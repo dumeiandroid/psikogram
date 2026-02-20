@@ -309,20 +309,16 @@ const CONFIG = {
 };
 
 // =========================================================
-// AMBIL id_x DAN x_01 DARI URL
+// AMBIL id_x DARI URL
 // =========================================================
-function getParamsFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    return {
-        id_x : params.get('id_x'),
-        x_01 : params.get('x_01')
-    };
+function getIdFromUrl() {
+    return new URLSearchParams(window.location.search).get('id_x');
 }
 
 // =========================================================
 // FETCH DATA DARI API
 // =========================================================
-async function fetchData(id, x_01) {
+async function fetchData(id) {
     const url = `${CONFIG.API_URL}?table=${CONFIG.TABLE_NAME}&id_x=${id}`;
     const res = await fetch(url, {
         headers: {
@@ -333,15 +329,7 @@ async function fetchData(id, x_01) {
     if (!res.ok) throw new Error(`HTTP error ${res.status}`);
     const json = await res.json();
     if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
-
-    // Validasi x_01: harus cocok dengan field x_01 di data
-    const data = json.data;
-    const x01Data = Array.isArray(data) ? data[0]?.x_01 : data?.x_01;
-    if (String(x01Data) !== String(x_01)) {
-        throw new Error('Akses ditolak: parameter x_01 tidak valid.');
-    }
-
-    return data;
+    return json.data;
 }
 
 // =========================================================
@@ -518,21 +506,19 @@ function setupDownload() {
 // MAIN
 // =========================================================
 async function main() {
-    const { id_x, x_01 } = getParamsFromUrl();
+    const id = getIdFromUrl();
 
-    if (!id_x || !x_01) {
+    if (!id) {
         document.getElementById('loading-screen').innerHTML = `
             <div style="color:white;font-size:18px;text-align:center;padding:40px;">
-                ⚠️ Parameter URL tidak lengkap.<br><br>
-                Contoh: <code>psikogram.html?id_x=1&x_01=ABC</code><br><br>
-                ${!id_x ? '❌ Parameter <code>id_x</code> tidak ditemukan.<br>' : ''}
-                ${!x_01 ? '❌ Parameter <code>x_01</code> tidak ditemukan.<br>' : ''}
+                ⚠️ Parameter <code>id_x</code> tidak ditemukan di URL.<br><br>
+                Contoh: <code>psikogram.html?id_x=1</code>
             </div>`;
         return;
     }
 
     try {
-        const rawData = await fetchData(id_x, x_01);
+        const rawData = await fetchData(id);
 
         // Semua kalkulasi dikerjakan oleh engine
         const hasil = window.PsikogramEngine.hitungPsikogram(rawData);
