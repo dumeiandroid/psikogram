@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Pemeriksaan Psikologis</title>
+
+    <style>
+        /* =============================================
+           STYLE IDENTIK DENGAN index.html
+           ============================================= */
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #7000E0;
+            background-image: url('images/bg1.jpg');
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: black;
+        }
+
+        /* --- Loading Screen --- */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(95,78,218,0.95);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 9999; color: white;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #loading-screen.hidden { display: none; }
+
+        /* --- Tombol Navigasi --- */
+        .tombol-nav {
+            background: #5F4EDA;
+            padding: 10px 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .tombol-nav a, .tombol-nav button {
+            background: white; color: #5F4EDA;
+            border: none; padding: 6px 14px;
+            border-radius: 4px; cursor: pointer;
+            font-size: 13px; font-weight: bold;
+            text-decoration: none; display: inline-block;
+        }
+        .tombol-nav a:hover, .tombol-nav button:hover { background: #e0d9ff; }
+        .tombol-nav button.btn-edit {
+            background: #ffd93d; color: #333;
+        }
+        .tombol-nav button.btn-edit:hover { background: #ffc107; }
+        .konsistensi-info { color: white; font-weight: bold; margin-left: auto; font-size: 14px; }
+
+        /* --- Containers --- */
+        .container1 {
+            background: white; width: 90%;
+            height: auto;
+            padding: 20px; border: none;
+            box-shadow: none; margin: 0 auto;
+        }
+        .container_a {
+            background: white; position: relative;
+            width: 90%;
+            height: auto;
+            padding: 20px; border: none;
+            box-shadow: none; margin: 0 auto;
+        }
+        .container_a::before {
+            content: ""; position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: url('gambar/logo1.png');
+            background-size: 70%; background-position: center;
+            background-repeat: no-repeat; opacity: 0.1; z-index: 0;
+        }
+        .container_a > * { position: relative; z-index: 1; }
+
+        /* --- Header Institusi --- */
+        .custom-header {
+            display: grid; grid-template-columns: auto 1fr;
+            align-items: center; margin-bottom: 20px;
+            background-color: #5F4EDA; padding: 10px; border-radius: 8px;
+        }
+        .logo-container_a { margin-right: 10px; }
+        .logo { width: 130px; height: auto; }
+        .info-container_a {
+            text-align: center; display: flex;
+            flex-direction: column; align-items: center; margin-left: -80px;
+            width: 95%;
+        }
+        .header-title  { font-size: 24px; font-weight: bold; color: white; margin: 2px 0; }
+        .header-subtitle { font-size: 18px; font-style: italic; color: #e0f7fa; margin: 2px 0; }
+        .location, .address, .phone { margin: 2px 0; color: white; }
+        .website { margin: 2px 0; color: #e0f7fa; }
+        .website a { color: #e0f7fa; text-decoration: underline; }
+
+        /* --- Tabel --- */
+        table {
+            width: 100%; border-collapse: collapse;
+            border-top: 3px double black; border-bottom: 3px double black;
+        }
+        th, td { padding: 8px; border: 1px solid black; }
+        th { text-align: center; font-size: inherit; }
+        td { text-align: left; font-size: inherit; }
+        .header { background-color: #f2f2f2; }
+        .highlight { background-color: #d1e7dd; text-align: center; }
+        .no-inner-borders td { border: none; }
+        .section-header { font-weight: bold; color: white; background-color: black; text-align: center; }
+        .custom-table { border-collapse: collapse; width: 100%; }
+        .custom-table td { padding: 5px; }
+
+        /* --- Halaman 2 --- */
+        .strength-weakness { margin-top: 20px; }
+        .custom-list { margin-left: 10px; margin-top: 5px; padding: 10px; }
+        .container_a p, .container_a li { text-align: justify; font-size: inherit; line-height: 1.6; }
+        .container_a .custom-list li { margin-bottom: 2px; }
+        .strength-weakness strong, .strength-weakness h4 { text-align: left; display: block; }
+        .signature { margin-top: 20px; text-align: right; }
+        .signature p { font-size: inherit; line-height: 1.4; }
+        .enter { margin: 20px 0; }
+
+        /* --- Tombol Download --- */
+        #downloadBtn {
+            display: block; margin: 20px auto;
+            padding: 12px 30px; background: #5F4EDA;
+            color: white; border: none; border-radius: 6px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+        }
+        #downloadBtn:hover { background: #4a3bb5; }
+
+        @media print {
+            body { background-color: white; }
+            .tombol-nav, #downloadBtn { display: none; }
+        }
+        .container1, .container_a { font-size: 120%; }
+        .batas-download { display: block; }
+        #downloadContent1, #downloadContent2 { height: auto; }
+
+        /* =============================================
+           MODAL EDIT — TAMBAHAN
+           ============================================= */
+        .modal-overlay {
+            display: none;
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 10000;
+            align-items: flex-start;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 30px 16px;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 780px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+            overflow: hidden;
+            margin: auto;
+        }
+        .modal-header {
+            background: #5F4EDA;
+            color: white;
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-header h2 { font-size: 17px; margin: 0; }
+        .modal-close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none; color: white;
+            width: 30px; height: 30px;
+            border-radius: 50%; font-size: 16px;
+            cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .modal-close-btn:hover { background: rgba(255,255,255,0.35); }
+
+        .modal-body { padding: 22px; }
+
+        /* Tab navigasi edit */
+        .edit-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        .edit-tab {
+            padding: 6px 14px;
+            border: 2px solid #ddd;
+            border-radius: 16px;
+            background: white;
+            color: #555;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .edit-tab.active { background: #5F4EDA; color: white; border-color: #5F4EDA; }
+        .edit-tab:hover:not(.active) { background: #f0edff; border-color: #5F4EDA; color: #5F4EDA; }
+
+        .edit-panel { display: none; }
+        .edit-panel.active { display: block; }
+
+        /* Form fields */
+        .edit-form-group {
+            margin-bottom: 14px;
+        }
+        .edit-form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .edit-form-group input[type="text"],
+        .edit-form-group input[type="number"],
+        .edit-form-group textarea,
+        .edit-form-group select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            transition: border-color .2s;
+            resize: vertical;
+        }
+        .edit-form-group input:focus,
+        .edit-form-group textarea:focus,
+        .edit-form-group select:focus {
+            outline: none;
+            border-color: #5F4EDA;
+        }
+
+        /* Skor grid (1-10) */
+        .skor-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        .skor-grid label {
+            font-size: 13px;
+            color: #333;
+            font-weight: bold;
+        }
+        .skor-grid .skor-sub {
+            font-size: 11px;
+            color: #888;
+            font-weight: normal;
+        }
+        .skor-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .skor-input-wrap input[type="number"] {
+            width: 65px;
+            padding: 6px 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .skor-input-wrap input:focus { outline: none; border-color: #5F4EDA; }
+        .skor-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        /* Daftar item (kekuatan/kelemahan/rekomendasi) */
+        .list-edit-item {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .list-edit-item span.item-num {
+            background: #5F4EDA;
+            color: white;
+            border-radius: 50%;
+            width: 24px; height: 24px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            margin-top: 10px;
+        }
+        .list-edit-item textarea {
+            flex: 1;
+            min-height: 60px;
+        }
+
+        /* Minat item */
+        .minat-edit-item {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #fafafa;
+        }
+        .minat-edit-item .minat-num {
+            font-weight: bold;
+            color: #5F4EDA;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        /* Modal footer */
+        .modal-footer {
+            padding: 16px 22px;
+            border-top: 2px solid #f0f0f0;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            background: #fafafa;
+        }
+        .btn-modal {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .btn-modal:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-save   { background: #28a745; color: white; }
+        .btn-save:hover:not(:disabled)   { background: #218838; }
+        .btn-cancel { background: #6c757d; color: white; }
+        .btn-cancel:hover { background: #545b62; }
+
+        /* Toast notifikasi */
+        #toast-msg {
+            display: none;
+            position: fixed;
+            bottom: 24px; right: 24px;
+            background: #333; color: white;
+            padding: 13px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 99999;
+            box-shadow: 0 4px 20px rgba(0,0,0,.3);
+            max-width: 360px;
+            line-height: 1.5;
+        }
+        #toast-msg.success { background: #28a745; }
+        #toast-msg.error   { background: #dc3545; }
+
+        /* Skor warna */
+        .skor-k  { background: #f8d7da; color: #721c24; }  /* 1-4  Kurang */
+        .skor-c  { background: #fff3cd; color: #856404; }  /* 5-6  Cukup  */
+        .skor-b  { background: #cce5ff; color: #004085; }  /* 7-8  Baik   */
+        .skor-bs { background: #d4edda; color: #155724; }  /* 9-10 Baik Sekali */
+    </style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+    <div class="spinner"></div>
+    <p style="font-size:18px; font-weight:bold;">Memuat data psikogram...</p>
+</div>
+
+<!-- Toast Notifikasi -->
+<div id="toast-msg"></div>
+
+<!-- Tombol Navigasi -->
+<div class="tombol-nav no-download">
+    <button onclick="window.history.back()">← Kembali</button>
+    <button onclick="window.print()">🖨️ Print</button>
+    <button id="downloadBtn2">📥 Download PDF</button>
+    <button class="btn-edit" onclick="bukaModalEdit()">✏️ Edit Data</button>
+    <span class="konsistensi-info" id="konsistensi-display">Konsistensi = -</span>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 1 — Tabel Aspek Psikologis
+     ═══════════════════════════════════════ -->
+<div class="batas-download" id="downloadContent1">
+    <div class="container1">
+
+        <!-- Header Institusi -->
+        <div class="custom-header no-download">
+            <div class="logo-container_a">
+                <img src="gambar/logo1.png" alt="Logo" class="logo"/>
+            </div>
+            <div class="info-container_a">
+                <div class="header-title">PT. LIDAN INDAH ABADI</div>
+                <div class="header-subtitle">LIDAN PSIKOLOGI</div>
+                <div class="location">Regus Forum Nine, Lantai 9 CIMB NIAGA PLAZA</div>
+                <div class="address">Jalan Imam Bonjol No.9, Medan 20159, Sumatera Utara</div>
+                <div class="phone">Telepon: +62851-5960-1400</div>
+                <div class="website">
+                    Website: <a href="http://www.lidan.co.id">www.lidan.co.id</a>,
+                    Email: <a href="mailto:psikologi@lidan.co.id">psikologi@lidan.co.id</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Identitas Peserta -->
+        <h2 style="text-align:center;">PROFIL PEMERIKSAAN PSIKOLOGIS</h2>
+        <table class="no-inner-borders custom-table">
+            <tr>
+                <td style="width:200px; border-left:none;">Nama</td>
+                <td style="width:20px;">:</td>
+                <td style="border-right:none;" id="td-nama"></td>
+            </tr>
+            <tr>
+                <td style="border-left:none;">Jenis Kelamin</td>
+                <td>:</td>
+                <td style="border-right:none;" id="td-jk"></td>
+            </tr>
+            <tr>
+                <td style="border-left:none;">Usia</td>
+                <td>:</td>
+                <td style="border-right:none;"><span id="td-usia"></span> Tahun</td>
+            </tr>
+            <tr>
+                <td style="border-left:none;">Tanggal Pemeriksaan</td>
+                <td>:</td>
+                <td style="border-right:none;" id="td-tanggal"></td>
+            </tr>
+        </table>
+
+        <!-- Tabel Aspek Psikologis -->
+        <h3 style="text-align:center;">Aspek Psikologis</h3>
+        <table>
+            <thead>
+                <tr class="header">
+                    <th rowspan="2" style="width:250px; vertical-align:middle;">Aspek Psikologis</th>
+                    <th rowspan="2" style="width:600px; vertical-align:middle;">Keterangan</th>
+                    <th colspan="10">Skala</th>
+                </tr>
+                <tr class="header">
+                    <th colspan="4">K</th>
+                    <th colspan="2">C</th>
+                    <th colspan="2">B</th>
+                    <th colspan="2">BS</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-aspek">
+                <!-- Diisi otomatis oleh JavaScript -->
+            </tbody>
+        </table>
+        <br>
+        *Keterangan : K = Kurang ; C = Cukup ; B = Baik ; BS = Baik Sekali
+        <div class="enter"></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 2 — Narasi & Tanda Tangan
+     ═══════════════════════════════════════ -->
+<div class="batas-download" id="downloadContent2">
+    <div class="container_a">
+        <div class="strength-weakness">
+
+            <div><strong>Intelligence Quotient (IQ) :</strong></div>
+            <ul class="custom-list">
+                <li>Intelligence Quotient / IQ = <span id="span-iq"></span></li>
+            </ul>
+
+            <div><strong>Strengths/Kelebihan:</strong></div>
+            <ul class="custom-list" id="list-kelebihan"></ul>
+
+            <div><strong>Weaknesses/Kelemahan:</strong></div>
+            <ul class="custom-list" id="list-kelemahan"></ul>
+
+            <div><strong>Recommendation/Rekomendasi:</strong></div>
+            <ul class="custom-list" id="list-rekomendasi"></ul>
+
+            <h4 style="text-decoration:underline;">Arah Minat Pendidikan / Pekerjaan</h4>
+            <ul class="custom-list" id="list-minat"></ul>
+        </div>
+
+        <!-- Tanda Tangan -->
+        <div class="signature">
+            <p style="text-align:right;"><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
+            <p style="margin-top:-12px; text-align:right;">Psikolog,</p>
+            <div style="text-align:right;"><img src="gambar/ttd.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
+            <p style="margin-top:-5px; text-align:right;"><strong>Dr. Karina M. Brahmana, M.Psi, Psikolog</strong></p>
+            <p style="margin-top:-12px; text-align:right;">No SIPP: 20070136-2021-02-0799</p><br>
+            <div class="enter"></div>
+            <img class="no-download" src="gambar/medsos.png" alt="Media Sosial" style="max-width:20%; height:auto;"/>
+        </div>
+    </div>
+</div>
+
+<button id="downloadBtn">Download PDF</button>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL EDIT DATA
+     ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-edit" onclick="tutupModalDiluar(event)">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>✏️ Edit Data Psikogram</h2>
+            <button class="modal-close-btn" onclick="tutupModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+
+            <!-- Tab navigasi -->
+            <div class="edit-tabs">
+                <button class="edit-tab active" onclick="switchEditTab('biodata')">👤 Biodata</button>
+                <button class="edit-tab"        onclick="switchEditTab('kemampuan')">🧠 Kemampuan</button>
+                <button class="edit-tab"        onclick="switchEditTab('kepribadian')">💡 Kepribadian</button>
+                <button class="edit-tab"        onclick="switchEditTab('sikap')">⚙️ Sikap Kerja</button>
+                <button class="edit-tab"        onclick="switchEditTab('iq')">📊 IQ</button>
+                <button class="edit-tab"        onclick="switchEditTab('kekuatan')">⭐ Kekuatan</button>
+                <button class="edit-tab"        onclick="switchEditTab('kelemahan')">⚠️ Kelemahan</button>
+                <button class="edit-tab"        onclick="switchEditTab('rekomendasi')">💬 Rekomendasi</button>
+                <button class="edit-tab"        onclick="switchEditTab('minat')">🎯 Arah Minat</button>
+            </div>
+
+            <!-- ── TAB BIODATA ── -->
+            <div class="edit-panel active" id="epanel-biodata">
+                <div class="edit-form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="ed-nama" placeholder="Nama peserta">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div class="edit-form-group">
+                        <label>Jenis Kelamin</label>
+                        <select id="ed-jk">
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="edit-form-group">
+                        <label>Usia (Tahun)</label>
+                        <input type="text" id="ed-usia" placeholder="Contoh: 25">
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div class="edit-form-group">
+                        <label>Tanggal Pemeriksaan</label>
+                        <input type="text" id="ed-tanggal" placeholder="Contoh: 23 Februari 2026">
+                    </div>
+                    <div class="edit-form-group">
+                        <label>Tanggal Tanda Tangan</label>
+                        <input type="text" id="ed-tanggal-ttd" placeholder="Contoh: 23 Februari 2026">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TAB KEMAMPUAN ── -->
+            <div class="edit-panel" id="epanel-kemampuan">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Isi skor 1–10. K=1-4, C=5-6, B=7-8, BS=9-10</p>
+                <div id="skor-kemampuan-wrap">
+                    <!-- Diisi JS -->
+                </div>
+            </div>
+
+            <!-- ── TAB KEPRIBADIAN ── -->
+            <div class="edit-panel" id="epanel-kepribadian">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Isi skor 1–10. K=1-4, C=5-6, B=7-8, BS=9-10</p>
+                <div id="skor-kepribadian-wrap">
+                    <!-- Diisi JS -->
+                </div>
+            </div>
+
+            <!-- ── TAB SIKAP KERJA ── -->
+            <div class="edit-panel" id="epanel-sikap">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Isi skor 1–10. K=1-4, C=5-6, B=7-8, BS=9-10</p>
+                <div id="skor-sikap-wrap">
+                    <!-- Diisi JS -->
+                </div>
+            </div>
+
+            <!-- ── TAB IQ ── -->
+            <div class="edit-panel" id="epanel-iq">
+                <div class="edit-form-group">
+                    <label>Nilai IQ</label>
+                    <input type="number" id="ed-iq" placeholder="Contoh: 110" min="40" max="200"
+                        style="max-width:180px;" oninput="updateIqKategori()">
+                </div>
+                <div id="iq-kategori-info" style="margin-top:8px; font-size:14px; color:#555;"></div>
+                <div style="margin-top:16px; background:#f8f9fa; border-radius:8px; padding:14px; font-size:13px; color:#555; line-height:1.8;">
+                    <strong>Panduan Kategori IQ:</strong><br>
+                    ≤69 = Sangat Rendah &nbsp;|&nbsp; 70–79 = Rendah &nbsp;|&nbsp; 80–89 = Di bawah Rata-rata<br>
+                    90–99 = Rata-rata Bawah &nbsp;|&nbsp; 100–109 = Rata-rata &nbsp;|&nbsp; 110–119 = Di atas Rata-rata<br>
+                    120–129 = Superior &nbsp;|&nbsp; 130–139 = Sangat Superior &nbsp;|&nbsp; ≥140 = Genius
+                </div>
+            </div>
+
+            <!-- ── TAB KEKUATAN ── -->
+            <div class="edit-panel" id="epanel-kekuatan">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat kekuatan/kelebihan peserta.</p>
+                <div id="kekuatan-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB KELEMAHAN ── -->
+            <div class="edit-panel" id="epanel-kelemahan">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat kelemahan peserta.</p>
+                <div id="kelemahan-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB REKOMENDASI ── -->
+            <div class="edit-panel" id="epanel-rekomendasi">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat rekomendasi untuk peserta.</p>
+                <div id="rekomendasi-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB ARAH MINAT ── -->
+            <div class="edit-panel" id="epanel-minat">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 arah minat peserta (nama & keterangan).</p>
+                <div id="minat-wrap"><!-- Diisi JS --></div>
+            </div>
+
+        </div><!-- /modal-body -->
+
+        <div class="modal-footer">
+            <button class="btn-modal btn-cancel" onclick="tutupModal()">Batal</button>
+            <button class="btn-modal btn-save" id="btn-simpan" onclick="simpanEdit()">💾 Simpan & Refresh</button>
+        </div>
+    </div>
+</div>
+
+<!-- Library PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+// =========================================================
+// KONFIGURASI API
+// =========================================================
+const CONFIG = {
+    API_URL    : 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis6',
+    TABLE_NAME : 'rekap_nilai1',   // ← Sumber: rekap_nilai1 (bukan nilai1)
+    API_SECRET : 'admin'
+};
+
+// Data global yang dipakai modal edit
+let _globalData   = null;   // raw row dari rekap_nilai1
+let _globalIdX    = null;   // id_x rekap_nilai1
+
+// Definisi aspek (sama dengan engine — dipakai untuk label skor)
+const ASPEK_KEMAMPUAN   = ['Kemampuan Umum','Daya Tangkap Visual','Kemampuan Berpikir Logis','Kemampuan Berpikir Abstrak','Penalaran Verbal','Penalaran Numerik'];
+const ASPEK_KEPRIBADIAN = ['Hasrat Berprestasi','Daya Tahan Stress','Kepercayaan Diri','Relasi Sosial','Kerjasama'];
+const ASPEK_SIKAP       = ['Sistematika Kerja','Inisiatif','Kemandirian'];
+const ASPEK_KEY_KEMAMPUAN   = ['kemampuan_umum','daya_tangkap_visual','kemampuan_berpikir_logis','kemampuan_berpikir_abstrak','penalaran_verbal','penalaran_numerik'];
+const ASPEK_KEY_KEPRIBADIAN = ['hasrat_berprestasi','daya_tahan_stress','kepercayaan_diri','relasi_sosial','kerjasama'];
+const ASPEK_KEY_SIKAP       = ['sistematika_kerja','inisiatif','kemandirian'];
+
+// =========================================================
+// AMBIL PARAMETER URL
+// =========================================================
+function getParamsFromUrl() {
+    const p = new URLSearchParams(window.location.search);
+    return { id_x: p.get('id_x'), x_01: p.get('x_01') };
+}
+
+// =========================================================
+// FETCH DATA DARI rekap_nilai1
+// =========================================================
+async function fetchData(id_x) {
+    const url = `${CONFIG.API_URL}?table=${CONFIG.TABLE_NAME}&id_x=${id_x}`;
+    const res = await fetch(url, {
+        headers: {
+            'X-Custom-Auth': CONFIG.API_SECRET,
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
+    const data = json.data;
+    return Array.isArray(data) ? data[0] : data;
+}
+
+// =========================================================
+// PARSE DATA DARI rekap_nilai1 (JSON per kolom)
+// =========================================================
+function parseRekapData(row) {
+    const safeJSON = (str, fallback) => {
+        try { return JSON.parse(str || '{}'); } catch { return fallback; }
+    };
+
+    const biodata    = safeJSON(row.x_02, {});
+    const kemampuan  = safeJSON(row.x_03, {});
+    const kepribadian= safeJSON(row.x_04, {});
+    const sikap      = safeJSON(row.x_05, {});
+    const iq         = parseInt(row.x_06) || 0;
+    const kekuatan   = safeJSON(row.x_07, []);
+    const kelemahan  = safeJSON(row.x_08, []);
+    const rekomendasi= safeJSON(row.x_09, []);
+    const minat      = safeJSON(row.x_10, []);
+
+    // Susun resultScores [14 aspek] dari JSON kemampuan + kepribadian + sikap
+    const resultScores = [
+        ...ASPEK_KEY_KEMAMPUAN.map(k   => parseInt(kemampuan[k])    || 1),
+        ...ASPEK_KEY_KEPRIBADIAN.map(k => parseInt(kepribadian[k])  || 1),
+        ...ASPEK_KEY_SIKAP.map(k       => parseInt(sikap[k])        || 1)
+    ];
+
+    return {
+        identitas: {
+            nama       : biodata.nama       || '',
+            jk         : biodata.jk         || '',
+            usia       : biodata.usia       || '',
+            tanggal    : biodata.tanggal    || '',
+            tanggalTTD : biodata.tanggal_ttd || biodata.tanggal || ''
+        },
+        IQ           : iq,
+        resultScores,
+        kekuatan,
+        kelemahan,
+        rekomendasi,
+        minat3Raw    : minat   // array [{singkatan, nama, keterangan}]
+    };
+}
+
+// =========================================================
+// RENDER HALAMAN (identik logika dengan index.html)
+// =========================================================
+function renderPage(parsed) {
+    const { identitas, IQ, resultScores, kekuatan, kelemahan, rekomendasi, minat3Raw } = parsed;
+
+    // Aspek Psikologis statis (sama persis dengan engine)
+    const aspekPsikologis = [
+        ['KEMAMPUAN',  'Kemampuan Umum',           'Mampu menemukan solusi untuk berbagai masalah dengan efektif.'],
+        [null,         'Daya Tangkap Visual',       'Cepat mengenali pola dan perbedaan di lingkungan sekitar.'],
+        [null,         'Kemampuan Berpikir Logis',  'Mampu membuat keputusan berdasarkan alasan yang jelas dalam situasi tertentu.'],
+        [null,         'Kemampuan Berpikir Abstrak','Mampu melihat hubungan antara berbagai hal dan memahami konsekuensi dari tindakan.'],
+        [null,         'Penalaran Verbal',          'Mampu berkomunikasi dengan jelas dan efektif dalam interaksi.'],
+        [null,         'Penalaran Numerik',         'Kemampuan memahami proses hitung dan berpikir teratur'],
+        ['KEPRIBADIAN','Hasrat Berprestasi',        'Keinginan untuk mencapai dan meningkatkan prestasi'],
+        [null,         'Daya Tahan Stress',         'Kemampuan mempertahankan kinerja'],
+        [null,         'Kepercayaan Diri',          'Adanya keyakinan terhadap kemampuan yang dimiliki'],
+        [null,         'Relasi Sosial',             'Kemampuan membina hubungan dengan orang lain'],
+        [null,         'Kerjasama',                 'Kemampuan bekerjasama individu atau berkelompok'],
+        ['SIKAP KERJA','Sistematika Kerja',         'Kemampuan membuat perencanaan & prioritas kerja'],
+        [null,         'Inisiatif',                 'Kemampuan mengambil tindakan yang diperlukan'],
+        [null,         'Kemandirian',               'Kemampuan mengambil sikap dan bekerja sendiri']
+    ];
+
+    // Identitas
+    document.getElementById('td-nama').textContent    = identitas.nama;
+    document.getElementById('td-jk').textContent      = identitas.jk;
+    document.getElementById('td-usia').textContent    = identitas.usia;
+    document.getElementById('td-tanggal').textContent = identitas.tanggal;
+    document.getElementById('span-tanggal-ttd').textContent = identitas.tanggalTTD;
+    document.getElementById('konsistensi-display').textContent = '';
+
+    // IQ
+    document.getElementById('span-iq').textContent = IQ;
+
+    // Tabel Aspek Psikologis
+    const tbody = document.getElementById('tbody-aspek');
+    tbody.innerHTML = '';
+    aspekPsikologis.forEach(([section, namaAspek, ket], idx) => {
+        if (section) {
+            const secRow = document.createElement('tr');
+            secRow.innerHTML = `<td colspan="12" class="section-header">${section}</td>`;
+            tbody.appendChild(secRow);
+        }
+        const tr = document.createElement('tr');
+        let cells = `<td>${namaAspek}</td><td>${ket}</td>`;
+        for (let i = 1; i <= 10; i++) {
+            const aktif = resultScores[idx] == i;
+            cells += `<td class="${aktif ? 'highlight' : ''}" style="width:30px; text-align:center;">${aktif ? '✔' : ''}</td>`;
+        }
+        tr.innerHTML = cells;
+        tbody.appendChild(tr);
+    });
+
+    // Kelebihan
+    const listKelebihan = document.getElementById('list-kelebihan');
+    listKelebihan.innerHTML = '';
+    kekuatan.forEach(teks => {
+        listKelebihan.innerHTML += `<li>${teks}</li>`;
+    });
+
+    // Kelemahan
+    const listKelemahan = document.getElementById('list-kelemahan');
+    listKelemahan.innerHTML = '';
+    kelemahan.forEach(teks => {
+        listKelemahan.innerHTML += `<li>${teks}</li>`;
+    });
+
+    // Rekomendasi
+    const listRekomendasi = document.getElementById('list-rekomendasi');
+    listRekomendasi.innerHTML = '';
+    rekomendasi.forEach(teks => {
+        listRekomendasi.innerHTML += `<li>${teks}</li>`;
+    });
+
+    // Arah Minat
+    const listMinat = document.getElementById('list-minat');
+    listMinat.innerHTML = '';
+    minat3Raw.forEach(item => {
+        if (!item) return;
+        const nama = item.nama || item.singkatan || '';
+        const ket  = item.keterangan || '';
+        listMinat.innerHTML += `<li><strong>${nama}</strong></li>`;
+        listMinat.innerHTML += `<li>Keterangan: ${ket}</li>`;
+    });
+}
+
+// =========================================================
+// DOWNLOAD PDF (identik dengan index.html)
+// =========================================================
+function setupDownload() {
+    async function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const W = doc.internal.pageSize.getWidth();
+        const H = doc.internal.pageSize.getHeight();
+
+        const noDownEls = document.querySelectorAll('.no-download');
+        noDownEls.forEach(el => el.style.display = 'none');
+
+        function loadImg(src) {
+            return new Promise(resolve => {
+                const img = new Image();
+                img.onload  = () => resolve(img);
+                img.onerror = () => resolve(null);
+                img.src = src;
+            });
+        }
+        function imgH(img) {
+            return (img.naturalHeight * W) / img.naturalWidth;
+        }
+
+        const [hdr1, ftr1] = await Promise.all([loadImg('gambar/01d.jpg'), loadImg('gambar/03a1.png')]);
+        const hdr1H = hdr1 ? imgH(hdr1) : 0;
+        const ftr1H = ftr1 ? imgH(ftr1) : 0;
+        if (hdr1) doc.addImage(hdr1, 'JPEG', 0, 0, W, hdr1H);
+        const c1 = await html2canvas(document.getElementById('downloadContent1'), {
+            scale: 2, useCORS: true, allowTaint: true, logging: false,
+            onclone: (clonedDoc) => {
+                const thead = clonedDoc.querySelector('thead');
+                if (!thead) return;
+                thead.innerHTML = `
+                    <tr class="header">
+                        <th colspan="2" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">Aspek dan Deskripsi Psikologis</th>
+                        <th colspan="10" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">Skala</th>
+                    </tr>
+                    <tr class="header">
+                        <th style="width:250px;background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">Aspek Psikologis</th>
+                        <th style="width:600px;background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">Keterangan</th>
+                        <th colspan="4" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">K</th>
+                        <th colspan="2" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">C</th>
+                        <th colspan="2" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">B</th>
+                        <th colspan="2" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">BS</th>
+                    </tr>`;
+            }
+        });
+        const h1 = (c1.height * W) / c1.width;
+        doc.addImage(c1.toDataURL('image/png'), 'PNG', 0, hdr1H, W, h1);
+        if (ftr1) doc.addImage(ftr1, 'PNG', 0, H - ftr1H, W, ftr1H);
+
+        doc.addPage();
+        const [hdr2, ftr2] = await Promise.all([loadImg('gambar/01d.jpg'), loadImg('gambar/03a1.png')]);
+        const hdr2H = hdr2 ? imgH(hdr2) : 0;
+        const ftr2H = ftr2 ? imgH(ftr2) : 0;
+        if (hdr2) doc.addImage(hdr2, 'JPEG', 0, 0, W, hdr2H);
+        const c2 = await html2canvas(document.getElementById('downloadContent2'), {scale: 2});
+        const h2 = (c2.height * W) / c2.width;
+        doc.addImage(c2.toDataURL('image/png'), 'PNG', 0, hdr2H, W, h2);
+        if (ftr2) doc.addImage(ftr2, 'PNG', 0, H - ftr2H, W, ftr2H);
+
+        doc.save('psikogram.pdf');
+        noDownEls.forEach(el => el.style.display = '');
+    }
+
+    document.getElementById('downloadBtn').onclick  = downloadPDF;
+    document.getElementById('downloadBtn2').onclick = downloadPDF;
+}
+
+// =========================================================
+// HELPER: label warna skor
+// =========================================================
+function skorKelas(s) {
+    if (s >= 9) return 'skor-bs';
+    if (s >= 7) return 'skor-b';
+    if (s >= 5) return 'skor-c';
+    return 'skor-k';
+}
+function skorLabel(s) {
+    if (s >= 9) return 'BS';
+    if (s >= 7) return 'B';
+    if (s >= 5) return 'C';
+    return 'K';
+}
+
+// =========================================================
+// MODAL EDIT — BUKA
+// =========================================================
+function bukaModalEdit() {
+    if (!_globalData) return;
+    const safeJSON = (str, fallback) => { try { return JSON.parse(str || '{}'); } catch { return fallback; } };
+
+    const biodata    = safeJSON(_globalData.x_02, {});
+    const kemampuan  = safeJSON(_globalData.x_03, {});
+    const kepribadian= safeJSON(_globalData.x_04, {});
+    const sikap      = safeJSON(_globalData.x_05, {});
+    const kekuatan   = safeJSON(_globalData.x_07, ['','','']);
+    const kelemahan  = safeJSON(_globalData.x_08, ['','','']);
+    const rekomendasi= safeJSON(_globalData.x_09, ['','','']);
+    const minat      = safeJSON(_globalData.x_10, [{},{},{}]);
+
+    // ── Biodata ──
+    document.getElementById('ed-nama').value        = biodata.nama        || '';
+    document.getElementById('ed-jk').value          = biodata.jk          || 'Laki-laki';
+    document.getElementById('ed-usia').value        = biodata.usia        || '';
+    document.getElementById('ed-tanggal').value     = biodata.tanggal     || '';
+    document.getElementById('ed-tanggal-ttd').value = biodata.tanggal_ttd || biodata.tanggal || '';
+
+    // ── IQ ──
+    document.getElementById('ed-iq').value = _globalData.x_06 || '';
+    updateIqKategori();
+
+    // ── Skor Kemampuan ──
+    const wrapKem = document.getElementById('skor-kemampuan-wrap');
+    wrapKem.innerHTML = '';
+    ASPEK_KEMAMPUAN.forEach((nama, i) => {
+        const key = ASPEK_KEY_KEMAMPUAN[i];
+        const val = parseInt(kemampuan[key]) || 1;
+        wrapKem.innerHTML += buatSkorInput('kem', key, nama, val);
+    });
+
+    // ── Skor Kepribadian ──
+    const wrapKep = document.getElementById('skor-kepribadian-wrap');
+    wrapKep.innerHTML = '';
+    ASPEK_KEPRIBADIAN.forEach((nama, i) => {
+        const key = ASPEK_KEY_KEPRIBADIAN[i];
+        const val = parseInt(kepribadian[key]) || 1;
+        wrapKep.innerHTML += buatSkorInput('kep', key, nama, val);
+    });
+
+    // ── Skor Sikap Kerja ──
+    const wrapSik = document.getElementById('skor-sikap-wrap');
+    wrapSik.innerHTML = '';
+    ASPEK_SIKAP.forEach((nama, i) => {
+        const key = ASPEK_KEY_SIKAP[i];
+        const val = parseInt(sikap[key]) || 1;
+        wrapSik.innerHTML += buatSkorInput('sik', key, nama, val);
+    });
+
+    // ── Kekuatan ──
+    const wrapKek = document.getElementById('kekuatan-wrap');
+    wrapKek.innerHTML = '';
+    [0,1,2].forEach(i => {
+        wrapKek.innerHTML += buatListInput('kekuatan', i, kekuatan[i] || '');
+    });
+
+    // ── Kelemahan ──
+    const wrapKel = document.getElementById('kelemahan-wrap');
+    wrapKel.innerHTML = '';
+    [0,1,2].forEach(i => {
+        wrapKel.innerHTML += buatListInput('kelemahan', i, kelemahan[i] || '');
+    });
+
+    // ── Rekomendasi ──
+    const wrapRek = document.getElementById('rekomendasi-wrap');
+    wrapRek.innerHTML = '';
+    [0,1,2].forEach(i => {
+        wrapRek.innerHTML += buatListInput('rekomendasi', i, rekomendasi[i] || '');
+    });
+
+    // ── Arah Minat ──
+    const wrapMin = document.getElementById('minat-wrap');
+    wrapMin.innerHTML = '';
+    [0,1,2].forEach(i => {
+        const m = minat[i] || {};
+        wrapMin.innerHTML += `
+        <div class="minat-edit-item">
+            <div class="minat-num">🎯 Minat ke-${i+1}</div>
+            <div class="edit-form-group">
+                <label>Nama Minat</label>
+                <input type="text" id="minat-nama-${i}" value="${escHtml(m.nama || m.singkatan || '')}" placeholder="Contoh: OUTDOOR">
+            </div>
+            <div class="edit-form-group">
+                <label>Keterangan</label>
+                <textarea id="minat-ket-${i}" rows="3" placeholder="Deskripsi arah minat...">${escHtml(m.keterangan || '')}</textarea>
+            </div>
+        </div>`;
+    });
+
+    // Buka modal & reset ke tab pertama
+    switchEditTab('biodata');
+    document.getElementById('modal-edit').classList.add('open');
+}
+
+// ── Helper buat input skor ──
+function buatSkorInput(prefix, key, nama, val) {
+    const kls = skorKelas(val);
+    const lbl = skorLabel(val);
+    return `
+    <div class="skor-grid">
+        <div>
+            <label>${nama}</label>
+        </div>
+        <div class="skor-input-wrap">
+            <input type="number" id="${prefix}-${key}" value="${val}" min="1" max="10"
+                oninput="updateSkorBadge('${prefix}-${key}', 'badge-${prefix}-${key}')">
+            <span class="skor-badge ${kls}" id="badge-${prefix}-${key}">${lbl}</span>
+        </div>
+    </div>`;
+}
+
+// ── Helper buat list input (kekuatan/kelemahan/rekomendasi) ──
+function buatListInput(prefix, idx, val) {
+    return `
+    <div class="list-edit-item">
+        <span class="item-num">${idx+1}</span>
+        <textarea id="${prefix}-${idx}" rows="3" placeholder="Isi teks...">${escHtml(val)}</textarea>
+    </div>`;
+}
+
+function updateSkorBadge(inputId, badgeId) {
+    const val = parseInt(document.getElementById(inputId).value) || 1;
+    const badge = document.getElementById(badgeId);
+    badge.className = `skor-badge ${skorKelas(val)}`;
+    badge.textContent = skorLabel(val);
+}
+
+function updateIqKategori() {
+    const iq = parseInt(document.getElementById('ed-iq').value) || 0;
+    const el = document.getElementById('iq-kategori-info');
+    let kat = '', warna = '';
+    if      (iq <= 69)  { kat='Sangat Rendah'; warna='#dc3545'; }
+    else if (iq <= 79)  { kat='Rendah';         warna='#e67e22'; }
+    else if (iq <= 89)  { kat='Di Bawah Rata-rata'; warna='#e6a817'; }
+    else if (iq <= 99)  { kat='Rata-rata Bawah';    warna='#888'; }
+    else if (iq <= 109) { kat='Rata-rata';          warna='#27ae60'; }
+    else if (iq <= 119) { kat='Di Atas Rata-rata';  warna='#2980b9'; }
+    else if (iq <= 129) { kat='Superior';            warna='#5F4EDA'; }
+    else if (iq <= 139) { kat='Sangat Superior';     warna='#5F4EDA'; }
+    else                { kat='Genius';              warna='#5F4EDA'; }
+    el.innerHTML = iq > 0
+        ? `Kategori: <strong style="color:${warna};">${kat}</strong> (IQ = ${iq})`
+        : '';
+}
+
+function escHtml(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// =========================================================
+// MODAL EDIT — TAB SWITCH
+// =========================================================
+function switchEditTab(tab) {
+    document.querySelectorAll('.edit-tab').forEach((t, i) => {
+        const tabs = ['biodata','kemampuan','kepribadian','sikap','iq','kekuatan','kelemahan','rekomendasi','minat'];
+        t.classList.toggle('active', tabs[i] === tab);
+    });
+    document.querySelectorAll('.edit-panel').forEach(p => {
+        p.classList.toggle('active', p.id === `epanel-${tab}`);
+    });
+}
+
+// =========================================================
+// MODAL EDIT — TUTUP
+// =========================================================
+function tutupModal() {
+    document.getElementById('modal-edit').classList.remove('open');
+}
+function tutupModalDiluar(e) {
+    if (e.target === document.getElementById('modal-edit')) tutupModal();
+}
+
+// =========================================================
+// MODAL EDIT — SIMPAN (PUT ke API)
+// =========================================================
+async function simpanEdit() {
+    const btn = document.getElementById('btn-simpan');
+    btn.disabled = true;
+    btn.textContent = '⏳ Menyimpan...';
+
+    try {
+        const safeJSON = (str, fallback) => { try { return JSON.parse(str || '{}'); } catch { return fallback; } };
+
+        // ── Biodata ──
+        const biodataLama = safeJSON(_globalData.x_02, {});
+        const biodataBaru = {
+            ...biodataLama,
+            nama         : document.getElementById('ed-nama').value.trim(),
+            jk           : document.getElementById('ed-jk').value,
+            usia         : document.getElementById('ed-usia').value.trim(),
+            tanggal      : document.getElementById('ed-tanggal').value.trim(),
+            tanggal_ttd  : document.getElementById('ed-tanggal-ttd').value.trim()
+        };
+
+        // ── Kemampuan ──
+        const kemampuanBaru = {};
+        ASPEK_KEY_KEMAMPUAN.forEach(key => {
+            kemampuanBaru[key] = parseInt(document.getElementById(`kem-${key}`).value) || 1;
+        });
+        // Pertahankan skor_iq dari data lama jika ada
+        const kemampuanLama = safeJSON(_globalData.x_03, {});
+        kemampuanBaru.skor_iq = kemampuanLama.skor_iq || 0;
+
+        // ── Kepribadian ──
+        const kepribadianBaru = {};
+        ASPEK_KEY_KEPRIBADIAN.forEach(key => {
+            kepribadianBaru[key] = parseInt(document.getElementById(`kep-${key}`).value) || 1;
+        });
+
+        // ── Sikap Kerja ──
+        const sikapBaru = {};
+        ASPEK_KEY_SIKAP.forEach(key => {
+            sikapBaru[key] = parseInt(document.getElementById(`sik-${key}`).value) || 1;
+        });
+
+        // ── IQ ──
+        const iqBaru = document.getElementById('ed-iq').value.trim();
+
+        // ── Kekuatan ──
+        const kekuatanBaru = [0,1,2].map(i => document.getElementById(`kekuatan-${i}`).value.trim());
+
+        // ── Kelemahan ──
+        const kelemahanBaru = [0,1,2].map(i => document.getElementById(`kelemahan-${i}`).value.trim());
+
+        // ── Rekomendasi ──
+        const rekomendasiBaru = [0,1,2].map(i => document.getElementById(`rekomendasi-${i}`).value.trim());
+
+        // ── Arah Minat ──
+        const minatBaru = [0,1,2].map(i => ({
+            singkatan  : (document.getElementById(`minat-nama-${i}`).value.trim()).toUpperCase(),
+            nama       : document.getElementById(`minat-nama-${i}`).value.trim().toUpperCase(),
+            keterangan : document.getElementById(`minat-ket-${i}`).value.trim()
+        }));
+
+        // ── Susun payload PUT ──
+        const payload = {
+            x_02 : JSON.stringify(biodataBaru),
+            x_03 : JSON.stringify(kemampuanBaru),
+            x_04 : JSON.stringify(kepribadianBaru),
+            x_05 : JSON.stringify(sikapBaru),
+            x_06 : iqBaru,
+            x_07 : JSON.stringify(kekuatanBaru),
+            x_08 : JSON.stringify(kelemahanBaru),
+            x_09 : JSON.stringify(rekomendasiBaru),
+            x_10 : JSON.stringify(minatBaru)
+        };
+
+        // ── Kirim PUT ke API ──
+        const apiUrl = `${CONFIG.API_URL}?table=${CONFIG.TABLE_NAME}&id_x=${_globalIdX}`;
+        const res = await fetch(apiUrl, {
+            method : 'PUT',
+            headers: {
+                'Content-Type'  : 'application/json',
+                'X-Custom-Auth' : CONFIG.API_SECRET
+            },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const result = await res.json();
+        if (!result.success) throw new Error(result.message || 'Gagal menyimpan');
+
+        // ── Sukses: tutup modal, reload data ──
+        tutupModal();
+        tampilToast('✅ Data berhasil disimpan! Memuat ulang...', 'success');
+        setTimeout(() => { location.reload(); }, 1200);
+
+    } catch (err) {
+        tampilToast(`❌ Gagal menyimpan: ${err.message}`, 'error');
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan & Refresh';
+    }
+}
+
+// =========================================================
+// TOAST
+// =========================================================
+function tampilToast(msg, type = '') {
+    const t = document.getElementById('toast-msg');
+    t.textContent = msg;
+    t.className   = type;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+
+// =========================================================
+// MAIN
+// =========================================================
+async function main() {
+    const { id_x, x_01 } = getParamsFromUrl();
+
+    if (!id_x) {
+        document.getElementById('loading-screen').innerHTML = `
+            <div style="color:white;font-size:18px;text-align:center;padding:40px;">
+                ⚠️ Parameter URL tidak lengkap.<br><br>
+                Contoh: <code>index_final.html?id_x=1</code><br><br>
+                ❌ Parameter <code>id_x</code> tidak ditemukan.
+            </div>`;
+        return;
+    }
+
+    try {
+        const rawData = await fetchData(id_x);
+
+        // Validasi x_01 jika ada di URL (opsional — untuk keamanan)
+        if (x_01 && String(rawData.x_01) !== String(x_01)) {
+            throw new Error('Akses ditolak: parameter x_01 tidak valid.');
+        }
+
+        // Simpan ke global (untuk modal edit)
+        _globalData = rawData;
+        _globalIdX  = rawData.id_x;
+
+        // Parse & render
+        const parsed = parseRekapData(rawData);
+        renderPage(parsed);
+
+        document.getElementById('loading-screen').classList.add('hidden');
+        setupDownload();
+
+    } catch (err) {
+        document.getElementById('loading-screen').innerHTML = `
+            <div style="color:white;font-size:18px;text-align:center;padding:40px;">
+                ⚠️ Gagal memuat data.<br><br>
+                <code style="font-size:14px;">${err.message}</code>
+            </div>`;
+    }
+}
+
+main();
+</script>
+
+<script src="https://login.lidan.co.id/login_admin.js"></script>
+</body>
+</html>

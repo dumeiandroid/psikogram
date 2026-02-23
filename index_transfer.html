@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Data Psikogram</title>
+    <script src="psikogram-engine.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #5F4EDA;
+            min-height: 100vh;
+            color: #222;
+        }
+
+        /* ── Header ── */
+        .page-header {
+            background: #4a3bb5;
+            color: white;
+            padding: 18px 30px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 3px solid #3a2da0;
+        }
+        .page-header h1 { font-size: 20px; }
+        .page-header span { font-size: 13px; opacity: .8; }
+
+        /* ── Layout ── */
+        .main-wrap {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 18px rgba(0,0,0,.18);
+            overflow: hidden;
+        }
+        .card-head {
+            background: #5F4EDA;
+            color: white;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-body { padding: 20px; }
+
+        /* ── Form Controls ── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color .2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #5F4EDA;
+        }
+
+        /* ── Mode Tabs ── */
+        .mode-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .mode-tab {
+            padding: 8px 18px;
+            border: 2px solid #5F4EDA;
+            border-radius: 20px;
+            background: white;
+            color: #5F4EDA;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .mode-tab.active {
+            background: #5F4EDA;
+            color: white;
+        }
+        .mode-tab:hover:not(.active) { background: #eee8ff; }
+
+        .mode-panel { display: none; }
+        .mode-panel.active { display: block; }
+
+        /* ── Buttons ── */
+        .btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-primary   { background: #5F4EDA; color: white; }
+        .btn-primary:hover:not(:disabled)   { background: #4a3bb5; }
+        .btn-success   { background: #28a745; color: white; }
+        .btn-success:hover:not(:disabled)   { background: #218838; }
+        .btn-danger    { background: #dc3545; color: white; }
+        .btn-danger:hover:not(:disabled)    { background: #c82333; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover:not(:disabled) { background: #545b62; }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        /* ── Preview Table ── */
+        .preview-wrap { overflow-x: auto; }
+        table.preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 700px;
+        }
+        .preview-table th {
+            background: #5F4EDA;
+            color: white;
+            padding: 9px 12px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .preview-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        .preview-table tr:hover td { background: #f5f0ff; }
+        .preview-table tr.selected td { background: #e8e0ff; }
+
+        /* ── Status Badge ── */
+        .badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .badge-new     { background: #d4edda; color: #155724; }
+        .badge-update  { background: #fff3cd; color: #856404; }
+        .badge-success { background: #cce5ff; color: #004085; }
+        .badge-error   { background: #f8d7da; color: #721c24; }
+        .badge-pending { background: #e2e3e5; color: #383d41; }
+
+        /* ── Progress ── */
+        .progress-bar-wrap {
+            background: #e9ecef;
+            border-radius: 8px;
+            height: 18px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #5F4EDA, #28a745);
+            height: 100%;
+            width: 0%;
+            transition: width .3s;
+            border-radius: 8px;
+        }
+
+        /* ── Log ── */
+        .log-box {
+            background: #1a1a2e;
+            color: #a8ff78;
+            border-radius: 8px;
+            padding: 14px;
+            font-family: monospace;
+            font-size: 12px;
+            height: 200px;
+            overflow-y: auto;
+            line-height: 1.7;
+        }
+        .log-box .log-err  { color: #ff6b6b; }
+        .log-box .log-ok   { color: #a8ff78; }
+        .log-box .log-info { color: #74b9ff; }
+        .log-box .log-warn { color: #ffd93d; }
+
+        /* ── Summary Stats ── */
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px 18px;
+            text-align: center;
+            min-width: 100px;
+            border: 2px solid #e9ecef;
+        }
+        .stat-box .stat-num { font-size: 26px; font-weight: bold; color: #5F4EDA; }
+        .stat-box .stat-lbl { font-size: 11px; color: #777; text-transform: uppercase; }
+
+        /* ── Detail JSON tooltip ── */
+        .json-cell {
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            color: #5F4EDA;
+            text-decoration: underline dotted;
+        }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,.55);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 10px;
+            max-width: 700px;
+            width: 95%;
+            max-height: 85vh;
+            overflow: auto;
+            padding: 24px;
+            box-shadow: 0 8px 40px rgba(0,0,0,.3);
+        }
+        .modal-box h3 { margin-bottom: 14px; color: #5F4EDA; }
+        .modal-box pre {
+            background: #f4f0ff;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .modal-close {
+            float: right;
+            cursor: pointer;
+            font-size: 20px;
+            color: #999;
+        }
+        .modal-close:hover { color: #333; }
+
+        /* ── Select All ── */
+        .select-all-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+        .spinner-inline {
+            display: inline-block;
+            width: 14px; height: 14px;
+            border: 2px solid rgba(255,255,255,.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="page-header">
+    <div>
+        <h1>📊 Transfer Data Psikogram: <span id="hdr-src">nilai1</span> → <span id="hdr-dst">rekap_nilai1</span></h1>
+        <span>Sumber: tabel <strong id="hdr-src2">nilai1</strong> &nbsp;|&nbsp; Tujuan: tabel <strong id="hdr-dst2">rekap_nilai1</strong> &nbsp;|&nbsp; API: lidan-co-id.pages.dev</span>
+    </div>
+</div>
+
+<!-- Main Wrap -->
+<div class="main-wrap">
+
+    <!-- ══ KONFIGURASI TABEL ══ -->
+    <div class="card">
+        <div class="card-head">🗄️ Konfigurasi Tabel</div>
+        <div class="card-body">
+            <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: end;">
+                <div class="form-group">
+                    <label>📥 Tabel Sumber (Baca Data)</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="cfg-src-table" value="nilai1" placeholder="nama_tabel_sumber"
+                            oninput="onTableInput()" style="flex:1;">
+                        <button class="btn btn-secondary" style="padding:9px 12px; white-space:nowrap;"
+                            onclick="resetSrcTable()">↩ Reset</button>
+                    </div>
+                    <div style="font-size:11px; color:#888; margin-top:4px;">Default: <code>nilai1</code></div>
+                </div>
+                <div class="form-group">
+                    <label>📤 Tabel Tujuan (Simpan Rekap)</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="cfg-dst-table" value="rekap_nilai1" placeholder="nama_tabel_tujuan"
+                            oninput="onTableInput()" style="flex:1;">
+                        <button class="btn btn-secondary" style="padding:9px 12px; white-space:nowrap;"
+                            onclick="resetDstTable()">↩ Reset</button>
+                    </div>
+                    <div style="font-size:11px; color:#888; margin-top:4px;">Default: <code>rekap_nilai1</code></div>
+                </div>
+                <div class="form-group" style="display:flex; flex-direction:column; justify-content:flex-end;">
+                    <button class="btn btn-primary" onclick="applyTableConfig()" style="width:100%;">
+                        ✅ Terapkan Konfigurasi
+                    </button>
+                    <div style="font-size:11px; color:#888; margin-top:4px; text-align:center;">
+                        Terapkan sebelum ambil data
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info strip -->
+            <div id="table-info-strip" style="
+                margin-top:14px; padding:10px 14px;
+                background:#f0edff; border-radius:8px; border-left:4px solid #5F4EDA;
+                font-size:13px; display:flex; align-items:center; gap:10px;">
+                <span style="font-size:18px;">ℹ️</span>
+                <span>Aktif: Membaca dari tabel <strong id="info-src">nilai1</strong>,
+                menyimpan ke tabel <strong id="info-dst">rekap_nilai1</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ PANEL KONFIGURASI TRANSFER ══ -->
+    <div class="card">
+        <div class="card-head">⚙️ Pengaturan Transfer</div>
+        <div class="card-body">
+
+            <!-- Mode Tabs -->
+            <div class="mode-tabs">
+                <button class="mode-tab active" onclick="switchMode('single')">🎯 Satu Peserta</button>
+                <button class="mode-tab"        onclick="switchMode('range')">📋 Range id_x</button>
+                <button class="mode-tab"        onclick="switchMode('all')">🌐 Semua Data</button>
+            </div>
+
+            <!-- Mode: Single -->
+            <div class="mode-panel active" id="panel-single">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>id_x Peserta</label>
+                        <input type="number" id="input-single-id" placeholder="Contoh: 5" min="1">
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="fetchPreview('single')">🔍 Ambil &amp; Preview</button>
+                </div>
+            </div>
+
+            <!-- Mode: Range -->
+            <div class="mode-panel" id="panel-range">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>id_x Dari</label>
+                        <input type="number" id="input-range-from" placeholder="Contoh: 1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>id_x Sampai</label>
+                        <input type="number" id="input-range-to" placeholder="Contoh: 10" min="1">
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="fetchPreview('range')">🔍 Ambil &amp; Preview</button>
+                </div>
+            </div>
+
+            <!-- Mode: All -->
+            <div class="mode-panel" id="panel-all">
+                <p style="color:#777; font-size:14px; margin-bottom:12px;">
+                    ⚠️ Mode ini akan mengambil <strong>seluruh data</strong> dari tabel <code>nilai1</code>. Pastikan koneksi stabil.
+                </p>
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="fetchPreview('all')">🔍 Ambil &amp; Preview Semua</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ PREVIEW DATA ══ -->
+    <div class="card" id="card-preview" style="display:none;">
+        <div class="card-head">👁️ Preview Data — Siap Transfer</div>
+        <div class="card-body">
+
+            <!-- Stats -->
+            <div class="stats-row" id="stats-row">
+                <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Total Data</div></div>
+                <div class="stat-box"><div class="stat-num" id="stat-new" style="color:#28a745;">0</div><div class="stat-lbl">Baru (POST)</div></div>
+                <div class="stat-box"><div class="stat-num" id="stat-update" style="color:#e6a817;">0</div><div class="stat-lbl">Update (PUT)</div></div>
+                <div class="stat-box"><div class="stat-num" id="stat-selected">0</div><div class="stat-lbl">Dipilih</div></div>
+            </div>
+
+            <!-- Select All -->
+            <div class="select-all-wrap">
+                <input type="checkbox" id="chk-all" onchange="toggleSelectAll(this.checked)">
+                <label for="chk-all" style="cursor:pointer;">Pilih semua data dalam tabel</label>
+            </div>
+
+            <!-- Table Preview -->
+            <div class="preview-wrap">
+                <table class="preview-table" id="preview-table">
+                    <thead>
+                        <tr>
+                            <th>✓</th>
+                            <th>id_x (sumber)</th>
+                            <th>Kode (x_01)</th>
+                            <th>Nama</th>
+                            <th>IQ</th>
+                            <th>Kemampuan (preview)</th>
+                            <th>Kepribadian (preview)</th>
+                            <th>Status di rekap_nilai1</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="preview-tbody"></tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" id="empty-state" style="display:none;">
+                <div class="icon">📭</div>
+                <div>Tidak ada data ditemukan</div>
+            </div>
+
+            <!-- Transfer Button -->
+            <div class="btn-row" style="margin-top:20px;">
+                <button class="btn btn-success" id="btn-transfer" onclick="startTransfer()" disabled>
+                    🚀 Transfer Data Terpilih
+                </button>
+                <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ PROGRESS & LOG ══ -->
+    <div class="card" id="card-progress" style="display:none;">
+        <div class="card-head">📡 Progress Transfer</div>
+        <div class="card-body">
+            <div class="stats-row">
+                <div class="stat-box"><div class="stat-num" id="prog-done">0</div><div class="stat-lbl">Selesai</div></div>
+                <div class="stat-box"><div class="stat-num" id="prog-ok" style="color:#28a745;">0</div><div class="stat-lbl">Berhasil</div></div>
+                <div class="stat-box"><div class="stat-num" id="prog-fail" style="color:#dc3545;">0</div><div class="stat-lbl">Gagal</div></div>
+                <div class="stat-box"><div class="stat-num" id="prog-total">0</div><div class="stat-lbl">Total</div></div>
+            </div>
+
+            <div class="progress-bar-wrap">
+                <div class="progress-bar" id="prog-bar"></div>
+            </div>
+            <div style="font-size:12px; color:#777; margin-bottom:12px;" id="prog-label">Menunggu...</div>
+
+            <div class="log-box" id="log-box"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ══ MODAL JSON DETAIL ══ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-box">
+        <span class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</span>
+        <h3 id="modal-title">Detail Data</h3>
+        <pre id="modal-content"></pre>
+    </div>
+</div>
+
+<!-- Load engine -->
+<script>
+// =========================================================
+// KONFIGURASI
+// =========================================================
+const CFG = {
+    API        : 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis6',
+    SRC_TABLE  : 'nilai1',        // Diupdate dinamis via applyTableConfig()
+    DST_TABLE  : 'rekap_nilai1',  // Diupdate dinamis via applyTableConfig()
+    SECRET     : 'admin',
+    DELAY_MS   : 300
+};
+
+// Default table names (untuk tombol reset)
+const DEFAULT_TABLES = { SRC: 'nilai1', DST: 'rekap_nilai1' };
+
+// =========================================================
+// KONFIGURASI TABEL DINAMIS
+// =========================================================
+function applyTableConfig() {
+    const src = document.getElementById('cfg-src-table').value.trim();
+    const dst = document.getElementById('cfg-dst-table').value.trim();
+
+    // Validasi: hanya huruf, angka, underscore
+    const valid = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+    if (!valid.test(src)) {
+        alert('⚠️ Nama tabel sumber tidak valid!\nHanya boleh huruf, angka, dan underscore (_).\nContoh: nilai1, data_psikologi');
+        document.getElementById('cfg-src-table').focus();
+        return;
+    }
+    if (!valid.test(dst)) {
+        alert('⚠️ Nama tabel tujuan tidak valid!\nHanya boleh huruf, angka, dan underscore (_).\nContoh: rekap_nilai1, hasil_psikologi');
+        document.getElementById('cfg-dst-table').focus();
+        return;
+    }
+
+    CFG.SRC_TABLE = src;
+    CFG.DST_TABLE = dst;
+
+    // Update header & info strip
+    updateHeaderDisplay();
+
+    // Tampilkan notifikasi sukses di info strip
+    const strip = document.getElementById('table-info-strip');
+    strip.style.background  = '#d4edda';
+    strip.style.borderColor = '#28a745';
+    strip.innerHTML = `<span style="font-size:18px;">✅</span>
+        <span>Konfigurasi diterapkan! Membaca dari <strong>${src}</strong>,
+        menyimpan ke <strong>${dst}</strong></span>`;
+    setTimeout(() => {
+        strip.style.background  = '#f0edff';
+        strip.style.borderColor = '#5F4EDA';
+        strip.innerHTML = `<span style="font-size:18px;">ℹ️</span>
+            <span>Aktif: Membaca dari tabel <strong id="info-src">${src}</strong>,
+            menyimpan ke tabel <strong id="info-dst">${dst}</strong></span>`;
+    }, 2500);
+
+    // Reset preview jika ada
+    if (previewRows.length > 0) {
+        resetAll();
+        showToast('⚠️ Preview direset karena konfigurasi tabel berubah. Silakan ambil data ulang.');
+    }
+}
+
+function resetSrcTable() {
+    document.getElementById('cfg-src-table').value = DEFAULT_TABLES.SRC;
+    onTableInput();
+}
+
+function resetDstTable() {
+    document.getElementById('cfg-dst-table').value = DEFAULT_TABLES.DST;
+    onTableInput();
+}
+
+function onTableInput() {
+    // Tandai belum diterapkan (strip kuning)
+    const src = document.getElementById('cfg-src-table').value.trim();
+    const dst = document.getElementById('cfg-dst-table').value.trim();
+    const isDiff = src !== CFG.SRC_TABLE || dst !== CFG.DST_TABLE;
+    const strip = document.getElementById('table-info-strip');
+    if (isDiff) {
+        strip.style.background  = '#fff3cd';
+        strip.style.borderColor = '#e6a817';
+        strip.innerHTML = `<span style="font-size:18px;">⚠️</span>
+            <span>Perubahan belum diterapkan. Klik <strong>Terapkan Konfigurasi</strong> untuk menggunakan tabel baru.</span>`;
+    } else {
+        strip.style.background  = '#f0edff';
+        strip.style.borderColor = '#5F4EDA';
+        strip.innerHTML = `<span style="font-size:18px;">ℹ️</span>
+            <span>Aktif: Membaca dari tabel <strong id="info-src">${CFG.SRC_TABLE}</strong>,
+            menyimpan ke tabel <strong id="info-dst">${CFG.DST_TABLE}</strong></span>`;
+    }
+}
+
+function updateHeaderDisplay() {
+    const src = CFG.SRC_TABLE;
+    const dst = CFG.DST_TABLE;
+    ['hdr-src','hdr-src2'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = src; });
+    ['hdr-dst','hdr-dst2'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = dst; });
+}
+
+function showToast(msg) {
+    let t = document.getElementById('toast-notif');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'toast-notif';
+        t.style.cssText = `position:fixed; bottom:24px; right:24px; background:#333; color:white;
+            padding:12px 20px; border-radius:8px; font-size:13px; z-index:9999;
+            box-shadow:0 4px 16px rgba(0,0,0,.3); max-width:340px; line-height:1.5;`;
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+
+// =========================================================
+// STATE
+// =========================================================
+let currentMode    = 'single';
+let previewRows    = [];   // array of { srcRow, mapped, existingId, status }
+
+// =========================================================
+// MODE SWITCH
+// =========================================================
+function switchMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-tab').forEach((t,i) => {
+        t.classList.toggle('active', ['single','range','all'][i] === mode);
+    });
+    document.querySelectorAll('.mode-panel').forEach((p,i) => {
+        p.classList.toggle('active', ['panel-single','panel-range','panel-all'][i] === 'panel-' + mode);
+    });
+}
+
+// =========================================================
+// LOG HELPER
+// =========================================================
+function log(msg, type='info') {
+    const box = document.getElementById('log-box');
+    const cls = { ok:'log-ok', err:'log-err', info:'log-info', warn:'log-warn' }[type] || 'log-info';
+    const time = new Date().toLocaleTimeString('id-ID');
+    box.innerHTML += `<div class="${cls}">[${time}] ${msg}</div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+// =========================================================
+// API HELPERS
+// =========================================================
+async function apiGet(table, params = {}, useAuth = false) {
+    const url = new URL(CFG.API);
+    url.searchParams.set('table', table);
+    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (useAuth) headers['X-Custom-Auth'] = CFG.SECRET;
+
+    const res = await fetch(url.toString(), { headers });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+}
+
+async function apiPost(table, body) {
+    const url = new URL(CFG.API);
+    url.searchParams.set('table', table);
+    const res = await fetch(url.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': CFG.SECRET },
+        body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+}
+
+async function apiPut(table, id_x, body) {
+    const url = new URL(CFG.API);
+    url.searchParams.set('table', table);
+    url.searchParams.set('id_x', id_x);
+    const res = await fetch(url.toString(), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': CFG.SECRET },
+        body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+}
+
+// =========================================================
+// FETCH SOURCE DATA
+// =========================================================
+async function fetchSourceData() {
+    if (currentMode === 'single') {
+        const id = parseInt(document.getElementById('input-single-id').value);
+        if (!id) throw new Error('id_x tidak boleh kosong');
+        const json = await apiGet(CFG.SRC_TABLE, { id_x: id });
+        if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
+        const d = json.data;
+        return Array.isArray(d) ? d : [d];
+    }
+    if (currentMode === 'range') {
+        const from = parseInt(document.getElementById('input-range-from').value);
+        const to   = parseInt(document.getElementById('input-range-to').value);
+        if (!from || !to || from > to) throw new Error('Range id_x tidak valid');
+        const json = await apiGet(CFG.SRC_TABLE, { 'id_x_gt': from - 1, 'id_x_lt': to + 1 });
+        if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
+        return json.data;
+    }
+    // all
+    const json = await apiGet(CFG.SRC_TABLE, {});
+    if (!json.success) throw new Error(json.message || 'Gagal ambil data');
+    return json.data;
+}
+
+// =========================================================
+// MAP DATA: dari rawData → kelompok x_01..x_11
+// =========================================================
+function mapData(rawRow) {
+    // Pastikan engine tersedia
+    if (!window.PsikogramEngine) throw new Error('PsikogramEngine belum dimuat. Pastikan psikogram-engine.js tersedia.');
+
+    const hasil = window.PsikogramEngine.hitungPsikogram(rawRow);
+    const { kekuatanKelemahan, minatData, aspekPsikologis } = window.PsikogramEngine;
+    const {
+        identitas, IQ, resultScores, konsistensi,
+        sorted_desc, sorted_asc,
+        kelebihan, kelemahan, rekomendasi, minat3
+    } = hasil;
+
+    // ── KEL 1: Kode peserta (x_01 dari sumber) ──
+    const kel1 = rawRow.x_01 || '';
+
+    // ── KEL 2: Biodata ──
+    const kel2 = JSON.stringify({
+        nama    : identitas.nama,
+        jk      : identitas.jk,
+        usia    : identitas.usia,
+        tanggal : identitas.tanggal,
+        id_sumber: rawRow.id_x
+    });
+
+    // ── KEL 3: Kemampuan (skor + label) ──
+    const kemampuanAspek = aspekPsikologis.filter(([sec]) => sec === 'KEMAMPUAN' || sec === null)
+        .slice(0, 6); // index 0-5: kemampuan umum s/d penalaran numerik
+    const kel3_obj = { skor_iq: IQ };
+    ['Kemampuan Umum','Daya Tangkap Visual','Kemampuan Berpikir Logis',
+     'Kemampuan Berpikir Abstrak','Penalaran Verbal','Penalaran Numerik'].forEach((nama, i) => {
+        const key = nama.toLowerCase().replace(/ /g,'_');
+        kel3_obj[key] = resultScores[i];
+    });
+    const kel3 = JSON.stringify(kel3_obj);
+
+    // ── KEL 4: Kepribadian (index 6-10) ──
+    const kel4_obj = {};
+    ['Hasrat Berprestasi','Daya Tahan Stress','Kepercayaan Diri','Relasi Sosial','Kerjasama'].forEach((nama, i) => {
+        const key = nama.toLowerCase().replace(/ /g,'_');
+        kel4_obj[key] = resultScores[6 + i];
+    });
+    const kel4 = JSON.stringify(kel4_obj);
+
+    // ── KEL 5: Sikap Kerja (index 11-13) ──
+    const kel5_obj = {};
+    ['Sistematika Kerja','Inisiatif','Kemandirian'].forEach((nama, i) => {
+        const key = nama.toLowerCase().replace(/ /g,'_');
+        kel5_obj[key] = resultScores[11 + i];
+    });
+    const kel5 = JSON.stringify(kel5_obj);
+
+    // ── KEL 6: IQ ──
+    const kel6 = String(IQ);
+
+    // ── KEL 7: Kekuatan / Kelebihan ──
+    const kekuatanArr = [0,1,2].map(i => {
+        const teks = kelebihan[i] !== null
+            ? kelebihan[i]
+            : kekuatanKelemahan[sorted_desc[i].index].teks2;
+        return teks;
+    });
+    const kel7 = JSON.stringify(kekuatanArr);
+
+    // ── KEL 8: Kelemahan ──
+    const kelemahanArr = [0,1,2].map(i => {
+        const teks = kelemahan[i] !== null
+            ? kelemahan[i]
+            : kekuatanKelemahan[sorted_asc[i].index].teks3;
+        return teks;
+    });
+    const kel8 = JSON.stringify(kelemahanArr);
+
+    // ── KEL 9: Rekomendasi ──
+    const rekomendasiArr = [0,1,2].map(i => {
+        const teks = rekomendasi[i] !== null
+            ? rekomendasi[i]
+            : kekuatanKelemahan[sorted_asc[i].index].teks5;
+        return teks;
+    });
+    const kel9 = JSON.stringify(rekomendasiArr);
+
+    // ── KEL 10: Arah Minat ──
+    const minatArr = minat3.map(({ singkatan, namaOverride, ketOverride }) => {
+        const item = minatData.find(m => m.singkatan === singkatan);
+        if (!item) return { singkatan, nama: singkatan, keterangan: '' };
+        return {
+            singkatan,
+            nama       : namaOverride ? namaOverride.toUpperCase() : item.arah_minat,
+            keterangan : ketOverride  ? ketOverride                : item.keterangan_minat
+        };
+    });
+    const kel10 = JSON.stringify(minatArr);
+
+    // ── KEL 11: Tanggal transfer ──
+    const now  = new Date();
+    const kel11 = now.toLocaleDateString('id-ID', {
+        day:'2-digit', month:'long', year:'numeric',
+        hour:'2-digit', minute:'2-digit'
+    });
+
+    return {
+        x_01 : kel1,   // kode peserta
+        x_02 : kel2,   // biodata (JSON)
+        x_03 : kel3,   // kemampuan (JSON)
+        x_04 : kel4,   // kepribadian (JSON)
+        x_05 : kel5,   // sikap kerja (JSON)
+        x_06 : kel6,   // IQ (angka)
+        x_07 : kel7,   // kekuatan (JSON array)
+        x_08 : kel8,   // kelemahan (JSON array)
+        x_09 : kel9,   // rekomendasi (JSON array)
+        x_10 : kel10,  // arah minat (JSON array)
+        x_11 : kel11   // tanggal transfer
+    };
+}
+
+// =========================================================
+// FETCH PREVIEW
+// =========================================================
+async function fetchPreview(mode) {
+    currentMode = mode;
+    previewRows = [];
+
+    const cardPreview  = document.getElementById('card-preview');
+    const tbody        = document.getElementById('preview-tbody');
+    const emptyState   = document.getElementById('empty-state');
+    const btnTransfer  = document.getElementById('btn-transfer');
+    const chkAll       = document.getElementById('chk-all');
+
+    cardPreview.style.display = 'none';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:#777;"><div class="spinner-inline" style="border-color:rgba(95,78,218,.3); border-top-color:#5F4EDA; width:24px; height:24px;"></div> Mengambil data...</td></tr>';
+    cardPreview.style.display = 'block';
+    emptyState.style.display = 'none';
+    btnTransfer.disabled = true;
+    chkAll.checked = false;
+
+    try {
+        // 1. Ambil data sumber
+        const srcData = await fetchSourceData();
+        if (!srcData || srcData.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.style.display = 'block';
+            updateStats();
+            return;
+        }
+
+        // 2. Hitung mapping untuk setiap baris
+        const rows = [];
+        for (const raw of srcData) {
+            try {
+                const mapped = mapData(raw);
+                rows.push({ srcRow: raw, mapped, existingId: null, status: 'pending', checked: false });
+            } catch(e) {
+                rows.push({ srcRow: raw, mapped: null, existingId: null, status: 'error', errMsg: e.message, checked: false });
+            }
+        }
+
+        // 3. Cek apakah x_01 sudah ada di rekap_nilai1
+        //    Kumpulkan semua kode x_01 unik, cek satu per satu
+        const kodePeserta = [...new Set(rows.filter(r => r.mapped).map(r => r.mapped.x_01))];
+        for (const kode of kodePeserta) {
+            try {
+                const cek = await apiGet(CFG.DST_TABLE, { x_01_eq: kode }, true);
+                if (cek.success && cek.data && cek.data.length > 0) {
+                    // Sudah ada — ambil id_x rekap
+                    const existId = cek.data[0].id_x;
+                    rows.filter(r => r.mapped && r.mapped.x_01 === kode).forEach(r => {
+                        r.existingId = existId;
+                        r.status = 'update';
+                    });
+                } else {
+                    rows.filter(r => r.mapped && r.mapped.x_01 === kode).forEach(r => {
+                        r.status = 'new';
+                    });
+                }
+            } catch(e) {
+                rows.filter(r => r.mapped && r.mapped.x_01 === kode).forEach(r => {
+                    r.status = 'new'; // anggap baru jika gagal cek
+                });
+            }
+        }
+
+        previewRows = rows;
+        renderPreviewTable();
+        updateStats();
+        updateTransferBtn();
+
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="9" style="color:#dc3545; padding:14px;">❌ Error: ${err.message}</td></tr>`;
+    }
+}
+
+// =========================================================
+// RENDER PREVIEW TABLE
+// =========================================================
+function renderPreviewTable() {
+    const tbody = document.getElementById('preview-tbody');
+    tbody.innerHTML = '';
+
+    if (previewRows.length === 0) {
+        document.getElementById('empty-state').style.display = 'block';
+        return;
+    }
+
+    previewRows.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.id = `row-${idx}`;
+        if (row.checked) tr.classList.add('selected');
+
+        const statusBadge = row.status === 'new'    ? '<span class="badge badge-new">🆕 Baru</span>'   :
+                            row.status === 'update' ? '<span class="badge badge-update">✏️ Update</span>' :
+                            row.status === 'error'  ? '<span class="badge badge-error">❌ Error</span>'  :
+                                                      '<span class="badge badge-pending">⏳ Pending</span>';
+
+        const nama    = row.mapped ? (() => { try { return JSON.parse(row.mapped.x_02).nama; } catch { return '-'; } })() : '-';
+        const iq      = row.mapped ? row.mapped.x_06 : '-';
+        const kemampJSON = row.mapped ? row.mapped.x_03 : '{}';
+        const kepribJSON = row.mapped ? row.mapped.x_04 : '{}';
+
+        const kemampPreview = row.mapped
+            ? Object.entries(JSON.parse(kemampJSON || '{}')).filter(([k]) => k !== 'skor_iq')
+                .slice(0,2).map(([k,v]) => `${k.replace(/_/g,' ')}:${v}`).join(', ')
+            : '-';
+        const kepribPreview = row.mapped
+            ? Object.entries(JSON.parse(kepribJSON || '{}')).slice(0,2)
+                .map(([k,v]) => `${k.replace(/_/g,' ')}:${v}`).join(', ')
+            : '-';
+
+        tr.innerHTML = `
+            <td style="text-align:center;">
+                <input type="checkbox" id="chk-${idx}"
+                    ${row.status === 'error' ? 'disabled' : ''}
+                    ${row.checked ? 'checked' : ''}
+                    onchange="toggleRow(${idx}, this.checked)">
+            </td>
+            <td><strong>${row.srcRow.id_x}</strong></td>
+            <td>${row.mapped ? row.mapped.x_01 : '<em style="color:#aaa;">-</em>'}</td>
+            <td>${nama}</td>
+            <td style="text-align:center;"><strong>${iq}</strong></td>
+            <td class="json-cell" onclick="showModal('Kemampuan – Peserta ${row.srcRow.id_x}', kemampJSON_${idx})"
+                title="Klik untuk lihat detail">
+                ${kemampPreview}...
+            </td>
+            <td class="json-cell" onclick="showModal('Kepribadian – Peserta ${row.srcRow.id_x}', kepribJSON_${idx})"
+                title="Klik untuk lihat detail">
+                ${kepribPreview}...
+            </td>
+            <td>${statusBadge} ${row.existingId ? `<small style="color:#999;">id_x:${row.existingId}</small>` : ''}</td>
+            <td>
+                <button class="btn btn-primary" style="padding:4px 10px; font-size:12px;"
+                    onclick="showDetailModal(${idx})">👁️ Detail</button>
+            </td>`;
+        tbody.appendChild(tr);
+
+        // Store JSON ke window untuk onclick
+        window[`kemampJSON_${idx}`]  = kemampJSON;
+        window[`kepribJSON_${idx}`]  = kepribJSON;
+
+        if (row.status === 'error') {
+            const errTr = document.createElement('tr');
+            errTr.innerHTML = `<td colspan="9" style="background:#fff5f5; color:#dc3545; font-size:12px; padding:6px 14px;">
+                ⚠️ Gagal memproses id_x ${row.srcRow.id_x}: ${row.errMsg}</td>`;
+            tbody.appendChild(errTr);
+        }
+    });
+}
+
+// =========================================================
+// TOGGLE ROW / SELECT ALL
+// =========================================================
+function toggleRow(idx, checked) {
+    previewRows[idx].checked = checked;
+    const tr = document.getElementById(`row-${idx}`);
+    if (tr) tr.classList.toggle('selected', checked);
+    updateStats();
+    updateTransferBtn();
+    // Update chk-all state
+    const allCheckable = previewRows.filter(r => r.status !== 'error');
+    const allChecked   = allCheckable.every(r => r.checked);
+    document.getElementById('chk-all').checked = allChecked && allCheckable.length > 0;
+}
+
+function toggleSelectAll(checked) {
+    previewRows.forEach((row, idx) => {
+        if (row.status === 'error') return;
+        row.checked = checked;
+        const chk = document.getElementById(`chk-${idx}`);
+        if (chk) chk.checked = checked;
+        const tr = document.getElementById(`row-${idx}`);
+        if (tr) tr.classList.toggle('selected', checked);
+    });
+    updateStats();
+    updateTransferBtn();
+}
+
+// =========================================================
+// UPDATE STATS
+// =========================================================
+function updateStats() {
+    const total    = previewRows.length;
+    const newCount = previewRows.filter(r => r.status === 'new').length;
+    const updCount = previewRows.filter(r => r.status === 'update').length;
+    const selected = previewRows.filter(r => r.checked).length;
+
+    document.getElementById('stat-total').textContent    = total;
+    document.getElementById('stat-new').textContent      = newCount;
+    document.getElementById('stat-update').textContent   = updCount;
+    document.getElementById('stat-selected').textContent = selected;
+}
+
+function updateTransferBtn() {
+    const hasSelected = previewRows.some(r => r.checked);
+    document.getElementById('btn-transfer').disabled = !hasSelected;
+}
+
+// =========================================================
+// MODAL
+// =========================================================
+function showModal(title, jsonStr) {
+    try {
+        const pretty = JSON.stringify(JSON.parse(jsonStr), null, 2);
+        document.getElementById('modal-title').textContent   = title;
+        document.getElementById('modal-content').textContent = pretty;
+    } catch {
+        document.getElementById('modal-title').textContent   = title;
+        document.getElementById('modal-content').textContent = jsonStr;
+    }
+    document.getElementById('modal-overlay').classList.add('open');
+}
+
+function showDetailModal(idx) {
+    const row = previewRows[idx];
+    if (!row || !row.mapped) return;
+    const allData = {
+        sumber_id_x : row.srcRow.id_x,
+        kel1_kode   : row.mapped.x_01,
+        kel2_biodata: JSON.parse(row.mapped.x_02 || '{}'),
+        kel3_kemampuan: JSON.parse(row.mapped.x_03 || '{}'),
+        kel4_kepribadian: JSON.parse(row.mapped.x_04 || '{}'),
+        kel5_sikap_kerja: JSON.parse(row.mapped.x_05 || '{}'),
+        kel6_iq     : row.mapped.x_06,
+        kel7_kekuatan: JSON.parse(row.mapped.x_07 || '[]'),
+        kel8_kelemahan: JSON.parse(row.mapped.x_08 || '[]'),
+        kel9_rekomendasi: JSON.parse(row.mapped.x_09 || '[]'),
+        kel10_minat : JSON.parse(row.mapped.x_10 || '[]'),
+        kel11_tgl_transfer: row.mapped.x_11,
+        status_rekap: row.status,
+        existing_id_x: row.existingId
+    };
+    showModal(`📋 Detail Lengkap — Peserta id_x ${row.srcRow.id_x}`, JSON.stringify(allData));
+}
+
+function closeModal(e) {
+    if (e.target === document.getElementById('modal-overlay')) {
+        document.getElementById('modal-overlay').classList.remove('open');
+    }
+}
+
+// =========================================================
+// TRANSFER
+// =========================================================
+async function startTransfer() {
+    const toTransfer = previewRows.filter(r => r.checked && r.status !== 'error' && r.mapped);
+    if (toTransfer.length === 0) return;
+
+    document.getElementById('btn-transfer').disabled = true;
+    document.getElementById('card-progress').style.display = 'block';
+    document.getElementById('card-progress').scrollIntoView({ behavior:'smooth', block:'start' });
+
+    const logBox = document.getElementById('log-box');
+    logBox.innerHTML = '';
+
+    let done = 0, ok = 0, fail = 0;
+    const total = toTransfer.length;
+
+    document.getElementById('prog-total').textContent = total;
+    updateProgress(0, 0, 0, total);
+    log(`🚀 Memulai transfer ${total} data...`, 'info');
+
+    for (const row of toTransfer) {
+        const pesertaId = row.srcRow.id_x;
+        const kode = row.mapped.x_01;
+        try {
+            let result;
+            if (row.status === 'update' && row.existingId) {
+                // PUT (update)
+                result = await apiPut(CFG.DST_TABLE, row.existingId, row.mapped);
+                log(`✏️ UPDATE id_x ${pesertaId} (kode: ${kode}) → rekap id_x ${row.existingId} — ${result.message || 'OK'}`, 'ok');
+            } else {
+                // POST (insert baru)
+                result = await apiPost(CFG.DST_TABLE, row.mapped);
+                log(`🆕 INSERT id_x ${pesertaId} (kode: ${kode}) → rekap id_x ${result.id_x || '?'} — ${result.message || 'OK'}`, 'ok');
+            }
+            ok++;
+            // Update badge di tabel preview
+            updateRowBadge(row, 'success');
+        } catch (err) {
+            fail++;
+            log(`❌ GAGAL id_x ${pesertaId} (kode: ${kode}) — ${err.message}`, 'err');
+            updateRowBadge(row, 'error');
+        }
+        done++;
+        updateProgress(done, ok, fail, total);
+
+        // Jeda kecil antar request
+        if (done < total) await sleep(CFG.DELAY_MS);
+    }
+
+    log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'info');
+    log(`✅ Selesai! Berhasil: ${ok} | Gagal: ${fail} | Total: ${total}`, ok === total ? 'ok' : 'warn');
+
+    document.getElementById('btn-transfer').disabled = false;
+}
+
+function updateProgress(done, ok, fail, total) {
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById('prog-bar').style.width   = pct + '%';
+    document.getElementById('prog-done').textContent  = done;
+    document.getElementById('prog-ok').textContent    = ok;
+    document.getElementById('prog-fail').textContent  = fail;
+    document.getElementById('prog-label').textContent = `${pct}% — ${done} dari ${total} data diproses`;
+}
+
+function updateRowBadge(row, result) {
+    // Cari baris di tabel preview berdasarkan id_x
+    const idx = previewRows.indexOf(row);
+    const tr  = document.getElementById(`row-${idx}`);
+    if (!tr) return;
+    const badgeCell = tr.cells[7];
+    if (result === 'success') {
+        badgeCell.innerHTML = `<span class="badge badge-success">✅ Tersimpan</span>`;
+    } else {
+        badgeCell.innerHTML = `<span class="badge badge-error">❌ Gagal</span>`;
+    }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// =========================================================
+// RESET
+// =========================================================
+function resetAll() {
+    previewRows = [];
+    document.getElementById('card-preview').style.display  = 'none';
+    document.getElementById('card-progress').style.display = 'none';
+    document.getElementById('preview-tbody').innerHTML = '';
+    document.getElementById('log-box').innerHTML       = '';
+    document.getElementById('chk-all').checked = false;
+    updateStats();
+}
+</script>
+</body>
+</html>
