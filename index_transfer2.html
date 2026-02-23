@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transfer Data Psikogram</title>
+    <script src="psikogram-engine.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -315,7 +316,7 @@
 <div class="page-header">
     <div>
         <h1>📊 Transfer Data Psikogram: <span id="hdr-src">nilai1</span> → <span id="hdr-dst">rekap_nilai1</span></h1>
-        <span>Sumber: tabel <strong id="hdr-src2">nilai1</strong> &nbsp;|&nbsp; Tujuan: tabel <strong id="hdr-dst2">rekap_nilai1</strong> &nbsp;|&nbsp; Src: lidan_co_id → Dst: psikogram_db</span>
+        <span>Sumber: tabel <strong id="hdr-src2">nilai1</strong> &nbsp;|&nbsp; Tujuan: tabel <strong id="hdr-dst2">rekap_nilai1</strong> &nbsp;|&nbsp; API: lidan-co-id.pages.dev</span>
     </div>
 </div>
 
@@ -514,8 +515,7 @@
 // KONFIGURASI
 // =========================================================
 const CFG = {
-    API        : 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis6', // API Sumber (lidan_co_id)
-    API_DST    : 'https://lidan-co-id.pages.dev/api/db_psikogram1',            // API Tujuan (psikogram_db)
+    API        : 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis6',
     SRC_TABLE  : 'nilai1',        // Diupdate dinamis via applyTableConfig()
     DST_TABLE  : 'rekap_nilai1',  // Diupdate dinamis via applyTableConfig()
     SECRET     : 'admin',
@@ -658,8 +658,8 @@ function log(msg, type='info') {
 // =========================================================
 // API HELPERS
 // =========================================================
-async function apiGet(table, params = {}, useAuth = false, useDst = false) {
-    const url = new URL(useDst ? CFG.API_DST : CFG.API);  // useDst=true → psikogram_db
+async function apiGet(table, params = {}, useAuth = false) {
+    const url = new URL(CFG.API);
     url.searchParams.set('table', table);
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
 
@@ -672,7 +672,7 @@ async function apiGet(table, params = {}, useAuth = false, useDst = false) {
 }
 
 async function apiPost(table, body) {
-    const url = new URL(CFG.API_DST);  // POST ke psikogram_db
+    const url = new URL(CFG.API);
     url.searchParams.set('table', table);
     const res = await fetch(url.toString(), {
         method: 'POST',
@@ -684,7 +684,7 @@ async function apiPost(table, body) {
 }
 
 async function apiPut(table, id_x, body) {
-    const url = new URL(CFG.API_DST);  // PUT ke psikogram_db
+    const url = new URL(CFG.API);
     url.searchParams.set('table', table);
     url.searchParams.set('id_x', id_x);
     const res = await fetch(url.toString(), {
@@ -886,7 +886,7 @@ async function fetchPreview(mode) {
         const kodePeserta = [...new Set(rows.filter(r => r.mapped).map(r => r.mapped.x_01))];
         for (const kode of kodePeserta) {
             try {
-                const cek = await apiGet(CFG.DST_TABLE, { x_01_eq: kode }, true, true);
+                const cek = await apiGet(CFG.DST_TABLE, { x_01_eq: kode }, true);
                 if (cek.success && cek.data && cek.data.length > 0) {
                     // Sudah ada — ambil id_x rekap
                     const existId = cek.data[0].id_x;
