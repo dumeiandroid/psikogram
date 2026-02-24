@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Psikotes — Rekap Dinamis</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+    <style>
+        :root {
+            --bg:       #0d0f14;
+            --surface:  #151820;
+            --surface2: #1c2030;
+            --border:   #2a2f3f;
+            --accent:   #4fffb0;
+            --accent2:  #4f8fff;
+            --danger:   #ff4f6d;
+            --text:     #e8eaf0;
+            --muted:    #6b7280;
+            --radius:   10px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 28px 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+        }
+        .header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px; font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .header h1 span { color: var(--accent); }
+        .header .sub {
+            font-size: 12px; color: var(--muted);
+            margin-top: 3px; font-family: 'DM Mono', monospace;
+        }
+        .badge-db {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 20px; padding: 5px 14px;
+            font-size: 11px; font-family: 'DM Mono', monospace; color: var(--accent2);
+        }
+        .badge-db::before {
+            content: ''; width: 7px; height: 7px; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 6px var(--accent);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+        /* Stats */
+        .stats-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 14px 20px; flex: 1; min-width: 130px;
+        }
+        .stat-card .num {
+            font-family: 'Syne', sans-serif; font-size: 28px;
+            font-weight: 700; color: var(--accent); line-height: 1;
+        }
+        .stat-card .lbl {
+            font-size: 11px; color: var(--muted); margin-top: 4px;
+            text-transform: uppercase; letter-spacing: .5px;
+        }
+
+        /* Toolbar */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 18px; border-radius: var(--radius); border: none;
+            cursor: pointer; font-family: 'DM Sans', sans-serif;
+            font-size: 13px; font-weight: 500;
+            transition: opacity .18s, transform .12s;
+        }
+        .btn:hover { opacity: .88; transform: translateY(-1px); }
+        .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+        .btn-danger-sm {
+            background: transparent; border: 1px solid var(--danger);
+            color: var(--danger); border-radius: 6px; padding: 4px 10px;
+            font-size: 11px; cursor: pointer; transition: background .15s;
+        }
+        .btn-danger-sm:hover { background: var(--danger); color: white; }
+        .btn-link {
+            background: var(--accent2); color: white;
+            border-radius: 6px; padding: 4px 12px;
+            font-size: 11px; cursor: pointer; border: none;
+            text-decoration: none; display: inline-block;
+            transition: opacity .15s;
+        }
+        .btn-link:hover { opacity: .85; }
+
+        /* Table */
+        .table-wrap {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden;
+        }
+        #adminTable_wrapper { padding: 16px; }
+        #adminTable_filter input {
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--text); border-radius: 7px; padding: 6px 10px;
+            font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+        }
+        #adminTable_filter label { color: var(--muted); font-size: 13px; }
+        #adminTable_length select {
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--text); border-radius: 7px; padding: 5px 8px;
+        }
+        #adminTable_length label { color: var(--muted); font-size: 13px; }
+        #adminTable_info { color: var(--muted); font-size: 12px; }
+        #adminTable_paginate .paginate_button {
+            background: var(--surface2) !important; border: 1px solid var(--border) !important;
+            color: var(--text) !important; border-radius: 6px !important; margin: 2px !important;
+        }
+        #adminTable_paginate .paginate_button.current {
+            background: var(--accent) !important; color: #0d0f14 !important; border-color: var(--accent) !important;
+        }
+        #adminTable_paginate .paginate_button:hover {
+            background: var(--surface) !important; color: var(--accent) !important;
+        }
+        table#adminTable { border-collapse: collapse; width: 100%; }
+        table#adminTable thead th {
+            background: var(--surface2); color: var(--muted);
+            font-family: 'DM Mono', monospace; font-size: 11px;
+            text-transform: uppercase; letter-spacing: .5px;
+            padding: 12px 14px; border-bottom: 1px solid var(--border);
+            border-top: none;
+        }
+        table#adminTable tbody td {
+            padding: 11px 14px; font-size: 13px;
+            border-bottom: 1px solid var(--border); vertical-align: middle;
+        }
+        table#adminTable tbody tr { background: var(--surface); transition: background .12s; }
+        table#adminTable tbody tr:hover { background: var(--surface2); }
+        table#adminTable tbody tr:last-child td { border-bottom: none; }
+
+        .kode-badge {
+            font-family: 'DM Mono', monospace; font-size: 12px;
+            background: var(--surface2); border: 1px solid var(--border);
+            padding: 3px 8px; border-radius: 5px; color: var(--accent);
+        }
+        .iq-badge {
+            font-family: 'Syne', sans-serif; font-weight: 700;
+            font-size: 15px; color: var(--accent2);
+        }
+        .tgl-text { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+        .nama-text { font-weight: 500; }
+
+        /* Loading */
+        .loading-state {
+            display: flex; align-items: center; justify-content: center;
+            padding: 60px; gap: 14px; color: var(--muted);
+        }
+        .spinner {
+            width: 20px; height: 20px; border: 2px solid var(--border);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-box {
+            background: rgba(255,79,109,.08); border: 1px solid var(--danger);
+            border-radius: var(--radius); padding: 14px 18px;
+            color: var(--danger); font-size: 13px; margin-bottom: 16px; display: none;
+        }
+
+        /* Auto refresh indicator */
+        .refresh-dot {
+            display: inline-block; width: 8px; height: 8px;
+            border-radius: 50%; background: var(--accent);
+            box-shadow: 0 0 6px var(--accent); margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        .last-update { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+    </style>
+</head>
+<body>
+
+<div style="max-width:1300px; margin:0 auto;">
+
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h1>Admin <span>Psikotes</span></h1>
+            <div class="sub">psikogram_db · tabel: <strong id="namaTableHeader" style="color:var(--accent)">—</strong> · auto-refresh 5 detik</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span class="last-update"><span class="refresh-dot"></span><span id="lastUpdate">Memuat...</span></span>
+            <span class="badge-db">db_psikogram1</span>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="num" id="statTotal">—</div>
+            <div class="lbl">Total Peserta</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" id="statIqAvg">—</div>
+            <div class="lbl">Rata-rata IQ</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" id="statToday">—</div>
+            <div class="lbl">Hari Ini</div>
+        </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-box" id="errorBox"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <button class="btn btn-secondary" onclick="loadData()">↻ Refresh Manual</button>
+        <button class="btn btn-secondary" id="btnGantiTabel" onclick="toggleTabelInput()">🗄 Ganti Tabel</button>
+        <span style="font-size:12px; color:var(--muted); margin-left:auto;" id="recordCount"></span>
+    </div>
+    <!-- Input ganti tabel -->
+    <div id="gantiTabelBox" style="display:none; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:16px;">
+        <div style="font-size:12px; color:var(--muted); margin-bottom:10px; font-family:'DM Mono',monospace;">GANTI TABEL SUMBER</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="inputTabelBaru" placeholder="Nama tabel (contoh: rekap_nilai2)"
+                style="flex:1; min-width:200px; background:var(--bg); border:1px solid var(--border);
+                       color:var(--text); border-radius:7px; padding:8px 12px; font-family:'DM Mono',monospace;
+                       font-size:13px; outline:none;"
+                onkeydown="if(event.key==='Enter') gantiTabel()">
+            <button class="btn btn-secondary" onclick="gantiTabel()" style="background:var(--accent); color:#0d0f14; border:none;">Terapkan</button>
+            <button class="btn btn-secondary" onclick="toggleTabelInput()">Batal</button>
+        </div>
+        <div id="tabelList" style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;"></div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+        <div id="tableContainer">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <span>Memuat data dari server...</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const API_URL    = 'https://lidan-co-id.pages.dev/api/db_psikogram1';
+    const SECRET     = 'admin';
+    const REFRESH_MS = 5000;
+    const DEFAULT_TABLE = 'rekap_nilai1';
+
+    // Ambil nama tabel dari URL ?tabel= atau gunakan default
+    function getTabelFromUrl() {
+        const p = new URLSearchParams(window.location.search);
+        return p.get('tabel') || DEFAULT_TABLE;
+    }
+
+    // Set tabel aktif & update URL tanpa reload
+    function setTabelAktif(nama) {
+        if (!nama || !nama.trim()) return;
+        nama = nama.trim();
+        const url = new URL(window.location.href);
+        url.searchParams.set('tabel', nama);
+        window.history.pushState({}, '', url.toString());
+        lastDataHash = null;
+        document.getElementById('namaTableHeader').textContent = nama;
+        document.title = `Admin Psikotes — ${nama}`;
+        loadData();
+    }
+
+    let TABLE_NAME = getTabelFromUrl();
+    let dataTable      = null;
+    let refreshTimer   = null;
+    let lastDataHash   = null;
+
+    // Toggle box ganti tabel
+    function toggleTabelInput() {
+        const box = document.getElementById('gantiTabelBox');
+        const isOpen = box.style.display !== 'none';
+        box.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+            document.getElementById('inputTabelBaru').value = TABLE_NAME;
+            document.getElementById('inputTabelBaru').focus();
+            loadTabelList();
+        }
+    }
+
+    function gantiTabel() {
+        const val = document.getElementById('inputTabelBaru').value.trim();
+        if (!val) return;
+        TABLE_NAME = val;
+        document.getElementById('gantiTabelBox').style.display = 'none';
+        setTabelAktif(val);
+    }
+
+    async function loadTabelList() {
+        try {
+            const res = await fetch(`${API_URL}?action=list_tables`, {
+                headers: { 'X-Custom-Auth': SECRET }
+            });
+            const result = await res.json();
+            const container = document.getElementById('tabelList');
+            container.innerHTML = '';
+            (result.tables || []).forEach(t => {
+                const btn = document.createElement('button');
+                btn.textContent = t;
+                btn.style.cssText = `background:${t === TABLE_NAME ? 'var(--accent)' : 'var(--surface)'};
+                    color:${t === TABLE_NAME ? '#0d0f14' : 'var(--text)'};
+                    border:1px solid var(--border); border-radius:6px;
+                    padding:5px 12px; font-size:12px; font-family:'DM Mono',monospace;
+                    cursor:pointer; transition:background .15s;`;
+                btn.onclick = () => {
+                    TABLE_NAME = t;
+                    document.getElementById('inputTabelBaru').value = t;
+                    document.getElementById('gantiTabelBox').style.display = 'none';
+                    setTabelAktif(t);
+                };
+                container.appendChild(btn);
+            });
+        } catch(e) { /* silent */ }
+    }
+
+    function safeJSON(str, def) {
+        try { return JSON.parse(str) || def; } catch { return def; }
+    }
+
+    function formatTgl(str) {
+        if (!str) return '—';
+        // coba parse ISO atau string biasa
+        const d = new Date(str);
+        if (isNaN(d)) return str;
+        return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+    }
+
+    async function loadData() {
+        try {
+            const res = await fetch(`${API_URL}?table=${TABLE_NAME}`, {
+                headers: { 'X-Custom-Auth': SECRET, 'Content-Type': 'application/json' }
+            });
+            if (!res.ok) throw new Error(`Server error: ${res.status}`);
+            const result = await res.json();
+            if (!result.success) throw new Error(result.error || 'Gagal ambil data');
+
+            const hash = JSON.stringify(result.data);
+            if (hash === lastDataHash) return; // tidak ada perubahan
+            lastDataHash = hash;
+
+            renderTable(result.data);
+            updateStats(result.data);
+            document.getElementById('recordCount').textContent = `${result.count} records`;
+            document.getElementById('lastUpdate').textContent = 'Update: ' + new Date().toLocaleTimeString('id-ID');
+            document.getElementById('errorBox').style.display = 'none';
+
+        } catch (e) {
+            document.getElementById('errorBox').textContent = '⚠ ' + e.message;
+            document.getElementById('errorBox').style.display = 'block';
+        }
+    }
+
+    function renderTable(rows) {
+        const container = document.getElementById('tableContainer');
+
+        if (dataTable) { dataTable.destroy(); dataTable = null; }
+
+        const tableHtml = `
+            <table id="adminTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Kode</th>
+                        <th>Nama</th>
+                        <th>IQ</th>
+                        <th>Tanggal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows.map(row => {
+                        const biodata = safeJSON(row.x_02, {});
+                        const nama    = biodata.nama || biodata.name || '—';
+                        const iq      = row.x_06 || '—';
+                        const tgl     = formatTgl(row.x_11);
+                        const kode    = row.x_01 || '—';
+                        const link    = `index_final.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
+                        return `<tr>
+                            <td style="color:var(--muted); font-family:'DM Mono',monospace; font-size:12px;">${row.id_x}</td>
+                            <td><span class="kode-badge">${kode}</span></td>
+                            <td><span class="nama-text">${nama}</span></td>
+                            <td><span class="iq-badge">${iq}</span></td>
+                            <td><span class="tgl-text">${tgl}</span></td>
+                            <td style="display:flex; gap:6px; align-items:center;">
+                                <a href="${link}" class="btn-link">🔍 Lihat</a>
+                                <button class="btn-danger-sm" onclick="hapusData(${row.id_x})">🗑</button>
+                            </td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>`;
+
+        container.innerHTML = tableHtml;
+
+        dataTable = $('#adminTable').DataTable({
+            pageLength: 25,
+            order: [[0, 'desc']],
+            language: {
+                search: 'Cari:',
+                lengthMenu: 'Tampilkan _MENU_ data',
+                info: 'Menampilkan _START_–_END_ dari _TOTAL_ data',
+                paginate: { previous: '‹', next: '›' },
+                emptyTable: 'Tidak ada data',
+                zeroRecords: 'Data tidak ditemukan'
+            },
+            columnDefs: [{ orderable: false, targets: 5 }]
+        });
+    }
+
+    function updateStats(rows) {
+        document.getElementById('statTotal').textContent = rows.length;
+
+        // Rata-rata IQ
+        const iqs = rows.map(r => parseInt(r.x_06)).filter(v => !isNaN(v));
+        const avg = iqs.length ? Math.round(iqs.reduce((a,b) => a+b, 0) / iqs.length) : '—';
+        document.getElementById('statIqAvg').textContent = avg;
+
+        // Hari ini
+        const today = new Date().toDateString();
+        const todayCount = rows.filter(r => {
+            if (!r.x_11) return false;
+            return new Date(r.x_11).toDateString() === today;
+        }).length;
+        document.getElementById('statToday').textContent = todayCount;
+    }
+
+    async function hapusData(id_x) {
+        if (!confirm(`Hapus data id_x=${id_x} secara permanen?`)) return;
+        try {
+            const res = await fetch(`${API_URL}?table=${TABLE_NAME}&id_x=${id_x}`, {
+                method: 'DELETE',
+                headers: { 'X-Custom-Auth': SECRET }
+            });
+            const result = await res.json();
+            if (result.success) {
+                lastDataHash = null; // paksa reload
+                loadData();
+            } else {
+                alert('Gagal hapus: ' + (result.message || 'unknown error'));
+            }
+        } catch(e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    function startPolling() {
+        if (refreshTimer) clearInterval(refreshTimer);
+        refreshTimer = setInterval(loadData, REFRESH_MS);
+    }
+
+    // Init
+    TABLE_NAME = getTabelFromUrl();
+    document.getElementById('namaTableHeader').textContent = TABLE_NAME;
+    document.title = `Admin Psikotes — ${TABLE_NAME}`;
+    loadData();
+    startPolling();
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', () => {
+        TABLE_NAME = getTabelFromUrl();
+        document.getElementById('namaTableHeader').textContent = TABLE_NAME;
+        document.title = `Admin Psikotes — ${TABLE_NAME}`;
+        lastDataHash = null;
+        loadData();
+    });
+</script>
+</body>
+</html>

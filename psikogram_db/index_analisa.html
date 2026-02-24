@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analisa Psikogram</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg:       #0f1117;
+    --surface:  #191c27;
+    --surface2: #21263a;
+    --border:   #2e3450;
+    --accent:   #5F4EDA;
+    --accent2:  #7c6ef0;
+    --kurang:   #ef4444;
+    --cukup:    #f59e0b;
+    --baik:     #22c55e;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --radius:   14px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -.3px;
+  }
+  .topbar-title span { color: var(--accent2); }
+  .topbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .topbar input[type="text"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    width: 160px;
+  }
+  .topbar input:focus { outline: none; border-color: var(--accent2); }
+  .btn-top {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .2s;
+  }
+  .btn-top:hover { background: var(--accent2); }
+  .btn-top:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-back {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-back:hover { background: var(--border); }
+
+  /* ── LOADING ── */
+  #loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,17,23,.92);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+    gap: 16px;
+  }
+  #loading-overlay.hidden { display: none; }
+  .spin {
+    width: 48px; height: 48px;
+    border: 4px solid rgba(95,78,218,.3);
+    border-top-color: var(--accent2);
+    border-radius: 50%;
+    animation: spin .75s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .load-txt { font-size: 15px; color: var(--muted); }
+
+  /* ── SUMMARY STRIP ── */
+  .summary-strip {
+    display: flex;
+    gap: 12px;
+    padding: 20px 28px 0;
+    flex-wrap: wrap;
+  }
+  .sum-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 22px;
+    flex: 1;
+    min-width: 130px;
+    text-align: center;
+  }
+  .sum-num {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .sum-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+
+  /* ── MAIN GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 18px;
+    padding: 20px 28px 40px;
+  }
+
+  /* ── CHART CARD ── */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color .2s, transform .2s;
+  }
+  .chart-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  .chart-card-head {
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chart-card-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .chart-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .chart-card-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .chart-card-body {
+    padding: 16px 18px;
+  }
+
+  /* Bar aspek */
+  .bar-section { margin-bottom: 8px; }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 9px;
+    cursor: pointer;
+  }
+  .bar-row:hover .bar-track { opacity: .85; }
+  .bar-label {
+    font-size: 12px;
+    width: 48px;
+    text-align: right;
+    color: var(--muted);
+    flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .bar-track {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: 99px;
+    height: 18px;
+    overflow: hidden;
+    position: relative;
+    transition: opacity .2s;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    min-width: 24px;
+    transition: width .6s cubic-bezier(.4,0,.2,1);
+  }
+  .bar-count {
+    font-size: 11px;
+    color: var(--muted);
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .legend-dots {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .legend-dot {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Pie IQ */
+  .pie-wrap {
+    position: relative;
+    height: 210px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pie-center-text {
+    position: absolute;
+    text-align: center;
+    pointer-events: none;
+  }
+  .pie-center-num {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .pie-center-lbl {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+  }
+  .pie-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .pie-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 6px;
+    transition: background .15s;
+  }
+  .pie-legend-row:hover { background: var(--surface2); }
+  .pie-legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .pie-legend-lbl { flex: 1; }
+  .pie-legend-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .pie-legend-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    width: 38px;
+    text-align: right;
+  }
+
+  /* IQ spans full width */
+  .chart-card.iq-card {
+    grid-column: 1 / -1;
+  }
+  .iq-card .chart-card-body {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 640px) {
+    .iq-card .chart-card-body { grid-template-columns: 1fr; }
+    .pie-wrap { height: 180px; }
+  }
+
+  /* ── ERROR / EMPTY ── */
+  .error-box, .empty-box {
+    grid-column: 1/-1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 50px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .error-box { border-color: var(--kurang); color: #fca5a5; }
+  .error-icon, .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* ── MODAL POPUP ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 680px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,.6);
+    animation: popIn .2s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn {
+    from { transform: scale(.92); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .modal-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .modal-head-info { flex: 1; }
+  .modal-head-title { font-size: 16px; font-weight: 800; }
+  .modal-head-sub   { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .modal-close {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { background: var(--border); }
+
+  /* Kategori badge di modal head */
+  .kat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .modal-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 16px 20px;
+  }
+
+  /* Search in modal */
+  .modal-search {
+    margin-bottom: 14px;
+  }
+  .modal-search input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .modal-search input:focus { outline: none; border-color: var(--accent2); }
+
+  /* Modal table */
+  .modal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .modal-table th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 9px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+  }
+  .modal-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(46,52,80,.5);
+    vertical-align: middle;
+  }
+  .modal-table tr:last-child td { border-bottom: none; }
+  .modal-table tr:hover td { background: var(--surface2); }
+
+  .skor-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px; height: 24px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+  }
+  .pill-k  { background: rgba(239,68,68,.2);  color: #fca5a5; }
+  .pill-c  { background: rgba(245,158,11,.2); color: #fcd34d; }
+  .pill-b  { background: rgba(34,197,94,.2);  color: #86efac; }
+
+  .nama-link {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .nama-link:hover { color: var(--accent2); text-decoration: underline; }
+
+  /* Ranking no */
+  .rank-no {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    width: 24px;
+    text-align: center;
+  }
+
+  /* Filter chips di modal */
+  .filter-chips {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--muted);
+    background: transparent;
+    font-family: inherit;
+  }
+  .chip.active-k { background: rgba(239,68,68,.2);  color: #fca5a5; border-color: #ef4444; }
+  .chip.active-c { background: rgba(245,158,11,.2); color: #fcd34d; border-color: #f59e0b; }
+  .chip.active-b { background: rgba(34,197,94,.2);  color: #86efac; border-color: #22c55e; }
+  .chip.active-all { background: var(--accent); color: white; border-color: var(--accent); }
+  .chip:hover { border-color: var(--accent2); }
+
+  /* Empty modal */
+  .modal-empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* IQ colors */
+  :root {
+    --iq0: #7f1d1d; --iq1: #991b1b; --iq2: #b45309; --iq3: #78716c;
+    --iq4: #4ade80; --iq5: #3b82f6; --iq6: #8b5cf6;
+    --iq7: #a855f7; --iq8: #ec4899;
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-overlay">
+  <div class="spin"></div>
+  <div class="load-txt" id="load-txt">Memuat data analisa...</div>
+</div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-title">📊 Analisa <span>Psikogram</span></div>
+  <div class="topbar-right">
+    <input type="text" id="inp-table" value="rekap_nilai1" placeholder="Nama tabel">
+    <button class="btn-top" onclick="loadData()">🔄 Muat Ulang</button>
+    <button class="btn-top btn-back" onclick="window.history.back()">← Kembali</button>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="summary-strip" id="summary-strip" style="display:none;">
+  <div class="sum-box">
+    <div class="sum-num" id="sum-total" style="color:var(--accent2);">–</div>
+    <div class="sum-lbl">Total Peserta</div>
+  </div>
+  <div class="sum-box">
+    <div class="sum-num" id="sum-baik" style="color:var(--baik);">–</div>
+    <div class="sum-lbl">Rata-rata Baik</div>
+  </div>
+  <div class="sum-box">
+    <div class="sum-num" id="sum-cukup" style="color:var(--cukup);">–</div>
+    <div class="sum-lbl">Rata-rata Cukup</div>
+  </div>
+  <div class="sum-box">
+    <div class="sum-num" id="sum-kurang" style="color:var(--kurang);">–</div>
+    <div class="sum-lbl">Rata-rata Kurang</div>
+  </div>
+  <div class="sum-box">
+    <div class="sum-num" id="sum-iq-avg" style="color:#c084fc;">–</div>
+    <div class="sum-lbl">Rata-rata IQ</div>
+  </div>
+</div>
+
+<!-- Main Grid -->
+<div class="main-grid" id="main-grid"></div>
+
+<!-- Modal Popup -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-info">
+        <div class="kat-badge" id="modal-badge"></div>
+        <div class="modal-head-title" id="modal-title">–</div>
+        <div class="modal-head-sub"  id="modal-sub">–</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-search">
+        <input type="text" id="modal-search-inp" placeholder="🔍 Cari nama..." oninput="filterModalTable()">
+      </div>
+      <div class="filter-chips" id="modal-chips"></div>
+      <div id="modal-table-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const API = 'https://lidan-co-id.pages.dev/api/db_psikogram1';
+const SECRET = 'admin';
+
+// ── ASPEK DEFINISI ──
+const ASPEK_KEMAMPUAN   = [
+  { label:'Kemampuan Umum',            key:'kemampuan_umum',            icon:'🧠', group:'KEMAMPUAN'   },
+  { label:'Daya Tangkap Visual',       key:'daya_tangkap_visual',       icon:'👁️', group:'KEMAMPUAN'   },
+  { label:'Berpikir Logis',            key:'kemampuan_berpikir_logis',  icon:'⚙️', group:'KEMAMPUAN'   },
+  { label:'Berpikir Abstrak',          key:'kemampuan_berpikir_abstrak',icon:'🔷', group:'KEMAMPUAN'   },
+  { label:'Penalaran Verbal',          key:'penalaran_verbal',          icon:'💬', group:'KEMAMPUAN'   },
+  { label:'Penalaran Numerik',         key:'penalaran_numerik',         icon:'🔢', group:'KEMAMPUAN'   },
+];
+const ASPEK_KEPRIBADIAN = [
+  { label:'Hasrat Berprestasi',        key:'hasrat_berprestasi',        icon:'🏆', group:'KEPRIBADIAN' },
+  { label:'Daya Tahan Stress',         key:'daya_tahan_stress',         icon:'💪', group:'KEPRIBADIAN' },
+  { label:'Kepercayaan Diri',          key:'kepercayaan_diri',          icon:'✨', group:'KEPRIBADIAN' },
+  { label:'Relasi Sosial',             key:'relasi_sosial',             icon:'🤝', group:'KEPRIBADIAN' },
+  { label:'Kerjasama',                 key:'kerjasama',                 icon:'👥', group:'KEPRIBADIAN' },
+];
+const ASPEK_SIKAP = [
+  { label:'Sistematika Kerja',         key:'sistematika_kerja',         icon:'📋', group:'SIKAP KERJA' },
+  { label:'Inisiatif',                 key:'inisiatif',                 icon:'🚀', group:'SIKAP KERJA' },
+  { label:'Kemandirian',               key:'kemandirian',               icon:'🦅', group:'SIKAP KERJA' },
+];
+const ALL_ASPEK = [...ASPEK_KEMAMPUAN, ...ASPEK_KEPRIBADIAN, ...ASPEK_SIKAP];
+
+const GROUP_COLORS = {
+  'KEMAMPUAN':   { bg:'rgba(59,130,246,.15)',  border:'#3b82f6', icon:'#3b82f6'  },
+  'KEPRIBADIAN': { bg:'rgba(168,85,247,.15)',  border:'#a855f7', icon:'#a855f7'  },
+  'SIKAP KERJA': { bg:'rgba(34,197,94,.15)',   border:'#22c55e', icon:'#22c55e'  },
+};
+
+// IQ kategori
+const IQ_KATEGORI = [
+  { label:'Sangat Rendah',      min:0,   max:69,  color:'#dc2626' },
+  { label:'Rendah',             min:70,  max:79,  color:'#ea580c' },
+  { label:'Di Bawah Rata-rata', min:80,  max:89,  color:'#ca8a04' },
+  { label:'Rata-rata Bawah',    min:90,  max:99,  color:'#64748b' },
+  { label:'Rata-rata',          min:100, max:109, color:'#22c55e' },
+  { label:'Di Atas Rata-rata',  min:110, max:119, color:'#3b82f6' },
+  { label:'Superior',           min:120, max:129, color:'#8b5cf6' },
+  { label:'Sangat Superior',    min:130, max:139, color:'#a855f7' },
+  { label:'Genius',             min:140, max:9999,color:'#ec4899' },
+];
+
+// ── GLOBAL STATE ──
+let allRows = [];        // raw data dari API
+let modalRows = [];      // baris yang sedang tampil di modal
+let modalActiveFilter = 'all';
+let pieChart = null;
+
+// ── KLASIFIKASI ──
+function klasSkor(s) {
+  if (s <= 4) return 'kurang';
+  if (s <= 6) return 'cukup';
+  return 'baik';
+}
+function klasIQ(iq) {
+  for (const k of IQ_KATEGORI) {
+    if (iq >= k.min && iq <= k.max) return k;
+  }
+  return IQ_KATEGORI[4];
+}
+
+// ── SAFE JSON PARSE ──
+function sj(str, fb) { try { return JSON.parse(str||'{}'); } catch { return fb; } }
+
+// ── LOAD DATA ──
+async function loadData() {
+  const table = document.getElementById('inp-table').value.trim() || 'rekap_nilai1';
+  document.getElementById('loading-overlay').classList.remove('hidden');
+  document.getElementById('load-txt').textContent = `Memuat data dari tabel "${table}"...`;
+  document.getElementById('main-grid').innerHTML = '';
+  document.getElementById('summary-strip').style.display = 'none';
+
+  try {
+    const url = `${API}?table=${encodeURIComponent(table)}`;
+    const res = await fetch(url, { headers:{ 'X-Custom-Auth': SECRET, 'Content-Type':'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message || 'Gagal ambil data');
+    allRows = json.data || [];
+    if (allRows.length === 0) {
+      renderEmpty();
+    } else {
+      renderAll();
+    }
+  } catch(e) {
+    renderError(e.message);
+  } finally {
+    document.getElementById('loading-overlay').classList.add('hidden');
+  }
+}
+
+// ── RENDER ALL ──
+function renderAll() {
+  const grid = document.getElementById('main-grid');
+  grid.innerHTML = '';
+
+  // Hitung summary
+  const total = allRows.length;
+  let sumBaik=0, sumCukup=0, sumKurang=0, iqTotal=0, iqCount=0;
+  allRows.forEach(row => {
+    const kem = sj(row.x_03,{}); const kep = sj(row.x_04,{}); const sik = sj(row.x_05,{});
+    ALL_ASPEK.forEach(a => {
+      const src = a.group==='KEMAMPUAN'?kem: a.group==='KEPRIBADIAN'?kep:sik;
+      const s = parseInt(src[a.key])||0;
+      if (s>0) { const k=klasSkor(s); if(k==='baik')sumBaik++; else if(k==='cukup')sumCukup++; else sumKurang++; }
+    });
+    const iq = parseInt(row.x_06)||0;
+    if (iq>0) { iqTotal+=iq; iqCount++; }
+  });
+
+  const totalScores = sumBaik+sumCukup+sumKurang;
+  document.getElementById('sum-total').textContent   = total;
+  document.getElementById('sum-baik').textContent    = totalScores>0?Math.round(sumBaik/total):'–';
+  document.getElementById('sum-cukup').textContent   = totalScores>0?Math.round(sumCukup/total):'–';
+  document.getElementById('sum-kurang').textContent  = totalScores>0?Math.round(sumKurang/total):'–';
+  document.getElementById('sum-iq-avg').textContent  = iqCount>0?Math.round(iqTotal/iqCount):'–';
+  document.getElementById('summary-strip').style.display = 'flex';
+
+  // Render tiap aspek
+  ALL_ASPEK.forEach(aspek => {
+    const card = buildAspekCard(aspek);
+    grid.appendChild(card);
+  });
+
+  // Render IQ (full width)
+  const iqCard = buildIQCard();
+  grid.appendChild(iqCard);
+
+  // Animate bars after DOM settled
+  setTimeout(() => animateBars(), 50);
+}
+
+// ── BUILD ASPEK CARD ──
+function buildAspekCard(aspek) {
+  const gc = GROUP_COLORS[aspek.group] || GROUP_COLORS['KEMAMPUAN'];
+
+  // Hitung distribusi
+  const baik=[], cukup=[], kurang=[];
+  allRows.forEach(row => {
+    const src = aspek.group==='KEMAMPUAN' ? sj(row.x_03,{})
+              : aspek.group==='KEPRIBADIAN' ? sj(row.x_04,{})
+              : sj(row.x_05,{});
+    const s = parseInt(src[aspek.key]) || 0;
+    const iq = parseInt(row.x_06) || 0;
+    const bio = sj(row.x_02,{});
+    const nama = bio.nama || row.x_01 || '–';
+    const entry = { nama, skor:s, iq, id_x: row.id_x, x_01: row.x_01 };
+    if (s<=0) return;
+    const k = klasSkor(s);
+    if (k==='baik') baik.push(entry);
+    else if (k==='cukup') cukup.push(entry);
+    else kurang.push(entry);
+  });
+
+  const total = baik.length + cukup.length + kurang.length;
+
+  const card = document.createElement('div');
+  card.className = 'chart-card';
+
+  card.innerHTML = `
+    <div class="chart-card-head" style="background:${gc.bg}; border-bottom-color:${gc.border}33;">
+      <div class="chart-card-icon" style="background:${gc.bg}; border:1px solid ${gc.border}44;">
+        ${aspek.icon}
+      </div>
+      <div>
+        <div class="chart-card-title">${aspek.label}</div>
+        <div class="chart-card-sub">${aspek.group} &bull; ${total} peserta</div>
+      </div>
+    </div>
+    <div class="chart-card-body">
+      ${buildBarRow('baik',   '7–10', baik.length,   total, aspek, baik,   cukup, kurang, gc)}
+      ${buildBarRow('cukup',  '5–6',  cukup.length,  total, aspek, baik,   cukup, kurang, gc)}
+      ${buildBarRow('kurang', '1–4',  kurang.length,  total, aspek, baik,   cukup, kurang, gc)}
+      <div class="legend-dots">
+        <div class="legend-dot" onclick="openModal('${aspek.label}','baik','${aspek.key}','${aspek.group}')">
+          <div class="dot" style="background:var(--baik)"></div><span>Baik (${baik.length})</span>
+        </div>
+        <div class="legend-dot" onclick="openModal('${aspek.label}','cukup','${aspek.key}','${aspek.group}')">
+          <div class="dot" style="background:var(--cukup)"></div><span>Cukup (${cukup.length})</span>
+        </div>
+        <div class="legend-dot" onclick="openModal('${aspek.label}','kurang','${aspek.key}','${aspek.group}')">
+          <div class="dot" style="background:var(--kurang)"></div><span>Kurang (${kurang.length})</span>
+        </div>
+      </div>
+    </div>`;
+
+  // Simpan data ke dataset card
+  card.dataset.aspekKey   = aspek.key;
+  card.dataset.aspekGroup = aspek.group;
+  card.dataset.aspekLabel = aspek.label;
+  card.dataset.baik   = JSON.stringify(baik.sort((a,b)=>b.skor-a.skor));
+  card.dataset.cukup  = JSON.stringify(cukup.sort((a,b)=>b.skor-a.skor));
+  card.dataset.kurang = JSON.stringify(kurang.sort((a,b)=>a.skor-b.skor));
+
+  return card;
+}
+
+function buildBarRow(kat, range, count, total, aspek, baik, cukup, kurang, gc) {
+  const pct = total>0 ? Math.round((count/total)*100) : 0;
+  const color = kat==='baik' ? 'var(--baik)' : kat==='cukup' ? 'var(--cukup)' : 'var(--kurang)';
+  return `
+    <div class="bar-row" onclick="openModal('${aspek.label}','${kat}','${aspek.key}','${aspek.group}')">
+      <div class="bar-label">${range}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:0%; background:${color};" data-target="${pct}">
+          ${pct>=12 ? pct+'%' : ''}
+        </div>
+      </div>
+      <div class="bar-count">${count}</div>
+    </div>`;
+}
+
+function animateBars() {
+  document.querySelectorAll('.bar-fill').forEach(el => {
+    const target = el.dataset.target;
+    setTimeout(() => { el.style.width = target + '%'; }, 10);
+  });
+}
+
+// ── BUILD IQ CARD ──
+function buildIQCard() {
+  // Hitung distribusi IQ
+  const dist = IQ_KATEGORI.map(k => ({ ...k, entries:[] }));
+  allRows.forEach(row => {
+    const iq = parseInt(row.x_06) || 0;
+    if (!iq) return;
+    const bio = sj(row.x_02,{});
+    const nama = bio.nama || row.x_01 || '–';
+    const entry = { nama, iq, id_x: row.id_x, x_01: row.x_01 };
+    const kat = dist.find(d => iq >= d.min && iq <= d.max);
+    if (kat) kat.entries.push(entry);
+  });
+
+  const totalIQ = dist.reduce((s,d)=>s+d.entries.length, 0);
+  const iqValues = allRows.map(r=>parseInt(r.x_06)||0).filter(v=>v>0);
+  const iqAvg = iqValues.length ? Math.round(iqValues.reduce((a,b)=>a+b,0)/iqValues.length) : 0;
+
+  const card = document.createElement('div');
+  card.className = 'chart-card iq-card';
+  card.innerHTML = `
+    <div class="chart-card-head" style="background:rgba(168,85,247,.1); border-bottom-color:rgba(168,85,247,.3);">
+      <div class="chart-card-icon" style="background:rgba(168,85,247,.15); border:1px solid rgba(168,85,247,.3);">📊</div>
+      <div>
+        <div class="chart-card-title">Intelligence Quotient (IQ)</div>
+        <div class="chart-card-sub">Distribusi kategori IQ &bull; ${totalIQ} peserta &bull; Rata-rata: ${iqAvg}</div>
+      </div>
+    </div>
+    <div class="chart-card-body">
+      <div class="pie-wrap">
+        <canvas id="pie-iq" width="240" height="240"></canvas>
+        <div class="pie-center-text">
+          <div class="pie-center-num" style="color:#c084fc;">${iqAvg}</div>
+          <div class="pie-center-lbl">Rata-rata IQ</div>
+        </div>
+      </div>
+      <div class="pie-legend" id="pie-legend"></div>
+    </div>`;
+
+  // Simpan distribusi untuk modal
+  card.dataset.iqDist = JSON.stringify(dist);
+
+  // Render legenda
+  setTimeout(() => {
+    const legendEl = card.querySelector('#pie-legend');
+    dist.filter(d=>d.entries.length>0).forEach(d => {
+      const pct = totalIQ>0 ? Math.round(d.entries.length/totalIQ*100) : 0;
+      const row = document.createElement('div');
+      row.className = 'pie-legend-row';
+      row.innerHTML = `
+        <div class="pie-legend-dot" style="background:${d.color};"></div>
+        <div class="pie-legend-lbl">${d.label}</div>
+        <div class="pie-legend-count">${d.entries.length} orang</div>
+        <div class="pie-legend-pct">${pct}%</div>`;
+      row.onclick = () => openIQModal(d.label, d.entries, d.color, dist, totalIQ);
+      legendEl.appendChild(row);
+    });
+
+    // Draw pie chart
+    const ctx = card.querySelector('#pie-iq').getContext('2d');
+    if (pieChart) { pieChart.destroy(); }
+    const filtered = dist.filter(d=>d.entries.length>0);
+    pieChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: filtered.map(d=>d.label),
+        datasets: [{
+          data: filtered.map(d=>d.entries.length),
+          backgroundColor: filtered.map(d=>d.color+'cc'),
+          borderColor: filtered.map(d=>d.color),
+          borderWidth: 2,
+          hoverOffset: 8,
+        }]
+      },
+      options: {
+        cutout: '62%',
+        responsive: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const pct = totalIQ>0?Math.round(ctx.raw/totalIQ*100):0;
+                return ` ${ctx.label}: ${ctx.raw} orang (${pct}%)`;
+              }
+            },
+            bodyColor: '#e2e8f0',
+            backgroundColor: '#191c27',
+            borderColor: '#2e3450',
+            borderWidth: 1,
+          }
+        },
+        onClick: (evt, elements) => {
+          if (!elements.length) return;
+          const idx = elements[0].index;
+          const d = filtered[idx];
+          openIQModal(d.label, d.entries, d.color, dist, totalIQ);
+        }
+      }
+    });
+  }, 100);
+
+  return card;
+}
+
+// ── MODAL ASPEK ──
+let _modalAllEntries = { baik:[], cukup:[], kurang:[] };
+let _modalAspekLabel = '';
+let _modalAspekKey   = '';
+
+function openModal(aspekLabel, kat, aspekKey, aspekGroup) {
+  // Cari card yang sesuai
+  const cards = document.querySelectorAll('.chart-card');
+  let baik=[], cukup=[], kurang=[];
+  cards.forEach(c => {
+    if (c.dataset.aspekKey === aspekKey && c.dataset.aspekGroup === aspekGroup) {
+      baik   = JSON.parse(c.dataset.baik   || '[]');
+      cukup  = JSON.parse(c.dataset.cukup  || '[]');
+      kurang = JSON.parse(c.dataset.kurang || '[]');
+    }
+  });
+
+  _modalAllEntries = { baik, cukup, kurang };
+  _modalAspekLabel = aspekLabel;
+  _modalAspekKey   = aspekKey;
+  modalActiveFilter = kat;
+
+  updateModalContent();
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('modal-search-inp').value = '';
+}
+
+function updateModalContent() {
+  const kat = modalActiveFilter;
+  const { baik, cukup, kurang } = _modalAllEntries;
+  const total = baik.length + cukup.length + kurang.length;
+
+  // Badge
+  const badgeEl = document.getElementById('modal-badge');
+  const colors = { baik:['#86efac','rgba(34,197,94,.2)'], cukup:['#fcd34d','rgba(245,158,11,.2)'], kurang:['#fca5a5','rgba(239,68,68,.2)'], all:['#a5b4fc','rgba(99,102,241,.2)'] };
+  const labels = { baik:'Baik (7–10)', cukup:'Cukup (5–6)', kurang:'Kurang (1–4)', all:'Semua Kategori' };
+  const [fc, bg] = colors[kat] || colors.all;
+  badgeEl.style.cssText = `color:${fc}; background:${bg};`;
+  badgeEl.textContent = labels[kat] || '';
+
+  document.getElementById('modal-title').textContent = _modalAspekLabel;
+
+  let entries;
+  if (kat==='all')    entries = [...baik,...cukup,...kurang];
+  else if (kat==='baik')   entries = baik;
+  else if (kat==='cukup')  entries = cukup;
+  else                      entries = kurang;
+
+  document.getElementById('modal-sub').textContent =
+    `${entries.length} peserta dari total ${total} peserta`;
+
+  // Chips filter
+  const chipsEl = document.getElementById('modal-chips');
+  chipsEl.innerHTML = '';
+  const chips = [
+    { key:'all',    label:`Semua (${total})`,       cls:'active-all' },
+    { key:'baik',   label:`Baik (${baik.length})`,  cls:'active-b' },
+    { key:'cukup',  label:`Cukup (${cukup.length})`,cls:'active-c' },
+    { key:'kurang', label:`Kurang (${kurang.length})`,cls:'active-k'},
+  ];
+  chips.forEach(ch => {
+    const btn = document.createElement('button');
+    btn.className = `chip ${kat===ch.key ? ch.cls : ''}`;
+    btn.textContent = ch.label;
+    btn.onclick = () => { modalActiveFilter = ch.key; document.getElementById('modal-search-inp').value=''; updateModalContent(); };
+    chipsEl.appendChild(btn);
+  });
+
+  // Store for search
+  modalRows = entries;
+  renderModalTable(entries);
+}
+
+function renderModalTable(entries) {
+  const wrap = document.getElementById('modal-table-wrap');
+  if (!entries.length) {
+    wrap.innerHTML = '<div class="modal-empty">😕 Tidak ada data pada kategori ini</div>';
+    return;
+  }
+  let html = `<table class="modal-table">
+    <thead><tr>
+      <th>#</th>
+      <th>Nama</th>
+      <th>Skor</th>
+      <th>IQ</th>
+    </tr></thead><tbody>`;
+  entries.forEach((e,i) => {
+    const kat = klasSkor(e.skor);
+    const pillCls = kat==='baik'?'pill-b': kat==='cukup'?'pill-c':'pill-k';
+    const iqKat = klasIQ(e.iq);
+    const finalUrl = `index_final.html?id_x=${e.id_x}&x_01=${encodeURIComponent(e.x_01||'')}`;
+    html += `<tr>
+      <td><span class="rank-no">${i+1}</span></td>
+      <td><a href="${finalUrl}" class="nama-link" target="_blank">${escHtml(e.nama)}</a></td>
+      <td><span class="skor-pill ${pillCls}">${e.skor}</span></td>
+      <td>
+        <span style="font-family:'DM Mono',monospace; font-size:12px; color:${iqKat.color}; font-weight:700;">${e.iq||'–'}</span>
+        ${e.iq ? `<span style="font-size:10px; color:var(--muted); margin-left:4px;">${iqKat.label}</span>` : ''}
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function filterModalTable() {
+  const q = document.getElementById('modal-search-inp').value.toLowerCase();
+  const filtered = modalRows.filter(e => (e.nama||'').toLowerCase().includes(q));
+  renderModalTable(filtered);
+}
+
+// ── MODAL IQ ──
+let _iqModalRows = [];
+
+function openIQModal(katLabel, entries, color, dist, totalIQ) {
+  _iqModalRows = entries;
+  const badgeEl = document.getElementById('modal-badge');
+  badgeEl.style.cssText = `color:white; background:${color}cc;`;
+  badgeEl.textContent = katLabel;
+
+  document.getElementById('modal-title').textContent = `IQ — ${katLabel}`;
+  document.getElementById('modal-sub').textContent =
+    `${entries.length} peserta dari ${totalIQ} peserta`;
+
+  // Chips IQ: semua kategori yang ada
+  const chipsEl = document.getElementById('modal-chips');
+  chipsEl.innerHTML = '';
+  dist.filter(d=>d.entries.length>0).forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = `chip ${d.label===katLabel ? '' : ''}`;
+    btn.style.cssText = d.label===katLabel ? `background:${d.color}33; color:${d.color}; border-color:${d.color};` : '';
+    btn.textContent = `${d.label} (${d.entries.length})`;
+    btn.onclick = () => {
+      openIQModal(d.label, d.entries, d.color, dist, totalIQ);
+    };
+    chipsEl.appendChild(btn);
+  });
+
+  modalRows = entries;
+  renderIQTable(entries);
+  document.getElementById('modal-search-inp').value = '';
+  document.getElementById('modal-search-inp').oninput = () => {
+    const q = document.getElementById('modal-search-inp').value.toLowerCase();
+    renderIQTable(entries.filter(e=>(e.nama||'').toLowerCase().includes(q)));
+  };
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function renderIQTable(entries) {
+  const wrap = document.getElementById('modal-table-wrap');
+  if (!entries.length) {
+    wrap.innerHTML = '<div class="modal-empty">😕 Tidak ada data</div>';
+    return;
+  }
+  const sorted = [...entries].sort((a,b)=>b.iq-a.iq);
+  let html = `<table class="modal-table">
+    <thead><tr>
+      <th>#</th>
+      <th>Nama</th>
+      <th>IQ</th>
+      <th>Kategori</th>
+    </tr></thead><tbody>`;
+  sorted.forEach((e,i) => {
+    const kat = klasIQ(e.iq);
+    const finalUrl = `index_final.html?id_x=${e.id_x}&x_01=${encodeURIComponent(e.x_01||'')}`;
+    html += `<tr>
+      <td><span class="rank-no">${i+1}</span></td>
+      <td><a href="${finalUrl}" class="nama-link" target="_blank">${escHtml(e.nama)}</a></td>
+      <td><span style="font-family:'DM Mono',monospace; font-weight:800; font-size:15px; color:${kat.color};">${e.iq}</span></td>
+      <td><span style="font-size:12px; color:${kat.color}; font-weight:600;">${kat.label}</span></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+// ── CLOSE MODAL ──
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+// ── EMPTY / ERROR ──
+function renderEmpty() {
+  document.getElementById('main-grid').innerHTML = `
+    <div class="empty-box">
+      <div class="empty-icon">📭</div>
+      <div>Tidak ada data ditemukan di tabel ini.</div>
+    </div>`;
+}
+function renderError(msg) {
+  document.getElementById('main-grid').innerHTML = `
+    <div class="error-box">
+      <div class="error-icon">❌</div>
+      <div style="font-weight:700; margin-bottom:8px;">Gagal memuat data</div>
+      <div style="font-size:13px;">${escHtml(msg)}</div>
+    </div>`;
+}
+
+// ── HELPER ──
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── INIT ──
+loadData();
+</script>
+</body>
+</html>
