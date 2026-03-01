@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Analisa Psikogram</title>
+<title>Analisa Psikogram — Kampus</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
@@ -749,9 +749,9 @@
 
 <!-- Topbar -->
 <div class="topbar">
-  <div class="topbar-title">📊 Analisa <span>Psikogram</span></div>
+  <div class="topbar-title">🎓 Analisa <span>Psikogram Kampus</span></div>
   <div class="topbar-right">
-    <input type="text" id="inp-table" value="rekap_nilai1" placeholder="Nama tabel">
+    <input type="text" id="inp-table" value="rekap_nilai_kampus" placeholder="Nama tabel">
     <button class="btn-top" onclick="loadData()">🔄 Muat Ulang</button>
     <button class="btn-top btn-back" onclick="window.history.back()">← Kembali</button>
   </div>
@@ -761,7 +761,7 @@
 <div class="summary-strip" id="summary-strip" style="display:none;">
   <div class="sum-box">
     <div class="sum-num" id="sum-total" style="color:var(--accent2);">–</div>
-    <div class="sum-lbl">Total Peserta</div>
+    <div class="sum-lbl">Total Mahasiswa</div>
   </div>
   <div class="sum-box">
     <div class="sum-num" id="sum-baik" style="color:var(--baik);">–</div>
@@ -1344,118 +1344,118 @@ function escHtml(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── DATA REKOMENDASI ──
+// ── DATA REKOMENDASI (KAMPUS) ──
 const REKOM_DATA = {
   kemampuan_umum: {
-    deskripsi: "Kemampuan kognitif dan kecerdasan umum siswa",
+    deskripsi: "Kemampuan kognitif dan kecerdasan umum mahasiswa",
     rekomendasi: [
-      { tipe:'workshop',  judul:'Brain Training & Kognisi Dasar',       desc:'Sesi latihan otak terstruktur untuk meningkatkan daya ingat, konsentrasi, dan kecepatan berpikir.',  durasi:'2 hari', peserta:'Semua siswa',      icon:'🧠' },
-      { tipe:'program',   judul:'Program Remedial Kognitif',             desc:'Program belajar intensif 1 bulan dengan metode spaced repetition dan active recall.',               durasi:'1 bulan', peserta:'Siswa kurang',     icon:'📚' },
-      { tipe:'seminar',   judul:'Seminar Belajar Efektif & Berpikir Kritis', desc:'Pengenalan teknik belajar berbasis neurosains: mind mapping, chunking, dan elaborative interrogation.', durasi:'1 hari', peserta:'Siswa & guru', icon:'💡' },
+      { tipe:'workshop',  judul:'Academic Excellence Workshop',           desc:'Pelatihan strategi belajar tingkat perguruan tinggi: critical reading, academic writing, dan note-taking efektif.', durasi:'2 hari', peserta:'Semua mahasiswa', icon:'🧠' },
+      { tipe:'program',   judul:'Program Tutorial Akademik',              desc:'Sistem tutor sebaya terstruktur bagi mahasiswa yang membutuhkan pendampingan akademik intensif.',    durasi:'1 semester', peserta:'Mahasiswa kurang', icon:'📚' },
+      { tipe:'seminar',   judul:'Seminar Strategi Belajar di Perguruan Tinggi', desc:'Teknik belajar adaptif untuk lingkungan kampus: self-regulated learning, spaced practice, dan retrieval.', durasi:'1 hari', peserta:'Mahasiswa baru', icon:'💡' },
     ]
   },
   daya_tangkap_visual: {
-    deskripsi: "Kemampuan memproses dan memahami informasi visual",
+    deskripsi: "Kemampuan memproses dan memahami informasi visual kompleks",
     rekomendasi: [
-      { tipe:'workshop',  judul:'Visual Learning Workshop',              desc:'Pelatihan membaca diagram, grafik, peta, dan simbol secara cepat dan akurat.',                       durasi:'1 hari',  peserta:'Semua siswa',      icon:'👁️' },
-      { tipe:'program',   judul:'Integrasi Media Visual di Kelas',        desc:'Program guru untuk mengintegrasikan infografis, video, dan diagram interaktif dalam pembelajaran.',  durasi:'1 semester', peserta:'Guru',         icon:'🎨' },
-      { tipe:'konseling', judul:'Asesmen Gaya Belajar Visual',            desc:'Sesi identifikasi gaya belajar individual dan penyusunan strategi belajar personal.',               durasi:'2 jam',   peserta:'Siswa kurang',     icon:'🔍' },
+      { tipe:'workshop',  judul:'Data Visualization & Infografis',        desc:'Workshop membaca dan membuat visualisasi data ilmiah, grafik statistik, dan diagram teknis.',         durasi:'1 hari',  peserta:'Semua mahasiswa',  icon:'📊' },
+      { tipe:'program',   judul:'Integrasi Visual dalam Perkuliahan',      desc:'Program dosen untuk mengintegrasikan media visual interaktif dan simulasi dalam metode pengajaran.',   durasi:'1 semester', peserta:'Dosen',          icon:'🎨' },
+      { tipe:'konseling', judul:'Asesmen Gaya Belajar Mahasiswa',          desc:'Sesi identifikasi modalitas belajar dominan dan perancangan strategi studi yang personal.',           durasi:'2 jam',   peserta:'Mahasiswa kurang', icon:'🔍' },
     ]
   },
   kemampuan_berpikir_logis: {
-    deskripsi: "Kemampuan berpikir sistematis dan menggunakan logika",
+    deskripsi: "Kemampuan berpikir sistematis, analitis, dan menggunakan logika",
     rekomendasi: [
-      { tipe:'workshop',  judul:'Logika & Problem Solving Dasar',        desc:'Workshop interaktif menggunakan puzzle, teka-teki logika, dan soal analitis bertahap.',               durasi:'2 hari',  peserta:'Semua siswa',      icon:'⚙️' },
-      { tipe:'program',   judul:'Olimpiade Logika Internal Sekolah',      desc:'Kompetisi internal berbasis soal HOTS untuk memotivasi dan mengasah kemampuan berpikir logis.',     durasi:'1 semester', peserta:'Semua siswa',   icon:'🏅' },
-      { tipe:'seminar',   judul:'Computational Thinking untuk Siswa',     desc:'Pengenalan berpikir komputasional: dekomposisi masalah, pengenalan pola, dan algoritma sederhana.', durasi:'1 hari',  peserta:'Siswa & guru',     icon:'💻' },
+      { tipe:'workshop',  judul:'Critical Thinking & Logical Reasoning',  desc:'Workshop berbasis studi kasus nyata untuk melatih pola pikir logis, analitis, dan pengambilan keputusan rasional.', durasi:'2 hari', peserta:'Semua mahasiswa', icon:'⚙️' },
+      { tipe:'program',   judul:'Kompetisi Riset & Karya Ilmiah',         desc:'Program mendorong mahasiswa mengikuti PKM, lomba inovasi, dan penelitian berbasis HOTS.',             durasi:'1 semester', peserta:'Semua mahasiswa', icon:'🏅' },
+      { tipe:'seminar',   judul:'Seminar Computational & Analytical Thinking', desc:'Pengenalan berpikir komputasional dan analitis lintas disiplin ilmu untuk era digital.',          durasi:'1 hari',  peserta:'Mahasiswa & dosen', icon:'💻' },
     ]
   },
   kemampuan_berpikir_abstrak: {
-    deskripsi: "Kemampuan memahami konsep non-konkret dan pola tersembunyi",
+    deskripsi: "Kemampuan memahami konsep teoritis dan pola abstrak",
     rekomendasi: [
-      { tipe:'workshop',  judul:'Abstract Thinking & Pattern Recognition', desc:'Latihan intensif mengenali pola tersembunyi, analogi, dan hubungan antar konsep abstrak.',        durasi:'1 hari',  peserta:'Semua siswa',      icon:'🔷' },
-      { tipe:'program',   judul:'Seni & Matematika Abstrak',               desc:'Program lintas mata pelajaran yang menghubungkan konsep matematika abstrak dengan ekspresi seni.',  durasi:'2 bulan', peserta:'Semua siswa',      icon:'🎭' },
-      { tipe:'konseling', judul:'Bimbingan Belajar Individual',             desc:'Pendampingan 1-on-1 untuk siswa dengan kesulitan memahami konsep abstrak.',                        durasi:'Berkelanjutan', peserta:'Siswa kurang', icon:'🤝' },
+      { tipe:'workshop',  judul:'Conceptual & Abstract Reasoning',        desc:'Latihan intensif melalui analogi lintas disiplin, meta-analisis, dan pemodelan konseptual.',          durasi:'1 hari',  peserta:'Semua mahasiswa',  icon:'🔷' },
+      { tipe:'program',   judul:'Interdisciplinary Learning Program',     desc:'Program kolaborasi lintas jurusan yang menghubungkan konsep abstrak dengan aplikasi nyata.',         durasi:'2 bulan', peserta:'Semua mahasiswa',  icon:'🎭' },
+      { tipe:'konseling', judul:'Bimbingan Akademik Individual',          desc:'Pendampingan 1-on-1 oleh dosen pembimbing untuk mahasiswa kesulitan memahami konsep teoritis.',       durasi:'Berkelanjutan', peserta:'Mahasiswa kurang', icon:'🤝' },
     ]
   },
   penalaran_verbal: {
-    deskripsi: "Kemampuan memahami dan menggunakan bahasa secara efektif",
+    deskripsi: "Kemampuan komunikasi verbal, membaca, dan menulis akademik",
     rekomendasi: [
-      { tipe:'program',   judul:'Program Literasi Sekolah',               desc:'Program membaca intensif, diskusi buku, dan debat terstruktur untuk meningkatkan kemampuan verbal.',  durasi:'1 semester', peserta:'Semua siswa',  icon:'📖' },
-      { tipe:'workshop',  judul:'Public Speaking & Komunikasi Efektif',   desc:'Pelatihan berbicara di depan umum, argumentasi logis, dan penyampaian ide secara terstruktur.',      durasi:'2 hari',  peserta:'Semua siswa',      icon:'🎤' },
-      { tipe:'seminar',   judul:'Seminar Kecerdasan Linguistik',           desc:'Memahami peran kecerdasan verbal dalam karir dan kehidupan sehari-hari.',                           durasi:'3 jam',   peserta:'Siswa & orang tua', icon:'💬' },
+      { tipe:'program',   judul:'Program Literasi Akademik Kampus',       desc:'Program penulisan esai ilmiah, review jurnal, dan diskusi akademik terstruktur.',                    durasi:'1 semester', peserta:'Semua mahasiswa', icon:'📖' },
+      { tipe:'workshop',  judul:'Academic Presentation & Public Speaking', desc:'Pelatihan presentasi ilmiah, seminar proposal, dan komunikasi profesional di lingkungan akademik.', durasi:'2 hari',  peserta:'Semua mahasiswa',  icon:'🎤' },
+      { tipe:'seminar',   judul:'Seminar Karir: Komunikasi di Dunia Kerja', desc:'Memahami peran kemampuan verbal dalam wawancara kerja, negosiasi, dan komunikasi profesional.',   durasi:'3 jam',   peserta:'Mahasiswa tingkat akhir', icon:'💬' },
     ]
   },
   penalaran_numerik: {
-    deskripsi: "Kemampuan berpikir dengan angka dan data",
+    deskripsi: "Kemampuan berpikir kuantitatif dan analisis data",
     rekomendasi: [
-      { tipe:'workshop',  judul:'Numerasi & Literasi Data',               desc:'Workshop memahami statistik dasar, membaca grafik data, dan menginterpretasi angka dalam konteks nyata.', durasi:'2 hari', peserta:'Semua siswa', icon:'🔢' },
-      { tipe:'program',   judul:'Matematika Kontekstual',                 desc:'Pendekatan pembelajaran matematika berbasis proyek nyata seperti keuangan, pengukuran, dan data sains.', durasi:'1 semester', peserta:'Semua siswa', icon:'📊' },
-      { tipe:'konseling', judul:'Mengatasi Math Anxiety',                 desc:'Sesi konseling dan terapi kognitif untuk siswa yang mengalami kecemasan terhadap matematika.',         durasi:'4 sesi',  peserta:'Siswa kurang',     icon:'💭' },
+      { tipe:'workshop',  judul:'Statistika & Analisis Data Terapan',     desc:'Workshop pengolahan data menggunakan SPSS, Excel, atau Python untuk riset akademik.',               durasi:'2 hari',  peserta:'Semua mahasiswa',  icon:'🔢' },
+      { tipe:'program',   judul:'Quantitative Research Methods Program',  desc:'Program penguatan metodologi penelitian kuantitatif dan interpretasi data ilmiah.',                  durasi:'1 semester', peserta:'Semua mahasiswa', icon:'📊' },
+      { tipe:'konseling', judul:'Bimbingan Statistika Skripsi',           desc:'Sesi pendampingan analisis data untuk mahasiswa yang mengerjakan tugas akhir berbasis kuantitatif.',  durasi:'4 sesi',  peserta:'Mahasiswa kurang', icon:'💭' },
     ]
   },
   hasrat_berprestasi: {
-    deskripsi: "Motivasi intrinsik untuk mencapai hasil terbaik",
+    deskripsi: "Motivasi intrinsik untuk meraih prestasi akademik dan profesional",
     rekomendasi: [
-      { tipe:'seminar',   judul:'Seminar Growth Mindset',                 desc:'Membangun pola pikir berkembang berdasarkan riset Carol Dweck tentang kecerdasan yang dapat ditumbuhkan.', durasi:'1 hari', peserta:'Semua siswa', icon:'🏆' },
-      { tipe:'program',   judul:'Program Mentoring Siswa Berprestasi',    desc:'Sistem mentoring di mana siswa berprestasi membimbing rekan yang kurang termotivasi.',               durasi:'1 semester', peserta:'Semua siswa',   icon:'⭐' },
-      { tipe:'konseling', judul:'Goal Setting & Motivasi Individual',     desc:'Pendampingan menyusun tujuan SMART dan rencana aksi personal untuk setiap siswa.',                  durasi:'Berkelanjutan', peserta:'Siswa kurang', icon:'🎯' },
+      { tipe:'seminar',   judul:'Seminar Growth Mindset & Karir',         desc:'Membangun mentalitas berkembang dan orientasi tujuan jangka panjang untuk mahasiswa.',               durasi:'1 hari',  peserta:'Semua mahasiswa',  icon:'🏆' },
+      { tipe:'program',   judul:'Program Beasiswa & Achievement Track',   desc:'Program identifikasi dan pendampingan mahasiswa berpotensi untuk raih beasiswa dan prestasi nasional.', durasi:'1 semester', peserta:'Semua mahasiswa', icon:'⭐' },
+      { tipe:'konseling', judul:'Coaching Akademik & Karir Individual',   desc:'Sesi coaching untuk menyusun roadmap akademik, karir, dan target pencapaian personal.',            durasi:'Berkelanjutan', peserta:'Mahasiswa kurang', icon:'🎯' },
     ]
   },
   daya_tahan_stress: {
-    deskripsi: "Kemampuan mengelola tekanan dan tetap performa di bawah stress",
+    deskripsi: "Kemampuan mengelola tekanan akademik dan tetap performa optimal",
     rekomendasi: [
-      { tipe:'workshop',  judul:'Manajemen Stress & Resiliensi Remaja',   desc:'Pelatihan teknik pernapasan, mindfulness, dan strategi koping yang sehat untuk siswa.',               durasi:'1 hari',  peserta:'Semua siswa',      icon:'💪' },
-      { tipe:'seminar',   judul:'Seminar Kesehatan Mental Sekolah',       desc:'Meningkatkan kesadaran tentang kesehatan mental, tanda-tanda burnout, dan cara mencari bantuan.',     durasi:'3 jam',   peserta:'Siswa, guru & orang tua', icon:'🧘' },
-      { tipe:'konseling', judul:'Konseling Manajemen Emosi',              desc:'Sesi konseling individual untuk siswa dengan tingkat stress tinggi dan kesulitan regulasi emosi.',     durasi:'Berkelanjutan', peserta:'Siswa kurang', icon:'💚' },
+      { tipe:'workshop',  judul:'Stress Management & Resiliensi Mahasiswa', desc:'Pelatihan mindfulness, teknik relaksasi, dan strategi koping sehat menghadapi tekanan akademik.',  durasi:'1 hari',  peserta:'Semua mahasiswa',  icon:'💪' },
+      { tipe:'seminar',   judul:'Seminar Kesehatan Mental Kampus',         desc:'Edukasi burnout akademik, pentingnya work-life balance, dan cara mengakses layanan psikologi kampus.', durasi:'3 jam', peserta:'Mahasiswa, dosen & tendik', icon:'🧘' },
+      { tipe:'konseling', judul:'Layanan Konseling Psikologi Kampus',      desc:'Sesi konseling individual dan kelompok oleh psikolog kampus untuk mahasiswa dengan tekanan tinggi.', durasi:'Berkelanjutan', peserta:'Mahasiswa kurang', icon:'💚' },
     ]
   },
   kepercayaan_diri: {
-    deskripsi: "Keyakinan diri terhadap kemampuan dan keputusan sendiri",
+    deskripsi: "Keyakinan diri dalam berpendapat, berkarya, dan bersaing",
     rekomendasi: [
-      { tipe:'workshop',  judul:'Self-Confidence Building Workshop',      desc:'Aktivitas membangun kepercayaan diri melalui tantangan terstruktur, role play, dan umpan balik positif.', durasi:'2 hari', peserta:'Semua siswa', icon:'✨' },
-      { tipe:'program',   judul:'Ekstrakulikuler Seni Pertunjukan',       desc:'Program teater, debat, atau presentasi publik yang membangun rasa percaya diri secara alami.',        durasi:'1 semester', peserta:'Semua siswa',   icon:'🎭' },
-      { tipe:'konseling', judul:'Terapi Kognitif Harga Diri',             desc:'Sesi konseling untuk mengidentifikasi dan mengubah pola pikir negatif tentang diri sendiri.',         durasi:'6 sesi',  peserta:'Siswa kurang',     icon:'🌟' },
+      { tipe:'workshop',  judul:'Confidence Building & Self-Branding',    desc:'Workshop membangun kepercayaan diri, personal branding, dan presentasi diri di lingkungan profesional.', durasi:'2 hari', peserta:'Semua mahasiswa', icon:'✨' },
+      { tipe:'program',   judul:'Program UKM Seni, Debat & Kompetisi',    desc:'Keterlibatan aktif dalam unit kegiatan mahasiswa yang membangun rasa percaya diri secara alami.',    durasi:'1 semester', peserta:'Semua mahasiswa', icon:'🎭' },
+      { tipe:'konseling', judul:'Konseling Pengembangan Diri',             desc:'Sesi psikologi untuk mengatasi impostor syndrome dan membangun self-efficacy mahasiswa.',            durasi:'6 sesi',  peserta:'Mahasiswa kurang', icon:'🌟' },
     ]
   },
   relasi_sosial: {
-    deskripsi: "Kemampuan membangun dan menjaga hubungan interpersonal",
+    deskripsi: "Kemampuan membangun jaringan dan relasi profesional",
     rekomendasi: [
-      { tipe:'workshop',  judul:'Social Skills & Empati',                 desc:'Pelatihan keterampilan sosial, active listening, empati, dan resolusi konflik secara damai.',         durasi:'1 hari',  peserta:'Semua siswa',      icon:'🤝' },
-      { tipe:'program',   judul:'Program Buddy System Sekolah',           desc:'Sistem teman sebangku terstruktur yang mendorong interaksi lintas kelompok dan budaya.',             durasi:'1 semester', peserta:'Semua siswa',   icon:'👫' },
-      { tipe:'seminar',   judul:'Seminar Anti Bullying & Inklusi',        desc:'Membangun budaya sekolah yang inklusif, aman, dan saling menghargai perbedaan.',                    durasi:'1 hari',   peserta:'Semua warga sekolah', icon:'🌈' },
+      { tipe:'workshop',  judul:'Networking & Interpersonal Skills',      desc:'Pelatihan membangun relasi profesional, etika berjaringan, dan komunikasi lintas budaya.',           durasi:'1 hari',  peserta:'Semua mahasiswa',  icon:'🤝' },
+      { tipe:'program',   judul:'Program Mentoring Alumni-Mahasiswa',     desc:'Menghubungkan mahasiswa dengan alumni berpengalaman untuk bimbingan karir dan jaringan profesional.',  durasi:'1 semester', peserta:'Semua mahasiswa', icon:'👥' },
+      { tipe:'seminar',   judul:'Seminar: Membangun Personal Network',    desc:'Strategi membangun jaringan profesional di era digital: LinkedIn, komunitas profesi, dan event industri.', durasi:'1 hari', peserta:'Mahasiswa tingkat akhir', icon:'🌐' },
     ]
   },
   kerjasama: {
-    deskripsi: "Kemampuan bekerja efektif dalam tim",
+    deskripsi: "Kemampuan kolaborasi efektif dalam tim akademik dan profesional",
     rekomendasi: [
-      { tipe:'workshop',  judul:'Team Building & Collaborative Learning', desc:'Kegiatan outbound dan proyek kolaboratif yang membangun kepercayaan, komunikasi, dan sinergi tim.',   durasi:'2 hari',  peserta:'Semua siswa',      icon:'👥' },
-      { tipe:'program',   judul:'Project-Based Learning (PBL)',           desc:'Metode pembelajaran berbasis proyek kelompok lintas mata pelajaran dengan peran yang jelas.',        durasi:'1 semester', peserta:'Semua siswa & guru', icon:'📋' },
-      { tipe:'seminar',   judul:'Seminar Kepemimpinan & Teamwork',        desc:'Mengenal dinamika tim, peran kepemimpinan situasional, dan cara mengatasi konflik dalam kelompok.',  durasi:'1 hari',  peserta:'Siswa & guru',     icon:'🎖️' },
+      { tipe:'workshop',  judul:'Team Dynamics & Collaborative Project',  desc:'Workshop membangun sinergi tim, manajemen konflik, dan kolaborasi efektif dalam proyek akademik.',   durasi:'2 hari',  peserta:'Semua mahasiswa',  icon:'👥' },
+      { tipe:'program',   judul:'Capstone Project & Tim Lintas Jurusan',  desc:'Program proyek akhir kolaboratif lintas program studi yang mensimulasikan kerja tim dunia nyata.',   durasi:'1 semester', peserta:'Semua mahasiswa', icon:'📋' },
+      { tipe:'seminar',   judul:'Seminar Agile Teamwork & Kepemimpinan',  desc:'Mengenal metodologi kerja tim modern: Agile, Scrum, dan kepemimpinan adaptif di lingkungan kerja.', durasi:'1 hari',  peserta:'Mahasiswa & dosen', icon:'🎖️' },
     ]
   },
   sistematika_kerja: {
-    deskripsi: "Kemampuan bekerja secara terencana dan terorganisir",
+    deskripsi: "Kemampuan bekerja terstruktur, terencana, dan metodis",
     rekomendasi: [
-      { tipe:'workshop',  judul:'Manajemen Waktu & Produktivitas',        desc:'Pelatihan teknik time blocking, to-do list efektif, dan prioritisasi tugas dengan metode Eisenhower.', durasi:'1 hari', peserta:'Semua siswa', icon:'📋' },
-      { tipe:'program',   judul:'Sistem Portofolio Belajar Siswa',        desc:'Program dokumentasi belajar terstruktur yang melatih perencanaan, pelaksanaan, dan evaluasi mandiri.', durasi:'1 semester', peserta:'Semua siswa', icon:'📁' },
-      { tipe:'seminar',   judul:'Seminar Organisasi Diri untuk Remaja',   desc:'Pengenalan sistem produktivitas adaptif untuk pelajar: GTD, Pomodoro, dan habit stacking.',         durasi:'3 jam',   peserta:'Siswa & orang tua', icon:'⏰' },
+      { tipe:'workshop',  judul:'Manajemen Proyek & Produktivitas',       desc:'Pelatihan project management dasar, Gantt chart, OKR, dan sistem kerja produktif untuk mahasiswa.',  durasi:'1 hari',  peserta:'Semua mahasiswa',  icon:'📋' },
+      { tipe:'program',   judul:'Portofolio Akademik & Karir Digital',    desc:'Program membangun portofolio digital terstruktur yang mendokumentasikan pencapaian akademik dan proyek.', durasi:'1 semester', peserta:'Semua mahasiswa', icon:'💼' },
+      { tipe:'seminar',   judul:'Seminar Produktivitas di Era Digital',   desc:'Pengenalan tools produktivitas modern: Notion, Trello, Asana, dan sistem GTD untuk mahasiswa.',      durasi:'3 jam',   peserta:'Semua mahasiswa',  icon:'⏰' },
     ]
   },
   inisiatif: {
-    deskripsi: "Kemauan bertindak proaktif tanpa harus diminta",
+    deskripsi: "Kemauan bertindak proaktif dan mengambil peran tanpa diminta",
     rekomendasi: [
-      { tipe:'program',   judul:'Student Entrepreneurship Program',       desc:'Program inkubasi ide dimana siswa merancang, merencanakan, dan mempresentasikan solusi nyata.',     durasi:'3 bulan', peserta:'Semua siswa',      icon:'🚀' },
-      { tipe:'workshop',  judul:'Design Thinking & Problem Solving',      desc:'Workshop menggunakan kerangka design thinking untuk menemukan dan memecahkan masalah nyata di sekolah.', durasi:'2 hari', peserta:'Semua siswa', icon:'💡' },
-      { tipe:'konseling', judul:'Coaching Proaktivitas Individual',       desc:'Sesi coaching untuk membantu siswa mengenali zona nyaman dan berani mengambil langkah pertama.',    durasi:'4 sesi',  peserta:'Siswa kurang',     icon:'🎯' },
+      { tipe:'program',   judul:'Program Wirausaha Mahasiswa (PMW)',      desc:'Program inkubasi startup kampus: validasi ide, pitching, prototyping, dan pendampingan bisnis.',    durasi:'3 bulan', peserta:'Semua mahasiswa',  icon:'🚀' },
+      { tipe:'workshop',  judul:'Design Thinking & Innovation Sprint',    desc:'Workshop intensif menggunakan design thinking untuk memecahkan masalah nyata di komunitas.',         durasi:'2 hari',  peserta:'Semua mahasiswa',  icon:'💡' },
+      { tipe:'konseling', judul:'Career Coaching & Proaktivitas Karir',  desc:'Sesi coaching individual untuk membantu mahasiswa membangun inisiatif karir sejak dini.',             durasi:'4 sesi',  peserta:'Mahasiswa kurang', icon:'🎯' },
     ]
   },
   kemandirian: {
-    deskripsi: "Kemampuan belajar dan bekerja tanpa bergantung pada orang lain",
+    deskripsi: "Kemampuan belajar mandiri dan tidak bergantung pada bimbingan terus-menerus",
     rekomendasi: [
-      { tipe:'program',   judul:'Self-Directed Learning Program',         desc:'Struktur belajar mandiri dengan target harian, jurnal refleksi, dan evaluasi diri mingguan.',       durasi:'1 semester', peserta:'Semua siswa',   icon:'🦅' },
-      { tipe:'workshop',  judul:'Workshop Kemandirian Belajar',           desc:'Pelatihan strategi belajar mandiri: self-monitoring, self-evaluation, dan self-regulation.',        durasi:'1 hari',  peserta:'Semua siswa',      icon:'📚' },
-      { tipe:'seminar',   judul:'Parenting: Mendukung Kemandirian Anak',  desc:'Seminar untuk orang tua tentang cara mendukung kemandirian tanpa over-parenting.',               durasi:'3 jam',   peserta:'Orang tua',        icon:'👨‍👩‍👧' },
+      { tipe:'program',   judul:'Self-Directed Learning & Riset Mandiri', desc:'Program belajar mandiri berbasis modul, MOOC, dan proyek riset independen dengan target terukur.',   durasi:'1 semester', peserta:'Semua mahasiswa', icon:'🦅' },
+      { tipe:'workshop',  judul:'Workshop Kemandirian & Self-Leadership', desc:'Pelatihan self-leadership, pengambilan keputusan mandiri, dan manajemen diri mahasiswa.',            durasi:'1 hari',  peserta:'Semua mahasiswa',  icon:'📚' },
+      { tipe:'seminar',   judul:'Seminar: Siap Kerja & Mandiri Finansial', desc:'Membekali mahasiswa dengan kesiapan kerja, literasi finansial, dan kemandirian pasca kampus.',      durasi:'3 jam',   peserta:'Mahasiswa tingkat akhir', icon:'🎓' },
     ]
   },
 };
@@ -1515,8 +1515,8 @@ function renderInsightPanel() {
     <div class="insight-header">
       <div class="insight-header-icon">📋</div>
       <div class="insight-header-text">
-        <h2>Insight & Rekomendasi Sekolah</h2>
-        <p>Analisa otomatis berdasarkan data ${allRows.length} peserta · Top 3 area prioritas tindakan</p>
+        <h2>Insight & Rekomendasi Kampus</h2>
+        <p>Analisa otomatis berdasarkan data ${allRows.length} mahasiswa · Top 3 area prioritas tindakan</p>
       </div>
     </div>
 
@@ -1533,8 +1533,8 @@ function renderInsightPanel() {
           <div class="health-score-ring-num" style="color:${healthGrade.color};">${healthScore}</div>
         </div>
         <div class="health-score-info">
-          <h3>Indeks Kesehatan Sekolah</h3>
-          <p>Rata-rata persentase siswa berkategori <strong>Baik</strong> di seluruh aspek psikogram.</p>
+          <h3>Indeks Kesehatan Kampus</h3>
+          <p>Rata-rata persentase mahasiswa berkategori <strong>Baik</strong> di seluruh aspek psikogram.</p>
           <div class="health-grade" style="background:${healthGrade.bg}; color:${healthGrade.color};">
             ${healthGrade.emoji} ${healthGrade.label}
           </div>
