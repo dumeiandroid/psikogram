@@ -389,21 +389,30 @@ function renderPage(hasil) {
     const listKelebihan = document.getElementById('list-kelebihan');
     listKelebihan.innerHTML = '';
     for (let i = 0; i < 3; i++) {
-        listKelebihan.innerHTML += `<li>${kelebihan[i]}</li>`;
+        const teks = kelebihan[i] !== null
+            ? kelebihan[i]
+            : kekuatanKelemahan[sorted_desc[i].index].teks2;
+        listKelebihan.innerHTML += `<li>${teks}</li>`;
     }
 
     // Kelemahan (3 skor terendah)
     const listKelemahan = document.getElementById('list-kelemahan');
     listKelemahan.innerHTML = '';
     for (let i = 0; i < 3; i++) {
-        listKelemahan.innerHTML += `<li>${kelemahan[i]}</li>`;
+        const teks = kelemahan[i] !== null
+            ? kelemahan[i]
+            : kekuatanKelemahan[sorted_asc[i].index].teks3;
+        listKelemahan.innerHTML += `<li>${teks}</li>`;
     }
 
     // Rekomendasi (berdasarkan 3 skor terendah)
     const listRekomendasi = document.getElementById('list-rekomendasi');
     listRekomendasi.innerHTML = '';
     for (let i = 0; i < 3; i++) {
-        listRekomendasi.innerHTML += `<li>${rekomendasi[i]}</li>`;
+        const teks = rekomendasi[i] !== null
+            ? rekomendasi[i]
+            : kekuatanKelemahan[sorted_asc[i].index].teks5;
+        listRekomendasi.innerHTML += `<li>${teks}</li>`;
     }
 
     // Minat (3 arah minat terkecil dari RMIB)
@@ -526,7 +535,7 @@ async function main() {
         const rawData = await fetchData(id_x, x_01);
 
         // Semua kalkulasi dikerjakan oleh engine
-        const hasil = window.PsikogramEngine.hitungPsikogram(rawData, id_x);
+        const hasil = window.PsikogramEngine.hitungPsikogram(rawData);
 
         renderPage(hasil);
         document.getElementById('loading-screen').classList.add('hidden');

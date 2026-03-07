@@ -247,7 +247,11 @@
     // FUNGSI UTAMA: hitung semua skor dari raw data API
     // =========================================================
 
-    function hitungPsikogram(data) {
+    function hitungPsikogram(data, id_x) {
+        // Buat seeded random berdasarkan id kandidat
+        // Setiap kandidat mendapat versi kalimat yang konsisten (tidak berubah saat refresh)
+        const rand = makeSeededRand(seedFromId(id_x));
+
         const x02 = data['x_02'] || '';
         const x05 = data['x_05'] || '';
         const x06 = data['x_06'] || '';
@@ -333,17 +337,60 @@
             ketOverride:  hasil10[6] && hasil10[6][j] && hasil10[6][j].trim() !== '' ? hasil10[6][j].trim() : null
         }));
 
+        // Mapping index aspek ke grup
+        // 0-5 = KEMAMPUAN, 6-10 = KEPRIBADIAN, 11-13 = SIKAP KERJA
+        const grupAspek = [0,0,0,0,0,0, 1,1,1,1,1, 2,2,2];
+
         // Kelebihan / Kelemahan / Rekomendasi berdasarkan skor tertinggi & terendah
         const indexed = resultScores.map((v, i) => ({ value: v, index: i }));
         const sorted_desc = [...indexed].sort((a, b) => b.value - a.value);
         const sorted_asc  = [...indexed].sort((a, b) => a.value - b.value);
 
+        /**
+         * Pilih 3 kandidat dari daftar terurut dengan aturan:
+         * - Utamakan 1 dari masing-masing grup yang berbeda (selama masih ada)
+         * - Urutan tetap mengikuti skor (bukan urutan grup)
+         * - Baru ambil lebih dari 1 dari grup yang sama jika grup lain sudah habis
+         */
+        function pilih3Distribusi(sortedList) {
+            const hasil = [];
+            const grupTerpakai = new Set();
+
+            // Pass 1: ambil satu per grup (prioritas grup berbeda, tetap urut skor)
+            for (const item of sortedList) {
+                if (hasil.length >= 3) break;
+                const grup = grupAspek[item.index];
+                if (!grupTerpakai.has(grup)) {
+                    hasil.push(item);
+                    grupTerpakai.add(grup);
+                }
+            }
+
+            // Pass 2: jika belum 3 (berarti ada grup yang kosong), ambil sisa urut skor
+            if (hasil.length < 3) {
+                const sudahDiambil = new Set(hasil.map(h => h.index));
+                for (const item of sortedList) {
+                    if (hasil.length >= 3) break;
+                    if (!sudahDiambil.has(item.index)) {
+                        hasil.push(item);
+                        sudahDiambil.add(item.index);
+                    }
+                }
+            }
+
+            return hasil;
+        }
+
+        const top3    = pilih3Distribusi(sorted_desc); // untuk kelebihan
+        const bottom3 = pilih3Distribusi(sorted_asc);  // untuk kelemahan & rekomendasi
+
+        // Override manual dari hasil10 jika ada, fallback ke teks engine
         const getKelebihan = i => hasil10[2] && hasil10[2][i] && hasil10[2][i].trim() !== ''
-            ? hasil10[2][i].trim() : null;
+            ? hasil10[2][i].trim() : pilihVersi(kekuatanKelemahan[top3[i].index].teks2, rand);
         const getKelemahan = i => hasil10[3] && hasil10[3][i] && hasil10[3][i].trim() !== ''
-            ? hasil10[3][i].trim() : null;
+            ? hasil10[3][i].trim() : pilihVersi(kekuatanKelemahan[bottom3[i].index].teks3, rand);
         const getReko = i => hasil10[4] && hasil10[4][i] && hasil10[4][i].trim() !== ''
-            ? hasil10[4][i].trim() : null;
+            ? hasil10[4][i].trim() : pilihVersi(kekuatanKelemahan[bottom3[i].index].teks5, rand);
 
         return {
             // Identitas
@@ -358,10 +405,10 @@
             IQ,
             resultScores,
             konsistensi: epps.konsistensi,
-            // Indeks terurut untuk kelebihan & kelemahan
+            // Indeks terurut (tetap dikirim untuk keperluan render tabel)
             sorted_desc,
             sorted_asc,
-            // Override teks (null = pakai default dari data statis)
+            // Teks hasil distribusi lintas grup
             kelebihan:  [getKelebihan(0), getKelebihan(1), getKelebihan(2)],
             kelemahan:  [getKelemahan(0), getKelemahan(1), getKelemahan(2)],
             rekomendasi:[getReko(0),      getReko(1),      getReko(2)],
@@ -370,24 +417,385 @@
     }
 
     // =========================================================
-    // DATA STATIS
+    // SEEDED RANDOM — hasil konsisten per kandidat (id_x)
+    // =========================================================
+
+    /**
+     * Simple seeded PRNG (mulberry32).
+     * Mengembalikan fungsi rand() yang menghasilkan float [0,1).
+     */
+    function makeSeededRand(seed) {
+        let s = seed >>> 0;
+        return function() {
+            s += 0x6D2B79F5;
+            let t = Math.imul(s ^ (s >>> 15), 1 | s);
+            t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
+    /**
+     * Ubah string id_x menjadi angka seed integer.
+     */
+    function seedFromId(id_x) {
+        let h = 0;
+        const str = String(id_x || '0');
+        for (let i = 0; i < str.length; i++) {
+            h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+        }
+        return h >>> 0;
+    }
+
+    /**
+     * Pilih satu elemen dari array berdasarkan rand().
+     * Jika bukan array, kembalikan nilai aslinya (backward-compat).
+     */
+    function pilihVersi(arr, rand) {
+        if (!Array.isArray(arr)) return arr;
+        return arr[Math.floor(rand() * arr.length)];
+    }
+
+    // =========================================================
+    // DATA STATIS — 5 versi per teks2 (kelebihan), teks3 (kelemahan), teks5 (rekomendasi)
     // =========================================================
 
     const kekuatanKelemahan = [
-        {teks1:"Kemampuan Umum",          teks2:"Mampu menemukan solusi untuk berbagai masalah dengan efektif.",                                           teks3:"Kesulitan menghadapi masalah yang sangat kompleks.",                           teks5:"Disarankan untuk melatih kemampuan pemecahan masalah dengan mengikuti simulasi kasus kompleks dan berpartisipasi dalam diskusi kelompok, sehingga dapat meningkatkan ketahanan dalam menghadapi tantangan yang lebih besar."},
-        {teks1:"Daya Tangkap Visual",     teks2:"Cepat mengenali pola dan perbedaan di lingkungan sekitar.",                                              teks3:"Kurang perhatian terhadap detail yang lebih kecil, yang mempengaruhi hasil akhir.", teks5:"Sangat dianjurkan untuk mempraktikkan teknik mindfulness yang dapat membantu meningkatkan fokus terhadap detail kecil, sehingga hasil kerja dapat lebih maksimal dan akurat."},
-        {teks1:"Kemampuan Berpikir Logis",teks2:"Mampu membuat keputusan berdasarkan alasan yang jelas dalam situasi tertentu.",                           teks3:"Kesulitan membuat keputusan cepat dalam situasi mendesak.",                    teks5:"Sebaiknya mengikuti pelatihan khusus yang dirancang untuk pengambilan keputusan di bawah tekanan, agar dapat meningkatkan kecepatan dan ketepatan dalam mengambil keputusan ketika situasi mendesak."},
-        {teks1:"Kemampuan Berpikir Abstrak",teks2:"Mampu melihat hubungan antara berbagai hal dan memahami konsekuensi dari tindakan.",                   teks3:"Tantangan dalam menerjemahkan ide-ide abstrak ke dalam praktik.",              teks5:"Disarankan untuk melakukan proyek kecil yang akan membantu menerapkan ide-ide abstrak ke dalam praktik nyata, sehingga dapat belajar dari pengalaman dan meningkatkan kemampuan penerapan ide."},
-        {teks1:"Penalaran Verbal",         teks2:"Mampu berkomunikasi dengan jelas dan efektif dalam interaksi.",                                          teks3:"Kurang sabar dalam mendengarkan pandangan orang lain, yang menghambat komunikasi.", teks5:"Sangat bermanfaat untuk melatih keterampilan mendengarkan aktif melalui kegiatan role-playing, yang dapat meningkatkan kemampuan untuk menghargai pandangan orang lain dan memperbaiki komunikasi."},
-        {teks1:"Penalaran Numerik",        teks2:"Kemampuan memahami proses hitung dan berpikir teratur.",                                                 teks3:"Memerlukan waktu lebih lama untuk memahami konsep matematika yang lebih rumit.", teks5:"Disarankan untuk berlatih secara rutin dengan soal-soal matematika yang lebih kompleks, agar dapat meningkatkan kecepatan dan pemahaman dalam konsep yang rumit."},
-        {teks1:"Hasrat Berprestasi",       teks2:"Keinginan untuk mencapai dan meningkatkan prestasi.",                                                    teks3:"Beban ekspektasi tinggi dapat memengaruhi fokus dan kinerja.",                 teks5:"Sangat penting untuk menetapkan tujuan yang realistis dan melakukan evaluasi berkala, agar dapat menjaga motivasi dan fokus pada pencapaian yang lebih terukur."},
-        {teks1:"Daya Tahan Stress",        teks2:"Kemampuan mempertahankan kinerja.",                                                                      teks3:"Kewalahan saat menghadapi tekanan yang berkepanjangan.",                       teks5:"Sebaiknya mempraktikkan teknik relaksasi dan manajemen waktu yang efektif, sehingga dapat mengurangi stres dan meningkatkan performa dalam menghadapi tekanan."},
-        {teks1:"Kepercayaan Diri",         teks2:"Adanya keyakinan terhadap kemampuan yang dimiliki.",                                                     teks3:"Kurang terbuka terhadap kritik konstruktif, yang menghambat perkembangan.",   teks5:"Disarankan untuk secara rutin meminta umpan balik dari orang lain, sehingga dapat membangun kepercayaan diri yang lebih solid dan meningkatkan kemampuan untuk menerima kritik."},
-        {teks1:"Relasi Sosial",            teks2:"Kemampuan membina hubungan dengan orang lain.",                                                          teks3:"Canggung dalam situasi sosial baru, yang menghambat interaksi.",              teks5:"Sangat dianjurkan untuk bergabung dengan kelompok sosial atau komunitas yang diminati, sehingga dapat berlatih keterampilan interaksi dan membangun hubungan yang lebih baik."},
-        {teks1:"Kerjasama",               teks2:"Kemampuan bekerjasama individu atau berkelompok.",                                                        teks3:"Kesulitan beradaptasi dengan dinamika kelompok yang berbeda.",                 teks5:"Disarankan untuk terlibat dalam berbagai aktivitas kelompok yang memerlukan kolaborasi, agar dapat meningkatkan kemampuan untuk beradaptasi dengan berbagai dinamika kelompok."},
-        {teks1:"Sistematika Kerja",        teks2:"Kemampuan membuat perencanaan & prioritas kerja.",                                                       teks3:"Terlalu fokus pada perencanaan, sehingga mengabaikan implementasi.",          teks5:"Sebaiknya tentukan batas waktu untuk setiap fase implementasi, agar tidak terjebak dalam perencanaan yang berlarut-larut dan dapat segera memulai eksekusi."},
-        {teks1:"Inisiatif",               teks2:"Kemampuan mengambil tindakan yang diperlukan.",                                                           teks3:"Pengambilan keputusan yang terburu-buru berisiko tinggi.",                    teks5:"Disarankan untuk selalu mempertimbangkan pro dan kontra secara mendalam sebelum mengambil keputusan, agar dapat mengurangi risiko yang mungkin timbul dari keputusan yang terburu-buru."},
-        {teks1:"Kemandirian",             teks2:"Kemampuan mengambil sikap dan bekerja sendiri.",                                                          teks3:"Kesulitan dalam berkolaborasi dengan tim, yang dapat memengaruhi hasil kerja.", teks5:"Sangat penting untuk terlibat dalam proyek kolaboratif yang dapat membantu meningkatkan keterampilan kerja sama dan beradaptasi dalam lingkungan tim."}
+        {
+            teks1: "Kemampuan Umum",
+            teks2: [
+                "Mampu menemukan solusi untuk berbagai masalah dengan efektif.",
+                "Memiliki kemampuan analitis yang baik dalam mengurai dan menyelesaikan persoalan.",
+                "Cakap dalam memahami situasi dan merancang langkah penyelesaian yang tepat.",
+                "Menunjukkan ketajaman berpikir yang membantu dalam menghadapi berbagai tantangan.",
+                "Dikenal mampu berpikir sistematis sehingga permasalahan dapat diselesaikan dengan baik."
+            ],
+            teks3: [
+                "Kesulitan menghadapi masalah yang sangat kompleks.",
+                "Cenderung kewalahan ketika dihadapkan pada persoalan berlapis yang memerlukan analisis mendalam.",
+                "Terkadang membutuhkan waktu lebih lama untuk memproses masalah yang memiliki banyak variabel.",
+                "Kurang optimal dalam mengelola masalah yang menuntut pendekatan multidimensi secara bersamaan.",
+                "Perlu pengembangan lebih lanjut dalam menangani permasalahan yang tidak memiliki solusi tunggal."
+            ],
+            teks5: [
+                "Disarankan untuk melatih kemampuan pemecahan masalah dengan mengikuti simulasi kasus kompleks dan berpartisipasi dalam diskusi kelompok, sehingga dapat meningkatkan ketahanan dalam menghadapi tantangan yang lebih besar.",
+                "Sangat dianjurkan untuk aktif mengikuti pelatihan studi kasus dan forum diskusi lintas bidang, agar wawasan dalam memecahkan masalah kompleks semakin berkembang.",
+                "Sebaiknya membiasakan diri membaca kasus nyata dari berbagai bidang dan menganalisisnya secara mandiri, guna melatih fleksibilitas berpikir ketika menghadapi situasi yang lebih rumit.",
+                "Direkomendasikan untuk mencari mentor yang berpengalaman dan secara rutin mendiskusikan tantangan pekerjaan, sehingga kemampuan memecahkan masalah kompleks dapat terasah secara bertahap.",
+                "Penting untuk berlatih menggunakan kerangka berpikir terstruktur seperti root-cause analysis dalam pekerjaan sehari-hari, agar kemampuan menangani masalah berlapis semakin terasah."
+            ]
+        },
+        {
+            teks1: "Daya Tangkap Visual",
+            teks2: [
+                "Cepat mengenali pola dan perbedaan di lingkungan sekitar.",
+                "Memiliki kepekaan tinggi dalam membaca informasi visual secara cepat dan akurat.",
+                "Tanggap terhadap perubahan visual sehingga mampu merespons situasi dengan sigap.",
+                "Mampu mengidentifikasi detail visual dengan baik dalam situasi yang berubah-ubah.",
+                "Unggul dalam memproses informasi yang bersifat visual dan spasial."
+            ],
+            teks3: [
+                "Kurang perhatian terhadap detail yang lebih kecil, yang mempengaruhi hasil akhir.",
+                "Terkadang melewatkan informasi visual yang bersifat minor namun berdampak pada kualitas pekerjaan.",
+                "Cenderung terfokus pada gambaran besar sehingga detail-detail kecil sering luput dari perhatian.",
+                "Perlu peningkatan dalam memperhatikan elemen-elemen kecil yang turut menentukan ketepatan hasil kerja.",
+                "Kadang kurang cermat dalam memeriksa kembali detail visual, sehingga berpotensi menimbulkan kesalahan kecil."
+            ],
+            teks5: [
+                "Sangat dianjurkan untuk mempraktikkan teknik mindfulness yang dapat membantu meningkatkan fokus terhadap detail kecil, sehingga hasil kerja dapat lebih maksimal dan akurat.",
+                "Direkomendasikan untuk membiasakan diri melakukan pengecekan ulang secara terstruktur pada setiap hasil pekerjaan, agar detail-detail penting tidak terlewatkan.",
+                "Sebaiknya berlatih menggunakan checklist dalam setiap tahapan pekerjaan, sehingga perhatian terhadap detail kecil dapat terjaga secara konsisten.",
+                "Disarankan untuk melatih konsentrasi dengan latihan visual seperti puzzle atau aktivitas yang memerlukan ketelitian tinggi, agar sensitivitas terhadap detail semakin meningkat.",
+                "Penting untuk mengalokasikan waktu khusus untuk review hasil pekerjaan sebelum diselesaikan, guna memastikan tidak ada detail penting yang terlewat."
+            ]
+        },
+        {
+            teks1: "Kemampuan Berpikir Logis",
+            teks2: [
+                "Mampu membuat keputusan berdasarkan alasan yang jelas dalam situasi tertentu.",
+                "Menunjukkan kemampuan yang baik dalam menyusun argumen yang runtut dan terstruktur.",
+                "Cenderung mengambil keputusan secara objektif berdasarkan fakta dan data yang tersedia.",
+                "Terbiasa berpikir secara sistematis sehingga mampu menilai situasi dengan pertimbangan yang matang.",
+                "Dikenal memiliki pendekatan yang rasional dalam menghadapi berbagai permasalahan."
+            ],
+            teks3: [
+                "Kesulitan membuat keputusan cepat dalam situasi mendesak.",
+                "Cenderung membutuhkan waktu lebih lama untuk mengambil keputusan ketika tekanan waktu meningkat.",
+                "Kurang optimal dalam situasi yang menuntut respons cepat tanpa kesempatan analisis mendalam.",
+                "Terkadang terlalu berhati-hati dalam mengambil keputusan sehingga terhambat ketika waktu sangat terbatas.",
+                "Perlu peningkatan dalam membuat keputusan yang cepat namun tetap tepat sasaran di bawah tekanan."
+            ],
+            teks5: [
+                "Sebaiknya mengikuti pelatihan khusus yang dirancang untuk pengambilan keputusan di bawah tekanan, agar dapat meningkatkan kecepatan dan ketepatan dalam mengambil keputusan ketika situasi mendesak.",
+                "Disarankan untuk berlatih skenario pengambilan keputusan cepat melalui simulasi atau permainan strategi, sehingga respons dalam kondisi tekanan dapat semakin terasah.",
+                "Sangat dianjurkan untuk mempelajari teknik keputusan berbasis prioritas seperti metode Eisenhower Matrix, agar dalam situasi mendesak tetap dapat memilih tindakan yang paling tepat.",
+                "Penting untuk membangun kebiasaan membuat kerangka keputusan sederhana yang bisa digunakan secara cepat, sehingga proses berpikir tidak terhambat ketika waktu sangat terbatas.",
+                "Direkomendasikan untuk secara rutin berlatih dalam situasi yang mensimulasikan tekanan waktu, agar rasa percaya diri dan kecepatan dalam memutuskan dapat terus berkembang."
+            ]
+        },
+        {
+            teks1: "Kemampuan Berpikir Abstrak",
+            teks2: [
+                "Mampu melihat hubungan antara berbagai hal dan memahami konsekuensi dari tindakan.",
+                "Unggul dalam memahami konsep-konsep yang bersifat non-literal dan penuh makna tersirat.",
+                "Memiliki kemampuan yang baik dalam mengaitkan ide-ide dari berbagai perspektif secara kreatif.",
+                "Cakap dalam memahami pola tersembunyi dan implikasi jangka panjang dari sebuah situasi.",
+                "Mampu berpikir di luar kerangka konvensional sehingga menghasilkan sudut pandang yang segar."
+            ],
+            teks3: [
+                "Tantangan dalam menerjemahkan ide-ide abstrak ke dalam praktik.",
+                "Terkadang mengalami kesulitan dalam mengubah konsep besar menjadi langkah-langkah kerja yang konkret.",
+                "Ide-ide yang dihasilkan cenderung masih bersifat umum dan membutuhkan penjabaran lebih lanjut.",
+                "Perlu peningkatan dalam menghubungkan konsep abstrak dengan kebutuhan dan konteks nyata di lapangan.",
+                "Kadang terlalu asyik dengan ide tanpa cukup memikirkan bagaimana mewujudkannya secara praktis."
+            ],
+            teks5: [
+                "Disarankan untuk melakukan proyek kecil yang akan membantu menerapkan ide-ide abstrak ke dalam praktik nyata, sehingga dapat belajar dari pengalaman dan meningkatkan kemampuan penerapan ide.",
+                "Sangat bermanfaat untuk membiasakan diri membuat rencana aksi dari setiap ide yang muncul, agar gagasan tidak hanya berhenti pada tataran konsep.",
+                "Direkomendasikan untuk berkolaborasi dengan rekan yang memiliki kekuatan eksekusi, sehingga ide-ide abstrak dapat lebih mudah diwujudkan menjadi hasil yang nyata.",
+                "Sebaiknya belajar menggunakan alat bantu seperti mind-mapping atau canvas model untuk menstrukturkan ide ke dalam bentuk yang lebih operasional.",
+                "Penting untuk melatih diri membuat prototipe atau uji coba kecil dari setiap ide, agar kemampuan mengeksekusi konsep abstrak secara bertahap semakin meningkat."
+            ]
+        },
+        {
+            teks1: "Penalaran Verbal",
+            teks2: [
+                "Mampu berkomunikasi dengan jelas dan efektif dalam interaksi.",
+                "Memiliki kemampuan berbahasa yang baik sehingga pesan dapat tersampaikan dengan tepat.",
+                "Terampil dalam menyusun kalimat yang lugas dan mudah dipahami oleh lawan bicara.",
+                "Dikenal komunikatif dan mampu menyesuaikan gaya bicara dengan berbagai situasi.",
+                "Cakap dalam mengungkapkan gagasan secara verbal baik secara lisan maupun tulisan."
+            ],
+            teks3: [
+                "Kurang sabar dalam mendengarkan pandangan orang lain, yang menghambat komunikasi.",
+                "Terkadang lebih fokus pada penyampaian pendapat sendiri daripada menyimak masukan dari orang lain.",
+                "Cenderung kurang memberikan ruang bagi lawan bicara untuk mengekspresikan pandangannya secara penuh.",
+                "Perlu peningkatan dalam keterampilan mendengar aktif agar komunikasi dua arah lebih seimbang.",
+                "Kadang terburu-buru merespons sehingga tidak sepenuhnya memahami maksud yang ingin disampaikan orang lain."
+            ],
+            teks5: [
+                "Sangat bermanfaat untuk melatih keterampilan mendengarkan aktif melalui kegiatan role-playing, yang dapat meningkatkan kemampuan untuk menghargai pandangan orang lain dan memperbaiki komunikasi.",
+                "Disarankan untuk berlatih teknik parafrase dalam setiap percakapan, yaitu mengulang kembali apa yang disampaikan lawan bicara sebelum merespons, agar komunikasi menjadi lebih efektif.",
+                "Penting untuk membiasakan diri menahan respons sejenak dan memastikan pemahaman yang tepat sebelum menjawab, guna menciptakan komunikasi yang lebih saling menghargai.",
+                "Direkomendasikan untuk mengikuti pelatihan komunikasi atau bergabung dalam forum diskusi terstruktur, sehingga kemampuan mendengarkan dan merespons secara seimbang dapat terus berkembang.",
+                "Sebaiknya melatih kesadaran diri dalam percakapan dengan secara sengaja memberikan giliran bicara yang lebih banyak kepada orang lain, agar dinamika komunikasi menjadi lebih harmonis."
+            ]
+        },
+        {
+            teks1: "Penalaran Numerik",
+            teks2: [
+                "Kemampuan memahami proses hitung dan berpikir teratur.",
+                "Mampu mengolah data angka dengan teliti dan sistematis.",
+                "Memiliki kebiasaan berpikir terstruktur yang mendukung pemahaman terhadap konsep kuantitatif.",
+                "Cakap dalam menggunakan logika numerik untuk mendukung analisis dan pengambilan keputusan.",
+                "Terbiasa bekerja dengan data yang memerlukan ketelitian perhitungan dan ketepatan angka."
+            ],
+            teks3: [
+                "Memerlukan waktu lebih lama untuk memahami konsep matematika yang lebih rumit.",
+                "Terkadang mengalami hambatan ketika berhadapan dengan kalkulasi yang melibatkan banyak langkah sekaligus.",
+                "Kurang lancar dalam menyederhanakan operasi matematika yang kompleks menjadi langkah-langkah yang lebih mudah.",
+                "Perlu peningkatan dalam kecepatan dan ketepatan saat menangani soal numerik dengan tingkat kerumitan tinggi.",
+                "Kadang merasa kurang percaya diri dalam mengerjakan soal-soal yang memadukan beberapa konsep matematis sekaligus."
+            ],
+            teks5: [
+                "Disarankan untuk berlatih secara rutin dengan soal-soal matematika yang lebih kompleks, agar dapat meningkatkan kecepatan dan pemahaman dalam konsep yang rumit.",
+                "Sangat dianjurkan untuk memanfaatkan aplikasi atau platform latihan numerik setiap hari, sehingga kemampuan berhitung semakin terasah secara konsisten.",
+                "Sebaiknya memulai dari pemahaman konsep dasar yang kuat sebelum beralih ke topik yang lebih kompleks, agar fondasi berpikir numerik semakin kokoh.",
+                "Direkomendasikan untuk bergabung dalam kelompok belajar yang fokus pada matematika terapan, agar dapat saling bertukar strategi penyelesaian soal yang efektif.",
+                "Penting untuk membiasakan diri mengerjakan soal-soal bertingkat secara berkala, dimulai dari yang sederhana hingga yang paling kompleks, guna membangun kepercayaan diri secara bertahap."
+            ]
+        },
+        {
+            teks1: "Hasrat Berprestasi",
+            teks2: [
+                "Keinginan untuk mencapai dan meningkatkan prestasi.",
+                "Memiliki motivasi yang kuat untuk terus berkembang dan mencapai hasil terbaik.",
+                "Dikenal sebagai pribadi yang tidak mudah puas dan selalu berupaya meningkatkan standar kerjanya.",
+                "Menunjukkan semangat tinggi dalam mengejar target dan memberikan hasil yang melampaui ekspektasi.",
+                "Terdorong oleh ambisi positif untuk memberikan kontribusi nyata dalam setiap pekerjaan yang dijalani."
+            ],
+            teks3: [
+                "Beban ekspektasi tinggi dapat memengaruhi fokus dan kinerja.",
+                "Terkadang tekanan untuk selalu tampil sempurna justru menimbulkan kecemasan yang mengganggu produktivitas.",
+                "Ekspektasi yang terlalu besar terhadap diri sendiri dapat menjadi bumerang dan memperlambat progres.",
+                "Cenderung sulit menerima hasil yang dianggap kurang sempurna, sehingga menghambat kemampuan untuk bergerak maju.",
+                "Perlu belajar menyeimbangkan ambisi dengan penerimaan terhadap proses, agar kinerja tidak terbebani secara berlebihan."
+            ],
+            teks5: [
+                "Sangat penting untuk menetapkan tujuan yang realistis dan melakukan evaluasi berkala, agar dapat menjaga motivasi dan fokus pada pencapaian yang lebih terukur.",
+                "Disarankan untuk menerapkan pendekatan growth mindset, yaitu memandang setiap kesalahan sebagai bagian dari proses belajar, sehingga tekanan terhadap kesempurnaan dapat berkurang.",
+                "Sebaiknya membagi tujuan besar menjadi pencapaian-pencapaian kecil yang bisa dinikmati prosesnya, agar semangat berprestasi tetap terjaga tanpa menimbulkan stres berlebihan.",
+                "Direkomendasikan untuk secara rutin merayakan keberhasilan kecil sebagai bentuk apresiasi diri, agar motivasi tetap positif dan tidak terkuras oleh ekspektasi yang terlalu tinggi.",
+                "Penting untuk belajar menetapkan batas yang sehat antara usaha maksimal dan penerimaan terhadap hasil, sehingga semangat berprestasi menjadi pendorong yang sehat dan berkelanjutan."
+            ]
+        },
+        {
+            teks1: "Daya Tahan Stress",
+            teks2: [
+                "Kemampuan mempertahankan kinerja di tengah tekanan.",
+                "Mampu tetap tenang dan produktif meskipun berada dalam situasi yang penuh tekanan.",
+                "Menunjukkan ketangguhan dalam menjaga stabilitas emosi dan performa kerja saat menghadapi tantangan.",
+                "Cukup handal dalam mengelola tekanan sehari-hari tanpa membiarkannya mengganggu hasil pekerjaan.",
+                "Dikenal sebagai pribadi yang tidak mudah goyah ketika dihadapkan pada situasi yang penuh ketidakpastian."
+            ],
+            teks3: [
+                "Kewalahan saat menghadapi tekanan yang berkepanjangan.",
+                "Terkadang sulit memulihkan diri dengan cepat setelah periode tekanan yang berlangsung lama.",
+                "Kapasitas dalam mengelola stres menurun secara signifikan ketika beban pekerjaan menumpuk dalam waktu bersamaan.",
+                "Cenderung mengalami penurunan produktivitas apabila tekanan terus-menerus berlangsung tanpa jeda pemulihan.",
+                "Perlu strategi yang lebih baik dalam mengelola energi agar ketahanan terhadap tekanan jangka panjang meningkat."
+            ],
+            teks5: [
+                "Sebaiknya mempraktikkan teknik relaksasi dan manajemen waktu yang efektif, sehingga dapat mengurangi stres dan meningkatkan performa dalam menghadapi tekanan.",
+                "Sangat dianjurkan untuk membangun rutinitas pemulihan harian seperti olahraga ringan atau meditasi, agar kapasitas dalam menghadapi tekanan jangka panjang semakin meningkat.",
+                "Disarankan untuk belajar mengenali tanda-tanda awal kelelahan emosional dan segera mengambil langkah pemulihan, sehingga burnout dapat dicegah sebelum berdampak pada kinerja.",
+                "Penting untuk membangun support system yang kuat di lingkungan kerja, agar ada tempat berbagi beban ketika tekanan terasa terlalu berat untuk ditanggung sendiri.",
+                "Direkomendasikan untuk secara rutin menjadwalkan waktu istirahat di sela-sela pekerjaan padat, guna menjaga stamina mental agar tetap optimal dalam jangka panjang."
+            ]
+        },
+        {
+            teks1: "Kepercayaan Diri",
+            teks2: [
+                "Adanya keyakinan terhadap kemampuan yang dimiliki.",
+                "Menampilkan sikap yang percaya diri dalam menyampaikan pendapat dan mengambil tindakan.",
+                "Mampu tampil tenang dan meyakinkan dalam situasi yang membutuhkan keberanian untuk maju.",
+                "Memiliki self-esteem yang cukup kuat sehingga tidak mudah goyah oleh penilaian negatif dari luar.",
+                "Dikenal sebagai pribadi yang berani mengekspresikan diri dan tidak ragu mengambil peran aktif."
+            ],
+            teks3: [
+                "Kurang terbuka terhadap kritik konstruktif, yang menghambat perkembangan.",
+                "Terkadang merespons kritik secara defensif sehingga peluang untuk belajar dari masukan menjadi terbatas.",
+                "Cenderung merasa tidak nyaman ketika mendapat evaluasi negatif, meskipun disampaikan dengan niat yang baik.",
+                "Perlu meningkatkan kemampuan menerima umpan balik secara terbuka agar potensi pengembangan diri dapat dimaksimalkan.",
+                "Kadang terlalu terikat pada cara pandang sendiri sehingga sulit mempertimbangkan perspektif orang lain secara adil."
+            ],
+            teks5: [
+                "Disarankan untuk secara rutin meminta umpan balik dari orang lain, sehingga dapat membangun kepercayaan diri yang lebih solid dan meningkatkan kemampuan untuk menerima kritik.",
+                "Sangat bermanfaat untuk melatih diri memisahkan antara kritik terhadap pekerjaan dan penilaian terhadap diri sendiri, agar masukan dapat diterima secara lebih objektif.",
+                "Penting untuk membangun perspektif bahwa kritik konstruktif adalah alat bantu pertumbuhan, bukan serangan personal, sehingga respons terhadapnya menjadi lebih terbuka.",
+                "Direkomendasikan untuk mencari mentor atau rekan yang dipercaya dan secara aktif mendiskusikan area pengembangan diri, agar proses menerima masukan menjadi lebih terbiasa dan nyaman.",
+                "Sebaiknya membiasakan diri untuk melakukan refleksi diri secara teratur, sehingga penerimaan terhadap kekurangan menjadi lebih lapang dan terbuka untuk perbaikan."
+            ]
+        },
+        {
+            teks1: "Relasi Sosial",
+            teks2: [
+                "Kemampuan membina hubungan dengan orang lain.",
+                "Memiliki kemampuan interpersonal yang baik dalam membangun kedekatan dan kepercayaan.",
+                "Dikenal mudah bergaul dan mampu menjaga hubungan yang positif dengan berbagai kalangan.",
+                "Terampil dalam menciptakan suasana yang nyaman sehingga orang lain merasa dihargai dan didengar.",
+                "Menunjukkan empati yang tulus dalam berinteraksi, sehingga hubungan yang dijalin cenderung bertahan lama."
+            ],
+            teks3: [
+                "Canggung dalam situasi sosial baru, yang menghambat interaksi.",
+                "Terkadang membutuhkan waktu lebih lama untuk merasa nyaman dan terbuka di lingkungan yang belum dikenal.",
+                "Cenderung menarik diri terlebih dahulu ketika berada di antara orang-orang baru sebelum mulai berinteraksi.",
+                "Perlu peningkatan dalam kemampuan beradaptasi secara sosial agar dapat lebih cepat menyesuaikan diri di lingkungan baru.",
+                "Kadang terkesan kurang inisiatif dalam memulai percakapan dengan orang yang baru dikenal."
+            ],
+            teks5: [
+                "Sangat dianjurkan untuk bergabung dengan kelompok sosial atau komunitas yang diminati, sehingga dapat berlatih keterampilan interaksi dan membangun hubungan yang lebih baik.",
+                "Disarankan untuk secara aktif mencari kesempatan untuk berkenalan dengan orang-orang baru dalam berbagai kegiatan, agar rasa canggung dalam situasi sosial baru dapat berkurang.",
+                "Penting untuk membiasakan diri mengambil inisiatif memulai percakapan kecil dalam pertemuan atau acara, sebagai latihan untuk membangun kepercayaan diri sosial secara bertahap.",
+                "Sebaiknya mulai dengan lingkungan yang lebih kecil dan nyaman terlebih dahulu, lalu secara bertahap perluas jaringan sosial ke lingkaran yang lebih luas.",
+                "Direkomendasikan untuk mengikuti kegiatan sosial atau komunitas secara rutin, sehingga keterampilan berinteraksi dengan orang baru dapat terus terasah dan rasa percaya diri sosial meningkat."
+            ]
+        },
+        {
+            teks1: "Kerjasama",
+            teks2: [
+                "Kemampuan bekerjasama individu atau berkelompok.",
+                "Mampu berkontribusi secara positif dalam lingkungan kerja tim maupun individu.",
+                "Menunjukkan sikap kooperatif yang mendukung terciptanya sinergi dalam kelompok.",
+                "Dikenal sebagai rekan kerja yang dapat diandalkan dan mendukung keberhasilan tim.",
+                "Memiliki kemampuan yang baik dalam menyelaraskan kepentingan pribadi dengan tujuan bersama kelompok."
+            ],
+            teks3: [
+                "Kesulitan beradaptasi dengan dinamika kelompok yang berbeda.",
+                "Terkadang kurang fleksibel ketika harus menyesuaikan gaya kerja dengan anggota tim yang memiliki karakter berbeda.",
+                "Cenderung merasa tidak nyaman dalam kelompok yang memiliki cara kerja atau nilai yang berbeda dari kebiasaannya.",
+                "Perlu peningkatan dalam kemampuan memahami dan menghargai perbedaan gaya kerja antar anggota tim.",
+                "Kadang kesulitan membangun chemistry yang baik dengan kelompok baru dalam waktu singkat."
+            ],
+            teks5: [
+                "Disarankan untuk terlibat dalam berbagai aktivitas kelompok yang memerlukan kolaborasi, agar dapat meningkatkan kemampuan untuk beradaptasi dengan berbagai dinamika kelompok.",
+                "Sangat dianjurkan untuk secara aktif terlibat dalam proyek lintas tim, sehingga pengalaman bekerja dengan berbagai karakter orang dapat memperluas fleksibilitas dalam berkolaborasi.",
+                "Penting untuk belajar memahami gaya kerja dan motivasi orang lain sebelum memulai kerja sama, agar penyesuaian dapat berlangsung lebih cepat dan harmonis.",
+                "Sebaiknya mengambil inisiatif untuk mengenal anggota tim baru secara personal, karena kedekatan interpersonal yang dibangun lebih awal akan memperlancar kolaborasi di kemudian hari.",
+                "Direkomendasikan untuk mengikuti pelatihan teamwork atau workshop kolaborasi, agar kemampuan beradaptasi dalam berbagai dinamika kelompok semakin meningkat."
+            ]
+        },
+        {
+            teks1: "Sistematika Kerja",
+            teks2: [
+                "Kemampuan membuat perencanaan & prioritas kerja.",
+                "Terorganisir dengan baik dalam menyusun rencana dan mengatur prioritas pekerjaan.",
+                "Memiliki pendekatan yang terstruktur sehingga setiap pekerjaan dapat diselesaikan secara efisien.",
+                "Dikenal teliti dalam merancang alur kerja yang jelas dan dapat diikuti secara konsisten.",
+                "Mampu mengelola berbagai tugas secara paralel dengan tetap menjaga keteraturan dan fokus."
+            ],
+            teks3: [
+                "Terlalu fokus pada perencanaan, sehingga mengabaikan implementasi.",
+                "Cenderung menghabiskan terlalu banyak waktu dalam fase perencanaan hingga menunda tahap pelaksanaan.",
+                "Terkadang terjebak dalam perfeksionisme perencanaan sehingga eksekusi menjadi terlambat.",
+                "Perlu meningkatkan keseimbangan antara kedalaman perencanaan dan kecepatan dalam memulai implementasi.",
+                "Kadang sulit melepaskan fase persiapan dan beralih ke aksi nyata ketika rencana dirasa belum sempurna."
+            ],
+            teks5: [
+                "Sebaiknya tentukan batas waktu untuk setiap fase implementasi, agar tidak terjebak dalam perencanaan yang berlarut-larut dan dapat segera memulai eksekusi.",
+                "Disarankan untuk menerapkan prinsip 'good enough to start' dalam setiap perencanaan, yaitu memulai eksekusi ketika rencana sudah cukup solid meski belum sempurna.",
+                "Penting untuk membiasakan diri menetapkan tenggat waktu yang ketat untuk setiap tahap perencanaan, sehingga energi dan waktu tidak habis sebelum eksekusi dimulai.",
+                "Direkomendasikan untuk menggunakan metode manajemen proyek seperti Agile atau sprint planning, agar keseimbangan antara perencanaan dan pelaksanaan dapat terjaga dengan lebih baik.",
+                "Sebaiknya belajar menerima bahwa rencana yang sempurna tidak selalu mungkin dicapai, dan bahwa tindakan nyata yang terarah jauh lebih berharga daripada rencana yang tak pernah dieksekusi."
+            ]
+        },
+        {
+            teks1: "Inisiatif",
+            teks2: [
+                "Kemampuan mengambil tindakan yang diperlukan.",
+                "Tidak menunggu instruksi dan mampu secara mandiri mengidentifikasi langkah yang perlu diambil.",
+                "Proaktif dalam melihat peluang dan segera bertindak untuk memanfaatkannya.",
+                "Dikenal sebagai pribadi yang berani menjadi yang pertama bertindak ketika situasi membutuhkan.",
+                "Menunjukkan keberanian untuk mengambil langkah awal tanpa harus selalu menunggu arahan dari pihak lain."
+            ],
+            teks3: [
+                "Pengambilan keputusan yang terburu-buru berisiko tinggi.",
+                "Terkadang bertindak terlalu cepat sebelum mempertimbangkan secara matang dampak dari keputusan yang diambil.",
+                "Kecenderungan untuk segera bertindak kadang mengabaikan analisis risiko yang perlu dilakukan terlebih dahulu.",
+                "Perlu peningkatan dalam mempertimbangkan konsekuensi jangka panjang sebelum mengambil inisiatif yang berisiko.",
+                "Kadang semangat untuk bertindak cepat justru menghasilkan keputusan yang kurang matang dan memerlukan koreksi di kemudian hari."
+            ],
+            teks5: [
+                "Disarankan untuk selalu mempertimbangkan pro dan kontra secara mendalam sebelum mengambil keputusan, agar dapat mengurangi risiko yang mungkin timbul dari keputusan yang terburu-buru.",
+                "Sangat penting untuk membiasakan diri melakukan jeda singkat sebelum bertindak, guna memastikan keputusan yang diambil sudah mempertimbangkan berbagai aspek secara proporsional.",
+                "Direkomendasikan untuk membangun kebiasaan konsultasi singkat dengan rekan terpercaya sebelum mengeksekusi inisiatif besar, sehingga risiko dapat dimitigasi lebih awal.",
+                "Sebaiknya mempelajari teknik analisis risiko sederhana yang bisa diterapkan secara cepat, agar keputusan yang diambil tetap berani namun tetap terukur dan bertanggung jawab.",
+                "Penting untuk mengembangkan kesadaran bahwa inisiatif yang baik bukan hanya soal kecepatan bertindak, tetapi juga soal ketepatan waktu dan kematangan pertimbangan sebelumnya."
+            ]
+        },
+        {
+            teks1: "Kemandirian",
+            teks2: [
+                "Kemampuan mengambil sikap dan bekerja sendiri.",
+                "Mampu menyelesaikan pekerjaan secara mandiri tanpa harus bergantung pada arahan terus-menerus.",
+                "Menunjukkan kemandirian yang tinggi dalam membuat keputusan dan mengeksekusi tugas secara independen.",
+                "Dikenal tidak mudah terpengaruh oleh tekanan eksternal dan mampu mempertahankan pendirian secara konsisten.",
+                "Memiliki otonomi kerja yang kuat sehingga mampu dipercaya untuk mengelola tanggung jawab secara penuh."
+            ],
+            teks3: [
+                "Kesulitan dalam berkolaborasi dengan tim, yang dapat memengaruhi hasil kerja.",
+                "Terkadang lebih nyaman bekerja sendiri hingga kurang optimal dalam situasi yang menuntut kolaborasi erat.",
+                "Cenderung menyukai kendali penuh atas pekerjaan sehingga kurang memberi ruang bagi kontribusi orang lain.",
+                "Perlu peningkatan dalam kemampuan berbagi peran dan tanggung jawab agar sinergi tim dapat lebih dimaksimalkan.",
+                "Kadang independensi yang tinggi membuat kesulitan dalam menerima bantuan atau delegasi dari rekan kerja."
+            ],
+            teks5: [
+                "Sangat penting untuk terlibat dalam proyek kolaboratif yang dapat membantu meningkatkan keterampilan kerja sama dan beradaptasi dalam lingkungan tim.",
+                "Disarankan untuk secara sadar melatih diri memberikan kepercayaan kepada rekan kerja untuk mengerjakan bagian tertentu, sehingga kemampuan berkolaborasi dapat berkembang secara bertahap.",
+                "Penting untuk memahami bahwa kemandirian dan kolaborasi bukan dua hal yang bertentangan, melainkan dua kekuatan yang perlu diseimbangkan untuk mencapai hasil terbaik.",
+                "Direkomendasikan untuk aktif terlibat dalam sesi brainstorming atau pengerjaan proyek bersama, agar nilai dari perspektif dan kontribusi orang lain dapat lebih dihargai.",
+                "Sebaiknya membiasakan diri untuk secara aktif meminta dan mempertimbangkan masukan dari rekan sebelum menyelesaikan pekerjaan secara mandiri, guna menghasilkan output yang lebih komprehensif."
+            ]
+        }
     ];
 
     const minatData = [
