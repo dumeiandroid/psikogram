@@ -843,5 +843,13 @@
         aspekPsikologis
     };
 
+    // Alias global langsung — agar pemanggilan hitungPsikogram(data, id_x)
+    // dari index.html tetap berfungsi tanpa perlu PsikogramEngine.hitungPsikogram()
+    global.hitungPsikogram  = hitungPsikogram;
+    global.pilih3Distribusi = pilih3Distribusi;
+    global.makeSeededRand   = makeSeededRand;
+    global.seedFromId       = seedFromId;
+    global.pilihVersi       = pilihVersi;
+
 })(window);
 // xx
