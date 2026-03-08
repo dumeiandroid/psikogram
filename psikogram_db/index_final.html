@@ -837,7 +837,7 @@ function renderPage(parsed) {
         const nama = item.nama || item.singkatan || '';
         const ket  = item.keterangan || '';
         listMinat.innerHTML += `<li><strong>${nama}</strong></li>`;
-        listMinat.innerHTML += `<li>Keterangan: ${ket}</li>`;
+        listMinat.innerHTML += `<p style="margin:2px 0 8px 10px;">${ket}</p>`;
     });
 }
 

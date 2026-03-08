@@ -426,7 +426,7 @@ function renderPage(hasil) {
         const namaMinat = namaOverride ? namaOverride.toUpperCase() : item.arah_minat;
         const ketMinat  = ketOverride  ? ketOverride                : item.keterangan_minat;
         listMinat.innerHTML += `<li><strong>${namaMinat}</strong></li>`;
-        listMinat.innerHTML += `<li>${ketMinat}</li>`;
+        listMinat.innerHTML += `<p style="margin:2px 0 8px 10px;">${ketMinat}</p>`;
     });
 }
 
