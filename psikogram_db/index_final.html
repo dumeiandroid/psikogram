@@ -609,8 +609,8 @@
                 <div id="iq-kategori-info" style="margin-top:8px; font-size:14px; color:#555;"></div>
                 <div style="margin-top:16px; background:#f8f9fa; border-radius:8px; padding:14px; font-size:13px; color:#555; line-height:1.8;">
                     <strong>Panduan Kategori IQ:</strong><br>
-                    ≤69 = Sangat Rendah &nbsp;|&nbsp; 70–79 = Rendah &nbsp;|&nbsp; 80–89 = Di bawah Rata-rata<br>
-                    90–99 = Rata-rata Bawah &nbsp;|&nbsp; 100–109 = Rata-rata &nbsp;|&nbsp; 110–119 = Di atas Rata-rata<br>
+                    ≤69 = Mental Defective &nbsp;|&nbsp; 70–79 = Borderline &nbsp;|&nbsp; 80–89 = Di Bawah Rata-rata<br>
+                    90–99 = Rata-rata Bawah &nbsp;|&nbsp; 100–109 = Rata-rata &nbsp;|&nbsp; 110–119 = Di Atas Rata-rata<br>
                     120–129 = Superior &nbsp;|&nbsp; 130–139 = Sangat Superior &nbsp;|&nbsp; ≥140 = Genius
                 </div>
             </div>
@@ -775,7 +775,19 @@ function renderPage(parsed) {
     document.getElementById('konsistensi-display').textContent = '';
 
     // IQ
-    document.getElementById('span-iq').textContent = IQ;
+    // IQ + kategori
+    function getKategoriIQ(iq) {
+        if      (iq <= 69)  return 'Mental Defective';
+        else if (iq <= 79)  return 'Borderline';
+        else if (iq <= 89)  return 'Di Bawah Rata-rata';
+        else if (iq <= 99)  return 'Rata-rata Bawah';
+        else if (iq <= 109) return 'Rata-rata';
+        else if (iq <= 119) return 'Di Atas Rata-rata';
+        else if (iq <= 129) return 'Superior';
+        else if (iq <= 139) return 'Sangat Superior';
+        else                return 'Genius';
+    }
+    document.getElementById('span-iq').textContent = IQ + ' (' + getKategoriIQ(IQ) + ')';
 
     // Tabel Aspek Psikologis
     const tbody = document.getElementById('tbody-aspek');
@@ -1052,15 +1064,15 @@ function updateIqKategori() {
     const iq = parseInt(document.getElementById('ed-iq').value) || 0;
     const el = document.getElementById('iq-kategori-info');
     let kat = '', warna = '';
-    if      (iq <= 69)  { kat='Sangat Rendah'; warna='#dc3545'; }
-    else if (iq <= 79)  { kat='Rendah';         warna='#e67e22'; }
-    else if (iq <= 89)  { kat='Di Bawah Rata-rata'; warna='#e6a817'; }
-    else if (iq <= 99)  { kat='Rata-rata Bawah';    warna='#888'; }
-    else if (iq <= 109) { kat='Rata-rata';          warna='#27ae60'; }
-    else if (iq <= 119) { kat='Di Atas Rata-rata';  warna='#2980b9'; }
-    else if (iq <= 129) { kat='Superior';            warna='#5F4EDA'; }
-    else if (iq <= 139) { kat='Sangat Superior';     warna='#5F4EDA'; }
-    else                { kat='Genius';              warna='#5F4EDA'; }
+    if      (iq <= 69)  { kat='Mental Defective';    warna='#dc3545'; }
+    else if (iq <= 79)  { kat='Borderline';           warna='#e67e22'; }
+    else if (iq <= 89)  { kat='Di Bawah Rata-rata';  warna='#e6a817'; }
+    else if (iq <= 99)  { kat='Rata-rata Bawah';      warna='#888'; }
+    else if (iq <= 109) { kat='Rata-rata';            warna='#27ae60'; }
+    else if (iq <= 119) { kat='Di Atas Rata-rata';   warna='#2980b9'; }
+    else if (iq <= 129) { kat='Superior';             warna='#5F4EDA'; }
+    else if (iq <= 139) { kat='Sangat Superior';      warna='#5F4EDA'; }
+    else                { kat='Genius';               warna='#5F4EDA'; }
     el.innerHTML = iq > 0
         ? `Kategori: <strong style="color:${warna};">${kat}</strong> (IQ = ${iq})`
         : '';
