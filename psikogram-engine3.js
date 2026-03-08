@@ -799,18 +799,18 @@
     ];
 
     const minatData = [
-        {arah_minat:"OUTDOOR",        singkatan:"OUT",       keterangan_minat:"Minat pada aktivitas lapangan, alam terbuka, dan eksplorasi lingkungan. Contoh: Kehutanan, Agroteknologi, Agribisnis, Ilmu Kelautan, Geografi."},
-        {arah_minat:"LITERATURE",     singkatan:"LITE",      keterangan_minat:"Minat pada bahasa, membaca, menulis, dan komunikasi. Contoh: Sastra Indonesia, Sastra Inggris, Pendidikan Bahasa Indonesia, Pendidikan Bahasa Inggris, Ilmu Komunikasi."},
-        {arah_minat:"MECHANICAL",     singkatan:"MECH",      keterangan_minat:"Minat pada mesin, teknologi, dan sistem mekanik. Contoh: Teknik Mesin, Teknik Industri, Teknik Elektro, Teknik Otomotif, Teknik Perkapalan."},
-        {arah_minat:"MUSICAL",        singkatan:"MUS",       keterangan_minat:"Minat pada musik dan seni pertunjukan. Contoh: Seni Musik, Pendidikan Musik, Seni Pertunjukan, Karawitan, Etnomusikologi."},
-        {arah_minat:"COMPUTATIONAL",  singkatan:"COMP",      keterangan_minat:"Minat pada angka, analisis data, dan perhitungan. Contoh: Akuntansi, Statistika, Matematika, Aktuaria, Sistem Informasi."},
-        {arah_minat:"SOCIAL SERVICE", singkatan:"SOS. WERV", keterangan_minat:"Minat pada membantu orang lain dan kegiatan sosial. Contoh: Psikologi, Bimbingan dan Konseling, Kesejahteraan Sosial, Sosiologi, Pendidikan Guru Sekolah Dasar (PGSD)."},
-        {arah_minat:"SCIENTIFIC",     singkatan:"ACIE",      keterangan_minat:"Minat pada penelitian, eksperimen, dan pengembangan ilmu pengetahuan. Contoh: Biologi, Kimia, Fisika, Farmasi, Bioteknologi."},
-        {arah_minat:"CLERICAL",       singkatan:"CLER",      keterangan_minat:"Minat pada pekerjaan administrasi, pengelolaan dokumen, dan organisasi. Contoh: Administrasi Perkantoran, Manajemen, Administrasi Bisnis, Perpustakaan dan Sains Informasi, Manajemen Perkantoran (Vokasi)."},
-        {arah_minat:"PERSUASIVE",     singkatan:"PERS",      keterangan_minat:"Minat pada mempengaruhi orang lain, kepemimpinan, dan aktivitas bisnis. Contoh: Manajemen, Ilmu Komunikasi, Administrasi Bisnis, Hubungan Internasional, Ilmu Administrasi Negara."},
-        {arah_minat:"PRACTICAL",      singkatan:"PRAC",      keterangan_minat:"Minat pada pekerjaan teknis dan penerapan praktis teknologi. Contoh: Teknik Sipil, Teknik Lingkungan, Teknologi Pangan, Teknologi Industri Pertanian, Teknik Geologi."},
-        {arah_minat:"AESTHETIC",      singkatan:"AESTH",     keterangan_minat:"Minat pada kreativitas, desain, dan seni visual. Contoh: Desain Komunikasi Visual, Desain Interior, Desain Produk, Seni Rupa, Film dan Televisi."},
-        {arah_minat:"MEDICAL",        singkatan:"MED",       keterangan_minat:"Minat pada bidang kesehatan dan pelayanan medis. Contoh: Kedokteran, Kedokteran Gigi, Keperawatan, Kesehatan Masyarakat, Ilmu Gizi."}
+        {arah_minat:"OUTDOOR",        singkatan:"OUT",       keterangan_minat:"Minat ini melibatkan berbagai aktivitas yang dilakukan di luar ruangan, seperti kegiatan outbound yang meningkatkan keterampilan tim, travelling untuk menjelajahi tempat-tempat baru, dan eksplorasi pertambangan yang memberikan wawasan tentang sumber daya alam serta teknik penambangan."},
+        {arah_minat:"LITERATURE",     singkatan:"LITE",      keterangan_minat:"Bidang ini berfokus pada literatur dan berbagai karya tulis, mencakup profesi seperti ahli perpustakaan yang bertanggung jawab untuk mengelola koleksi buku, serta petugas administrasi yang mendukung organisasi dan penyebaran informasi dalam institusi literasi."},
+        {arah_minat:"MECHANICAL",     singkatan:"MECH",      keterangan_minat:"Minat ini terkait dengan ilmu mekanik dan teknik, yang mencakup berbagai disiplin seperti teknik mesin yang merancang dan memproduksi mesin, serta teknik sipil yang merencanakan dan membangun infrastruktur seperti jembatan dan gedung."},
+        {arah_minat:"MUSICAL",        singkatan:"MUS",       keterangan_minat:"Minat di bidang musik ini mencakup kemampuan untuk menciptakan, memainkan, atau menginterpretasikan karya musik, yang bisa termasuk profesi seperti komposer yang merangkai melodi serta pemain musik yang tampil di berbagai acara dan pertunjukan."},
+        {arah_minat:"COMPUTATIONAL",  singkatan:"COMP",      keterangan_minat:"Bidang ini berfokus pada keterampilan analisis dan perhitungan, mencakup profesi seperti akuntan yang bertanggung jawab untuk pencatatan dan pelaporan keuangan, serta ahli pembukuan yang mengelola catatan transaksi untuk bisnis dan organisasi."},
+        {arah_minat:"SOCIAL SERVICE", singkatan:"SOS. WERV", keterangan_minat:"Minat ini berkaitan dengan pelayanan sosial dan komunitas, mencakup peran sebagai sukarelawan yang memberikan bantuan kepada yang membutuhkan, pekerja sosial yang membantu individu dan keluarga dalam kesulitan, serta psikolog yang memberikan dukungan mental dan emosional."},
+        {arah_minat:"SCIENTIFIC",     singkatan:"ACIE",      keterangan_minat:"Minat di bidang scientific ini melibatkan penelitian dan eksperimen untuk mengembangkan pengetahuan baru, mencakup profesi seperti peneliti yang melakukan studi ilmiah dan ahli matematika yang menerapkan teori matematika dalam berbagai aplikasi praktis."},
+        {arah_minat:"CLERICAL",       singkatan:"CLER",      keterangan_minat:"Bidang ini berfokus pada keterampilan administratif dan organisasi, mencakup peran sebagai sekretaris yang mengelola jadwal dan dokumen, serta notulen yang mendokumentasikan rapat dan kegiatan penting dalam suatu organisasi."},
+        {arah_minat:"PERSUASIVE",     singkatan:"PERS",      keterangan_minat:"Minat ini berhubungan dengan kemampuan berkomunikasi dan mempengaruhi orang lain, mencakup profesi seperti ahli komunikasi yang merancang strategi komunikasi efektif, serta marketing yang mempromosikan produk dan layanan kepada konsumen."},
+        {arah_minat:"PRACTICAL",      singkatan:"PRAC",      keterangan_minat:"Minat ini berfokus pada keterampilan praktis dan teknis, mencakup peran sebagai montir yang memperbaiki dan merawat kendaraan, serta ahli perbaikan mesin yang menangani berbagai masalah teknis pada peralatan dan alat-alat industri."},
+        {arah_minat:"AESTHETIC",      singkatan:"AESTH",     keterangan_minat:"Minat ini mencakup kemampuan kreatif dalam seni dan desain, termasuk profesi seperti pelukis yang menciptakan karya seni visual, seniman patung yang membuat patung dari berbagai bahan, serta arsitek yang merancang bangunan dengan mempertimbangkan fungsi dan estetika."},
+        {arah_minat:"MEDICAL",        singkatan:"MED",       keterangan_minat:"Minat ini berkaitan dengan bidang medis dan kesehatan, mencakup profesi seperti dokter yang mendiagnosis dan merawat penyakit, perawat yang memberikan perawatan langsung kepada pasien, serta ahli kesehatan yang berfokus pada pencegahan penyakit dan promosi kesehatan."}
     ];
 
     const aspekPsikologis = [
@@ -843,4 +843,13 @@
         aspekPsikologis
     };
 
+    // Alias global langsung — agar pemanggilan hitungPsikogram(data, id_x)
+    // dari index.html tetap berfungsi tanpa perlu PsikogramEngine.hitungPsikogram()
+    global.hitungPsikogram  = hitungPsikogram;
+    global.pilih3Distribusi = pilih3Distribusi;
+    global.makeSeededRand   = makeSeededRand;
+    global.seedFromId       = seedFromId;
+    global.pilihVersi       = pilihVersi;
+
 })(window);
+// xx
