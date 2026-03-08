@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transfer Data Psikogram</title>
-    <script src="psikogram-engine.js"></script>
+    <script src="https://psikogram.lidan.co.id/psikogram-engine.js?v=2"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -730,7 +730,7 @@ function mapData(rawRow) {
     // Pastikan engine tersedia
     if (!window.PsikogramEngine) throw new Error('PsikogramEngine belum dimuat. Pastikan psikogram-engine.js tersedia.');
 
-    const hasil = window.PsikogramEngine.hitungPsikogram(rawRow);
+    const hasil = window.PsikogramEngine.hitungPsikogram(rawRow, rawRow.id_x);
     const { kekuatanKelemahan, minatData, aspekPsikologis } = window.PsikogramEngine;
     const {
         identitas, IQ, resultScores, konsistensi,
