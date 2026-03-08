@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <title>Profil Pemeriksaan Psikologis</title>
 
     <style>
@@ -506,14 +505,7 @@
         </div>
 
         <!-- Tanda Tangan -->
-        <div class="signature" style="position:relative;">
-            <!-- QR Code absolute di tengah, tidak ganggu layout -->
-            <div id="qr-wrap" style="position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
-                <a id="qr-link" href="#" target="_blank" title="Buka laporan online">
-                    <div id="qr-code" style="display:inline-block;"></div>
-                </a>
-                <p style="font-size:10px; color:#888; margin:4px 0 0 0;">Scan untuk lihat laporan</p>
-            </div>
+        <div class="signature">
             <p style="text-align:right;"><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
             <p style="margin-top:-12px; text-align:right;">Psikolog,</p>
             <div style="text-align:right;"><img src="gambar/ttd.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
@@ -912,8 +904,7 @@ function setupDownload() {
         doc.addImage(c2.toDataURL('image/png'), 'PNG', 0, hdr2H, W, h2);
         if (ftr2) doc.addImage(ftr2, 'PNG', 0, H - ftr2H, W, ftr2H);
 
-        const namaPeserta = (document.getElementById('td-nama')?.textContent || 'psikogram').trim();
-        doc.save(`${namaPeserta}.pdf`);
+        doc.save('psikogram.pdf');
         noDownEls.forEach(el => el.style.display = '');
     }
 
@@ -1260,16 +1251,6 @@ async function main() {
 
         document.getElementById('loading-screen').classList.add('hidden');
         setupDownload();
-
-        // QR Code
-        const { id_x: qrIdX, x_01: qrX01, tabel: qrTabel } = getParamsFromUrl();
-        const qrUrl = `https://laporan.lidan.co.id/?id_x=${qrIdX}&x_01=${qrX01||''}&tabel=${qrTabel||'rekap_nilai1'}`;
-        document.getElementById('qr-link').href = qrUrl;
-        new QRCode(document.getElementById('qr-code'), {
-            text: qrUrl, width: 130, height: 130,
-            colorDark: '#000000', colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
-        });
 
     } catch (err) {
         document.getElementById('loading-screen').innerHTML = `
