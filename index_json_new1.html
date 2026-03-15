@@ -357,9 +357,7 @@ function renderPage(hasil) {
 
     // Identitas
     document.getElementById('td-nama').textContent    = identitas.nama;
-    const jkRaw = identitas.jk || identitas.jenis_kelamin || identitas.gender || '';
-    const jkLabel = jkRaw === 'L' ? 'Laki-laki' : jkRaw === 'P' ? 'Perempuan' : jkRaw;
-    document.getElementById('td-jk').textContent = jkLabel;
+    document.getElementById('td-jk').textContent      = identitas.jk;
     document.getElementById('td-usia').textContent    = identitas.usia;
     document.getElementById('td-tanggal').textContent = identitas.tanggal;
     document.getElementById('span-tanggal-ttd').textContent = identitas.tanggalTTD;
@@ -539,15 +537,6 @@ async function main() {
 
         // Semua kalkulasi dikerjakan oleh engine
         const hasil = window.PsikogramEngine.hitungPsikogram(rawData, id_x);
-
-        // Patch identitas dari x_02 JSON (engine hanya support format lama pipe-separated)
-        try {
-            const raw = Array.isArray(rawData) ? rawData[0] : rawData;
-            const bio = JSON.parse(raw.x_02 || '{}');
-            if (!hasil.identitas.jk)   hasil.identitas.jk   = bio.gender || bio.jenis_kelamin || '';
-            if (!hasil.identitas.nama) hasil.identitas.nama = bio.nama   || hasil.identitas.nama || '';
-            if (!hasil.identitas.usia) hasil.identitas.usia = bio.usia   || hasil.identitas.usia || '';
-        } catch(e) {}
 
         renderPage(hasil);
         document.getElementById('loading-screen').classList.add('hidden');
