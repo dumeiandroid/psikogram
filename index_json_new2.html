@@ -274,10 +274,8 @@
             <div><strong>Recommendation/Rekomendasi:</strong></div>
             <ul class="custom-list" id="list-rekomendasi"></ul>
 
-            <div id="section-minat">
             <h4 style="text-decoration:underline;">Arah Minat Pendidikan / Pekerjaan</h4>
             <ul class="custom-list" id="list-minat"></ul>
-            </div>
         </div>
 
         <!-- Tanda Tangan -->
@@ -357,38 +355,6 @@ function renderPage(hasil) {
         kelebihan, kelemahan, rekomendasi, minat3
     } = hasil;
 
-    // ── Deteksi ketersediaan data per sumber ──────────────────
-    const raw = hasil._raw || {};
-    let x05obj = {}, x06obj = {};
-    try { x05obj = JSON.parse(raw.x_05 || '{}'); } catch(e) {}
-    try { x06obj = JSON.parse(raw.x_06 || '{}'); } catch(e) {}
-
-    const hasCfit       = ['cfit1','cfit2','cfit3','cfit4'].some(k => x05obj[k] !== undefined);
-    const hasTkdVerbal  = (x05obj.tkd3 !== undefined || x05obj.tkd5 !== undefined);
-    const hasTkdNumerik = (x05obj.tkd6 !== undefined || x05obj.deret6 !== undefined);
-    const hasEpps       = !!(x06obj.epps && x06obj.epps.trim().length > 0);
-    const hasRmib       = ['rmib_k1','rmib_k2','rmib_k3','rmib_k4',
-                           'rmib_k5','rmib_k6','rmib_k7','rmib_k8']
-                          .every(k => x06obj[k] && x06obj[k].trim().length > 0);
-
-    // Mapping index aspek (0-13) ke flag data tersedia
-    const aspekHasData = [
-        hasCfit,       // 0: Kemampuan Umum
-        hasCfit,       // 1: Daya Tangkap Visual
-        hasCfit,       // 2: Berpikir Logis
-        hasCfit,       // 3: Berpikir Abstrak
-        hasTkdVerbal,  // 4: Penalaran Verbal
-        hasTkdNumerik, // 5: Penalaran Numerik
-        hasEpps,       // 6: Hasrat Berprestasi
-        hasEpps,       // 7: Daya Tahan Stress
-        hasEpps,       // 8: Kepercayaan Diri
-        hasEpps,       // 9: Relasi Sosial
-        hasEpps,       // 10: Kerjasama
-        hasEpps,       // 11: Sistematika Kerja
-        hasEpps,       // 12: Inisiatif
-        hasEpps        // 13: Kemandirian
-    ];
-
     // Identitas
     document.getElementById('td-nama').textContent    = identitas.nama;
     const jkRaw = identitas.jk || identitas.jenis_kelamin || identitas.gender || '';
@@ -412,35 +378,15 @@ function renderPage(hasil) {
     }
     document.getElementById('span-iq').textContent = IQ + ' (' + getKategoriIQ(IQ) + ')';
 
-    // ── Tabel Aspek Psikologis ─────────────────────────────────
-    // Baris disembunyikan jika data sumber belum ada
-    // Header section hanya muncul jika ada minimal 1 baris visible di section tersebut
+    // Tabel Aspek Psikologis
     const tbody = document.getElementById('tbody-aspek');
     tbody.innerHTML = '';
-
-    // Pre-compute: section mana yang punya minimal 1 baris visible
-    const sectionVisible = {};
-    let currentSection = null;
-    aspekPsikologis.forEach(([section, , ], idx) => {
-        if (section) currentSection = section;
-        if (aspekHasData[idx]) sectionVisible[currentSection] = true;
-    });
-
-    currentSection = null;
     aspekPsikologis.forEach(([section, namaAspek, ket], idx) => {
-        if (section) currentSection = section;
-
-        // Lewati baris jika data belum ada
-        if (!aspekHasData[idx]) return;
-
-        // Tambah header section sekali saja (flag dihapus setelah ditambah)
-        if (section && sectionVisible[section]) {
+        if (section) {
             const secRow = document.createElement('tr');
             secRow.innerHTML = `<td colspan="12" class="section-header">${section}</td>`;
             tbody.appendChild(secRow);
-            delete sectionVisible[section]; // sudah ditambah, jangan dobel
         }
-
         const tr = document.createElement('tr');
         let cells = `<td>${namaAspek}</td><td>${ket}</td>`;
         for (let i = 1; i <= 10; i++) {
@@ -472,24 +418,17 @@ function renderPage(hasil) {
         listRekomendasi.innerHTML += `<li>${rekomendasi[i]}</li>`;
     }
 
-    // ── Arah Minat ────────────────────────────────────────────
-    // Sembunyikan seluruh blok minat jika data RMIB belum lengkap
-    const sectionMinat = document.getElementById('section-minat');
-    if (!hasRmib) {
-        if (sectionMinat) sectionMinat.style.display = 'none';
-    } else {
-        if (sectionMinat) sectionMinat.style.display = '';
-        const listMinat = document.getElementById('list-minat');
-        listMinat.innerHTML = '';
-        minat3.forEach(({ singkatan, namaOverride, ketOverride }) => {
-            const item = minatData.find(m => m.singkatan === singkatan);
-            if (!item) return;
-            const namaMinat = namaOverride ? namaOverride.toUpperCase() : item.arah_minat;
-            const ketMinat  = ketOverride  ? ketOverride                : item.keterangan_minat;
-            listMinat.innerHTML += `<li><strong>${namaMinat}</strong></li>`;
-            listMinat.innerHTML += `<p style="margin:2px 0 8px 10px;">${ketMinat}</p>`;
-        });
-    }
+    // Minat (3 arah minat terkecil dari RMIB)
+    const listMinat = document.getElementById('list-minat');
+    listMinat.innerHTML = '';
+    minat3.forEach(({ singkatan, namaOverride, ketOverride }) => {
+        const item = minatData.find(m => m.singkatan === singkatan);
+        if (!item) return;
+        const namaMinat = namaOverride ? namaOverride.toUpperCase() : item.arah_minat;
+        const ketMinat  = ketOverride  ? ketOverride                : item.keterangan_minat;
+        listMinat.innerHTML += `<li><strong>${namaMinat}</strong></li>`;
+        listMinat.innerHTML += `<p style="margin:2px 0 8px 10px;">${ketMinat}</p>`;
+    });
 }
 
 // =========================================================
@@ -600,8 +539,6 @@ async function main() {
 
         // Semua kalkulasi dikerjakan oleh engine
         const hasil = window.PsikogramEngine.hitungPsikogram(rawData, id_x);
-        // Simpan raw data agar renderPage bisa deteksi ketersediaan data
-        hasil._raw = Array.isArray(rawData) ? rawData[0] : rawData;
 
         // Patch identitas dari x_02 JSON (engine hanya support format lama pipe-separated)
         try {
