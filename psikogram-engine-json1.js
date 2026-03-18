@@ -35,9 +35,9 @@
     }
 
     function parseX05(x05) {
-        // Format nilai1_json: {"cfit1":12,"cfit2":8,"cfit3":15,"cfit4":9,"tkd3":30,"tkd6":18,...}
-        // Mendukung key lama (tkd5, deret6) maupun key baru (tkd3, tkd6)
-        // [0]=cfit1 [1]=cfit2 [2]=cfit3 [3]=cfit4 [15]=tkd3|tkd5 [17]=tkd6|deret6
+        // Format nilai1_json: {"cfit1":12,"cfit2":8,"cfit3":15,"cfit4":9,"tkd5":30,"deret6":18,...}
+        // Dikembalikan sebagai array index agar sisa kode kompatibel:
+        // [0]=cfit1 [1]=cfit2 [2]=cfit3 [3]=cfit4 [15]=tkd5 [17]=deret6
         const obj = JSON.parse(x05 || '{}');
         const arr = new Array(20).fill('');
         arr[0]  = obj.cfit1  !== undefined ? String(obj.cfit1)  : '';
@@ -55,10 +55,8 @@
         arr[12] = obj.ist9   !== undefined ? String(obj.ist9)   : '';
         arr[13] = obj.apm1   !== undefined ? String(obj.apm1)   : '';
         arr[14] = obj.apm14  !== undefined ? String(obj.apm14)  : '';
-        const tkd3val  = obj.tkd3  ?? obj.tkd5;   // tkd3 (baru) atau tkd5 (lama)
-        const tkd6val  = obj.tkd6  ?? obj.deret6; // tkd6 (baru) atau deret6 (lama)
-        arr[15] = tkd3val  !== undefined ? String(tkd3val)  : '';
-        arr[17] = tkd6val  !== undefined ? String(tkd6val)  : '';
+        arr[15] = obj.tkd5   !== undefined ? String(obj.tkd5)   : '';
+        arr[17] = obj.deret6 !== undefined ? String(obj.deret6) : '';
         return arr;
     }
 
@@ -871,7 +869,7 @@
     // EXPORT: semua yang dibutuhkan file tampilan
     // =========================================================
     global.PsikogramEngine = {
-        // Fungsi utama — panggil xxini dari psikogram.html
+        // Fungsi utama — panggil ini dari psikogram.html
         hitungPsikogram,
         // Data statis — dipakai untuk render teks default
         kekuatanKelemahan,
