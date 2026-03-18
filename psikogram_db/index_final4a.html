@@ -657,8 +657,8 @@
 </div>
 
 <!-- Library PDF -->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
 // =========================================================
@@ -849,274 +849,71 @@ function renderPage(parsed) {
 }
 
 // =========================================================
-// DOWNLOAD PDF — pdfmake (langsung dari data, bukan screenshot)
+// DOWNLOAD PDF (identik dengan index.html)
 // =========================================================
 function setupDownload() {
-
-    // Warna utama
-    const UNGU   = '#5F4EDA';
-    const HITAM  = '#000000';
-    const ABUABU = '#f2f2f2';
-    const HIJAU  = '#d1e7dd';
-
-    // Ambil gambar sebagai base64
-    function toBase64(src) {
-        return new Promise(resolve => {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-                const c = document.createElement('canvas');
-                c.width = img.naturalWidth; c.height = img.naturalHeight;
-                c.getContext('2d').drawImage(img, 0, 0);
-                resolve(c.toDataURL('image/png'));
-            };
-            img.onerror = () => resolve(null);
-            img.src = src + '?t=' + Date.now();
-        });
-    }
-
     async function downloadPDF() {
-        const btn = document.getElementById('downloadBtn');
-        btn.textContent = '⏳ Membuat PDF...';
-        btn.disabled = true;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const W = doc.internal.pageSize.getWidth();
+        const H = doc.internal.pageSize.getHeight();
 
-        // Ambil data dari halaman
-        const nama    = document.getElementById('td-nama')?.textContent?.trim() || '';
-        const jk      = document.getElementById('td-jk')?.textContent?.trim() || '';
-        const usia    = document.getElementById('td-usia')?.textContent?.trim() || '';
-        const tgl     = document.getElementById('td-tanggal')?.textContent?.trim() || '';
-        const iq      = document.getElementById('span-iq')?.textContent?.trim() || '';
-        const tglTTD  = document.getElementById('span-tanggal-ttd')?.textContent?.trim() || '';
+        const noDownEls = document.querySelectorAll('.no-download');
+        noDownEls.forEach(el => el.style.display = 'none');
 
-        const kelebihan  = [...document.querySelectorAll('#list-kelebihan li')].map(l => l.textContent.trim());
-        const kelemahan  = [...document.querySelectorAll('#list-kelemahan li')].map(l => l.textContent.trim());
-        const rekomendasi= [...document.querySelectorAll('#list-rekomendasi li')].map(l => l.textContent.trim());
-
-        // Arah minat — ambil dari DOM
-        const minatItems = [];
-        const minatEl = document.getElementById('list-minat');
-        if (minatEl) {
-            const children = minatEl.children;
-            for (let i = 0; i < children.length; i++) {
-                const el = children[i];
-                if (el.tagName === 'LI') minatItems.push({ type: 'title', text: el.textContent.trim() });
-                else if (el.tagName === 'P') minatItems.push({ type: 'desc', text: el.textContent.trim() });
-            }
+        function loadImg(src) {
+            return new Promise(resolve => {
+                const img = new Image();
+                img.onload  = () => resolve(img);
+                img.onerror = () => resolve(null);
+                img.src = src;
+            });
+        }
+        function imgH(img) {
+            return (img.naturalHeight * W) / img.naturalWidth;
         }
 
-        // Baris tabel aspek dari DOM tbody
-        const rows = [...document.querySelectorAll('#tbody-aspek tr')];
-        const tabelBaris = rows.map(tr => {
-            const tds = tr.querySelectorAll('td');
-            if (tds.length === 1) {
-                // section header
-                return { type: 'section', text: tds[0].textContent.trim() };
-            }
-            const aspek = tds[0]?.textContent.trim() || '';
-            const ket   = tds[1]?.textContent.trim() || '';
-            let skorIdx = -1;
-            for (let i = 2; i < tds.length; i++) {
-                if (tds[i].textContent.trim() === '✔') { skorIdx = i - 2; break; }
-            }
-            return { type: 'row', aspek, ket, skorIdx };
-        });
-
-        // Load gambar
-        const [logoB64, hdrB64, ttdB64] = await Promise.all([
-            toBase64('gambar/logo1.png'),
-            toBase64('gambar/01d.jpg'),
-            toBase64('gambar/ttd.png')
-        ]);
-
-        // Buat baris tabel aspek untuk pdfmake — header dengan colSpan benar
-        const EMP = {text:'', border:[false,false,false,false]};
-        const FS1 = 9.5; // font size halaman 1
-        const TH = (txt, extra={}) => ({ text:txt, bold:true, fontSize:FS1, alignment:'center', fillColor:ABUABU, border:[true,true,true,true], margin:[1,3,1,3], ...extra });
-
-        const tableBody = [
-            [
-                TH('Aspek Psikologis', {rowSpan:2, margin:[2,10,2,2]}),
-                TH('Keterangan',       {rowSpan:2, margin:[2,10,2,2]}),
-                TH('K',  {colSpan:4}), EMP, EMP, EMP,
-                TH('C',  {colSpan:2}), EMP,
-                TH('B',  {colSpan:2}), EMP,
-                TH('BS', {colSpan:2}), EMP
-            ],
-            [ EMP, EMP,
-              TH('1'),TH('2'),TH('3'),TH('4'),
-              TH('5'),TH('6'),
-              TH('7'),TH('8'),
-              TH('9'),TH('10')
-            ]
-        ];
-
-        tabelBaris.forEach(r => {
-            if (r.type === 'section') {
-                tableBody.push([
-                    { text: r.text, bold:true, fontSize:FS1, color:'#ffffff', fillColor:HITAM,
-                      alignment:'center', colSpan:12, border:[true,true,true,true], margin:[2,3,2,3] },
-                    ...Array(11).fill(EMP)
-                ]);
-            } else {
-                const skorCells = Array.from({length:10}, (_, i) => ({
-                    text: i === r.skorIdx ? 'v' : '',
-                    bold: i === r.skorIdx,
-                    fontSize: i === r.skorIdx ? FS1+2 : FS1,
-                    alignment: 'center',
-                    fillColor: i === r.skorIdx ? HIJAU : null,
-                    border: [true,true,true,true],
-                    margin: [1,2,1,2]
-                }));
-                tableBody.push([
-                    { text: r.aspek, fontSize:FS1, border:[true,true,true,true], margin:[3,2,3,2] },
-                    { text: r.ket,   fontSize:FS1, border:[true,true,true,true], margin:[3,2,3,2] },
-                    ...skorCells
-                ]);
+        const [hdr1, ftr1] = await Promise.all([loadImg('gambar/01d.jpg'), loadImg('gambar/03a1.png')]);
+        const hdr1H = hdr1 ? imgH(hdr1) : 0;
+        const ftr1H = ftr1 ? imgH(ftr1) : 0;
+        if (hdr1) doc.addImage(hdr1, 'JPEG', 0, 0, W, hdr1H);
+        const c1 = await html2canvas(document.getElementById('downloadContent1'), {
+            scale: 2, useCORS: true, allowTaint: true, logging: false,
+            onclone: (clonedDoc) => {
+                const thead = clonedDoc.querySelector('thead');
+                if (!thead) return;
+                thead.innerHTML = `
+                    <tr class="header">
+                        <th colspan="2" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">Aspek dan Deskripsi Psikologis</th>
+                        <th colspan="10" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">Skala</th>
+                    </tr>
+                    <tr class="header">
+                        <th style="width:250px;background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">Aspek Psikologis</th>
+                        <th style="width:600px;background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">Keterangan</th>
+                        <th colspan="4" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">K</th>
+                        <th colspan="2" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">C</th>
+                        <th colspan="2" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">B</th>
+                        <th colspan="2" style="background:#f2f2f2;border:1px solid black;padding:8px;text-align:center;font-size:19px;">BS</th>
+                    </tr>`;
             }
         });
+        const h1 = (c1.height * W) / c1.width;
+        doc.addImage(c1.toDataURL('image/png'), 'PNG', 0, hdr1H, W, h1);
+        if (ftr1) doc.addImage(ftr1, 'PNG', 0, H - ftr1H, W, ftr1H);
 
-        // Header institusi (sama 2 halaman)
-        const headerInstitusi = () => {
-            const content = [];
-            if (hdrB64) {
-                content.push({ image: hdrB64, width: 595, margin: [-30, 0, -30, 10] });
-            } else {
-                content.push({
-                    table: { widths: ['auto','*'], body: [[
-                        logoB64 ? { image: logoB64, width: 60, rowSpan: 5, margin:[0,4,0,0] } : { text:'' },
-                        { text: 'PT. LIDAN INDAH ABADI', bold: true, fontSize: 14, color:'white', alignment:'center' }
-                    ],[{},{text:'LIDAN PSIKOLOGI',italics:true,fontSize:10,color:'#e0f7fa',alignment:'center'}],
-                    [{},{text:'Regus Forum Nine, Lantai 9 CIMB NIAGA PLAZA',fontSize:8,color:'white',alignment:'center'}],
-                    [{},{text:'Jalan Imam Bonjol No.9, Medan 20159, Sumatera Utara',fontSize:8,color:'white',alignment:'center'}],
-                    [{},{text:'Telepon: +62851-5960-1400 | www.lidan.co.id | cs@lidan.co.id',fontSize:8,color:'white',alignment:'center'}]
-                    ]}, fillColor: UNGU, margin:[0,0,0,8]
-                });
-            }
-            return content;
-        };
+        doc.addPage();
+        const [hdr2, ftr2] = await Promise.all([loadImg('gambar/01d.jpg'), loadImg('gambar/03a1.png')]);
+        const hdr2H = hdr2 ? imgH(hdr2) : 0;
+        const ftr2H = ftr2 ? imgH(ftr2) : 0;
+        if (hdr2) doc.addImage(hdr2, 'JPEG', 0, 0, W, hdr2H);
+        const c2 = await html2canvas(document.getElementById('downloadContent2'), {scale: 2});
+        const h2 = (c2.height * W) / c2.width;
+        doc.addImage(c2.toDataURL('image/png'), 'PNG', 0, hdr2H, W, h2);
+        if (ftr2) doc.addImage(ftr2, 'PNG', 0, H - ftr2H, W, ftr2H);
 
-        // Halaman 2 — narasi
-        const FS2 = 11; // font size halaman 2
-
-        // Ambil QR code sebagai base64 dari canvas yang sudah di-generate
-        function getQrBase64() {
-            const qrCanvas = document.querySelector('#qr-code canvas');
-            if (qrCanvas) return qrCanvas.toDataURL('image/png');
-            const qrImg = document.querySelector('#qr-code img');
-            if (qrImg) return qrImg.src;
-            return null;
-        }
-        const qrB64 = getQrBase64();
-        const hal2Content = [];
-        hal2Content.push({ text: 'Intelligence Quotient (IQ) :', bold: true, fontSize: FS2, margin:[0,0,0,2] });
-        hal2Content.push({ text: `• Intelligence Quotient / IQ = ${iq}`, fontSize: FS2, margin:[8,0,0,6] });
-
-        hal2Content.push({ text: 'Strengths/Kelebihan:', bold: true, fontSize: FS2, margin:[0,0,0,2] });
-        kelebihan.forEach(t => hal2Content.push({ text: `• ${t}`, fontSize: FS2, margin:[8,0,0,2] }));
-        hal2Content.push({ text: '', margin:[0,0,0,4] });
-
-        hal2Content.push({ text: 'Weaknesses/Kelemahan:', bold: true, fontSize: FS2, margin:[0,0,0,2] });
-        kelemahan.forEach(t => hal2Content.push({ text: `• ${t}`, fontSize: FS2, margin:[8,0,0,2] }));
-        hal2Content.push({ text: '', margin:[0,0,0,4] });
-
-        hal2Content.push({ text: 'Recommendation/Rekomendasi:', bold: true, fontSize: FS2, margin:[0,0,0,2] });
-        rekomendasi.forEach(t => hal2Content.push({ text: `• ${t}`, fontSize: FS2, margin:[8,0,0,2], alignment:'justify' }));
-        hal2Content.push({ text: '', margin:[0,0,0,4] });
-
-        hal2Content.push({ text: 'Arah Minat Pendidikan / Pekerjaan', bold: true, decoration:'underline', fontSize: FS2, margin:[0,0,0,4] });
-        minatItems.forEach(m => {
-            if (m.type === 'title') hal2Content.push({ text: `• ${m.text}`, bold: true, fontSize: FS2, margin:[0,0,0,2] });
-            else hal2Content.push({ text: m.text, fontSize: FS2, margin:[10,0,0,6], alignment:'justify' });
-        });
-
-        // Tanda tangan
-        hal2Content.push({ text: '', margin:[0,10,0,0] });
-        const ttdRow = {
-            columns: [
-                // QR code di tengah
-                { width: '*', text:'' },
-                {
-                    width: 'auto',
-                    stack: qrB64 ? [
-                        { image: qrB64, width: 90, alignment: 'center' },
-                        { text: 'Scan untuk lihat laporan', fontSize: 8, alignment: 'center', color: '#888', margin:[0,2,0,0] }
-                    ] : [{ text:'' }]
-                },
-                { width: '*', text:'' },
-                // Tanda tangan kanan
-                {
-                    width: 'auto',
-                    stack: [
-                        { text: `Medan, ${tglTTD}`, bold: true, fontSize: FS2 },
-                        { text: 'Psikolog,', fontSize: FS2, margin:[0,2,0,2] },
-                        ttdB64 ? { image: ttdB64, width: 90, margin:[0,2,0,2] } : { text:'', margin:[0,50,0,0] },
-                        { text: 'Dr. Karina M. Brahmana, M.Psi, Psikolog', bold: true, fontSize: FS2, margin:[0,2,0,0] },
-                        { text: 'No SIPP: 20070136-2021-02-0799', fontSize: FS2 }
-                    ],
-                    alignment: 'right'
-                }
-            ]
-        };
-        hal2Content.push(ttdRow);
-
-        // Definisi dokumen pdfmake
-        const docDef = {
-            pageSize: 'A4',
-            pageMargins: [30, 0, 30, 20],
-            content: [
-                // === HALAMAN 1 ===
-                ...headerInstitusi(),
-                { text: 'PROFIL PEMERIKSAAN PSIKOLOGIS', bold: true, fontSize: FS1+4, alignment: 'center', margin:[0,4,0,8] },
-                {
-                    table: {
-                        widths: [140, 10, '*'],
-                        body: [
-                            [{text:'Nama',fontSize:FS1,border:[false,false,false,false]},{text:':',fontSize:FS1,border:[false,false,false,false]},{text:nama,fontSize:FS1,border:[false,false,false,false]}],
-                            [{text:'Jenis Kelamin',fontSize:FS1,border:[false,false,false,false]},{text:':',fontSize:FS1,border:[false,false,false,false]},{text:jk,fontSize:FS1,border:[false,false,false,false]}],
-                            [{text:'Usia',fontSize:FS1,border:[false,false,false,false]},{text:':',fontSize:FS1,border:[false,false,false,false]},{text:usia+' Tahun',fontSize:FS1,border:[false,false,false,false]}],
-                            [{text:'Tanggal Pemeriksaan',fontSize:FS1,border:[false,false,false,false]},{text:':',fontSize:FS1,border:[false,false,false,false]},{text:tgl,fontSize:FS1,border:[false,false,false,false]}],
-                        ]
-                    },
-                    layout: { hLineWidth:()=>0, vLineWidth:()=>0 },
-                    margin: [0,0,0,6]
-                },
-                {
-                    canvas: [
-                        { type:'line', x1:0, y1:0, x2:515, y2:0, lineWidth:2 },
-                        { type:'line', x1:0, y1:3, x2:515, y2:3, lineWidth:0.5 }
-                    ], margin:[0,0,0,4]
-                },
-                { text: 'Aspek Psikologis', bold: true, fontSize: FS1+2, alignment: 'center', margin:[0,0,0,4] },
-                {
-                    table: {
-                        headerRows: 2,
-                        widths: [75, 170, 15,15,15,15, 18,18, 18,18, 22,22],
-                        body: tableBody
-                    },
-                    layout: {
-                        hLineWidth: () => 0.5,
-                        vLineWidth: () => 0.5,
-                        hLineColor: () => '#000',
-                        vLineColor: () => '#000'
-                    },
-                    margin: [0,0,0,4]
-                },
-                { text: '*Keterangan : K = Kurang ; C = Cukup ; B = Baik ; BS = Baik Sekali', fontSize: FS1-1, margin:[0,2,0,0] },
-
-                // === HALAMAN 2 === dibungkus stack dengan margin kiri-kanan lebih lebar
-                { text: '', pageBreak: 'before' },
-                ...headerInstitusi(),
-                {
-                    stack: hal2Content,
-                    margin: [20, 0, 20, 0]
-                }
-            ],
-            defaultStyle: { font: 'Roboto' }
-        };
-
-        pdfMake.createPdf(docDef).download(`${nama || 'psikogram'}.pdf`);
-        btn.textContent = 'Download PDF';
-        btn.disabled = false;
+        const namaPeserta = (document.getElementById('td-nama')?.textContent || 'psikogram').trim();
+        doc.save(`${namaPeserta}.pdf`);
+        noDownEls.forEach(el => el.style.display = '');
     }
 
     document.getElementById('downloadBtn').onclick  = downloadPDF;
