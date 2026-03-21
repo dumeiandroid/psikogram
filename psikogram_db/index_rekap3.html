@@ -111,14 +111,6 @@
             transition: opacity .15s;
         }
         .btn-link-iq:hover { opacity: .85; }
-        .btn-link-sert {
-            background: #b45309; color: white;
-            border-radius: 6px; padding: 4px 12px;
-            font-size: 11px; cursor: pointer; border: none;
-            text-decoration: none; display: inline-block;
-            transition: opacity .15s;
-        }
-        .btn-link-sert:hover { opacity: .85; }
 
         /* Table */
         .table-wrap {
@@ -412,7 +404,6 @@
                         const kode    = row.x_01 || '—';
                         const link    = `index_final.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkIQ  = `https://laporan.lidan.co.id/iq/?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
-                        const linkSert= `sertifikat-iq.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         return `<tr>
                             <td style="color:var(--muted); font-family:'DM Mono',monospace; font-size:12px;">${row.id_x}</td>
                             <td><span class="kode-badge">${kode}</span></td>
@@ -422,7 +413,6 @@
                             <td style="display:flex; gap:6px; align-items:center;">
                                 <a href="${link}" target="_blank" class="btn-link">📄 Full</a>
                                 <a href="${linkIQ}" target="_blank" class="btn-link-iq">🧠 IQ</a>
-                                <a href="${linkSert}" target="_blank" class="btn-link-sert">🏅 Sertifikat</a>
                                 <button class="btn-danger-sm" onclick="hapusData(${row.id_x})">🗑</button>
                             </td>
                         </tr>`;
