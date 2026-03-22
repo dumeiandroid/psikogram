@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sertifikat IQ – Lidan Psikologi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;900&family=Great+Vibes&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: #2a2218;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 20px;
+    font-family: 'EB Garamond', serif;
+}
+
+#ls {
+    position: fixed; inset: 0; background: #2a2218;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999; gap: 14px;
+}
+#ls p { color: #C9A84C; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 4px; }
+.sp { width: 36px; height: 36px; border: 2px solid #3d3020; border-top-color: #C9A84C; border-radius: 50%; animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#ls.hidden { display: none; }
+
+.pbar { display: flex; gap: 12px; margin-bottom: 28px; }
+.pb {
+    padding: 10px 28px; border: none; border-radius: 2px;
+    font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 2px; cursor: pointer; transition: all .2s; text-transform: uppercase;
+}
+.pb1 { background: linear-gradient(135deg, #a07820, #C9A84C, #e8c860, #C9A84C, #a07820); color: #2a1800; box-shadow: 0 2px 12px rgba(201,168,76,.3); }
+.pb1:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(201,168,76,.4); }
+.pb2 { background: transparent; color: #888; border: 1px solid #444; }
+.pb2:hover { color: #aaa; }
+
+/* ═══════════════════════════
+   SERTIFIKAT
+═══════════════════════════ */
+.cert {
+    width: 820px;
+    position: relative;
+    background-color: #FDF6E3;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+        radial-gradient(ellipse at 0% 0%, rgba(201,168,76,.10) 0%, transparent 45%),
+        radial-gradient(ellipse at 100% 0%, rgba(201,168,76,.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 100% 100%, rgba(201,168,76,.10) 0%, transparent 45%),
+        radial-gradient(ellipse at 0% 100%, rgba(201,168,76,.08) 0%, transparent 45%);
+    box-shadow: 0 10px 50px rgba(0,0,0,.55), 0 2px 10px rgba(0,0,0,.3);
+    overflow: hidden;
+}
+
+/* ─── LAYER 1: Watermark ─── */
+.cert-watermark {
+    position: absolute; inset: 0; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+}
+.cert-watermark img {
+    width: 280px; height: 280px; object-fit: contain;
+    opacity: .045; filter: sepia(1) saturate(2);
+}
+
+/* ─── LAYER 2: Ukiran Bunga ─── */
+.floral-tr, .floral-bl {
+    position: absolute; z-index: 2; pointer-events: none;
+}
+.floral-tr { top: 0; right: 0; width: 280px; height: 280px; }
+.floral-bl { bottom: 0; left: 0; width: 280px; height: 280px; transform: rotate(180deg); }
+
+/* ─── LAYER 3: Frame ─── */
+.frame-outer {
+    position: absolute; inset: 10px; z-index: 3;
+    border: 3.5px solid #C9A84C; pointer-events: none;
+}
+.frame-pattern {
+    position: absolute; inset: 14px; z-index: 3;
+    overflow: hidden; pointer-events: none;
+}
+.frame-pattern svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.frame-inner {
+    position: absolute; inset: 18px; z-index: 3;
+    border: 1px solid rgba(201,168,76,.45); pointer-events: none;
+}
+
+/* ─── LAYER 4: Ornamen sudut frame ─── */
+.corner-orn {
+    position: absolute; z-index: 4; pointer-events: none;
+    width: 48px; height: 48px;
+}
+.co-tl { top: 7px; left: 7px; }
+.co-tr { top: 7px; right: 7px; transform: scaleX(-1); }
+.co-bl { bottom: 7px; left: 7px; transform: scaleY(-1); }
+.co-br { bottom: 7px; right: 7px; transform: scale(-1,-1); }
+
+/* ─── LAYER 4: Konten teks ─── */
+.cert-body {
+    position: relative; z-index: 4;
+    padding: 42px 62px 34px;
+}
+
+.cert-header { display: flex; align-items: center; gap: 18px; margin-bottom: 6px; }
+.cert-logo {
+    width: 70px; height: 70px; border-radius: 50%;
+    border: 2.5px solid #C9A84C; object-fit: cover; flex-shrink: 0;
+    box-shadow: 0 0 0 4px rgba(201,168,76,.14), 0 2px 10px rgba(0,0,0,.2);
+}
+.cert-title-main {
+    font-family: 'Cinzel', serif; font-size: 29px; font-weight: 900;
+    color: #7a5c10; letter-spacing: 3px; line-height: 1;
+    text-shadow: 1px 1px 0 rgba(255,220,100,.35), 0 2px 8px rgba(120,90,15,.2);
+}
+.cert-title-sub {
+    font-family: 'Cinzel', serif; font-size: 9.5px; font-weight: 600;
+    letter-spacing: 7px; color: #B8922A; margin-top: 7px;
+}
+
+.laurel-div {
+    display: flex; align-items: center; gap: 10px; margin: 13px 0 15px;
+}
+.laurel-div .ll { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #C9A84C 30%, #C9A84C 70%, transparent); }
+
+.cert-kepada {
+    text-align: center; font-family: 'Cinzel', serif;
+    font-size: 9px; font-weight: 600;
+    letter-spacing: 5px; color: #B8922A;
+    text-transform: uppercase; margin-bottom: 5px;
+}
+.cert-nama {
+    text-align: center; font-family: 'Great Vibes', cursive;
+    font-size: 60px; color: #3B2A1A; line-height: 1.1; margin-bottom: 5px;
+    text-shadow: 1px 2px 4px rgba(59,42,26,.18), 0 1px 0 rgba(201,168,76,.12);
+}
+.cert-sub {
+    text-align: center; font-family: 'EB Garamond', serif;
+    font-size: 14px; color: #5a4020; font-style: italic;
+    letter-spacing: .3px; margin-bottom: 7px;
+}
+.cert-score {
+    text-align: center; font-family: 'Cinzel', serif;
+    font-size: 19px; font-weight: 600; color: #3B2A1A;
+    letter-spacing: 2px; margin-bottom: 3px;
+    text-shadow: 0 1px 2px rgba(59,42,26,.12);
+}
+.cert-score .sv {
+    color: #8B6914; font-weight: 900; font-size: 23px;
+    text-shadow: 1px 1px 0 rgba(255,210,80,.4), 0 2px 6px rgba(139,105,20,.25);
+}
+
+/* ─── LAYER 5: Footer (TTD, logo, segel) ─── */
+.cert-footer {
+    display: flex; align-items: flex-end;
+    justify-content: space-between; gap: 16px; margin-top: 3px;
+}
+
+/* ─── LAYER 6: QR ─── */
+.cert-qr { flex-shrink: 0; position: relative; z-index: 6; }
+.qr-box {
+    padding: 5px; border: 1.5px solid rgba(201,168,76,.55);
+    background: white; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+#cert-qr-code canvas, #cert-qr-code img { display: block; }
+.qr-label {
+    font-family: 'Cinzel', serif; font-size: 7px; color: #B8922A;
+    text-align: center; margin-top: 4px; letter-spacing: 2px;
+}
+
+.cert-ttd {
+    flex: 1; text-align: center; z-index: 5;
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.cert-tanggal { font-family: 'EB Garamond', serif; font-size: 13px; color: #5a4020; letter-spacing: .4px; }
+.cert-psikolog-lbl { font-family: 'Cinzel', serif; font-size: 9.5px; font-weight: 600; color: #8B6914; letter-spacing: 3px; }
+.ttd-wrap { position: relative; width: 160px; height: 100px; display: flex; align-items: center; justify-content: center; }
+.ttd-img { position: absolute; top: 0; left: 50%; transform: translateX(-50%); height: 68px; max-width: 160px; object-fit: contain; z-index: 5; }
+.stempel-img { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); width: 92px; height: 92px; object-fit: contain; z-index: 5; opacity: .87; }
+.cert-ttd-line { width: 100%; max-width: 230px; height: 1px; background: linear-gradient(90deg, transparent, #C9A84C, transparent); margin: 3px auto; }
+.cert-ttd-nama { font-family: 'Cinzel', serif; font-size: 9.5px; font-weight: 600; color: #3B2A1A; letter-spacing: .3px; }
+.cert-ttd-sipp { font-family: 'EB Garamond', serif; font-size: 11px; color: #8B6914; margin-top: 1px; }
+
+.cert-seal { flex-shrink: 0; width: 78px; text-align: center; z-index: 5; }
+
+@media print {
+    body { background: #FDF6E3; padding: 0; }
+    .pbar { display: none; }
+    .cert { width: 100%; box-shadow: none; }
+}
+@media (max-width: 880px) {
+    .cert { width: 100%; }
+    .cert-body { padding: 28px 22px; }
+    .cert-nama { font-size: 38px; }
+    .cert-title-main { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<div id="ls"><div class="sp"></div><p>Memuat Sertifikat</p></div>
+
+<div class="pbar">
+    <button class="pb pb1" onclick="window.print()">&#128438; Cetak / Simpan PDF</button>
+    <button class="pb pb2" onclick="history.back()">&#8592; Kembali</button>
+</div>
+
+<div class="cert">
+
+    <!-- LAYER 1: Watermark -->
+    <div class="cert-watermark">
+        <img src="https://psikogram.lidan.co.id/gambar/logo1.png" alt="">
+    </div>
+
+    <!-- LAYER 2: Ukiran bunga kanan atas -->
+    <svg class="floral-tr" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g opacity="0.78" fill="none" stroke="#C9A84C">
+            <!-- Tangkai utama menjalar dari sudut kanan atas -->
+            <path d="M280 0 C240 20 200 60 160 100 C130 130 100 160 70 200" stroke-width="1.2"/>
+            <path d="M280 0 C260 30 230 55 190 80 C155 103 120 135 90 170" stroke-width=".8" stroke-dasharray="4 2"/>
+
+            <!-- Ranting sulur kiri atas -->
+            <path d="M200 0 C195 25 185 45 165 55 C150 62 135 58 125 45" stroke-width="1"/>
+            <path d="M240 0 C235 18 220 32 200 38 C185 43 170 40 162 30" stroke-width=".8"/>
+
+            <!-- Mawar 1 — tengah atas -->
+            <circle cx="190" cy="38" r="10" stroke-width="1.2"/>
+            <circle cx="190" cy="38" r="6.5" stroke-width="1"/>
+            <circle cx="190" cy="38" r="3" stroke-width=".8"/>
+            <path d="M180 30 Q190 24 200 30 Q206 38 200 46 Q190 52 180 46 Q174 38 180 30" stroke-width="1" fill="rgba(201,168,76,.12)"/>
+            <path d="M183 27 Q190 22 197 27" stroke-width=".7"/>
+            <path d="M183 49 Q190 54 197 49" stroke-width=".7"/>
+            <path d="M178 32 Q173 38 178 44" stroke-width=".7"/>
+            <path d="M202 32 Q207 38 202 44" stroke-width=".7"/>
+
+            <!-- Daun di kiri mawar 1 -->
+            <path d="M170 42 Q158 35 150 40 Q155 50 168 48 Z" stroke-width=".9" fill="rgba(201,168,76,.08)"/>
+            <path d="M159 37 Q154 42 158 47" stroke-width=".6"/>
+
+            <!-- Daun di bawah mawar 1 -->
+            <path d="M192 52 Q200 64 195 72 Q185 68 183 56 Z" stroke-width=".9" fill="rgba(201,168,76,.08)"/>
+            <path d="M193 57 Q195 65 192 70" stroke-width=".6"/>
+
+            <!-- Mawar 2 — di jalur utama -->
+            <circle cx="148" cy="110" r="9" stroke-width="1.2"/>
+            <circle cx="148" cy="110" r="5.5" stroke-width="1"/>
+            <circle cx="148" cy="110" r="2.5" stroke-width=".8"/>
+            <path d="M139 102 Q148 96 157 102 Q163 110 157 118 Q148 124 139 118 Q133 110 139 102" stroke-width="1" fill="rgba(201,168,76,.12)"/>
+            <path d="M142 99 Q148 95 154 99" stroke-width=".7"/>
+            <path d="M142 121 Q148 126 154 121" stroke-width=".7"/>
+
+            <!-- Sulur dari mawar 2 -->
+            <path d="M140 105 C128 95 118 88 108 90 C100 92 96 100 102 106" stroke-width=".9"/>
+            <path d="M148 120 C140 135 130 145 118 148 C108 150 100 144 104 136" stroke-width=".9"/>
+
+            <!-- Kuncup bunga kecil 1 -->
+            <ellipse cx="106" cy="92" rx="5" ry="7" stroke-width=".9" fill="rgba(201,168,76,.1)"/>
+            <path d="M103 88 Q106 84 109 88" stroke-width=".7"/>
+            <path d="M101 92 Q106 98 111 92" stroke-width=".7" opacity=".6"/>
+
+            <!-- Daun sulur kiri -->
+            <path d="M120 96 Q110 88 105 94 Q110 104 122 100 Z" stroke-width=".9" fill="rgba(201,168,76,.08)"/>
+
+            <!-- Kuncup bunga kecil 2 -->
+            <ellipse cx="108" cy="138" rx="5" ry="7" stroke-width=".9" fill="rgba(201,168,76,.1)"/>
+            <path d="M105 134 Q108 130 111 134" stroke-width=".7"/>
+
+            <!-- Mawar 3 — jalur utama tengah -->
+            <circle cx="110" cy="168" r="8" stroke-width="1.1"/>
+            <circle cx="110" cy="168" r="5" stroke-width=".9"/>
+            <path d="M102 161 Q110 155 118 161 Q123 168 118 175 Q110 181 102 175 Q97 168 102 161" stroke-width="1" fill="rgba(201,168,76,.12)"/>
+            <path d="M105 158 Q110 154 115 158" stroke-width=".7"/>
+            <path d="M105 178 Q110 183 115 178" stroke-width=".7"/>
+
+            <!-- Daun kanan mawar 3 -->
+            <path d="M120 164 Q132 157 138 163 Q132 174 120 172 Z" stroke-width=".9" fill="rgba(201,168,76,.08)"/>
+            <path d="M124 159 Q131 162 134 168" stroke-width=".6"/>
+
+            <!-- Daun kiri mawar 3 -->
+            <path d="M100 166 Q88 158 82 164 Q88 175 100 172 Z" stroke-width=".9" fill="rgba(201,168,76,.08)"/>
+
+            <!-- Sulur melingkar ornamen -->
+            <path d="M258 0 C252 15 238 22 225 18 C215 15 210 8 215 3" stroke-width=".8"/>
+            <path d="M215 4 C213 10 218 16 225 14" stroke-width=".6"/>
+            <circle cx="230" cy="16" r="2" stroke-width=".7" fill="rgba(201,168,76,.15)"/>
+
+            <!-- Titik-titik ornamen kecil -->
+            <circle cx="175" cy="18" r="1.5" fill="#C9A84C" opacity=".5"/>
+            <circle cx="220" cy="55" r="1.5" fill="#C9A84C" opacity=".5"/>
+            <circle cx="135" cy="75" r="1.5" fill="#C9A84C" opacity=".5"/>
+            <circle cx="170" cy="130" r="1.5" fill="#C9A84C" opacity=".5"/>
+            <circle cx="90" cy="145" r="1.5" fill="#C9A84C" opacity=".5"/>
+        </g>
+    </svg>
+
+    <!-- LAYER 2: Ukiran bunga kiri bawah (mirrored) -->
+    <svg class="floral-bl" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g opacity="0.78" fill="none" stroke="#C9A84C">
+            <path d="M280 0 C240 20 200 60 160 100 C130 130 100 160 70 200" stroke-width="1.2"/>
+            <path d="M280 0 C260 30 230 55 190 80 C155 103 120 135 90 170" stroke-width=".8" stroke-dasharray="4 2"/>
+            <path d="M200 0 C195 25 185 45 165 55 C150 62 135 58 125 45" stroke-width="1"/>
+            <path d="M240 0 C235 18 220 32 200 38 C185 43 170 40 162 30" stroke-width=".8"/>
+            <circle cx="190" cy="38" r="10" stroke-width="1.2"/>
+            <circle cx="190" cy="38" r="6.5" stroke-width="1"/>
+            <circle cx="190" cy="38" r="3" stroke-width=".8"/>
+            <path d="M180 30 Q190 24 200 30 Q206 38 200 46 Q190 52 180 46 Q174 38 180 30" stroke-width="1" fill="rgba(201,168,76,.12)"/>
+            <path d="M183 27 Q190 22 197 27" stroke-width=".7"/>
+            <path d="M183 49 Q190 54 197 49" stroke-width=".7"/>
+            <path d="M178 32 Q173 38 178 44" stroke-width=".7"/>
+            <path d="M202 32 Q207 38 202 44" stroke-width=".7"/>
+            <path d="M170 42 Q158 35 150 40 Q155 50 168 48 Z" stroke-width=".9" fill="rgba(201,168,76,.08)"/>
+            <path d="M159 37 Q154 42 158 47" stroke-width=".6"/>
+            <path d="M192 52 Q200 64 195 72 Q185 68 183 56 Z" stroke-width=".9" fill="rgba(201,168,76,.08)"/>
+            <path d="M193 57 Q195 65 192 70" stroke-width=".6"/>
+            <circle cx="148" cy="110" r="9" stroke-width="1.2"/>
+            <circle cx="148" cy="110" r="5.5" stroke-width="1"/>
+            <circle cx="148" cy="110" r="2.5" stroke-width=".8"/>
+            <path d="M139 102 Q148 96 157 102 Q163 110 157 118 Q148 124 139 118 Q133 110 139 102" stroke-width="1" fill="rgba(201,168,76,.12)"/>
+            <path d="M142 99 Q148 95 154 99" stroke-width=".7"/>
+            <path d="M142 121 Q148 126 154 121" stroke-width=".7"/>
+            <path d="M140 105 C128 95 118 88 108 90 C100 92 96 100 102 106" stroke-width=".9"/>
+            <path d="M148 120 C140 135 130 145 118 148 C108 150 100 144 104 136" stroke-width=".9"/>
+            <ellipse cx="106" cy="92" rx="5" ry="7" stroke-width=".9" fill="rgba(201,168,76,.1)"/>
+            <path d="M103 88 Q106 84 109 88" stroke-width=".7"/>
+            <path d="M120 96 Q110 88 105 94 Q110 104 122 100 Z" stroke-width=".9" fill="rgba(201,168,76,.08)"/>
+            <ellipse cx="108" cy="138" rx="5" ry="7" stroke-width=".9" fill="rgba(201,168,76,.1)"/>
+            <path d="M105 134 Q108 130 111 134" stroke-width=".7"/>
+            <circle cx="110" cy="168" r="8" stroke-width="1.1"/>
+            <circle cx="110" cy="168" r="5" stroke-width=".9"/>
+            <path d="M102 161 Q110 155 118 161 Q123 168 118 175 Q110 181 102 175 Q97 168 102 161" stroke-width="1" fill="rgba(201,168,76,.12)"/>
+            <path d="M105 158 Q110 154 115 158" stroke-width=".7"/>
+            <path d="M105 178 Q110 183 115 178" stroke-width=".7"/>
+            <path d="M120 164 Q132 157 138 163 Q132 174 120 172 Z" stroke-width=".9" fill="rgba(201,168,76,.08)"/>
+            <path d="M100 166 Q88 158 82 164 Q88 175 100 172 Z" stroke-width=".9" fill="rgba(201,168,76,.08)"/>
+            <path d="M258 0 C252 15 238 22 225 18 C215 15 210 8 215 3" stroke-width=".8"/>
+            <circle cx="230" cy="16" r="2" stroke-width=".7" fill="rgba(201,168,76,.15)"/>
+            <circle cx="175" cy="18" r="1.5" fill="#C9A84C" opacity=".5"/>
+            <circle cx="220" cy="55" r="1.5" fill="#C9A84C" opacity=".5"/>
+            <circle cx="135" cy="75" r="1.5" fill="#C9A84C" opacity=".5"/>
+            <circle cx="170" cy="130" r="1.5" fill="#C9A84C" opacity=".5"/>
+            <circle cx="90" cy="145" r="1.5" fill="#C9A84C" opacity=".5"/>
+        </g>
+    </svg>
+
+    <!-- LAYER 3: Frame -->
+    <div class="frame-outer"></div>
+    <div class="frame-pattern">
+        <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <defs>
+                <pattern id="arab" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+                    <g fill="none" stroke="rgba(201,168,76,0.16)" stroke-width=".6">
+                        <circle cx="14" cy="14" r="5"/>
+                        <line x1="14" y1="0" x2="14" y2="9"/>
+                        <line x1="14" y1="19" x2="14" y2="28"/>
+                        <line x1="0" y1="14" x2="9" y2="14"/>
+                        <line x1="19" y1="14" x2="28" y2="14"/>
+                        <line x1="4" y1="4" x2="10" y2="10"/>
+                        <line x1="18" y1="18" x2="24" y2="24"/>
+                        <line x1="24" y1="4" x2="18" y2="10"/>
+                        <line x1="4" y1="24" x2="10" y2="18"/>
+                    </g>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#arab)"/>
+        </svg>
+    </div>
+    <div class="frame-inner"></div>
+
+    <!-- LAYER 3: Ornamen sudut frame -->
+    <div class="corner-orn co-tl">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 5 L43 5" stroke="#C9A84C" stroke-width="2"/>
+            <path d="M5 5 L5 43" stroke="#C9A84C" stroke-width="2"/>
+            <path d="M11 5 Q11 11 5 11" stroke="#C9A84C" stroke-width=".8"/>
+            <path d="M19 5 Q19 19 5 19" stroke="#C9A84C" stroke-width=".6"/>
+            <circle cx="5" cy="5" r="3" fill="#C9A84C"/>
+            <circle cx="5" cy="5" r="1.4" fill="#FDF6E3"/>
+            <circle cx="24" cy="5" r="1.8" stroke="#C9A84C" stroke-width=".8" fill="rgba(201,168,76,.2)"/>
+            <circle cx="5" cy="24" r="1.8" stroke="#C9A84C" stroke-width=".8" fill="rgba(201,168,76,.2)"/>
+        </svg>
+    </div>
+    <div class="corner-orn co-tr">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 5 L43 5" stroke="#C9A84C" stroke-width="2"/>
+            <path d="M5 5 L5 43" stroke="#C9A84C" stroke-width="2"/>
+            <path d="M11 5 Q11 11 5 11" stroke="#C9A84C" stroke-width=".8"/>
+            <path d="M19 5 Q19 19 5 19" stroke="#C9A84C" stroke-width=".6"/>
+            <circle cx="5" cy="5" r="3" fill="#C9A84C"/>
+            <circle cx="5" cy="5" r="1.4" fill="#FDF6E3"/>
+            <circle cx="24" cy="5" r="1.8" stroke="#C9A84C" stroke-width=".8" fill="rgba(201,168,76,.2)"/>
+            <circle cx="5" cy="24" r="1.8" stroke="#C9A84C" stroke-width=".8" fill="rgba(201,168,76,.2)"/>
+        </svg>
+    </div>
+    <div class="corner-orn co-bl">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 5 L43 5" stroke="#C9A84C" stroke-width="2"/>
+            <path d="M5 5 L5 43" stroke="#C9A84C" stroke-width="2"/>
+            <path d="M11 5 Q11 11 5 11" stroke="#C9A84C" stroke-width=".8"/>
+            <path d="M19 5 Q19 19 5 19" stroke="#C9A84C" stroke-width=".6"/>
+            <circle cx="5" cy="5" r="3" fill="#C9A84C"/>
+            <circle cx="5" cy="5" r="1.4" fill="#FDF6E3"/>
+            <circle cx="24" cy="5" r="1.8" stroke="#C9A84C" stroke-width=".8" fill="rgba(201,168,76,.2)"/>
+            <circle cx="5" cy="24" r="1.8" stroke="#C9A84C" stroke-width=".8" fill="rgba(201,168,76,.2)"/>
+        </svg>
+    </div>
+    <div class="corner-orn co-br">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 5 L43 5" stroke="#C9A84C" stroke-width="2"/>
+            <path d="M5 5 L5 43" stroke="#C9A84C" stroke-width="2"/>
+            <path d="M11 5 Q11 11 5 11" stroke="#C9A84C" stroke-width=".8"/>
+            <path d="M19 5 Q19 19 5 19" stroke="#C9A84C" stroke-width=".6"/>
+            <circle cx="5" cy="5" r="3" fill="#C9A84C"/>
+            <circle cx="5" cy="5" r="1.4" fill="#FDF6E3"/>
+            <circle cx="24" cy="5" r="1.8" stroke="#C9A84C" stroke-width=".8" fill="rgba(201,168,76,.2)"/>
+            <circle cx="5" cy="24" r="1.8" stroke="#C9A84C" stroke-width=".8" fill="rgba(201,168,76,.2)"/>
+        </svg>
+    </div>
+
+    <!-- LAYER 4: Konten -->
+    <div class="cert-body">
+
+        <div class="cert-header">
+            <img src="https://psikogram.lidan.co.id/gambar/logo1.png"
+                 alt="Logo" class="cert-logo" onerror="this.style.display='none'">
+            <div>
+                <div class="cert-title-main">Intelligence Quotient</div>
+                <div class="cert-title-sub">Certificate of Achievement</div>
+            </div>
+        </div>
+
+        <div class="laurel-div">
+            <div class="ll"></div>
+            <svg width="76" height="18" viewBox="0 0 76 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M38 9 C33 3 24 1 18 5 C13 9 12 16 17 16 C21 16 25 12 25 9" stroke="#C9A84C" stroke-width=".9" fill="rgba(201,168,76,.1)"/>
+                <path d="M38 9 C43 3 52 1 58 5 C63 9 64 16 59 16 C55 16 51 12 51 9" stroke="#C9A84C" stroke-width=".9" fill="rgba(201,168,76,.1)"/>
+                <path d="M38 9 C35 4 28 3 24 6 C21 9 21 14 24 14" stroke="#C9A84C" stroke-width=".65"/>
+                <path d="M38 9 C41 4 48 3 52 6 C55 9 55 14 52 14" stroke="#C9A84C" stroke-width=".65"/>
+                <circle cx="38" cy="9" r="2.8" fill="#C9A84C"/>
+                <circle cx="38" cy="9" r="1.3" fill="#FDF6E3"/>
+            </svg>
+            <div class="ll"></div>
+        </div>
+
+        <div class="cert-kepada">Diberikan Kepada</div>
+        <div class="cert-nama" id="cert-nama">—</div>
+        <div class="cert-sub">Telah mengikuti Tes Inteligensi / IQ di Lidan Psikologi</div>
+        <div class="cert-score">Score IQ &nbsp;=&nbsp; <span class="sv" id="cert-score-val">—</span></div>
+
+        <div class="laurel-div" style="margin-top:12px;">
+            <div class="ll"></div>
+            <svg width="50" height="14" viewBox="0 0 50 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M25 7 C21 2 14 1 10 4 C7 7 7 12 10 12 C13 12 16 9 16 7" stroke="#C9A84C" stroke-width=".8" fill="rgba(201,168,76,.1)"/>
+                <path d="M25 7 C29 2 36 1 40 4 C43 7 43 12 40 12 C37 12 34 9 34 7" stroke="#C9A84C" stroke-width=".8" fill="rgba(201,168,76,.1)"/>
+                <circle cx="25" cy="7" r="2.2" fill="#C9A84C"/>
+                <circle cx="25" cy="7" r="1" fill="#FDF6E3"/>
+            </svg>
+            <div class="ll"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="cert-footer">
+
+            <!-- LAYER 6: QR paling atas -->
+            <div class="cert-qr">
+                <div class="qr-box"><div id="cert-qr-code"></div></div>
+                <div class="qr-label">Verifikasi</div>
+            </div>
+
+            <!-- LAYER 5: TTD -->
+            <div class="cert-ttd">
+                <div class="cert-tanggal" id="cert-tanggal">—</div>
+                <div class="cert-psikolog-lbl">Psikolog</div>
+                <div class="ttd-wrap" id="ttd-wrap">
+                    <img src="https://psikogram.lidan.co.id/gambar/ttd.png" alt="TTD" class="ttd-img" id="ttd-img" onerror="this.style.visibility='hidden'">
+                    <img src="https://psikogram.lidan.co.id/gambar/stempel.png" alt="Stempel" class="stempel-img" id="stempel-img" onerror="this.style.display='none'">
+                </div>
+                <div class="cert-ttd-line"></div>
+                <div class="cert-ttd-nama" id="nama-psikolog">Dr. Karina Meriem Beru Brahmana, M.Psi, Psikolog</div>
+                <div class="cert-ttd-sipp" id="nomor-sipp">No. SIPP 20070136 – 2021 – 02 – 0799</div>
+            </div>
+
+            <!-- LAYER 5: Segel -->
+            <div class="cert-seal">
+                <svg width="78" height="78" viewBox="0 0 78 78" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="sg" cx="40%" cy="35%" r="60%">
+                            <stop offset="0%" stop-color="#e8c860"/>
+                            <stop offset="50%" stop-color="#C9A84C"/>
+                            <stop offset="100%" stop-color="#8B6914"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="39" cy="39" r="35" fill="none" stroke="url(#sg)" stroke-width="1.5" stroke-dasharray="3 2"/>
+                    <circle cx="39" cy="39" r="30" fill="rgba(201,168,76,.07)" stroke="url(#sg)" stroke-width="1"/>
+                    <circle cx="39" cy="39" r="25" fill="none" stroke="url(#sg)" stroke-width=".5"/>
+                    <path d="M39 14 L41.5 32 L57 25 L46 38 L57 51 L41.5 44 L39 62 L36.5 44 L21 51 L32 38 L21 25 L36.5 32 Z" fill="url(#sg)" opacity=".22"/>
+                    <path id="cp" d="M39 39 m-21 0 a21 21 0 1 1 42 0 a21 21 0 1 1 -42 0" fill="none"/>
+                    <text font-family="Cinzel, serif" font-size="5" fill="#8B6914" font-weight="600" letter-spacing="1.5">
+                        <textPath href="#cp" startOffset="5%">LIDAN PSIKOLOGI · OFFICIAL ·</textPath>
+                    </text>
+                    <circle cx="39" cy="39" r="7" fill="url(#sg)" opacity=".28"/>
+                    <circle cx="39" cy="39" r="3.5" fill="url(#sg)"/>
+                    <circle cx="39" cy="39" r="1.8" fill="#FDF6E3"/>
+                </svg>
+                <div style="font-family:'Cinzel',serif;font-size:7px;color:#B8922A;text-align:center;margin-top:2px;letter-spacing:1px;">OFFICIAL</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+const CONFIG = {
+    API_URL    : 'https://lidan-co-id.pages.dev/api/db_psikogram1',
+    TABLE_NAME : (new URLSearchParams(window.location.search).get('tabel')) || 'rekap_nilai1',
+    API_SECRET : 'admin'
+};
+
+function getKat(n) {
+    if (n<=69) return 'Mental Defective';
+    if (n<=79) return 'Borderline';
+    if (n<=89) return 'Rata-rata Bawah';
+    if (n<=109) return 'Rata-rata';
+    if (n<=119) return 'Di Atas Rata-rata';
+    if (n<=129) return 'Superior';
+    if (n<=139) return 'Sangat Superior';
+    return 'Genius';
+}
+
+function fmt(str) {
+    if (!str) return '';
+    const d = new Date(str);
+    if (isNaN(d)) return str;
+    return d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+}
+
+/* ═══════════════════════════════════════════════
+   KONFIGURASI — edit nilai di sini sesuai kebutuhan
+═══════════════════════════════════════════════ */
+const CERT_CONFIG = {
+    ttd: {
+        tinggi:    100,   // tinggi gambar tanda tangan (px)
+        offsetY:    0,   // geser naik(-) / turun(+) dalam px
+    },
+    stempel: {
+        ukuran:    92,   // lebar & tinggi gambar stempel (px)
+        offsetY:    0,   // geser naik(-) / turun(+) dalam px
+    },
+    psikolog: {
+        nama:      'Dr. Karina Meriem Beru Brahmana, M.Psi, Psikolog',
+        fontSize:  12.5,  // ukuran font nama psikolog (px)
+        sipp:      'No. SIPP 20070136 – 2021 – 02 – 0799',
+        sippSize:  14,   // ukuran font nomor SIPP (px)
+    }
+};
+
+function applyConfig() {
+    const c = CERT_CONFIG;
+
+    // Tanda tangan
+    const ttdImg = document.getElementById('ttd-img');
+    if (ttdImg) {
+        ttdImg.style.height   = c.ttd.tinggi + 'px';
+        ttdImg.style.maxWidth = '160px';
+        ttdImg.style.top      = c.ttd.offsetY + 'px';
+    }
+
+    // Stempel
+    const stempelImg = document.getElementById('stempel-img');
+    if (stempelImg) {
+        stempelImg.style.width  = c.stempel.ukuran + 'px';
+        stempelImg.style.height = c.stempel.ukuran + 'px';
+        stempelImg.style.top    = c.stempel.offsetY + 'px';
+    }
+
+    // Sesuaikan tinggi ttd-wrap agar tidak memotong gambar
+    const ttdWrap = document.getElementById('ttd-wrap');
+    if (ttdWrap) {
+        const maxH = Math.max(
+            c.ttd.tinggi     + Math.abs(c.ttd.offsetY),
+            c.stempel.ukuran + Math.abs(c.stempel.offsetY)
+        ) + 10;
+        ttdWrap.style.height = maxH + 'px';
+    }
+
+    // Nama psikolog
+    const namaPsikolog = document.getElementById('nama-psikolog');
+    if (namaPsikolog) {
+        namaPsikolog.textContent  = c.psikolog.nama;
+        namaPsikolog.style.fontSize = c.psikolog.fontSize + 'px';
+    }
+
+    // Nomor SIPP
+    const nomorSipp = document.getElementById('nomor-sipp');
+    if (nomorSipp) {
+        nomorSipp.textContent  = c.psikolog.sipp;
+        nomorSipp.style.fontSize = c.psikolog.sippSize + 'px';
+    }
+}
+
+async function main() {
+    const p = new URLSearchParams(window.location.search);
+    const id = p.get('id_x'), tok = p.get('x_01');
+
+    if (!id) {
+        document.getElementById('ls').innerHTML =
+            `<div style="color:#C9A84C;font-family:'Cinzel',serif;text-align:center;padding:30px;font-size:12px;letter-spacing:2px;">
+                PARAMETER ID_X TIDAK DITEMUKAN</div>`;
+        return;
+    }
+
+    try {
+        const res  = await fetch(`${CONFIG.API_URL}?table=${CONFIG.TABLE_NAME}&id_x=${id}`,
+            { headers: { 'X-Custom-Auth': CONFIG.API_SECRET } });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
+        const row  = Array.isArray(json.data) ? json.data[0] : json.data;
+        if (tok && String(row.x_01) !== String(tok)) throw new Error('Akses ditolak.');
+
+        const bio = (() => { try { return JSON.parse(row.x_02||'{}'); } catch { return {}; } })();
+        const iq  = parseInt(row.x_06) || 0;
+
+        document.getElementById('cert-nama').textContent      = bio.nama || '—';
+        document.getElementById('cert-tanggal').textContent   = 'Medan, ' + (fmt(row.x_11 || bio.tanggal || '') || '—');
+        document.getElementById('cert-score-val').textContent = `${iq} (${getKat(iq)})`;
+
+        const qrUrl = `https://laporan.lidan.co.id/sertifikat/?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}`;
+        new QRCode(document.getElementById('cert-qr-code'), {
+            text: qrUrl, width: 96, height: 96,
+            colorDark: '#3B2A1A', colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+
+        document.getElementById('ls').classList.add('hidden');
+        applyConfig();
+    } catch(err) {
+        document.getElementById('ls').innerHTML =
+            `<div style="color:#C9A84C;font-family:'Cinzel',serif;text-align:center;padding:30px;font-size:12px;">
+                GAGAL MEMUAT<br><br>
+                <span style="font-size:11px;color:#888;font-family:Arial;">${err.message}</span><br><br>
+                <button onclick="location.reload()"
+                    style="padding:10px 26px;background:linear-gradient(135deg,#a07820,#C9A84C,#e8c860);
+                    color:#2a1800;border:none;border-radius:2px;font-family:'Cinzel',serif;
+                    font-size:10px;font-weight:600;letter-spacing:2px;cursor:pointer;">COBA LAGI</button>
+            </div>`;
+    }
+}
+main();
+</script>
+</body>
+</html>

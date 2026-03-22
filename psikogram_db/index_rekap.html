@@ -411,7 +411,7 @@
                         const tgl     = formatTgl(row.x_11);
                         const kode    = row.x_01 || '—';
                         const link    = `index_final.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
-                        const linkIQ  = `https://laporan.lidan.co.id/iq/?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
+                        const linkIQ  = `index_final_iq.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkSert= `sertifikat-iq.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         return `<tr>
                             <td style="color:var(--muted); font-family:'DM Mono',monospace; font-size:12px;">${row.id_x}</td>
