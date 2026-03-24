@@ -433,8 +433,8 @@ function fmt(s){if(!s)return'';const d=new Date(s);if(isNaN(d))return s;return d
 
 async function main(){
   const p=new URLSearchParams(window.location.search),id=p.get('id_x'),tok=p.get('x_01');
-  if(!id){
-    document.getElementById('ls').innerHTML='<div style="color:#D4AF37;font-family:Cinzel,serif;text-align:center;padding:30px;font-size:12px;letter-spacing:2px;">PARAMETER ID_X TIDAK DITEMUKAN</div>';
+  if(!id||!tok){
+    document.getElementById('ls').innerHTML='<div style="color:#D4AF37;font-family:Cinzel,serif;text-align:center;padding:30px;font-size:12px;letter-spacing:2px;">AKSES TIDAK VALID</div>';
     return;
   }
   try{
@@ -442,13 +442,13 @@ async function main(){
     const json=await res.json();
     if(!json.success)throw new Error(json.message||'Data tidak ditemukan');
     const row=Array.isArray(json.data)?json.data[0]:json.data;
-    if(tok&&String(row.x_01)!==String(tok))throw new Error('Akses ditolak.');
+    if(String(row.x_01)!==String(tok))throw new Error('Akses ditolak.');
     const bio=(()=>{try{return JSON.parse(row.x_02||'{}')}catch{return{}}})();
     const iq=parseInt(row.x_06)||0;
     document.getElementById('cert-nama').textContent=bio.nama||'—';
     document.getElementById('cert-tgl').textContent='Medan, '+(fmt(row.x_11||bio.tanggal||'')||'—');
     document.getElementById('cert-sv').textContent=`${iq} (${kat(iq)})`;
-    const qrUrl=`https://laporan.lidan.co.id/sertifikat/sertifikat-iq?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}`;
+    const qrUrl=`https://laporan.lidan.co.id/sertifikat/sertifikat-iq?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}&tabel=${encodeURIComponent(CFG.TABLE_NAME)}`;
     new QRCode(document.getElementById('qr'),{text:qrUrl,width:96,height:96,colorDark:'#1A1A1A',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
     document.getElementById('ls').classList.add('hidden');
     applyConfig();

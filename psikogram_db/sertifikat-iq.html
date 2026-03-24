@@ -602,10 +602,10 @@ async function main() {
     const p = new URLSearchParams(window.location.search);
     const id = p.get('id_x'), tok = p.get('x_01');
 
-    if (!id) {
+    if (!id || !tok) {
         document.getElementById('ls').innerHTML =
             `<div style="color:#C9A84C;font-family:'Cinzel',serif;text-align:center;padding:30px;font-size:12px;letter-spacing:2px;">
-                PARAMETER ID_X TIDAK DITEMUKAN</div>`;
+                AKSES TIDAK VALID</div>`;
         return;
     }
 
@@ -615,7 +615,7 @@ async function main() {
         const json = await res.json();
         if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
         const row  = Array.isArray(json.data) ? json.data[0] : json.data;
-        if (tok && String(row.x_01) !== String(tok)) throw new Error('Akses ditolak.');
+        if (String(row.x_01) !== String(tok)) throw new Error('Akses ditolak.');
 
         const bio = (() => { try { return JSON.parse(row.x_02||'{}'); } catch { return {}; } })();
         const iq  = parseInt(row.x_06) || 0;
@@ -624,7 +624,7 @@ async function main() {
         document.getElementById('cert-tanggal').textContent   = 'Medan, ' + (fmt(row.x_11 || bio.tanggal || '') || '—');
         document.getElementById('cert-score-val').textContent = `${iq} (${getKat(iq)})`;
 
-        const qrUrl = `https://laporan.lidan.co.id/sertifikat/?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}`;
+        const qrUrl = `https://laporan.lidan.co.id/sertifikat/?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}&tabel=${encodeURIComponent(CONFIG.TABLE_NAME)}`;
         new QRCode(document.getElementById('cert-qr-code'), {
             text: qrUrl, width: 96, height: 96,
             colorDark: '#3B2A1A', colorLight: '#ffffff',

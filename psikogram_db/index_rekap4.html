@@ -111,25 +111,14 @@
             transition: opacity .15s;
         }
         .btn-link-iq:hover { opacity: .85; }
-        .sert-group {
-            display: inline-flex; align-items: center; gap: 0;
-            border: 1px solid #b45309; border-radius: 6px; overflow: hidden;
-        }
-        .sert-label {
+        .btn-link-sert {
             background: #b45309; color: white;
-            padding: 4px 8px; font-size: 11px;
-            font-family: 'DM Sans', sans-serif; font-weight: 500;
-            white-space: nowrap;
+            border-radius: 6px; padding: 4px 12px;
+            font-size: 11px; cursor: pointer; border: none;
+            text-decoration: none; display: inline-block;
+            transition: opacity .15s;
         }
-        .sert-btn {
-            background: #1c2030; color: #f0c070;
-            border: none; border-left: 1px solid #b45309;
-            padding: 4px 9px; font-size: 11px; font-weight: 600;
-            cursor: pointer; text-decoration: none;
-            display: inline-block; font-family: 'DM Sans', sans-serif;
-            transition: background .15s;
-        }
-        .sert-btn:hover { background: #b45309; color: white; }
+        .btn-link-sert:hover { opacity: .85; }
 
         /* Table */
         .table-wrap {
@@ -423,8 +412,7 @@
                         const kode    = row.x_01 || '—';
                         const link    = `index_final.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkIQ  = `index_final_iq.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
-                        const linkSert1 = `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
-                        const linkSert2 = `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq1?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
+                        const linkSert= `sertifikat-iq.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         return `<tr>
                             <td style="color:var(--muted); font-family:'DM Mono',monospace; font-size:12px;">${row.id_x}</td>
                             <td><span class="kode-badge">${kode}</span></td>
@@ -434,11 +422,7 @@
                             <td style="display:flex; gap:6px; align-items:center;">
                                 <a href="${link}" target="_blank" class="btn-link">📄 Full</a>
                                 <a href="${linkIQ}" target="_blank" class="btn-link-iq">🧠 IQ</a>
-                                <div class="sert-group">
-                                    <span class="sert-label">🏅 Sertifikat</span>
-                                    <a href="${linkSert1}" target="_blank" class="sert-btn">1</a>
-                                    <a href="${linkSert2}" target="_blank" class="sert-btn">2</a>
-                                </div>
+                                <a href="${linkSert}" target="_blank" class="btn-link-sert">🏅 Sertifikat</a>
                                 <button class="btn-danger-sm" onclick="hapusData(${row.id_x})">🗑</button>
                             </td>
                         </tr>`;
