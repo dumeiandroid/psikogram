@@ -448,7 +448,7 @@ async function main(){
     document.getElementById('cert-nama').textContent=bio.nama||'—';
     document.getElementById('cert-tgl').textContent='Medan, '+(fmt(row.x_11||bio.tanggal||'')||'—');
     document.getElementById('cert-sv').textContent=`${iq} (${kat(iq)})`;
-    const qrUrl=`https://laporan.lidan.co.id/sertifikat/?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}`;
+    const qrUrl=`https://laporan.lidan.co.id/sertifikat/sertifikat-iq?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}`;
     new QRCode(document.getElementById('qr'),{text:qrUrl,width:96,height:96,colorDark:'#1A1A1A',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
     document.getElementById('ls').classList.add('hidden');
     applyConfig();
