@@ -642,7 +642,10 @@
                 <button class="edit-tab"        onclick="switchEditTab('kepribadian')">💡 Kepribadian</button>
                 <button class="edit-tab"        onclick="switchEditTab('sikap')">⚙️ Sikap Kerja</button>
                 <button class="edit-tab"        onclick="switchEditTab('iq')">📊 IQ</button>
-                <button class="edit-tab"        onclick="switchEditTab('keterangan')">📝 Keterangan Psikologis</button>
+                <button class="edit-tab"        onclick="switchEditTab('kekuatan')">⭐ Kekuatan</button>
+                <button class="edit-tab"        onclick="switchEditTab('kelemahan')">⚠️ Kelemahan</button>
+                <button class="edit-tab"        onclick="switchEditTab('rekomendasi')">💬 Rekomendasi</button>
+                <button class="edit-tab"        onclick="switchEditTab('minat')">🎯 Arah Minat</button>
             </div>
 
             <!-- ── TAB BIODATA ── -->
@@ -716,18 +719,28 @@
                 </div>
             </div>
 
-            <!-- ── TAB KETERANGAN PSIKOLOGIS ── -->
-            <div class="edit-panel" id="epanel-keterangan">
-                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit teks keterangan psikologis yang ditampilkan di laporan.</p>
-                <div class="edit-form-group">
-                    <label>Keterangan Psikologis</label>
-                    <textarea id="ed-keterangan" rows="10"
-                        style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:13px; font-family:Arial,sans-serif; line-height:1.8; resize:vertical;"
-                        placeholder="Tulis atau edit keterangan psikologis di sini..."></textarea>
-                </div>
-                <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:6px; padding:10px 14px; font-size:12px; color:#856404; margin-top:8px;">
-                    &#9888; Teks ini akan ditampilkan langsung di bagian <strong>Keterangan Psikologis</strong> pada laporan. Klik <strong>Simpan &amp; Refresh</strong> untuk menyimpan.
-                </div>
+            <!-- ── TAB KEKUATAN ── -->
+            <div class="edit-panel" id="epanel-kekuatan">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat kekuatan/kelebihan peserta.</p>
+                <div id="kekuatan-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB KELEMAHAN ── -->
+            <div class="edit-panel" id="epanel-kelemahan">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat kelemahan peserta.</p>
+                <div id="kelemahan-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB REKOMENDASI ── -->
+            <div class="edit-panel" id="epanel-rekomendasi">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat rekomendasi untuk peserta.</p>
+                <div id="rekomendasi-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB ARAH MINAT ── -->
+            <div class="edit-panel" id="epanel-minat">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 arah minat peserta (nama & keterangan).</p>
+                <div id="minat-wrap"><!-- Diisi JS --></div>
             </div>
 
         </div><!-- /modal-body -->
@@ -1291,6 +1304,11 @@ function bukaModalEdit() {
     const kemampuan  = safeJSON(_globalData.x_03, {});
     const kepribadian= safeJSON(_globalData.x_04, {});
     const sikap      = safeJSON(_globalData.x_05, {});
+    const kekuatan   = safeJSON(_globalData.x_07, ['','','']);
+    const kelemahan  = safeJSON(_globalData.x_08, ['','','']);
+    const rekomendasi= safeJSON(_globalData.x_09, ['','','']);
+    const minat      = safeJSON(_globalData.x_10, [{},{},{}]);
+
     // ── Biodata ──
     document.getElementById('ed-nama').value        = biodata.nama        || '';
     document.getElementById('ed-jk').value          = biodata.jk          || 'Laki-laki';
@@ -1329,8 +1347,45 @@ function bukaModalEdit() {
         wrapSik.innerHTML += buatSkorInput('sik', key, nama, val);
     });
 
-    // ── Keterangan Psikologis (x_12) ──
-    document.getElementById('ed-keterangan').value = _globalData.x_12 || '';
+    // ── Kekuatan ──
+    const wrapKek = document.getElementById('kekuatan-wrap');
+    wrapKek.innerHTML = '';
+    [0,1,2].forEach(i => {
+        wrapKek.innerHTML += buatListInput('kekuatan', i, kekuatan[i] || '');
+    });
+
+    // ── Kelemahan ──
+    const wrapKel = document.getElementById('kelemahan-wrap');
+    wrapKel.innerHTML = '';
+    [0,1,2].forEach(i => {
+        wrapKel.innerHTML += buatListInput('kelemahan', i, kelemahan[i] || '');
+    });
+
+    // ── Rekomendasi ──
+    const wrapRek = document.getElementById('rekomendasi-wrap');
+    wrapRek.innerHTML = '';
+    [0,1,2].forEach(i => {
+        wrapRek.innerHTML += buatListInput('rekomendasi', i, rekomendasi[i] || '');
+    });
+
+    // ── Arah Minat ──
+    const wrapMin = document.getElementById('minat-wrap');
+    wrapMin.innerHTML = '';
+    [0,1,2].forEach(i => {
+        const m = minat[i] || {};
+        wrapMin.innerHTML += `
+        <div class="minat-edit-item">
+            <div class="minat-num">🎯 Minat ke-${i+1}</div>
+            <div class="edit-form-group">
+                <label>Nama Minat</label>
+                <input type="text" id="minat-nama-${i}" value="${escHtml(m.nama || m.singkatan || '')}" placeholder="Contoh: OUTDOOR">
+            </div>
+            <div class="edit-form-group">
+                <label>Keterangan</label>
+                <textarea id="minat-ket-${i}" rows="3" placeholder="Deskripsi arah minat...">${escHtml(m.keterangan || '')}</textarea>
+            </div>
+        </div>`;
+    });
 
     // Buka modal & reset ke tab pertama
     switchEditTab('biodata');
@@ -1396,7 +1451,7 @@ function escHtml(s) {
 // =========================================================
 function switchEditTab(tab) {
     document.querySelectorAll('.edit-tab').forEach((t, i) => {
-        const tabs = ['biodata','kemampuan','kepribadian','sikap','iq','keterangan'];
+        const tabs = ['biodata','kemampuan','kepribadian','sikap','iq','kekuatan','kelemahan','rekomendasi','minat'];
         t.classList.toggle('active', tabs[i] === tab);
     });
     document.querySelectorAll('.edit-panel').forEach(p => {
@@ -1460,8 +1515,21 @@ async function simpanEdit() {
         // ── IQ ──
         const iqBaru = document.getElementById('ed-iq').value.trim();
 
-        // ── Keterangan Psikologis ──
-        const keteranganBaru = document.getElementById('ed-keterangan').value.trim();
+        // ── Kekuatan ──
+        const kekuatanBaru = [0,1,2].map(i => document.getElementById(`kekuatan-${i}`).value.trim());
+
+        // ── Kelemahan ──
+        const kelemahanBaru = [0,1,2].map(i => document.getElementById(`kelemahan-${i}`).value.trim());
+
+        // ── Rekomendasi ──
+        const rekomendasiBaru = [0,1,2].map(i => document.getElementById(`rekomendasi-${i}`).value.trim());
+
+        // ── Arah Minat ──
+        const minatBaru = [0,1,2].map(i => ({
+            singkatan  : (document.getElementById(`minat-nama-${i}`).value.trim()).toUpperCase(),
+            nama       : document.getElementById(`minat-nama-${i}`).value.trim().toUpperCase(),
+            keterangan : document.getElementById(`minat-ket-${i}`).value.trim()
+        }));
 
         // ── Susun payload PUT ──
         const payload = {
@@ -1470,7 +1538,10 @@ async function simpanEdit() {
             x_04 : JSON.stringify(kepribadianBaru),
             x_05 : JSON.stringify(sikapBaru),
             x_06 : iqBaru,
-            x_12 : keteranganBaru
+            x_07 : JSON.stringify(kekuatanBaru),
+            x_08 : JSON.stringify(kelemahanBaru),
+            x_09 : JSON.stringify(rekomendasiBaru),
+            x_10 : JSON.stringify(minatBaru)
         };
 
         // ── Kirim PUT ke API ──
