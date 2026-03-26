@@ -402,7 +402,6 @@
     <button onclick="bukaPreview()">🔍 Preview PDF</button>
     <button id="downloadBtn2">📥 Download PDF</button>
     <button class="btn-edit" onclick="bukaModalEdit()">✏️ Edit Data</button>
-    <button id="btn-generate-laporan" onclick="bukaModalGenerate()" style="background:#17a2b8; color:white; display:none;">🤖 Generate Laporan</button>
     <span class="konsistensi-info" id="konsistensi-display">Konsistensi = -</span>
 </div>
 
@@ -547,12 +546,6 @@
             </ul>
         </div>
 
-        <!-- KETERANGAN NARASI OTOMATIS (x_12) -->
-        <div id="narasi-section" style="display:none; margin-top:16px; padding:14px 16px; background:#f0edff; border-left:4px solid #5F4EDA; border-radius:6px;">
-            <strong style="color:#5F4EDA; font-size:14px;">&#128221; Keterangan Psikologis:</strong>
-            <p id="narasi-text" style="margin:8px 0 0 0; text-align:justify; line-height:1.8; font-size:inherit;"></p>
-        </div>
-
         <!-- Tanda Tangan -->
         <div class="signature" style="position:relative;margin-top:20px;">
             <div id="qr-wrap" style="position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
@@ -581,47 +574,8 @@
     <span id="list-kelemahan"></span>
     <span id="list-rekomendasi"></span>
     <span id="list-minat"></span>
-</div>
 
 <button id="downloadBtn">Download PDF</button>
-
-<!-- ═══════════════════════════════════════════════════════
-     MODAL GENERATE LAPORAN
-     ═══════════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="modal-generate" onclick="tutupModalGenerateDiluar(event)">
-    <div class="modal-box" style="max-width:820px;">
-        <div class="modal-header">
-            <h2>&#129302; Generate Keterangan Psikologis</h2>
-            <button class="modal-close-btn" onclick="tutupModalGenerate()">&#10005;</button>
-        </div>
-        <div class="modal-body">
-            <p style="font-size:13px; color:#666; margin:0 0 14px 0;">
-                Keterangan psikologis berikut dibuat secara otomatis berdasarkan skor hasil pemeriksaan.
-                Anda dapat mengedit teks sebelum menyimpan.
-            </p>
-            <div id="generate-loading" style="text-align:center; padding:30px; display:none;">
-                <div class="spinner" style="margin:0 auto 10px;"></div>
-                <p style="color:#5F4EDA;">Menyusun narasi...</p>
-            </div>
-            <div id="generate-content" style="display:none;">
-                <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:12px; margin-bottom:12px;">
-                    <label style="font-size:12px; font-weight:bold; color:#5F4EDA; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">&#128221; Keterangan Psikologis</label>
-                    <textarea id="gen-narasi-text" rows="10"
-                        style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; font-family:Arial,sans-serif; line-height:1.8; resize:vertical;"
-                        placeholder="Narasi akan muncul di sini..."></textarea>
-                </div>
-                <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:6px; padding:10px 14px; font-size:12px; color:#856404;">
-                    &#9888; Anda dapat mengedit teks di atas sebelum menyimpan. Klik <strong>Regenerate</strong> untuk membuat ulang narasi dengan variasi kalimat yang berbeda.
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-modal" style="background:#17a2b8; color:white;" onclick="regenerateNarasi()">&#128260; Regenerate</button>
-            <button class="btn-modal btn-cancel" onclick="tutupModalGenerate()">Batal</button>
-            <button class="btn-modal btn-save" id="btn-simpan-narasi" onclick="simpanNarasi()">&#128190; Simpan & Tampilkan</button>
-        </div>
-    </div>
-</div>
 
 <!-- ═══════════════════════════════════════════════════════
      MODAL EDIT DATA
@@ -1214,23 +1168,6 @@ function setupDownload() {
                 { text:'Intelligence Quotient (IQ) :', bold:true, fontSize:FS1, margin:[0,0,0,2] },
                 { text:`• Intelligence Quotient / IQ = ${iq}`, fontSize:FS1, margin:[8,0,0,10] },
 
-                // Keterangan Narasi (x_12) jika ada
-                ...(() => {
-                    const narasiEl = document.getElementById('narasi-text');
-                    const narasi   = narasiEl ? narasiEl.textContent.trim() : '';
-                    if (!narasi) return [];
-                    return [
-                        { text:'Keterangan Psikologis:', bold:true, fontSize:FS1, margin:[0,0,0,4] },
-                        {
-                            text: narasi,
-                            fontSize: FS1,
-                            alignment: 'justify',
-                            lineHeight: 1.5,
-                            margin: [0,0,0,10]
-                        }
-                    ];
-                })(),
-
                 // Tanda tangan di halaman 1
                 {
                     columns: [
@@ -1616,13 +1553,6 @@ async function main() {
         document.getElementById('loading-screen').classList.add('hidden');
         setupDownload();
 
-        // Tampilkan tombol generate laporan
-        document.getElementById('btn-generate-laporan').style.display = 'inline-block';
-
-        // Tampilkan narasi x_12 jika sudah ada
-        const narasiTersimpan = rawData.x_12 || '';
-        tampilkanNarasi(narasiTersimpan);
-
         // QR Code
         const { id_x: qrIdX, x_01: qrX01, tabel: qrTabel } = getParamsFromUrl();
         const qrUrl = `https://laporan.lidan.co.id/iq/?id_x=${qrIdX}&x_01=${qrX01||''}&tabel=${qrTabel||'rekap_nilai1'}`;
@@ -1642,241 +1572,6 @@ async function main() {
                     background:#4fffb0;color:#0d0f14;border:none;border-radius:8px;
                     font-size:15px;font-weight:600;cursor:pointer;">↻ Coba Lagi</button>
             </div>`;
-    }
-}
-
-// =========================================================
-// GENERATE LAPORAN — TEMPLATE KALIMAT
-// =========================================================
-
-// Fungsi acak pilih satu dari array
-function acak(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-// ── Template per aspek berdasarkan kategori ──
-const TEMPLATE_NARASI = {
-    kemampuan_umum: {
-        K:  ["Kemampuan umum yang dimiliki masih perlu ditingkatkan, terutama dalam memecahkan masalah sehari-hari secara efektif.",
-             "Kemampuan umum peserta masih berada pada taraf yang membutuhkan pengembangan lebih lanjut.",
-             "Secara umum, kemampuan kognitif dasar peserta masih memerlukan bimbingan dan latihan yang konsisten."],
-        C:  ["Kemampuan umum peserta cukup memadai untuk menangani tugas-tugas yang bersifat rutin.",
-             "Kemampuan umum yang dimiliki sudah cukup untuk bekerja dalam situasi yang terstruktur dengan baik.",
-             "Peserta memiliki kemampuan umum yang cukup, meski masih memerlukan arahan dalam situasi yang lebih kompleks."],
-        B:  ["Kemampuan umum peserta tergolong baik, mampu menemukan solusi untuk berbagai permasalahan dengan cukup efektif.",
-             "Peserta menunjukkan kemampuan umum yang baik dalam memahami dan menyelesaikan berbagai persoalan.",
-             "Kemampuan umum yang dimiliki peserta berada pada level baik, mendukung produktivitas kerja sehari-hari."],
-        BS: ["Kemampuan umum peserta sangat baik, mencerminkan kapasitas kognitif yang tinggi dalam memecahkan masalah secara efektif.",
-             "Peserta memiliki kemampuan umum yang sangat menonjol, mampu menghadapi tantangan intelektual dengan sangat baik.",
-             "Kemampuan umum yang dimiliki berada pada level sangat baik, menjadi fondasi kuat dalam berbagai situasi kerja."]
-    },
-    daya_tangkap_visual: {
-        K:  ["Daya tangkap visual peserta masih terbatas, membutuhkan waktu lebih lama untuk mengenali pola dan perbedaan visual.",
-             "Kemampuan menangkap informasi secara visual masih perlu dilatih dan dikembangkan.",
-             "Peserta masih memerlukan peningkatan dalam kemampuan memproses informasi yang bersifat visual."],
-        C:  ["Daya tangkap visual peserta cukup memadai untuk kebutuhan kerja yang tidak terlalu menuntut kecepatan persepsi.",
-             "Kemampuan visual peserta cukup dalam mengenali pola-pola dasar di lingkungan sekitarnya.",
-             "Peserta memiliki daya tangkap visual yang cukup, meskipun masih perlu berlatih untuk situasi yang lebih detail."],
-        B:  ["Daya tangkap visual peserta baik, mampu mengenali pola dan perbedaan di lingkungan secara cepat dan tepat.",
-             "Peserta memiliki kemampuan visual yang baik dalam mengidentifikasi detail dan perbedaan secara akurat.",
-             "Kemampuan persepsi visual peserta tergolong baik, mendukung pekerjaan yang memerlukan ketelitian visual."],
-        BS: ["Daya tangkap visual peserta sangat baik, dengan kecepatan dan ketepatan tinggi dalam mengenali pola kompleks.",
-             "Peserta unggul dalam kemampuan visual, mampu memproses informasi visual secara sangat cepat dan akurat.",
-             "Daya tangkap visual yang sangat baik menjadikan peserta sangat efektif dalam pekerjaan yang mengandalkan persepsi visual."]
-    },
-    kemampuan_berpikir_logis: {
-        K:  ["Kemampuan berpikir logis peserta masih perlu dikembangkan, terutama dalam menyusun alasan yang sistematis.",
-             "Peserta masih memerlukan peningkatan dalam membuat keputusan berdasarkan alur berpikir yang logis.",
-             "Kemampuan logika peserta masih terbatas dan membutuhkan latihan dalam penalaran sebab-akibat."],
-        C:  ["Kemampuan berpikir logis peserta cukup, mampu membuat keputusan sederhana berdasarkan alasan yang jelas.",
-             "Peserta memiliki kemampuan logis yang cukup untuk menyelesaikan masalah-masalah yang bersifat terstruktur.",
-             "Logika berpikir peserta cukup memadai dalam situasi kerja yang tidak terlalu kompleks."],
-        B:  ["Kemampuan berpikir logis peserta baik, mampu membuat keputusan berdasarkan alasan yang jelas dalam berbagai situasi.",
-             "Peserta menunjukkan kemampuan berpikir logis yang baik dalam menganalisis situasi dan menentukan tindakan yang tepat.",
-             "Daya pikir logis peserta tergolong baik, mendukung pengambilan keputusan yang rasional dan terarah."],
-        BS: ["Kemampuan berpikir logis peserta sangat baik, mencerminkan kualitas penalaran yang tajam dan sistematis.",
-             "Peserta memiliki kemampuan logika yang sangat tinggi, mampu mengurai masalah kompleks dengan terstruktur.",
-             "Berpikir logis adalah kekuatan utama peserta, dengan kemampuan analisis sebab-akibat yang sangat menonjol."]
-    },
-    kemampuan_berpikir_abstrak: {
-        K:  ["Kemampuan berpikir abstrak peserta masih perlu ditingkatkan, terutama dalam memahami konsep yang tidak tampak secara langsung.",
-             "Peserta memerlukan pengembangan dalam kemampuan melihat hubungan antar hal yang bersifat abstrak.",
-             "Kemampuan abstraksi peserta masih terbatas dan memerlukan dukungan dalam memahami konsep-konsep kompleks."],
-        C:  ["Kemampuan berpikir abstrak peserta cukup, mampu memahami konsep-konsep dasar meskipun kadang perlu penjelasan tambahan.",
-             "Peserta memiliki kemampuan abstrak yang cukup untuk mengikuti arahan yang bersifat konseptual.",
-             "Kemampuan abstraksi peserta cukup memadai dalam situasi kerja yang tidak terlalu menuntut pemikiran tingkat tinggi."],
-        B:  ["Kemampuan berpikir abstrak peserta baik, mampu melihat hubungan antar berbagai hal dan memahami konsekuensi tindakan.",
-             "Peserta menunjukkan kemampuan abstrak yang baik dalam memahami pola dan hubungan konseptual.",
-             "Daya abstraksi peserta tergolong baik, mendukung kemampuan berinovasi dan berpikir kreatif."],
-        BS: ["Kemampuan berpikir abstrak peserta sangat baik, mencerminkan kapasitas intelektual yang tinggi dalam penalaran konseptual.",
-             "Peserta sangat unggul dalam berpikir abstrak, mampu menghubungkan konsep-konsep kompleks dengan mudah.",
-             "Kemampuan abstraksi yang sangat baik menjadikan peserta sangat adaptif dalam lingkungan yang dinamis dan kompleks."]
-    },
-    penalaran_verbal: {
-        K:  ["Penalaran verbal peserta masih terbatas, memerlukan peningkatan dalam berkomunikasi dan memahami instruksi lisan maupun tulisan.",
-             "Kemampuan verbal peserta perlu dikembangkan agar dapat berkomunikasi dengan lebih efektif.",
-             "Peserta masih membutuhkan latihan dalam mengolah dan menyampaikan informasi secara verbal."],
-        C:  ["Penalaran verbal peserta cukup, mampu berkomunikasi dengan cukup jelas dalam interaksi sehari-hari.",
-             "Kemampuan verbal peserta cukup memadai untuk kebutuhan komunikasi di lingkungan kerja yang terstruktur.",
-             "Peserta memiliki penalaran verbal yang cukup dalam memahami dan menyampaikan informasi secara lisan."],
-        B:  ["Penalaran verbal peserta baik, mampu berkomunikasi dengan jelas dan efektif dalam berbagai interaksi.",
-             "Peserta menunjukkan kemampuan verbal yang baik dalam memahami dan menyampaikan pesan secara tepat.",
-             "Kemampuan penalaran verbal peserta tergolong baik, menjadi aset penting dalam komunikasi tim dan presentasi."],
-        BS: ["Penalaran verbal peserta sangat baik, mencerminkan kemampuan komunikasi yang fasih dan efektif.",
-             "Peserta sangat unggul dalam penalaran verbal, mampu menyampaikan ide kompleks dengan jelas dan terstruktur.",
-             "Kemampuan verbal yang sangat baik menjadikan peserta komunikator yang handal dalam lingkungan profesional."]
-    },
-    penalaran_numerik: {
-        K:  ["Penalaran numerik peserta masih perlu ditingkatkan, terutama dalam memahami proses hitung dan berpikir kuantitatif.",
-             "Kemampuan numerik peserta masih terbatas dan memerlukan latihan dalam pengolahan angka.",
-             "Peserta memerlukan pengembangan dalam kemampuan berhitung dan bernalar secara kuantitatif."],
-        C:  ["Penalaran numerik peserta cukup, mampu melakukan perhitungan dasar yang diperlukan dalam pekerjaan sehari-hari.",
-             "Kemampuan numerik peserta cukup memadai untuk tugas-tugas yang memerlukan kalkulasi sederhana.",
-             "Peserta memiliki penalaran numerik yang cukup untuk mengikuti instruksi yang bersifat angka dan data."],
-        B:  ["Penalaran numerik peserta baik, mampu memahami proses hitung dan berpikir secara teratur dan kuantitatif.",
-             "Peserta menunjukkan kemampuan numerik yang baik dalam mengolah data dan melakukan analisis angka.",
-             "Kemampuan numerik yang baik mendukung peserta dalam pekerjaan yang memerlukan akurasi perhitungan."],
-        BS: ["Penalaran numerik peserta sangat baik, mencerminkan kemampuan analisis kuantitatif yang tinggi.",
-             "Peserta sangat unggul dalam penalaran numerik, mampu mengolah data angka dengan cepat dan akurat.",
-             "Kemampuan numerik yang sangat baik menjadikan peserta sangat andal dalam pekerjaan yang menuntut presisi matematis."]
-    }
-};
-
-// Template pembuka berdasarkan jenis kelamin
-function kalimatPembuka(nama, jk) {
-    const ia = jk && jk.toLowerCase().includes('perempuan') ? 'Ia' : 'Ia';
-    const templates = [
-        `Berdasarkan hasil pemeriksaan psikologis yang telah dilakukan, ${nama} menunjukkan profil kemampuan kognitif sebagai berikut.`,
-        `Hasil pemeriksaan psikologis terhadap ${nama} mengungkapkan gambaran kemampuan kognitif yang dapat diuraikan sebagai berikut.`,
-        `Pemeriksaan psikologis yang dilakukan terhadap ${nama} memberikan gambaran mengenai kapasitas kognitif yang dimilikinya.`
-    ];
-    return acak(templates);
-}
-
-// Template penutup berdasarkan IQ
-function kalimatPenutup(iq, kategoriIQ) {
-    const templates = [
-        `Secara keseluruhan, taraf kecerdasan umum (IQ) ${nama_peserta_global} berada pada kategori ${kategoriIQ} dengan skor ${iq}, yang mencerminkan potensi intelektual yang ${iq >= 110 ? 'di atas rata-rata' : iq >= 90 ? 'cukup memadai' : 'perlu mendapat perhatian lebih lanjut'}.`,
-        `Dari sisi kecerdasan umum, skor IQ sebesar ${iq} menempatkan ${nama_peserta_global} pada kategori ${kategoriIQ}, mengindikasikan kapasitas intelektual yang ${iq >= 110 ? 'mumpuni' : iq >= 90 ? 'berada dalam rentang normal' : 'masih memerlukan pengembangan'}.`,
-        `Adapun taraf kecerdasan umum (IQ = ${iq}) berada pada kategori ${kategoriIQ}, yang ${iq >= 110 ? 'menunjukkan kemampuan intelektual yang unggul' : iq >= 90 ? 'menunjukkan kemampuan intelektual yang memadai' : 'menunjukkan perlunya dukungan khusus dalam pengembangan kognitif'}.`
-    ];
-    return acak(templates);
-}
-
-let nama_peserta_global = '';
-
-// Fungsi utama generate narasi
-function generateNarasi() {
-    const safeJSON = (str, fallback) => { try { return JSON.parse(str || '{}'); } catch { return fallback; } };
-    const kemampuan = safeJSON(_globalData.x_03, {});
-    const biodata   = safeJSON(_globalData.x_02, {});
-    const iq        = parseInt(_globalData.x_06) || 0;
-    const nama      = biodata.nama || 'Peserta';
-    const jk        = biodata.jk   || '';
-    nama_peserta_global = nama;
-
-    function getKatIQ(iq) {
-        if      (iq <= 69)  return 'Mental Defective';
-        else if (iq <= 79)  return 'Borderline';
-        else if (iq <= 89)  return 'Rata-rata Bawah';
-        else if (iq <= 109) return 'Rata-rata';
-        else if (iq <= 119) return 'Di Atas Rata-rata';
-        else if (iq <= 129) return 'Superior';
-        else if (iq <= 139) return 'Sangat Superior';
-        else                return 'Genius';
-    }
-
-    function getKatLabel(skor) {
-        if (skor >= 9) return 'BS';
-        if (skor >= 7) return 'B';
-        if (skor >= 5) return 'C';
-        return 'K';
-    }
-
-    // Bangun paragraf
-    let bagian = [];
-    bagian.push(kalimatPembuka(nama, jk));
-
-    ASPEK_KEY_KEMAMPUAN.forEach(key => {
-        const skor = parseInt(kemampuan[key]) || 1;
-        const kat  = getKatLabel(skor);
-        const pool = TEMPLATE_NARASI[key];
-        if (pool && pool[kat]) bagian.push(acak(pool[kat]));
-    });
-
-    if (iq > 0) bagian.push(kalimatPenutup(iq, getKatIQ(iq)));
-
-    return bagian.join(' ');
-}
-
-// ── Buka modal generate ──
-function bukaModalGenerate() {
-    if (!_globalData) return;
-    document.getElementById('modal-generate').classList.add('open');
-    document.getElementById('generate-loading').style.display = 'block';
-    document.getElementById('generate-content').style.display = 'none';
-
-    // Cek apakah sudah ada narasi tersimpan di x_12
-    const narasisimpan = _globalData.x_12 || '';
-    setTimeout(() => {
-        document.getElementById('generate-loading').style.display = 'none';
-        document.getElementById('generate-content').style.display = 'block';
-        // Tampilkan narasi tersimpan jika ada, kalau tidak generate baru
-        document.getElementById('gen-narasi-text').value = narasisimpan || generateNarasi();
-    }, 600);
-}
-
-// ── Regenerate (acak ulang) ──
-function regenerateNarasi() {
-    document.getElementById('gen-narasi-text').value = generateNarasi();
-}
-
-// ── Tutup modal generate ──
-function tutupModalGenerate() {
-    document.getElementById('modal-generate').classList.remove('open');
-}
-function tutupModalGenerateDiluar(e) {
-    if (e.target === document.getElementById('modal-generate')) tutupModalGenerate();
-}
-
-// ── Simpan narasi ke x_12 via PUT ──
-async function simpanNarasi() {
-    const teks = document.getElementById('gen-narasi-text').value.trim();
-    if (!teks) { tampilToast('⚠️ Narasi tidak boleh kosong.', 'error'); return; }
-
-    const btn = document.getElementById('btn-simpan-narasi');
-    btn.disabled = true;
-    btn.textContent = '⏳ Menyimpan...';
-
-    try {
-        const apiUrl = `${CONFIG.API_URL}?table=${CONFIG.TABLE_NAME}&id_x=${_globalIdX}`;
-        const res = await fetch(apiUrl, {
-            method : 'PUT',
-            headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': CONFIG.API_SECRET },
-            body   : JSON.stringify({ x_12: teks })
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const result = await res.json();
-        if (!result.success) throw new Error(result.message || 'Gagal menyimpan');
-
-        // Update global data & tampilkan di halaman
-        _globalData.x_12 = teks;
-        tampilkanNarasi(teks);
-        tutupModalGenerate();
-        tampilToast('✅ Keterangan berhasil disimpan!', 'success');
-    } catch (err) {
-        tampilToast(`❌ Gagal menyimpan: ${err.message}`, 'error');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = '💾 Simpan & Tampilkan';
-    }
-}
-
-// ── Tampilkan narasi di halaman ──
-function tampilkanNarasi(teks) {
-    if (teks && teks.trim()) {
-        document.getElementById('narasi-text').textContent = teks;
-        document.getElementById('narasi-section').style.display = 'block';
-    } else {
-        document.getElementById('narasi-section').style.display = 'none';
     }
 }
 
