@@ -819,7 +819,7 @@ function parseRekapData(row) {
     return {
         identitas: {
             nama       : biodata.nama       || '',
-            jk         : biodata.jk         || biodata.jenis_kelamin || biodata.kelamin || '',
+            jk         : biodata.jk         || '',
             usia       : biodata.usia       || '',
             tanggal    : biodata.tanggal    || '',
             tanggalTTD : biodata.tanggal_ttd || biodata.tanggal || ''
@@ -1293,7 +1293,7 @@ function bukaModalEdit() {
     const sikap      = safeJSON(_globalData.x_05, {});
     // ── Biodata ──
     document.getElementById('ed-nama').value        = biodata.nama        || '';
-    document.getElementById('ed-jk').value          = biodata.jk          || biodata.jenis_kelamin || biodata.kelamin || 'Laki-laki';
+    document.getElementById('ed-jk').value          = biodata.jk          || 'Laki-laki';
     document.getElementById('ed-usia').value        = biodata.usia        || '';
     document.getElementById('ed-tanggal').value     = biodata.tanggal     || '';
     document.getElementById('ed-tanggal-ttd').value = biodata.tanggal_ttd || biodata.tanggal || '';
