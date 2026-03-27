@@ -819,7 +819,7 @@ function parseRekapData(row) {
     return {
         identitas: {
             nama       : biodata.nama       || '',
-            jk         : biodata.jk         || biodata.jenis_kelamin || biodata.kelamin || '',
+            jk         : (biodata.jk || '').trim() || (biodata.jenis_kelamin || '').trim() || (biodata.kelamin || '').trim() || 'Laki-laki',
             usia       : biodata.usia       || '',
             tanggal    : biodata.tanggal    || '',
             tanggalTTD : biodata.tanggal_ttd || biodata.tanggal || ''
@@ -1109,13 +1109,21 @@ function setupDownload() {
             }
         });
 
-        // Header institusi
+        // ── Konfigurasi margin PDF (ubah nilai di sini) ──
+        const PDF_MARGIN = {
+            kiri         : 30,   // margin kiri semua halaman (pt)
+            kanan        : 30,   // margin kanan semua halaman (pt)
+            atas_hal2plus: 50,   // margin atas halaman 2, 3, dst (pt)
+            bawah        : 30    // margin bawah semua halaman (pt)
+        };
+
+        // Header institusi — margin top negatif untuk kompensasi pageMargins atas_hal2plus
         const headerInstitusi = () => {
             const content = [];
             if (hdrB64) {
-                content.push({ image: hdrB64, width: 595, margin: [-30, 0, -30, 10] });
+                content.push({ image: hdrB64, width: 595, margin: [-30, -PDF_MARGIN.atas_hal2plus, -30, 10] });
             } else {
-                content.push({ text:'PT. LIDAN INDAH ABADI', bold:true, fontSize:14, color:UNGU, alignment:'center', margin:[0,0,0,8] });
+                content.push({ text:'PT. LIDAN INDAH ABADI', bold:true, fontSize:14, color:UNGU, alignment:'center', margin:[0,-PDF_MARGIN.atas_hal2plus,0,8] });
             }
             return content;
         };
@@ -1171,7 +1179,9 @@ function setupDownload() {
 
         return {
             pageSize: 'A4',
-            pageMargins: [30, 0, 30, 20],
+            // pageMargins atas = PDF_MARGIN.atas_hal2plus berlaku untuk semua halaman.
+            // Halaman 1 dikompensasi: header gambar pakai margin top negatif agar menempel ke atas.
+            pageMargins: [PDF_MARGIN.kiri, PDF_MARGIN.atas_hal2plus, PDF_MARGIN.kanan, PDF_MARGIN.bawah],
             content: [
                 ...headerInstitusi(),
                 { text:'PROFIL PEMERIKSAAN PSIKOLOGIS', bold:true, fontSize:FS1+4, alignment:'center', margin:[0,4,0,8] },
@@ -1293,7 +1303,7 @@ function bukaModalEdit() {
     const sikap      = safeJSON(_globalData.x_05, {});
     // ── Biodata ──
     document.getElementById('ed-nama').value        = biodata.nama        || '';
-    document.getElementById('ed-jk').value          = biodata.jk          || biodata.jenis_kelamin || biodata.kelamin || 'Laki-laki';
+    document.getElementById('ed-jk').value          = (biodata.jk || '').trim() || (biodata.jenis_kelamin || '').trim() || 'Laki-laki';
     document.getElementById('ed-usia').value        = biodata.usia        || '';
     document.getElementById('ed-tanggal').value     = biodata.tanggal     || '';
     document.getElementById('ed-tanggal-ttd').value = biodata.tanggal_ttd || biodata.tanggal || '';
