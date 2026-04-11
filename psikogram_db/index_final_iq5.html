@@ -550,7 +550,7 @@
         <!-- KETERANGAN NARASI OTOMATIS (x_12) -->
         <div id="narasi-section" style="display:none; margin-top:16px; padding:14px 16px; background:#f0edff; border-left:4px solid #5F4EDA; border-radius:6px;">
             <strong style="color:#5F4EDA; font-size:14px;">&#128221; Keterangan Psikologis:</strong>
-            <p id="narasi-text" style="margin:8px 0 0 0; text-align:justify; line-height:1.8; font-size:inherit; display:block;"></p>
+            <p id="narasi-text" style="margin:8px 0 0 0; text-align:justify; line-height:1.8; font-size:inherit;"></p>
         </div>
 
         <!-- Tanda Tangan -->
@@ -718,122 +718,14 @@
 
             <!-- ── TAB KETERANGAN PSIKOLOGIS ── -->
             <div class="edit-panel" id="epanel-keterangan">
-                <p style="font-size:12px; color:#888; margin-bottom:10px;">Edit teks keterangan psikologis yang ditampilkan di laporan.</p>
-
-                <!-- Toggle Visual / Kode -->
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-                    <span style="font-size:12px; font-weight:bold; color:#444; text-transform:uppercase; letter-spacing:0.4px;">Mode:</span>
-                    <button id="btn-mode-visual" onclick="setEditorMode('visual')"
-                        style="padding:5px 14px; border:2px solid #5F4EDA; border-radius:16px; background:#5F4EDA; color:white; font-size:12px; font-weight:bold; cursor:pointer;">
-                        🖊️ Visual
-                    </button>
-                    <button id="btn-mode-kode" onclick="setEditorMode('kode')"
-                        style="padding:5px 14px; border:2px solid #ddd; border-radius:16px; background:white; color:#555; font-size:12px; font-weight:bold; cursor:pointer;">
-                        &lt;/&gt; HTML
-                    </button>
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit teks keterangan psikologis yang ditampilkan di laporan.</p>
+                <div class="edit-form-group">
+                    <label>Keterangan Psikologis</label>
+                    <textarea id="ed-keterangan" rows="10"
+                        style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:13px; font-family:Arial,sans-serif; line-height:1.8; resize:vertical;"
+                        placeholder="Tulis atau edit keterangan psikologis di sini..."></textarea>
                 </div>
-
-                <!-- WYSIWYG Toolbar -->
-                <div id="wysiwyg-toolbar" style="
-                    display:flex; flex-wrap:wrap; gap:4px; padding:8px 10px;
-                    background:#f0edff; border:2px solid #5F4EDA; border-bottom:none;
-                    border-radius:8px 8px 0 0;">
-
-                    <!-- Format teks -->
-                    <button title="Bold" onclick="wysiCmd('bold')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-weight:bold;font-size:14px;">B</button>
-                    <button title="Italic" onclick="wysiCmd('italic')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-style:italic;font-size:14px;">I</button>
-                    <button title="Underline" onclick="wysiCmd('underline')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;text-decoration:underline;font-size:14px;">U</button>
-                    <button title="Strikethrough" onclick="wysiCmd('strikeThrough')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;text-decoration:line-through;font-size:13px;">S</button>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- Warna teks -->
-                    <label title="Warna Teks" style="position:relative;width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;">
-                        🖊️<input type="color" onchange="wysiCmd('foreColor',this.value)" style="position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;" title="Warna Teks">
-                    </label>
-                    <!-- Warna background teks -->
-                    <label title="Sorot Teks" style="position:relative;width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;">
-                        🖍️<input type="color" onchange="wysiCmd('hiliteColor',this.value)" style="position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;" title="Sorot Teks">
-                    </label>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- Ukuran font -->
-                    <select title="Ukuran Font" onchange="wysiCmd('fontSize',this.value); this.value=''" style="height:30px;border:1px solid #ccc;border-radius:4px;font-size:12px;padding:0 4px;">
-                        <option value="">Ukuran</option>
-                        <option value="1">Kecil</option>
-                        <option value="3">Normal</option>
-                        <option value="4">Besar</option>
-                        <option value="5">Lebih Besar</option>
-                        <option value="6">Sangat Besar</option>
-                    </select>
-
-                    <!-- Jenis font -->
-                    <select title="Jenis Font" onchange="wysiCmd('fontName',this.value); this.value=''" style="height:30px;border:1px solid #ccc;border-radius:4px;font-size:12px;padding:0 4px;">
-                        <option value="">Font</option>
-                        <option value="Arial">Arial</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Georgia">Georgia</option>
-                        <option value="Courier New">Courier New</option>
-                        <option value="Verdana">Verdana</option>
-                    </select>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- Alignment -->
-                    <button title="Rata Kiri" onclick="wysiCmd('justifyLeft')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">⬅</button>
-                    <button title="Tengah" onclick="wysiCmd('justifyCenter')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">☰</button>
-                    <button title="Rata Kanan" onclick="wysiCmd('justifyRight')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">➡</button>
-                    <button title="Justify" onclick="wysiCmd('justifyFull')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">▤</button>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- List -->
-                    <button title="Daftar Poin" onclick="wysiCmd('insertUnorderedList')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">•≡</button>
-                    <button title="Daftar Nomor" onclick="wysiCmd('insertOrderedList')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">1≡</button>
-                    <button title="Outdent" onclick="wysiCmd('outdent')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">⇤</button>
-                    <button title="Indent" onclick="wysiCmd('indent')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">⇥</button>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- Heading -->
-                    <select title="Heading / Paragraf" onchange="wysiCmd('formatBlock',this.value); this.value=''" style="height:30px;border:1px solid #ccc;border-radius:4px;font-size:12px;padding:0 4px;">
-                        <option value="">Heading</option>
-                        <option value="h1">Judul 1</option>
-                        <option value="h2">Judul 2</option>
-                        <option value="h3">Judul 3</option>
-                        <option value="h4">Judul 4</option>
-                        <option value="p">Paragraf</option>
-                    </select>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- Hapus format -->
-                    <button title="Hapus Format" onclick="wysiCmd('removeFormat')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">✕A</button>
-                    <!-- Undo / Redo -->
-                    <button title="Undo" onclick="wysiCmd('undo')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:14px;">↩</button>
-                    <button title="Redo" onclick="wysiCmd('redo')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:14px;">↪</button>
-                </div>
-
-                <!-- WYSIWYG contenteditable area -->
-                <div id="ed-keterangan-wysiwyg" contenteditable="true"
-                    style="width:100%; min-height:220px; padding:12px; border:2px solid #5F4EDA;
-                           border-radius:0 0 8px 8px; font-size:13px; font-family:Arial,sans-serif;
-                           line-height:1.8; overflow-y:auto; background:white; outline:none;"
-                    placeholder="Tulis atau edit keterangan psikologis di sini...">
-                </div>
-
-                <!-- Mode HTML / Kode -->
-                <textarea id="ed-keterangan-kode" rows="12"
-                    style="display:none; width:100%; padding:12px; border:2px solid #5F4EDA;
-                           border-radius:0 0 8px 8px; font-size:12px; font-family:'Courier New',monospace;
-                           line-height:1.6; resize:vertical; outline:none;"
-                    placeholder="Edit HTML di sini..."></textarea>
-
-                <!-- Hidden input untuk simpan -->
-                <input type="hidden" id="ed-keterangan">
-
-                <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:6px; padding:10px 14px; font-size:12px; color:#856404; margin-top:10px;">
+                <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:6px; padding:10px 14px; font-size:12px; color:#856404; margin-top:8px;">
                     &#9888; Teks ini akan ditampilkan langsung di bagian <strong>Keterangan Psikologis</strong> pada laporan. Klik <strong>Simpan &amp; Refresh</strong> untuk menyimpan.
                 </div>
             </div>
@@ -1322,7 +1214,7 @@ function setupDownload() {
                 // Keterangan Narasi (x_12) jika ada
                 ...(() => {
                     const narasiEl = document.getElementById('narasi-text');
-                    const narasi   = narasiEl ? (narasiEl.textContent || narasiEl.innerText || '').trim() : '';
+                    const narasi   = narasiEl ? narasiEl.textContent.trim() : '';
                     if (!narasi) return [];
                     return [
                         { text:'Keterangan Psikologis:', bold:true, fontSize:FS1, margin:[0,0,0,4] },
@@ -1447,12 +1339,8 @@ function bukaModalEdit() {
         wrapSik.innerHTML += buatSkorInput('sik', key, nama, val);
     });
 
-    // ── Keterangan Psikologis (x_12) — load ke WYSIWYG ──
-    const isiKet = _globalData.x_12 || '';
-    document.getElementById('ed-keterangan-wysiwyg').innerHTML = isiKet;
-    document.getElementById('ed-keterangan-kode').value = isiKet;
-    document.getElementById('ed-keterangan').value = isiKet;
-    setEditorMode('visual');
+    // ── Keterangan Psikologis (x_12) ──
+    document.getElementById('ed-keterangan').value = _globalData.x_12 || '';
 
     // Buka modal & reset ke tab pertama
     switchEditTab('biodata');
@@ -1582,8 +1470,7 @@ async function simpanEdit() {
         // ── IQ ──
         const iqBaru = document.getElementById('ed-iq').value.trim();
 
-        // ── Keterangan Psikologis — ambil dari WYSIWYG atau mode kode ──
-        syncEditorToHidden();
+        // ── Keterangan Psikologis ──
         const keteranganBaru = document.getElementById('ed-keterangan').value.trim();
 
         // ── Susun payload PUT ──
@@ -1925,81 +1812,11 @@ async function simpanNarasi() {
 // ── Tampilkan narasi di halaman ──
 function tampilkanNarasi(teks) {
     if (teks && teks.trim()) {
-        const el = document.getElementById('narasi-text');
-        // Cek apakah konten mengandung HTML tag
-        if (/<[a-z][\s\S]*>/i.test(teks)) {
-            el.innerHTML = teks;
-        } else {
-            el.textContent = teks;
-        }
+        document.getElementById('narasi-text').textContent = teks;
         document.getElementById('narasi-section').style.display = 'block';
     } else {
         document.getElementById('narasi-section').style.display = 'none';
     }
-}
-
-// =========================================================
-// WYSIWYG EDITOR — FUNGSI
-// =========================================================
-let _editorMode = 'visual'; // 'visual' atau 'kode'
-
-function setEditorMode(mode) {
-    _editorMode = mode;
-    const wysiwyg = document.getElementById('ed-keterangan-wysiwyg');
-    const kode    = document.getElementById('ed-keterangan-kode');
-    const toolbar = document.getElementById('wysiwyg-toolbar');
-    const btnV    = document.getElementById('btn-mode-visual');
-    const btnK    = document.getElementById('btn-mode-kode');
-
-    if (mode === 'visual') {
-        // Sync dari kode ke visual sebelum switch
-        if (kode.style.display !== 'none') {
-            wysiwyg.innerHTML = kode.value;
-        }
-        wysiwyg.style.display = 'block';
-        kode.style.display    = 'none';
-        toolbar.style.display = 'flex';
-        wysiwyg.style.borderRadius = '0 0 8px 8px';
-        btnV.style.background  = '#5F4EDA';
-        btnV.style.color       = 'white';
-        btnV.style.borderColor = '#5F4EDA';
-        btnK.style.background  = 'white';
-        btnK.style.color       = '#555';
-        btnK.style.borderColor = '#ddd';
-    } else {
-        // Sync dari visual ke kode sebelum switch
-        if (wysiwyg.style.display !== 'none') {
-            kode.value = wysiwyg.innerHTML;
-        }
-        wysiwyg.style.display = 'none';
-        kode.style.display    = 'block';
-        toolbar.style.display = 'none';
-        kode.style.borderRadius = '8px';
-        kode.style.borderTop = '2px solid #5F4EDA';
-        btnK.style.background  = '#5F4EDA';
-        btnK.style.color       = 'white';
-        btnK.style.borderColor = '#5F4EDA';
-        btnV.style.background  = 'white';
-        btnV.style.color       = '#555';
-        btnV.style.borderColor = '#ddd';
-    }
-}
-
-function wysiCmd(cmd, value) {
-    document.getElementById('ed-keterangan-wysiwyg').focus();
-    document.execCommand(cmd, false, value || null);
-}
-
-function syncEditorToHidden() {
-    let html = '';
-    if (_editorMode === 'visual') {
-        html = document.getElementById('ed-keterangan-wysiwyg').innerHTML;
-    } else {
-        html = document.getElementById('ed-keterangan-kode').value;
-        // Sync balik ke wysiwyg juga
-        document.getElementById('ed-keterangan-wysiwyg').innerHTML = html;
-    }
-    document.getElementById('ed-keterangan').value = html;
 }
 
 main();
