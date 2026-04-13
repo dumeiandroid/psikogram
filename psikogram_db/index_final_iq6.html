@@ -1460,27 +1460,18 @@ function setupDownload() {
                         const headSizes = {h1:defaultFS+10, h2:defaultFS+7, h3:defaultFS+4, h4:defaultFS+2};
 
                         if (tag === 'ul' || tag === 'ol') {
-                            const listBlocks = [];
-                            let counter = 1;
+                            const items = [];
                             node.querySelectorAll(':scope > li').forEach(li => {
                                 const inlines = [];
                                 li.childNodes.forEach(ch => {
-                                    // Skip whitespace-only text nodes (e.g. "\n" before/after SPAN)
-                                    if (ch.nodeType === Node.TEXT_NODE && !ch.textContent.trim()) return;
                                     nodeToInline(ch, { fontSize: defaultFS }).forEach(x => inlines.push(x));
                                 });
-                                const prefix = tag === 'ol' ? `${counter++}. ` : '• ';
-                                listBlocks.push({
-                                    columns: [
-                                        { width: 'auto', text: prefix, fontSize: defaultFS, margin: [0,0,4,0] },
-                                        { width: '*', text: inlines.length ? inlines : [{ text: '' }], fontSize: defaultFS, alignment: 'justify' }
-                                    ],
-                                    columnGap: 0,
-                                    margin: [8, 0, 0, 2]
-                                });
+                                items.push(inlines.length === 1 ? inlines[0] : { text: inlines });
                             });
-                            if (!listBlocks.length) return null;
-                            return { stack: listBlocks, margin: [0, 0, 0, 4] };
+                            if (!items.length) return null;
+                            return tag === 'ul'
+                                ? { ul: items, fontSize: defaultFS, margin:[0,0,0,4] }
+                                : { ol: items, fontSize: defaultFS, margin:[0,0,0,4] };
                         }
 
                         // Paragraph / heading / div / br
