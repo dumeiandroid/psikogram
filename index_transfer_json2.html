@@ -380,8 +380,6 @@
                 <button class="mode-tab active" onclick="switchMode('single')">🎯 Satu Peserta</button>
                 <button class="mode-tab"        onclick="switchMode('range')">📋 Range id_x</button>
                 <button class="mode-tab"        onclick="switchMode('all')">🌐 Semua Data</button>
-                <button class="mode-tab"        onclick="switchMode('date_single')">📅 Satu Tanggal</button>
-                <button class="mode-tab"        onclick="switchMode('date_range')">🗓️ Range Tanggal</button>
             </div>
 
             <!-- Mode: Single -->
@@ -421,42 +419,6 @@
                 </p>
                 <div class="btn-row">
                     <button class="btn btn-primary" onclick="fetchPreview('all')">🔍 Ambil &amp; Preview Semua</button>
-                </div>
-            </div>
-
-            <!-- Mode: Satu Tanggal -->
-            <div class="mode-panel" id="panel-date_single">
-                <p style="color:#777; font-size:14px; margin-bottom:12px;">
-                    Filter berdasarkan <strong>tgl_tes</strong> di dalam data biodata (x_02).
-                </p>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Tanggal Tes</label>
-                        <input type="date" id="input-date-single">
-                    </div>
-                </div>
-                <div class="btn-row">
-                    <button class="btn btn-primary" onclick="fetchPreview('date_single')">🔍 Ambil &amp; Preview</button>
-                </div>
-            </div>
-
-            <!-- Mode: Range Tanggal -->
-            <div class="mode-panel" id="panel-date_range">
-                <p style="color:#777; font-size:14px; margin-bottom:12px;">
-                    Filter berdasarkan <strong>tgl_tes</strong> di dalam data biodata (x_02).
-                </p>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Tanggal Dari</label>
-                        <input type="date" id="input-date-from">
-                    </div>
-                    <div class="form-group">
-                        <label>Tanggal Sampai</label>
-                        <input type="date" id="input-date-to">
-                    </div>
-                </div>
-                <div class="btn-row">
-                    <button class="btn btn-primary" onclick="fetchPreview('date_range')">🔍 Ambil &amp; Preview</button>
                 </div>
             </div>
         </div>
@@ -675,12 +637,11 @@ let previewRows    = [];   // array of { srcRow, mapped, existingId, status }
 // =========================================================
 function switchMode(mode) {
     currentMode = mode;
-    const modeList  = ['single','range','all','date_single','date_range'];
     document.querySelectorAll('.mode-tab').forEach((t,i) => {
-        t.classList.toggle('active', modeList[i] === mode);
+        t.classList.toggle('active', ['single','range','all'][i] === mode);
     });
     document.querySelectorAll('.mode-panel').forEach((p,i) => {
-        p.classList.toggle('active', 'panel-' + modeList[i] === p.id);
+        p.classList.toggle('active', ['panel-single','panel-range','panel-all'][i] === 'panel-' + mode);
     });
 }
 
@@ -755,35 +716,6 @@ async function fetchSourceData() {
         const json = await apiGet(CFG.SRC_TABLE, { 'id_x_gt': from - 1, 'id_x_lt': to + 1 });
         if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
         return json.data;
-    }
-    if (currentMode === 'date_single') {
-        const tgl = document.getElementById('input-date-single').value;
-        if (!tgl) throw new Error('Tanggal tes tidak boleh kosong');
-        // Ambil semua data lalu filter client-side berdasarkan tgl_tes di x_02
-        const json = await apiGet(CFG.SRC_TABLE, {});
-        if (!json.success) throw new Error(json.message || 'Gagal ambil data');
-        return (json.data || []).filter(row => {
-            try {
-                const bio = JSON.parse(row.x_02 || '{}');
-                return (bio.tgl_tes || '').slice(0, 10) === tgl;
-            } catch { return false; }
-        });
-    }
-    if (currentMode === 'date_range') {
-        const dari   = document.getElementById('input-date-from').value;
-        const sampai = document.getElementById('input-date-to').value;
-        if (!dari || !sampai) throw new Error('Tanggal dari dan sampai tidak boleh kosong');
-        if (dari > sampai) throw new Error('Tanggal dari tidak boleh lebih besar dari tanggal sampai');
-        // Ambil semua data lalu filter client-side
-        const json = await apiGet(CFG.SRC_TABLE, {});
-        if (!json.success) throw new Error(json.message || 'Gagal ambil data');
-        return (json.data || []).filter(row => {
-            try {
-                const bio = JSON.parse(row.x_02 || '{}');
-                const tgl = (bio.tgl_tes || '').slice(0, 10);
-                return tgl >= dari && tgl <= sampai;
-            } catch { return false; }
-        });
     }
     // all
     const json = await apiGet(CFG.SRC_TABLE, {});
