@@ -300,84 +300,56 @@
 
         const usia = parseFloat(nama[0] ? nama[0][4] : 16) || 16;
 
-        // ── Helper: cek apakah string tidak kosong ──────────────────────────
-        function hasValue(v) {
-            return v !== undefined && v !== null && String(v).trim() !== '';
-        }
+        // CFIT
+        const CFIT1 = parseInt(nilai05[0]) || 0;
+        const CFIT2 = parseInt(nilai05[1]) || 0;
+        const CFIT3 = parseInt(nilai05[2]) || 0;
+        const CFIT4 = parseInt(nilai05[3]) || 0;
+        const skorCFIT = CFIT1 + CFIT2 + CFIT3 + CFIT4;
+        const iqCalc = getIQ_cfit(skorCFIT, usia);
 
-        // ── CFIT ─────────────────────────────────────────────────────────────
-        // Dianggap ada data CFIT hanya jika minimal satu subtes diisi
-        const hasCFIT = hasValue(nilai05[0]) || hasValue(nilai05[1]) ||
-                        hasValue(nilai05[2]) || hasValue(nilai05[3]);
+        // Gunakan override dari hasil10[0][3] jika ada
+        const IQ = (hasil10[0] && hasil10[0][3] && parseInt(hasil10[0][3]) !== 0)
+            ? parseInt(hasil10[0][3]) : iqCalc;
 
-        const CFIT1 = hasCFIT ? (parseInt(nilai05[0]) || 0) : null;
-        const CFIT2 = hasCFIT ? (parseInt(nilai05[1]) || 0) : null;
-        const CFIT3 = hasCFIT ? (parseInt(nilai05[2]) || 0) : null;
-        const CFIT4 = hasCFIT ? (parseInt(nilai05[3]) || 0) : null;
-        const skorCFIT = hasCFIT ? (CFIT1 + CFIT2 + CFIT3 + CFIT4) : null;
-        const iqCalc  = hasCFIT ? getIQ_cfit(skorCFIT, usia) : null;
+        const tkd3 = parseFloat(nilai05[15]) || 0;
+        const tkd6 = parseFloat(nilai05[17]) || 0;
 
-        // Override dari hasil10[0][3] jika ada
-        let IQ = null;
-        if (hasil10[0] && hasil10[0][3] && parseInt(hasil10[0][3]) !== 0) {
-            IQ = parseInt(hasil10[0][3]);
-        } else if (iqCalc !== null) {
-            IQ = iqCalc;
-        }
-
-        // ── TKD ──────────────────────────────────────────────────────────────
-        const tkd3 = hasValue(nilai05[15]) ? parseFloat(nilai05[15]) : null;
-        const tkd6 = hasValue(nilai05[17]) ? parseFloat(nilai05[17]) : null;
-
-        // ── EPPS ─────────────────────────────────────────────────────────────
+        // EPPS
         const soalEppsStr = x6arr[0] || '';
-        const hasEPPS = soalEppsStr.trim() !== '';
-        const soalEpps = hasEPPS ? soalEppsStr.split(';').map(v => v.trim()) : [];
-        const epps = hasEPPS ? skorEPPS(soalEpps) : null;
+        const soalEpps = soalEppsStr.split(';').map(v => v.trim());
+        const epps = skorEPPS(soalEpps);
 
-        const ACH = epps ? epps.ws_ach : null;
-        const DOM = epps ? epps.ws_dom : null;
-        const AUT = epps ? epps.ws_out : null;
-        const EXH = epps ? epps.ws_exh : null;
-        const AFF = epps ? epps.ws_aff : null;
-        const DEF = epps ? epps.ws_def : null;
-        const ORD = epps ? epps.ws_ord : null;
+        const ACH = epps.ws_ach;
+        const DOM = epps.ws_dom;
+        const AUT = epps.ws_out;
+        const EXH = epps.ws_exh;
+        const AFF = epps.ws_aff;
+        const DEF = epps.ws_def;
+        const ORD = epps.ws_ord;
 
-        // ── RMIB ─────────────────────────────────────────────────────────────
-        const rmibParts = [x6arr[2],x6arr[3],x6arr[4],x6arr[5],x6arr[6],x6arr[7],x6arr[8],x6arr[9]]
-            .filter(Boolean);
-        const hasRMIB = rmibParts.length > 0;
-        const soalRmib = hasRMIB ? rmibParts.join('; ').split(';').map(v => v.trim()) : [];
-        const rmib = hasRMIB ? skorRMIB(soalRmib) : null;
+        // RMIB
+        const rmibStr = [x6arr[2],x6arr[3],x6arr[4],x6arr[5],x6arr[6],x6arr[7],x6arr[8],x6arr[9]]
+            .filter(Boolean).join('; ');
+        const soalRmib = rmibStr.split(';').map(v => v.trim());
+        const rmib = skorRMIB(soalRmib);
 
-        // ── Helper getScore yang aman terhadap null ───────────────────────────
-        function safeScore(value, type) {
-            if (value === null || value === undefined) return null;
-            return getScore(value, type);
-        }
-
-        // ── Gabungan null-safe untuk aspek yang melibatkan beberapa skor ─────
-        function avgOrNull(...vals) {
-            if (vals.some(v => v === null || v === undefined)) return null;
-            return vals.reduce((a, b) => a + b, 0) / vals.length;
-        }
-
-        // ── Skor skala 1–10 (14 aspek psikologis) ───────────────────────────
+        // Skor skala 1–10 (14 aspek psikologis)
         let resultScores = [
-            safeScore(IQ, 'iq'),                               // 0: Kemampuan Umum
-            safeScore(CFIT2, 'cfit'),                          // 1: Daya Tangkap Visual
-            safeScore(avgOrNull(CFIT1, CFIT4), 'cfit'),       // 2: Berpikir Logis
-            safeScore(CFIT3, 'cfit'),                          // 3: Berpikir Abstrak
-            safeScore(tkd3, 'tkd3'),                           // 4: Penalaran Verbal
-            safeScore(tkd6, 'tkd6'),                           // 5: Penalaran Numerik
-            safeScore(ACH, 'ach'),                             // 6: Hasrat Berprestasi
-            safeScore(avgOrNull(DOM, ACH, AUT), 'ach'),       // 7: Daya Tahan Stress
-            safeScore(EXH, 'ach'),                             // 8: Kepercayaan Diri
-            safeScore(AFF, 'ach'),                             // 9: Relasi Sosial
-            safeScore(DEF, 'ach'),                             // 10: Kerjasama
-            safeScore(ORD, 'ach'),                             // 11: Sistematika Kerja
-            safeScore(avgOrNull(DOM, ACH, AUT), 'ach'),       // 12: Inisiatif
-            safeScore(AUT, 'ach')                              // 13: Kemandirian
+            getScore(IQ, 'iq'),                        // 0: Kemampuan Umum
+            getScore(CFIT2, 'cfit'),                   // 1: Daya Tangkap Visual
+            getScore((CFIT1 + CFIT4) / 2, 'cfit'),    // 2: Berpikir Logis
+            getScore(CFIT3, 'cfit'),                   // 3: Berpikir Abstrak
+            getScore(tkd3, 'tkd3'),                    // 4: Penalaran Verbal
+            getScore(tkd6, 'tkd6'),                    // 5: Penalaran Numerik
+            getScore(ACH, 'ach'),                      // 6: Hasrat Berprestasi
+            getScore((DOM + ACH + AUT) / 3, 'ach'),   // 7: Daya Tahan Stress
+            getScore(EXH, 'ach'),                      // 8: Kepercayaan Diri
+            getScore(AFF, 'ach'),                      // 9: Relasi Sosial
+            getScore(DEF, 'ach'),                      // 10: Kerjasama
+            getScore(ORD, 'ach'),                      // 11: Sistematika Kerja
+            getScore((DOM + ACH + AUT) / 3, 'ach'),   // 12: Inisiatif
+            getScore(AUT, 'ach')                       // 13: Kemandirian
         ];
 
         // Override dengan hasil10[1] jika ada nilai tidak kosong/0
@@ -387,34 +359,28 @@
             }
         }
 
-        // ── Minat RMIB ────────────────────────────────────────────────────────
-        // Hanya olah jika data RMIB tersedia
-        let minat3 = [];
-        if (rmib) {
-            const totalsRmib = {
-                'OUT': rmib.out, 'MECH': rmib.mech, 'COMP': rmib.comp,
-                'ACIE': rmib.acie, 'PERS': rmib.pers, 'AESTH': rmib.aesth,
-                'LITE': rmib.lite, 'MUS': rmib.mus, 'SOS. WERV': rmib.sos_wer,
-                'CLER': rmib.cler, 'PRAC': rmib.prac, 'MED': rmib.med
-            };
-            const sortedMinat = Object.entries(totalsRmib).sort((a, b) => a[1] - b[1]);
-            minat3 = sortedMinat.slice(0, 3).map(([key], j) => ({
-                singkatan: key,
-                namaOverride: hasil10[5] && hasil10[5][j] && hasil10[5][j].trim() !== '' ? hasil10[5][j].trim() : null,
-                ketOverride:  hasil10[6] && hasil10[6][j] && hasil10[6][j].trim() !== '' ? hasil10[6][j].trim() : null
-            }));
-        }
+        // Minat RMIB: urutkan dari terkecil (3 arah minat utama)
+        const totalsRmib = {
+            'OUT': rmib.out, 'MECH': rmib.mech, 'COMP': rmib.comp,
+            'ACIE': rmib.acie, 'PERS': rmib.pers, 'AESTH': rmib.aesth,
+            'LITE': rmib.lite, 'MUS': rmib.mus, 'SOS. WERV': rmib.sos_wer,
+            'CLER': rmib.cler, 'PRAC': rmib.prac, 'MED': rmib.med
+        };
+        const sortedMinat = Object.entries(totalsRmib).sort((a, b) => a[1] - b[1]);
+        const minat3 = sortedMinat.slice(0, 3).map(([key], j) => ({
+            singkatan: key,
+            namaOverride: hasil10[5] && hasil10[5][j] && hasil10[5][j].trim() !== '' ? hasil10[5][j].trim() : null,
+            ketOverride:  hasil10[6] && hasil10[6][j] && hasil10[6][j].trim() !== '' ? hasil10[6][j].trim() : null
+        }));
 
         // Mapping index aspek ke grup
         // 0-5 = KEMAMPUAN, 6-10 = KEPRIBADIAN, 11-13 = SIKAP KERJA
         const grupAspek = [0,0,0,0,0,0, 1,1,1,1,1, 2,2,2];
 
         // Kelebihan / Kelemahan / Rekomendasi berdasarkan skor tertinggi & terendah
-        // Hanya ikutkan aspek yang memiliki skor (tidak null)
         const indexed = resultScores.map((v, i) => ({ value: v, index: i }));
-        const indexedValid = indexed.filter(item => item.value !== null && item.value !== undefined);
-        const sorted_desc = [...indexedValid].sort((a, b) => b.value - a.value);
-        const sorted_asc  = [...indexedValid].sort((a, b) => a.value - b.value);
+        const sorted_desc = [...indexed].sort((a, b) => b.value - a.value);
+        const sorted_asc  = [...indexed].sort((a, b) => a.value - b.value);
 
         /**
          * Pilih 3 kandidat dari daftar terurut dengan aturan:
@@ -455,22 +421,12 @@
         const bottom3 = pilih3Distribusi(sorted_asc);  // untuk kelemahan & rekomendasi
 
         // Override manual dari hasil10 jika ada, fallback ke teks engine
-        // Hanya isi jika ada cukup kandidat valid
-        const getKelebihan = i => {
-            if (!top3[i]) return '';
-            return hasil10[2] && hasil10[2][i] && hasil10[2][i].trim() !== ''
-                ? hasil10[2][i].trim() : pilihVersi(kekuatanKelemahan[top3[i].index].teks2, rand);
-        };
-        const getKelemahan = i => {
-            if (!bottom3[i]) return '';
-            return hasil10[3] && hasil10[3][i] && hasil10[3][i].trim() !== ''
-                ? hasil10[3][i].trim() : pilihVersi(kekuatanKelemahan[bottom3[i].index].teks3, rand);
-        };
-        const getReko = i => {
-            if (!bottom3[i]) return '';
-            return hasil10[4] && hasil10[4][i] && hasil10[4][i].trim() !== ''
-                ? hasil10[4][i].trim() : pilihVersi(kekuatanKelemahan[bottom3[i].index].teks5, rand);
-        };
+        const getKelebihan = i => hasil10[2] && hasil10[2][i] && hasil10[2][i].trim() !== ''
+            ? hasil10[2][i].trim() : pilihVersi(kekuatanKelemahan[top3[i].index].teks2, rand);
+        const getKelemahan = i => hasil10[3] && hasil10[3][i] && hasil10[3][i].trim() !== ''
+            ? hasil10[3][i].trim() : pilihVersi(kekuatanKelemahan[bottom3[i].index].teks3, rand);
+        const getReko = i => hasil10[4] && hasil10[4][i] && hasil10[4][i].trim() !== ''
+            ? hasil10[4][i].trim() : pilihVersi(kekuatanKelemahan[bottom3[i].index].teks5, rand);
 
         return {
             // Identitas
@@ -484,7 +440,7 @@
             // Skor
             IQ,
             resultScores,
-            konsistensi: epps ? epps.konsistensi : null,
+            konsistensi: epps.konsistensi,
             // Indeks terurut (tetap dikirim untuk keperluan render tabel)
             sorted_desc,
             sorted_asc,
