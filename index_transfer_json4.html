@@ -10,26 +10,14 @@
         // karakter_engine.js menggunakan const di top-level sehingga tidak otomatis masuk window.
         // Solusi: load ulang via fetch lalu eksekusi dengan window assignment eksplisit.
         // Simpan promise agar fetchPreview bisa await sebelum proses data
-        function _loadEngine(url, varName) {
-            return fetch(url)
-                .then(r => r.text())
-                .then(text => {
-                    const fn = new Function(text + '; return ' + varName + ';');
-                    window[varName] = fn();
-                    console.log('[' + varName + '] Berhasil dimuat');
-                })
-                .catch(e => console.error('[' + varName + '] Gagal:', e));
-        }
-
-        // Semua engine dimuat paralel, disimpan sebagai promise untuk di-await
-        window._enginesReady = Promise.all([
-            _loadEngine('https://psikogram.lidan.co.id/karakter_engine.js', 'KarakterEngine'),
-            _loadEngine('https://psikogram.lidan.co.id/potensi_engine.js',  'PotensiEngine'),
-            _loadEngine('https://psikogram.lidan.co.id/karir_engine.js',    'KarirEngine'),
-            _loadEngine('https://psikogram.lidan.co.id/asmara_engine.js',   'AsmaraEngine'),
-        ]);
-        // Backward compat
-        window._karakterEngineReady = window._enginesReady;
+        window._karakterEngineReady = fetch('https://psikogram.lidan.co.id/karakter_engine.js')
+            .then(r => r.text())
+            .then(text => {
+                const fn = new Function(text + '; return KarakterEngine;');
+                window.KarakterEngine = fn();
+                console.log('[KarakterEngine] Berhasil dimuat:', typeof window.KarakterEngine, Object.keys(window.KarakterEngine));
+            })
+            .catch(e => console.error('[KarakterEngine] Gagal dimuat:', e));
     </script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -985,242 +973,6 @@ function hitungKarakter(rawRow) {
     };
 }
 
-
-// =========================================================
-// HITUNG POTENSI: who_1 who_2 who_3 → bagian potensi di x_12 & x_13
-// =========================================================
-function hitungPotensi(rawRow) {
-    let x07 = {};
-    try { x07 = JSON.parse(rawRow.x_07 || '{}'); } catch(e) {}
-
-    const PE = window.PotensiEngine;
-    const x12 = {};
-    const x13 = {};
-
-    // TES 01: Gaya Belajar VAK (who_1)
-    const raw1 = x07['who_1'] || x07['tes-gaya-belajar-vak'] || '';
-    if (raw1) {
-        const arr = raw1.split(';').filter(v => v);
-        const skor = { A:0, B:0, C:0 };
-        arr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
-        const total = arr.length || 1;
-        const persen = {};
-        Object.keys(skor).forEach(k => persen[k] = Math.round(skor[k]/total*100));
-        const dominan = Object.keys(skor).reduce((a,b) => skor[a] > skor[b] ? a : b);
-        x12['tes01'] = { dominan, skor, persen, total };
-        const cfg = PE ? PE.LEARNING_STYLES[dominan] : null;
-        if (cfg) x13['tes01'] = { nama: cfg.name, description: cfg.description||'', characteristics: cfg.characteristics||[], tips: cfg.tips||[] };
-    }
-
-    // TES 02: Otak Kiri vs Kanan (who_2)
-    const raw2 = x07['who_2'] || x07['input-tes-otak-kiri-&-kanan'] || '';
-    if (raw2) {
-        const arr = raw2.split(';').filter(v => v);
-        let kiri = 0, kanan = 0;
-        arr.forEach(v => { if (v === 'A') kiri++; else if (v === 'B') kanan++; });
-        const total = arr.length || 1;
-        const persen = { A: Math.round(kiri/total*100), B: Math.round(kanan/total*100) };
-        const dominan = kiri === kanan ? 'BALANCED' : kiri > kanan ? 'LEFT' : 'RIGHT';
-        x12['tes02'] = { dominan, skor: { A: kiri, B: kanan }, persen, total };
-        const cfg = PE ? PE.BRAIN_TYPES[dominan] : null;
-        if (cfg) x13['tes02'] = { nama: cfg.name, tagline: cfg.tagline||'', description: cfg.description||'', characteristics: cfg.characteristics||[], tips: cfg.tips||[] };
-    }
-
-    // TES 03: Kecerdasan Majemuk (who_3) — 8 tipe x 10 soal
-    const raw3 = x07['who_3'] || x07['input-tes-kecerdasan-majemuk'] || '';
-    if (raw3 && PE && PE.INTELLIGENCES) {
-        const arr = raw3.split(';').filter(v => v);
-        const types = Object.keys(PE.INTELLIGENCES);
-        const scores = {};
-        types.forEach((name, i) => {
-            scores[name] = arr.slice(i*10, i*10+10).filter(v => v === 'A').length;
-        });
-        const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
-        const dominan = sorted[0][0];
-        x12['tes03'] = { dominan, skor: scores, sorted: sorted.map(([k,v]) => ({nama:k, skor:v})) };
-        const cfg = PE.INTELLIGENCES[dominan];
-        if (cfg) x13['tes03'] = { nama: cfg.name||dominan, description: cfg.description||'', characteristics: cfg.characteristics||[], tips: cfg.tips||[] };
-    }
-
-    return {
-        x12: Object.keys(x12).length > 0 ? x12 : null,
-        x13: Object.keys(x13).length > 0 ? x13 : null,
-    };
-}
-
-// =========================================================
-// HITUNG KARIR: who_20..27 → bagian karir di x_12 & x_13
-// =========================================================
-function hitungKarir(rawRow) {
-    let x07 = {};
-    try { x07 = JSON.parse(rawRow.x_07 || '{}'); } catch(e) {}
-
-    const KE = window.KarirEngine;
-    const x12 = {};
-    const x13 = {};
-
-    // TES 20: RIASEC (who_20)
-    const raw20 = x07['who_20'] || '';
-    if (raw20 && KE) {
-        const arr = raw20.split(';').filter(v => v);
-        const scoresObj = {};
-        KE.DATA.RIASEC_CATEGORIES.forEach((c,i) => {
-            scoresObj[c.id] = arr.slice(i*8, i*8+8).filter(v => v === 'B').length;
-        });
-        const sorted = KE.DATA.RIASEC_CATEGORIES.map(c => ({...c, score: scoresObj[c.id]||0})).sort((a,b)=>b.score-a.score);
-        x12['tes20'] = { dominan: sorted[0].id, top3: sorted.slice(0,3).map(c=>({id:c.id,nama:c.name,score:c.score})) };
-        x13['tes20'] = { dominan: sorted[0].name, top3: sorted.slice(0,3).map(c=>({id:c.id,nama:c.name,desc:c.desc,careers:c.careers})) };
-    }
-
-    // TES 21: Jiwa Kepemimpinan (who_21) — skor numerik
-    const raw21 = x07['who_21'] || '';
-    if (raw21 && KE) {
-        const arr = raw21.split(';').filter(v => v);
-        const totalSkor = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
-        const result = KE.DATA.KEPEMIMPINAN_LEVELS.find(l => totalSkor <= l.maxSkor) || KE.DATA.KEPEMIMPINAN_LEVELS[KE.DATA.KEPEMIMPINAN_LEVELS.length-1];
-        x12['tes21'] = { skor: totalSkor, maxSkor: 42 };
-        x13['tes21'] = { title: result.title, description: result.description, characteristics: result.characteristics||[], suggestions: result.suggestions||[] };
-    }
-
-    // TES 22: Gaya Kepemimpinan (who_22)
-    const raw22 = x07['who_22'] || '';
-    if (raw22 && KE) {
-        const arr = raw22.split(';').filter(v => v);
-        const styles = KE.DATA.GAYA_KEPEMIMPINAN_STYLES.map((s,i) => ({
-            ...s, score: arr.slice(i*5, i*5+5).filter(v => v === 'A').length
-        })).sort((a,b) => b.score-a.score);
-        x12['tes22'] = { dominan: styles[0].id||styles[0].name, scores: styles.map(s=>({nama:s.name,score:s.score})) };
-        x13['tes22'] = { dominan: styles[0].name, description: styles[0].description||'', characteristics: styles[0].characteristics||[] };
-    }
-
-    // TES 23: Motivasi (who_23) — total skor
-    const raw23 = x07['who_23'] || '';
-    if (raw23 && KE) {
-        const arr = raw23.split(';').filter(v => v);
-        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
-        const result = KE.DATA.MOTIVASI_LEVELS.find(l => total >= l.minSkor) || KE.DATA.MOTIVASI_LEVELS[0];
-        x12['tes23'] = { skor: total, maxSkor: 70, persen: Math.round(total/70*100) };
-        x13['tes23'] = { title: result.title||result.level, description: result.description||'', suggestions: result.suggestions||[] };
-    }
-
-    // TES 24: Manajemen Waktu (who_24)
-    const raw24 = x07['who_24'] || '';
-    if (raw24 && KE) {
-        const arr = raw24.split(';').filter(v => v);
-        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
-        const result = KE.DATA.MANWAK_LEVELS ? (KE.DATA.MANWAK_LEVELS.find(l => total >= l.minSkor) || KE.DATA.MANWAK_LEVELS[0]) : null;
-        x12['tes24'] = { skor: total, maxSkor: 30 };
-        if (result) x13['tes24'] = { title: result.title||result.level, description: result.description||'', suggestions: result.suggestions||[] };
-    }
-
-    // TES 25: Stres (who_25)
-    const raw25 = x07['who_25'] || '';
-    if (raw25 && KE) {
-        const arr = raw25.split(';').filter(v => v);
-        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
-        const result = KE.DATA.STRES_LEVELS ? (KE.DATA.STRES_LEVELS.find(l => total >= l.minSkor) || KE.DATA.STRES_LEVELS[0]) : null;
-        x12['tes25'] = { skor: total, maxSkor: 12 };
-        if (result) x13['tes25'] = { title: result.title||result.level, description: result.description||'', suggestions: result.suggestions||[] };
-    }
-
-    // TES 27: Keberanian (who_27)
-    const raw27 = x07['who_27'] || '';
-    if (raw27 && KE) {
-        const arr = raw27.split(';').filter(v => v);
-        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
-        const cfg = KE.DATA.KEBERANIAN_CONFIG;
-        const maxSkor = cfg ? (cfg.maxSkor || 50) : 50;
-        const result = cfg && cfg.levels ? (cfg.levels.find(l => total >= l.minSkor) || cfg.levels[0]) : null;
-        x12['tes27'] = { skor: total, maxSkor, persen: Math.round(total/maxSkor*100) };
-        if (result) x13['tes27'] = { title: result.title||result.level, description: result.description||'', traits: result.traits||[], suggestions: result.suggestions||[] };
-    }
-
-    return {
-        x12: Object.keys(x12).length > 0 ? x12 : null,
-        x13: Object.keys(x13).length > 0 ? x13 : null,
-    };
-}
-
-// =========================================================
-// HITUNG ASMARA: who_9, who_12..18 → bagian asmara di x_12 & x_13
-// =========================================================
-function hitungAsmara(rawRow) {
-    let x07 = {};
-    try { x07 = JSON.parse(rawRow.x_07 || '{}'); } catch(e) {}
-
-    const AE = window.AsmaraEngine;
-    const x12 = {};
-    const x13 = {};
-
-    if (!AE) return { x12: null, x13: null };
-
-    const TES_ASMARA = [
-        { id: '09', key: 'who_9'  },
-        { id: '12', key: 'who_12' },
-        { id: '13', key: 'who_13' },
-        { id: '14', key: 'who_14' },
-        { id: '15', key: 'who_15' },
-        { id: '16', key: 'who_16' },
-        { id: '17', key: 'who_17' },
-        { id: '18', key: 'who_18' },
-    ];
-
-    TES_ASMARA.forEach(({ id, key }) => {
-        const raw = x07[key] || '';
-        if (!raw) return;
-        try {
-            const cfg = AE.getConfig(id);
-            if (!cfg) return;
-
-            const jawabanArr = raw.split(';').filter(v => v);
-            const tipe = cfg.tipe;
-
-            if (tipe === 'pilihan-tertinggi') {
-                const scores = {};
-                cfg.opsi.forEach(o => scores[o] = 0);
-                jawabanArr.forEach(v => { if (scores[v] !== undefined) scores[v]++; });
-                const dominant = cfg.opsi.reduce((a,b) => scores[a] > scores[b] ? a : b);
-                const persen = {};
-                cfg.opsi.forEach(o => persen[o] = Math.round(scores[o]/(cfg.totalSoal||jawabanArr.length)*100));
-                x12[`tes${id}`] = { dominant, scores, persen };
-                const typeInfo = cfg.types ? cfg.types[dominant] : null;
-                if (typeInfo) x13[`tes${id}`] = { nama: typeInfo.name, description: typeInfo.description||'', characteristics: typeInfo.characteristics||[], advice: typeInfo.advice||typeInfo.tips||[] };
-
-            } else if (tipe === 'skala-per-tipe') {
-                const scores = {};
-                cfg.typesList.forEach((t,i) => {
-                    scores[t] = jawabanArr.slice(i*cfg.soalPerTipe, i*cfg.soalPerTipe+cfg.soalPerTipe).reduce((s,v) => s+(parseInt(v)||0), 0);
-                });
-                const dominant = Object.keys(scores).reduce((a,b) => scores[a] > scores[b] ? a : b);
-                x12[`tes${id}`] = { dominant, scores };
-                const typeInfo = cfg.types ? cfg.types[dominant] : null;
-                if (typeInfo) x13[`tes${id}`] = { nama: typeInfo.name, description: typeInfo.description||'', characteristics: typeInfo.characteristics||[], advice: typeInfo.advice||[] };
-
-            } else if (tipe === 'total-level') {
-                const total = jawabanArr.reduce((s,v) => s+(parseInt(v)||0), 0);
-                const result = cfg.levels ? (cfg.levels.find(l => total >= (l.minSkor||0) && total <= (l.maxSkor||999)) || cfg.levels[cfg.levels.length-1]) : null;
-                x12[`tes${id}`] = { skor: total, maxSkor: cfg.maxSkor||null };
-                if (result) x13[`tes${id}`] = { title: result.title||result.level||'', description: result.description||'', characteristics: result.characteristics||[], advice: result.advice||[] };
-
-            } else if (tipe === 'pointmap-level') {
-                const pointMap = cfg.pointMap || {};
-                let total = 0;
-                jawabanArr.forEach((v,i) => { total += (pointMap[i+1]?.[v] || 0); });
-                const result = cfg.levels ? (cfg.levels.find(l => total >= (l.minSkor||0)) || cfg.levels[cfg.levels.length-1]) : null;
-                x12[`tes${id}`] = { skor: total, maxSkor: cfg.maxSkor||null };
-                if (result) x13[`tes${id}`] = { title: result.title||result.level||'', description: result.description||'', characteristics: result.characteristics||[], advice: result.advice||[] };
-            }
-        } catch(e) {
-            console.warn('[hitungAsmara] tes' + id + ' error:', e.message);
-        }
-    });
-
-    return {
-        x12: Object.keys(x12).length > 0 ? x12 : null,
-        x13: Object.keys(x13).length > 0 ? x13 : null,
-    };
-}
-
 // =========================================================
 // MAP DATA: dari rawData → kelompok x_01..x_13
 // =========================================================
@@ -1333,24 +1085,7 @@ function mapData(rawRow) {
     });
 
     // ── KEL 12 & 13: Karakter (angka & kalimat) ──
-    // ── Hitung semua engine ──
     const karakter = hitungKarakter(rawRow);
-    const potensi  = hitungPotensi(rawRow);
-    const karir    = hitungKarir(rawRow);
-    const asmara   = hitungAsmara(rawRow);
-
-    // ── Gabungkan ke x_12 (angka) dan x_13 (kalimat) ──
-    const x12_obj = {};
-    if (karakter.x12) x12_obj.karakter = JSON.parse(karakter.x12);
-    if (potensi.x12)  x12_obj.potensi  = potensi.x12;
-    if (karir.x12)    x12_obj.karir    = karir.x12;
-    if (asmara.x12)   x12_obj.asmara   = asmara.x12;
-
-    const x13_obj = {};
-    if (karakter.x13) x13_obj.karakter = JSON.parse(karakter.x13);
-    if (potensi.x13)  x13_obj.potensi  = potensi.x13;
-    if (karir.x13)    x13_obj.karir    = karir.x13;
-    if (asmara.x13)   x13_obj.asmara   = asmara.x13;
 
     return {
         x_01 : kel1,          // kode peserta
@@ -1364,8 +1099,8 @@ function mapData(rawRow) {
         x_09 : kel9,          // rekomendasi (JSON array)
         x_10 : kel10,         // arah minat (JSON array)
         x_11 : kel11,         // tanggal transfer
-        x_12 : Object.keys(x12_obj).length > 0 ? JSON.stringify(x12_obj) : null,
-        x_13 : Object.keys(x13_obj).length > 0 ? JSON.stringify(x13_obj) : null,
+        x_12 : karakter.x12, // karakter angka mentah (JSON)
+        x_13 : karakter.x13  // karakter kalimat (JSON)
     };
 }
 
@@ -1376,9 +1111,9 @@ async function fetchPreview(mode) {
     currentMode = mode;
     previewRows = [];
 
-    // Tunggu semua engine siap sebelum proses (hindari race condition)
-    if (window._enginesReady) {
-        try { await window._enginesReady; } catch(e) {}
+    // Tunggu KarakterEngine siap sebelum proses (hindari race condition)
+    if (window._karakterEngineReady) {
+        try { await window._karakterEngineReady; } catch(e) {}
     }
 
     const cardPreview  = document.getElementById('card-preview');

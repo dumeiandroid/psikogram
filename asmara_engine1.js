@@ -1025,27 +1025,6 @@ const AsmaraEngine = (() => {
     },
 
     /**
-     * Proses langsung dari objek x07 (jawaban mentah) tanpa fetch API.
-     * Digunakan oleh transfer tool (index_transfer_json.html) agar
-     * konversi huruf→angka dilakukan di engine, BUKAN di HTML.
-     *
-     * @param {string} tesId  - '09', '12', '13', '14', '15', '16', '17', '18'
-     * @param {object} x07obj - objek hasil JSON.parse(rawRow.x_07)
-     * @returns {object} result object — sama persis dengan hasil load()
-     */
-    processRaw(tesId, x07obj) {
-      const cfg = CONFIG[tesId];
-      if (!cfg) throw new Error(`Tes ID ${tesId} tidak dikenal`);
-
-      // Bungkus x07obj menjadi format rawData yang dipakai process()
-      const fakeRaw = {
-        x_02: '{}',
-        x_07: JSON.stringify(x07obj)
-      };
-      return process(tesId, fakeRaw);
-    },
-
-    /**
      * Akses raw config jika perlu
      */
     getConfig(tesId) {

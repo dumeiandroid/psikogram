@@ -5,32 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transfer Data Psikogram JSON</title>
     <script src="https://psikogram.lidan.co.id/psikogram-engine-json.js?v=1"></script>
-    <script src="https://psikogram.lidan.co.id/karakter_engine.js"></script>
-    <script>
-        // karakter_engine.js menggunakan const di top-level sehingga tidak otomatis masuk window.
-        // Solusi: load ulang via fetch lalu eksekusi dengan window assignment eksplisit.
-        // Simpan promise agar fetchPreview bisa await sebelum proses data
-        function _loadEngine(url, varName) {
-            return fetch(url)
-                .then(r => r.text())
-                .then(text => {
-                    const fn = new Function(text + '; return ' + varName + ';');
-                    window[varName] = fn();
-                    console.log('[' + varName + '] Berhasil dimuat');
-                })
-                .catch(e => console.error('[' + varName + '] Gagal:', e));
-        }
-
-        // Semua engine dimuat paralel, disimpan sebagai promise untuk di-await
-        window._enginesReady = Promise.all([
-            _loadEngine('https://psikogram.lidan.co.id/karakter_engine.js', 'KarakterEngine'),
-            _loadEngine('https://psikogram.lidan.co.id/potensi_engine.js',  'PotensiEngine'),
-            _loadEngine('https://psikogram.lidan.co.id/karir_engine.js',    'KarirEngine'),
-            _loadEngine('https://psikogram.lidan.co.id/asmara_engine.js',   'AsmaraEngine'),
-        ]);
-        // Backward compat
-        window._karakterEngineReady = window._enginesReady;
-    </script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -569,7 +543,7 @@
     <div class="modal-box">
         <span class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</span>
         <h3 id="modal-title">Detail Data</h3>
-        <div id="modal-content"></div>
+        <pre id="modal-content"></pre>
     </div>
 </div>
 
@@ -867,362 +841,7 @@ async function fetchSourceData() {
 }
 
 // =========================================================
-// HITUNG KARAKTER: dari rawRow → x_12 (angka) & x_13 (kalimat)
-// Menggunakan logika scoring dari KarakterEngine
-// =========================================================
-function hitungKarakter(rawRow) {
-    // Ambil x_07 (jawaban tes karakter)
-    let x07 = {};
-    try { x07 = JSON.parse(rawRow.x_07 || '{}'); } catch(e) {}
-
-    const TES_LIST = ['04','05','06','07','08'];
-    const TES_KEYS = {
-        '04': ['input-tes-temperamen',            'who_4'],
-        '05': ['input-tes-extrovert-vs-introvert', 'who_5'],
-        '06': ['input-tes-sensori-vs-intuitif',    'who_6'],
-        '07': ['input-tes-thinking-vs-feeling',    'who_7'],
-        '08': ['input-tes-pengamat-vs-penilai',    'who_8'],
-    };
-
-    // Ambil data config dari KarakterEngine
-    const KDATA = window.KarakterEngine ? window.KarakterEngine.data : null;
-
-    const x12 = {}; // angka mentah
-    const x13 = {}; // kalimat
-
-    TES_LIST.forEach(tesId => {
-        // Cari jawaban dari berbagai kemungkinan key
-        let rawJawaban = '';
-        for (const key of TES_KEYS[tesId]) {
-            if (x07[key] !== undefined && x07[key] !== '') { rawJawaban = x07[key]; break; }
-        }
-        if (!rawJawaban) return; // skip tes yang belum dikerjakan
-
-        const jawabanArr = rawJawaban.split(';').filter(v => v !== '');
-        const skor = {};
-        let dominan = null;
-        let persen  = {};
-        let total   = jawabanArr.length;
-        let markerPosition = null;
-        let sortedSkor = null;
-        let config  = null;
-
-        if (tesId === '04') {
-            // Temperamen: A B C D
-            ['A','B','C','D'].forEach(k => skor[k] = 0);
-            jawabanArr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
-            total = 26;
-            Object.keys(skor).forEach(k => { persen[k] = Math.round((skor[k]/total)*100); });
-            dominan    = Object.keys(skor).reduce((a,b) => skor[a] > skor[b] ? a : b);
-            sortedSkor = Object.entries(skor).sort((a,b) => b[1]-a[1]).map(([k,v]) => ({key:k, skor:v}));
-            config     = KDATA ? KDATA.TEMPERAMENTS[dominan] : null;
-
-        } else if (tesId === '05') {
-            // Ekstrovert vs Introvert
-            skor.A = 0; skor.B = 0;
-            jawabanArr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
-            total = 17;
-            persen = { A: Math.round((skor.A/total)*100), B: Math.round((skor.B/total)*100) };
-            const selisih = Math.abs(skor.A - skor.B);
-            dominan = selisih <= 3 ? 'AMBIVERT' : (skor.A > skor.B ? 'EXTROVERT' : 'INTROVERT');
-            markerPosition = Math.round((skor.A/total)*100);
-            config  = KDATA ? KDATA.PERSONALITY_TYPES[dominan] : null;
-
-        } else if (tesId === '06') {
-            // Sensing vs Intuitif
-            skor.A = 0; skor.B = 0;
-            jawabanArr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
-            total = skor.A + skor.B;
-            persen = { A: Math.round((skor.A/total)*100), B: Math.round((skor.B/total)*100) };
-            dominan = skor.A >= skor.B ? 'A' : 'B';
-            config  = KDATA ? KDATA.SENSING_TYPES[dominan] : null;
-
-        } else if (tesId === '07') {
-            // Thinking vs Feeling
-            skor.A = 0; skor.B = 0;
-            jawabanArr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
-            total = 20;
-            persen = { A: Math.round((skor.A/total)*100), B: Math.round((skor.B/total)*100) };
-            dominan = skor.A >= skor.B ? 'THINKING' : 'FEELING';
-            markerPosition = Math.round((skor.A/total)*100);
-            config  = KDATA ? KDATA.DECISION_TYPES[dominan] : null;
-
-        } else if (tesId === '08') {
-            // Judging vs Perceiving
-            skor.A = 0; skor.B = 0;
-            jawabanArr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
-            total = 10;
-            persen = { A: Math.round((skor.A/total)*100), B: Math.round((skor.B/total)*100) };
-            dominan = skor.A > skor.B ? 'JUDGING' : 'PERCEIVING';
-            markerPosition = Math.round((skor.A/total)*100);
-            config  = KDATA ? KDATA.LIFESTYLE_TYPES[dominan] : null;
-        }
-
-        // x_12: angka mentah
-        const angka = { dominan, skor, persen, total };
-        if (markerPosition !== null) angka.markerPosition = markerPosition;
-        if (sortedSkor)              angka.sortedSkor     = sortedSkor;
-        x12[`tes${tesId}`] = angka;
-
-        // x_13: kalimat (dari config engine)
-        if (config) {
-            x13[`tes${tesId}`] = {
-                nama            : config.name            || '',
-                tagline         : config.tagline         || '',
-                description     : config.description     || config.desc || '',
-                characteristics : config.characteristics || config.traits || [],
-                strengths       : config.strengths       || [],
-                weaknesses      : config.weaknesses      || [],
-                careers         : config.careers         || [],
-                tips            : config.tips            || []
-            };
-        }
-    });
-
-    return {
-        x12: Object.keys(x12).length > 0 ? JSON.stringify(x12) : null,
-        x13: Object.keys(x13).length > 0 ? JSON.stringify(x13) : null,
-    };
-}
-
-
-// =========================================================
-// HITUNG POTENSI: who_1 who_2 who_3 → bagian potensi di x_12 & x_13
-// =========================================================
-function hitungPotensi(rawRow) {
-    let x07 = {};
-    try { x07 = JSON.parse(rawRow.x_07 || '{}'); } catch(e) {}
-
-    const PE = window.PotensiEngine;
-    const x12 = {};
-    const x13 = {};
-
-    // TES 01: Gaya Belajar VAK (who_1)
-    const raw1 = x07['who_1'] || x07['tes-gaya-belajar-vak'] || '';
-    if (raw1) {
-        const arr = raw1.split(';').filter(v => v);
-        const skor = { A:0, B:0, C:0 };
-        arr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
-        const total = arr.length || 1;
-        const persen = {};
-        Object.keys(skor).forEach(k => persen[k] = Math.round(skor[k]/total*100));
-        const dominan = Object.keys(skor).reduce((a,b) => skor[a] > skor[b] ? a : b);
-        x12['tes01'] = { dominan, skor, persen, total };
-        const cfg = PE ? PE.LEARNING_STYLES[dominan] : null;
-        if (cfg) x13['tes01'] = { nama: cfg.name, description: cfg.description||'', characteristics: cfg.characteristics||[], tips: cfg.tips||[] };
-    }
-
-    // TES 02: Otak Kiri vs Kanan (who_2)
-    const raw2 = x07['who_2'] || x07['input-tes-otak-kiri-&-kanan'] || '';
-    if (raw2) {
-        const arr = raw2.split(';').filter(v => v);
-        let kiri = 0, kanan = 0;
-        arr.forEach(v => { if (v === 'A') kiri++; else if (v === 'B') kanan++; });
-        const total = arr.length || 1;
-        const persen = { A: Math.round(kiri/total*100), B: Math.round(kanan/total*100) };
-        const dominan = kiri === kanan ? 'BALANCED' : kiri > kanan ? 'LEFT' : 'RIGHT';
-        x12['tes02'] = { dominan, skor: { A: kiri, B: kanan }, persen, total };
-        const cfg = PE ? PE.BRAIN_TYPES[dominan] : null;
-        if (cfg) x13['tes02'] = { nama: cfg.name, tagline: cfg.tagline||'', description: cfg.description||'', characteristics: cfg.characteristics||[], tips: cfg.tips||[] };
-    }
-
-    // TES 03: Kecerdasan Majemuk (who_3) — 8 tipe x 10 soal
-    const raw3 = x07['who_3'] || x07['input-tes-kecerdasan-majemuk'] || '';
-    if (raw3 && PE && PE.INTELLIGENCES) {
-        const arr = raw3.split(';').filter(v => v);
-        const types = Object.keys(PE.INTELLIGENCES);
-        const scores = {};
-        types.forEach((name, i) => {
-            scores[name] = arr.slice(i*10, i*10+10).filter(v => v === 'A').length;
-        });
-        const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
-        const dominan = sorted[0][0];
-        x12['tes03'] = { dominan, skor: scores, sorted: sorted.map(([k,v]) => ({nama:k, skor:v})) };
-        const cfg = PE.INTELLIGENCES[dominan];
-        if (cfg) x13['tes03'] = { nama: cfg.name||dominan, description: cfg.description||'', characteristics: cfg.characteristics||[], tips: cfg.tips||[] };
-    }
-
-    return {
-        x12: Object.keys(x12).length > 0 ? x12 : null,
-        x13: Object.keys(x13).length > 0 ? x13 : null,
-    };
-}
-
-// =========================================================
-// HITUNG KARIR: who_20..27 → bagian karir di x_12 & x_13
-// =========================================================
-function hitungKarir(rawRow) {
-    let x07 = {};
-    try { x07 = JSON.parse(rawRow.x_07 || '{}'); } catch(e) {}
-
-    const KE = window.KarirEngine;
-    const x12 = {};
-    const x13 = {};
-
-    // TES 20: RIASEC (who_20)
-    const raw20 = x07['who_20'] || '';
-    if (raw20 && KE) {
-        const arr = raw20.split(';').filter(v => v);
-        const scoresObj = {};
-        KE.DATA.RIASEC_CATEGORIES.forEach((c,i) => {
-            scoresObj[c.id] = arr.slice(i*8, i*8+8).filter(v => v === 'B').length;
-        });
-        const sorted = KE.DATA.RIASEC_CATEGORIES.map(c => ({...c, score: scoresObj[c.id]||0})).sort((a,b)=>b.score-a.score);
-        x12['tes20'] = { dominan: sorted[0].id, top3: sorted.slice(0,3).map(c=>({id:c.id,nama:c.name,score:c.score})) };
-        x13['tes20'] = { dominan: sorted[0].name, top3: sorted.slice(0,3).map(c=>({id:c.id,nama:c.name,desc:c.desc,careers:c.careers})) };
-    }
-
-    // TES 21: Jiwa Kepemimpinan (who_21) — skor numerik
-    const raw21 = x07['who_21'] || '';
-    if (raw21 && KE) {
-        const arr = raw21.split(';').filter(v => v);
-        const totalSkor = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
-        const result = KE.DATA.KEPEMIMPINAN_LEVELS.find(l => totalSkor <= l.maxSkor) || KE.DATA.KEPEMIMPINAN_LEVELS[KE.DATA.KEPEMIMPINAN_LEVELS.length-1];
-        x12['tes21'] = { skor: totalSkor, maxSkor: 42 };
-        x13['tes21'] = { title: result.title, description: result.description, characteristics: result.characteristics||[], suggestions: result.suggestions||[] };
-    }
-
-    // TES 22: Gaya Kepemimpinan (who_22)
-    const raw22 = x07['who_22'] || '';
-    if (raw22 && KE) {
-        const arr = raw22.split(';').filter(v => v);
-        const styles = KE.DATA.GAYA_KEPEMIMPINAN_STYLES.map((s,i) => ({
-            ...s, score: arr.slice(i*5, i*5+5).filter(v => v === 'A').length
-        })).sort((a,b) => b.score-a.score);
-        x12['tes22'] = { dominan: styles[0].id||styles[0].name, scores: styles.map(s=>({nama:s.name,score:s.score})) };
-        x13['tes22'] = { dominan: styles[0].name, description: styles[0].description||'', characteristics: styles[0].characteristics||[] };
-    }
-
-    // TES 23: Motivasi (who_23) — total skor
-    const raw23 = x07['who_23'] || '';
-    if (raw23 && KE) {
-        const arr = raw23.split(';').filter(v => v);
-        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
-        const result = KE.DATA.MOTIVASI_LEVELS.find(l => total >= l.minSkor) || KE.DATA.MOTIVASI_LEVELS[0];
-        x12['tes23'] = { skor: total, maxSkor: 70, persen: Math.round(total/70*100) };
-        x13['tes23'] = { title: result.title||result.level, description: result.description||'', suggestions: result.suggestions||[] };
-    }
-
-    // TES 24: Manajemen Waktu (who_24)
-    const raw24 = x07['who_24'] || '';
-    if (raw24 && KE) {
-        const arr = raw24.split(';').filter(v => v);
-        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
-        const result = KE.DATA.MANWAK_LEVELS ? (KE.DATA.MANWAK_LEVELS.find(l => total >= l.minSkor) || KE.DATA.MANWAK_LEVELS[0]) : null;
-        x12['tes24'] = { skor: total, maxSkor: 30 };
-        if (result) x13['tes24'] = { title: result.title||result.level, description: result.description||'', suggestions: result.suggestions||[] };
-    }
-
-    // TES 25: Stres (who_25)
-    const raw25 = x07['who_25'] || '';
-    if (raw25 && KE) {
-        const arr = raw25.split(';').filter(v => v);
-        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
-        const result = KE.DATA.STRES_LEVELS ? (KE.DATA.STRES_LEVELS.find(l => total >= l.minSkor) || KE.DATA.STRES_LEVELS[0]) : null;
-        x12['tes25'] = { skor: total, maxSkor: 12 };
-        if (result) x13['tes25'] = { title: result.title||result.level, description: result.description||'', suggestions: result.suggestions||[] };
-    }
-
-    // TES 27: Keberanian (who_27)
-    const raw27 = x07['who_27'] || '';
-    if (raw27 && KE) {
-        const arr = raw27.split(';').filter(v => v);
-        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
-        const cfg = KE.DATA.KEBERANIAN_CONFIG;
-        const maxSkor = cfg ? (cfg.maxSkor || 50) : 50;
-        const result = cfg && cfg.levels ? (cfg.levels.find(l => total >= l.minSkor) || cfg.levels[0]) : null;
-        x12['tes27'] = { skor: total, maxSkor, persen: Math.round(total/maxSkor*100) };
-        if (result) x13['tes27'] = { title: result.title||result.level, description: result.description||'', traits: result.traits||[], suggestions: result.suggestions||[] };
-    }
-
-    return {
-        x12: Object.keys(x12).length > 0 ? x12 : null,
-        x13: Object.keys(x13).length > 0 ? x13 : null,
-    };
-}
-
-// =========================================================
-// HITUNG ASMARA: who_9, who_12..18 → bagian asmara di x_12 & x_13
-// =========================================================
-function hitungAsmara(rawRow) {
-    let x07 = {};
-    try { x07 = JSON.parse(rawRow.x_07 || '{}'); } catch(e) {}
-
-    const AE = window.AsmaraEngine;
-    const x12 = {};
-    const x13 = {};
-
-    if (!AE) return { x12: null, x13: null };
-
-    const TES_ASMARA = [
-        { id: '09', key: 'who_9'  },
-        { id: '12', key: 'who_12' },
-        { id: '13', key: 'who_13' },
-        { id: '14', key: 'who_14' },
-        { id: '15', key: 'who_15' },
-        { id: '16', key: 'who_16' },
-        { id: '17', key: 'who_17' },
-        { id: '18', key: 'who_18' },
-    ];
-
-    TES_ASMARA.forEach(({ id, key }) => {
-        const raw = x07[key] || '';
-        if (!raw) return;
-        try {
-            const cfg = AE.getConfig(id);
-            if (!cfg) return;
-
-            const jawabanArr = raw.split(';').filter(v => v);
-            const tipe = cfg.tipe;
-
-            if (tipe === 'pilihan-tertinggi') {
-                const scores = {};
-                cfg.opsi.forEach(o => scores[o] = 0);
-                jawabanArr.forEach(v => { if (scores[v] !== undefined) scores[v]++; });
-                const dominant = cfg.opsi.reduce((a,b) => scores[a] > scores[b] ? a : b);
-                const persen = {};
-                cfg.opsi.forEach(o => persen[o] = Math.round(scores[o]/(cfg.totalSoal||jawabanArr.length)*100));
-                x12[`tes${id}`] = { dominant, scores, persen };
-                const typeInfo = cfg.types ? cfg.types[dominant] : null;
-                if (typeInfo) x13[`tes${id}`] = { nama: typeInfo.name, description: typeInfo.description||'', characteristics: typeInfo.characteristics||[], advice: typeInfo.advice||typeInfo.tips||[] };
-
-            } else if (tipe === 'skala-per-tipe') {
-                const scores = {};
-                cfg.typesList.forEach((t,i) => {
-                    scores[t] = jawabanArr.slice(i*cfg.soalPerTipe, i*cfg.soalPerTipe+cfg.soalPerTipe).reduce((s,v) => s+(parseInt(v)||0), 0);
-                });
-                const dominant = Object.keys(scores).reduce((a,b) => scores[a] > scores[b] ? a : b);
-                x12[`tes${id}`] = { dominant, scores };
-                const typeInfo = cfg.types ? cfg.types[dominant] : null;
-                if (typeInfo) x13[`tes${id}`] = { nama: typeInfo.name, description: typeInfo.description||'', characteristics: typeInfo.characteristics||[], advice: typeInfo.advice||[] };
-
-            } else if (tipe === 'total-level') {
-                const total = jawabanArr.reduce((s,v) => s+(parseInt(v)||0), 0);
-                const result = cfg.levels ? (cfg.levels.find(l => total >= (l.minSkor||0) && total <= (l.maxSkor||999)) || cfg.levels[cfg.levels.length-1]) : null;
-                x12[`tes${id}`] = { skor: total, maxSkor: cfg.maxSkor||null };
-                if (result) x13[`tes${id}`] = { title: result.title||result.level||'', description: result.description||'', characteristics: result.characteristics||[], advice: result.advice||[] };
-
-            } else if (tipe === 'pointmap-level') {
-                const pointMap = cfg.pointMap || {};
-                let total = 0;
-                jawabanArr.forEach((v,i) => { total += (pointMap[i+1]?.[v] || 0); });
-                const result = cfg.levels ? (cfg.levels.find(l => total >= (l.minSkor||0)) || cfg.levels[cfg.levels.length-1]) : null;
-                x12[`tes${id}`] = { skor: total, maxSkor: cfg.maxSkor||null };
-                if (result) x13[`tes${id}`] = { title: result.title||result.level||'', description: result.description||'', characteristics: result.characteristics||[], advice: result.advice||[] };
-            }
-        } catch(e) {
-            console.warn('[hitungAsmara] tes' + id + ' error:', e.message);
-        }
-    });
-
-    return {
-        x12: Object.keys(x12).length > 0 ? x12 : null,
-        x13: Object.keys(x13).length > 0 ? x13 : null,
-    };
-}
-
-// =========================================================
-// MAP DATA: dari rawData → kelompok x_01..x_13
+// MAP DATA: dari rawData → kelompok x_01..x_11
 // =========================================================
 function mapData(rawRow) {
     // Pastikan engine tersedia
@@ -1332,40 +951,18 @@ function mapData(rawRow) {
         hour:'2-digit', minute:'2-digit'
     });
 
-    // ── KEL 12 & 13: Karakter (angka & kalimat) ──
-    // ── Hitung semua engine ──
-    const karakter = hitungKarakter(rawRow);
-    const potensi  = hitungPotensi(rawRow);
-    const karir    = hitungKarir(rawRow);
-    const asmara   = hitungAsmara(rawRow);
-
-    // ── Gabungkan ke x_12 (angka) dan x_13 (kalimat) ──
-    const x12_obj = {};
-    if (karakter.x12) x12_obj.karakter = JSON.parse(karakter.x12);
-    if (potensi.x12)  x12_obj.potensi  = potensi.x12;
-    if (karir.x12)    x12_obj.karir    = karir.x12;
-    if (asmara.x12)   x12_obj.asmara   = asmara.x12;
-
-    const x13_obj = {};
-    if (karakter.x13) x13_obj.karakter = JSON.parse(karakter.x13);
-    if (potensi.x13)  x13_obj.potensi  = potensi.x13;
-    if (karir.x13)    x13_obj.karir    = karir.x13;
-    if (asmara.x13)   x13_obj.asmara   = asmara.x13;
-
     return {
-        x_01 : kel1,          // kode peserta
-        x_02 : kel2,          // biodata (JSON)
-        x_03 : kel3,          // kemampuan (JSON)
-        x_04 : kel4,          // kepribadian (JSON)
-        x_05 : kel5,          // sikap kerja (JSON)
-        x_06 : kel6,          // IQ (angka)
-        x_07 : kel7,          // kekuatan (JSON array)
-        x_08 : kel8,          // kelemahan (JSON array)
-        x_09 : kel9,          // rekomendasi (JSON array)
-        x_10 : kel10,         // arah minat (JSON array)
-        x_11 : kel11,         // tanggal transfer
-        x_12 : Object.keys(x12_obj).length > 0 ? JSON.stringify(x12_obj) : null,
-        x_13 : Object.keys(x13_obj).length > 0 ? JSON.stringify(x13_obj) : null,
+        x_01 : kel1,   // kode peserta
+        x_02 : kel2,   // biodata (JSON)
+        x_03 : kel3,   // kemampuan (JSON)
+        x_04 : kel4,   // kepribadian (JSON)
+        x_05 : kel5,   // sikap kerja (JSON)
+        x_06 : kel6,   // IQ (angka)
+        x_07 : kel7,   // kekuatan (JSON array)
+        x_08 : kel8,   // kelemahan (JSON array)
+        x_09 : kel9,   // rekomendasi (JSON array)
+        x_10 : kel10,  // arah minat (JSON array)
+        x_11 : kel11   // tanggal transfer
     };
 }
 
@@ -1375,11 +972,6 @@ function mapData(rawRow) {
 async function fetchPreview(mode) {
     currentMode = mode;
     previewRows = [];
-
-    // Tunggu semua engine siap sebelum proses (hindari race condition)
-    if (window._enginesReady) {
-        try { await window._enginesReady; } catch(e) {}
-    }
 
     const cardPreview  = document.getElementById('card-preview');
     const tbody        = document.getElementById('preview-tbody');
@@ -1577,69 +1169,37 @@ function updateTransferBtn() {
 // MODAL
 // =========================================================
 function showModal(title, jsonStr) {
-    let html = '';
     try {
         const pretty = JSON.stringify(JSON.parse(jsonStr), null, 2);
-        html = `<pre style="white-space:pre-wrap;word-break:break-word;font-size:13px">${pretty}</pre>`;
+        document.getElementById('modal-title').textContent   = title;
+        document.getElementById('modal-content').textContent = pretty;
     } catch {
-        html = `<pre style="white-space:pre-wrap;font-size:13px">${jsonStr}</pre>`;
+        document.getElementById('modal-title').textContent   = title;
+        document.getElementById('modal-content').textContent = jsonStr;
     }
-    document.getElementById('modal-title').textContent  = title;
-    document.getElementById('modal-content').innerHTML  = html;
     document.getElementById('modal-overlay').classList.add('open');
 }
 
 function showDetailModal(idx) {
     const row = previewRows[idx];
     if (!row || !row.mapped) return;
-    const m = row.mapped;
-
-    const kolom = [
-        { key: 'x_01',  label: 'Kode Peserta',      val: m.x_01 },
-        { key: 'x_02',  label: 'Biodata',            val: m.x_02 },
-        { key: 'x_03',  label: 'Kemampuan',          val: m.x_03 },
-        { key: 'x_04',  label: 'Kepribadian',        val: m.x_04 },
-        { key: 'x_05',  label: 'Sikap Kerja',        val: m.x_05 },
-        { key: 'x_06',  label: 'IQ',                 val: m.x_06 },
-        { key: 'x_07',  label: 'Kekuatan',           val: m.x_07 },
-        { key: 'x_08',  label: 'Kelemahan',          val: m.x_08 },
-        { key: 'x_09',  label: 'Rekomendasi',        val: m.x_09 },
-        { key: 'x_10',  label: 'Arah Minat',         val: m.x_10 },
-        { key: 'x_11',  label: 'Tgl Transfer',       val: m.x_11 },
-        { key: 'x_12',  label: 'Karakter (Angka)',   val: m.x_12 },
-        { key: 'x_13',  label: 'Karakter (Kalimat)', val: m.x_13 },
-    ];
-
-    let html = `<table style="width:100%;border-collapse:collapse;font-size:13px">`;
-    html += `<tr style="background:#f0eeff">
-        <th style="padding:8px 10px;text-align:left;width:110px;color:#5F4EDA;border-bottom:2px solid #ddd">Kolom</th>
-        <th style="padding:8px 10px;text-align:left;color:#5F4EDA;border-bottom:2px solid #ddd">Label</th>
-        <th style="padding:8px 10px;text-align:left;color:#5F4EDA;border-bottom:2px solid #ddd">Nilai</th>
-    </tr>`;
-
-    kolom.forEach(({ key, label, val }) => {
-        let display = '';
-        if (val === null || val === undefined || val === 'null') {
-            display = `<span style="color:#bbb;font-style:italic">null</span>`;
-        } else {
-            try {
-                const parsed = JSON.parse(val);
-                display = `<pre style="margin:0;white-space:pre-wrap;word-break:break-word;font-size:12px;max-height:120px;overflow-y:auto;background:#f8f8ff;padding:6px;border-radius:4px">${JSON.stringify(parsed, null, 2)}</pre>`;
-            } catch {
-                display = `<span>${val}</span>`;
-            }
-        }
-        html += `<tr style="border-bottom:1px solid #eee;vertical-align:top">
-            <td style="padding:8px 10px;font-weight:700;color:#5F4EDA;white-space:nowrap">${key}</td>
-            <td style="padding:8px 10px;color:#666;white-space:nowrap">${label}</td>
-            <td style="padding:8px 10px">${display}</td>
-        </tr>`;
-    });
-    html += `</table>`;
-
-    document.getElementById('modal-title').innerHTML = `📋 Detail Kolom Tujuan — id_x <b>${row.srcRow.id_x}</b> &nbsp;<span style="font-size:12px;font-weight:normal;color:${row.status==='new'?'#28a745':'#f59e0b'}">[${row.status==='new'?'POST BARU':'UPDATE'}]</span>`;
-    document.getElementById('modal-content').innerHTML = html;
-    document.getElementById('modal-overlay').classList.add('open');
+    const allData = {
+        sumber_id_x : row.srcRow.id_x,
+        kel1_kode   : row.mapped.x_01,
+        kel2_biodata: JSON.parse(row.mapped.x_02 || '{}'),
+        kel3_kemampuan: JSON.parse(row.mapped.x_03 || '{}'),
+        kel4_kepribadian: JSON.parse(row.mapped.x_04 || '{}'),
+        kel5_sikap_kerja: JSON.parse(row.mapped.x_05 || '{}'),
+        kel6_iq     : row.mapped.x_06,
+        kel7_kekuatan: JSON.parse(row.mapped.x_07 || '[]'),
+        kel8_kelemahan: JSON.parse(row.mapped.x_08 || '[]'),
+        kel9_rekomendasi: JSON.parse(row.mapped.x_09 || '[]'),
+        kel10_minat : JSON.parse(row.mapped.x_10 || '[]'),
+        kel11_tgl_transfer: row.mapped.x_11,
+        status_rekap: row.status,
+        existing_id_x: row.existingId
+    };
+    showModal(`📋 Detail Lengkap — Peserta id_x ${row.srcRow.id_x}`, JSON.stringify(allData));
 }
 
 function closeModal(e) {
