@@ -1144,108 +1144,72 @@ function hitungKarir(rawRow) {
 // =========================================================
 // HITUNG ASMARA: who_9, who_12..18 → bagian asmara di x_12 & x_13
 // =========================================================
-// FIX: Gunakan AsmaraEngine.processRaw() agar konversi huruf→angka
-// (opsiNilai, pointMap) dilakukan SEPENUHNYA oleh engine, bukan
-// dihitung ulang di sini. Ini memastikan nilai yang ditransfer ke DB
-// 100% identik dengan yang ditampilkan di gabungan_asmara.html.
-// =========================================================
 function hitungAsmara(rawRow) {
     let x07 = {};
     try { x07 = JSON.parse(rawRow.x_07 || '{}'); } catch(e) {}
 
     const AE = window.AsmaraEngine;
-    if (!AE || typeof AE.processRaw !== 'function') {
-        console.warn('[hitungAsmara] AsmaraEngine.processRaw tidak tersedia');
-        return { x12: null, x13: null };
-    }
-
-    // Daftar tes asmara dengan key jawaban di x07
-    // (key alternatif: who_9 / input-tes-pola-asuh, dst sesuai engine)
-    const TES_ASMARA = [
-        { id: '09', keys: ['input-tes-pola-asuh', 'who_9']   },
-        { id: '12', keys: ['input-tes-tipe-cinta', 'who_12'] },
-        { id: '13', keys: ['input-tes-jenis-cinta', 'who_13'] },
-        { id: '14', keys: ['input-tes-kecanduan-hubungan', 'who_14'] },
-        { id: '15', keys: ['input-tes-mengenal-pasangan', 'who_15'] },
-        { id: '16', keys: ['input-tes-kesetiaan', 'who_16'] },
-        { id: '17', keys: ['input-tes-sahabat', 'who_17'] },
-        { id: '18', keys: ['input-tes-siap-pendamping', 'who_18'] },
-    ];
-
     const x12 = {};
     const x13 = {};
 
-    TES_ASMARA.forEach(({ id, keys }) => {
-        // Cek apakah ada jawaban untuk tes ini (dari salah satu key)
-        const hasData = keys.some(k => x07[k] !== undefined && x07[k] !== '');
-        if (!hasData) return; // peserta belum mengerjakan tes ini, skip
+    if (!AE) return { x12: null, x13: null };
 
+    const TES_ASMARA = [
+        { id: '09', key: 'who_9'  },
+        { id: '12', key: 'who_12' },
+        { id: '13', key: 'who_13' },
+        { id: '14', key: 'who_14' },
+        { id: '15', key: 'who_15' },
+        { id: '16', key: 'who_16' },
+        { id: '17', key: 'who_17' },
+        { id: '18', key: 'who_18' },
+    ];
+
+    TES_ASMARA.forEach(({ id, key }) => {
+        const raw = x07[key] || '';
+        if (!raw) return;
         try {
-            // Serahkan SELURUH perhitungan ke engine — termasuk konversi huruf→angka
-            const result = AE.processRaw(id, x07);
-            const cfg    = result.config;
-            const tipe   = cfg.tipe;
+            const cfg = AE.getConfig(id);
+            if (!cfg) return;
 
-            // ── Susun x12 (angka) per tipe ──────────────────────────────
+            const jawabanArr = raw.split(';').filter(v => v);
+            const tipe = cfg.tipe;
+
             if (tipe === 'pilihan-tertinggi') {
-                x12[`tes${id}`] = {
-                    dominant : result.dominant,
-                    scores   : result.scores,
-                    persen   : result.persen,
-                };
+                const scores = {};
+                cfg.opsi.forEach(o => scores[o] = 0);
+                jawabanArr.forEach(v => { if (scores[v] !== undefined) scores[v]++; });
+                const dominant = cfg.opsi.reduce((a,b) => scores[a] > scores[b] ? a : b);
+                const persen = {};
+                cfg.opsi.forEach(o => persen[o] = Math.round(scores[o]/(cfg.totalSoal||jawabanArr.length)*100));
+                x12[`tes${id}`] = { dominant, scores, persen };
+                const typeInfo = cfg.types ? cfg.types[dominant] : null;
+                if (typeInfo) x13[`tes${id}`] = { nama: typeInfo.name, description: typeInfo.description||'', characteristics: typeInfo.characteristics||[], advice: typeInfo.advice||typeInfo.tips||[] };
+
             } else if (tipe === 'skala-per-tipe') {
-                x12[`tes${id}`] = {
-                    dominant : result.dominant,
-                    scores   : result.scores,
-                };
+                const scores = {};
+                cfg.typesList.forEach((t,i) => {
+                    scores[t] = jawabanArr.slice(i*cfg.soalPerTipe, i*cfg.soalPerTipe+cfg.soalPerTipe).reduce((s,v) => s+(parseInt(v)||0), 0);
+                });
+                const dominant = Object.keys(scores).reduce((a,b) => scores[a] > scores[b] ? a : b);
+                x12[`tes${id}`] = { dominant, scores };
+                const typeInfo = cfg.types ? cfg.types[dominant] : null;
+                if (typeInfo) x13[`tes${id}`] = { nama: typeInfo.name, description: typeInfo.description||'', characteristics: typeInfo.characteristics||[], advice: typeInfo.advice||[] };
+
             } else if (tipe === 'total-level') {
-                x12[`tes${id}`] = {
-                    level  : result.level,
-                    skor   : result.total,
-                    maxSkor: cfg.maxSkor || null,
-                    minSkor: cfg.minSkor || null,
-                };
+                const total = jawabanArr.reduce((s,v) => s+(parseInt(v)||0), 0);
+                const result = cfg.levels ? (cfg.levels.find(l => total >= (l.minSkor||0) && total <= (l.maxSkor||999)) || cfg.levels[cfg.levels.length-1]) : null;
+                x12[`tes${id}`] = { skor: total, maxSkor: cfg.maxSkor||null };
+                if (result) x13[`tes${id}`] = { title: result.title||result.level||'', description: result.description||'', characteristics: result.characteristics||[], advice: result.advice||[] };
+
             } else if (tipe === 'pointmap-level') {
-                x12[`tes${id}`] = {
-                    level   : result.level,
-                    skor    : result.total,
-                    maxSkor : cfg.maxSkor || null,
-                    minSkor : cfg.minSkor || null,
-                    skorList: result.skorList || [],
-                };
+                const pointMap = cfg.pointMap || {};
+                let total = 0;
+                jawabanArr.forEach((v,i) => { total += (pointMap[i+1]?.[v] || 0); });
+                const result = cfg.levels ? (cfg.levels.find(l => total >= (l.minSkor||0)) || cfg.levels[cfg.levels.length-1]) : null;
+                x12[`tes${id}`] = { skor: total, maxSkor: cfg.maxSkor||null };
+                if (result) x13[`tes${id}`] = { title: result.title||result.level||'', description: result.description||'', characteristics: result.characteristics||[], advice: result.advice||[] };
             }
-
-            // ── Susun x13 (teks/kalimat) — ambil dari typeInfo engine ───
-            const ti = result.typeInfo;
-            if (ti) {
-                const entry = {
-                    description    : ti.description    || '',
-                    characteristics: ti.characteristics || [],
-                    advice         : ti.advice || ti.tips || ti.suggestions || [],
-                };
-                // Tambah field nama/title sesuai tipe
-                if (tipe === 'pilihan-tertinggi') {
-                    entry.nama = ti.name || '';
-                    if (ti.strengths)     entry.strengths     = ti.strengths;
-                    if (ti.ideal_partner) entry.ideal_partner = ti.ideal_partner;
-                    if (ti.impact)        entry.impact        = ti.impact;
-                } else if (tipe === 'skala-per-tipe') {
-                    entry.nama = ti.name || '';
-                } else {
-                    // total-level & pointmap-level: gunakan title
-                    entry.title = ti.title || '';
-                    if (ti.warning)    entry.warning    = ti.warning    || null;
-                    if (ti.indicators) entry.indicators = ti.indicators || [];
-                    if (ti.risks)      entry.risks      = ti.risks      || [];
-                    if (ti.strengths)  entry.strengths  = ti.strengths  || [];
-                    if (ti.weaknesses) entry.weaknesses = ti.weaknesses || [];
-                    if (ti.colorClass) entry.colorClass = ti.colorClass;
-                    if (ti.color)      entry.color      = ti.color;
-                    if (ti.icon)       entry.icon       = ti.icon;
-                }
-                x13[`tes${id}`] = entry;
-            }
-
         } catch(e) {
             console.warn('[hitungAsmara] tes' + id + ' error:', e.message);
         }
