@@ -711,6 +711,25 @@ async function apiGet(table, params = {}, useAuth = false, useDst = false) {
     return res.json();
 }
 
+// Ambil SEMUA data sumber dengan pagination by id_x (batch 100)
+async function fetchAllSource() {
+    let allData = [];
+    let lastId  = null;  // akan diisi id_x terkecil batch sebelumnya
+
+    while (true) {
+        const params = lastId ? { id_x_lt: lastId } : {};
+        const json   = await apiGet(CFG.SRC_TABLE, params);
+        if (!json.success || !json.data || json.data.length === 0) break;
+
+        allData = allData.concat(json.data);
+        const ids = json.data.map(r => r.id_x);
+        lastId   = Math.min(...ids);  // ambil id terkecil untuk batch berikutnya
+
+        if (json.data.length < 100) break;  // batch terakhir, stop
+    }
+    return allData;
+}
+
 async function apiPost(table, body) {
     const url = new URL(CFG.API_DST);  // POST ke psikogram_db
     url.searchParams.set('table', table);
@@ -752,16 +771,26 @@ async function fetchSourceData() {
         const from = parseInt(document.getElementById('input-range-from').value);
         const to   = parseInt(document.getElementById('input-range-to').value);
         if (!from || !to || from > to) throw new Error('Range id_x tidak valid');
-        const json = await apiGet(CFG.SRC_TABLE, { 'id_x_gt': from - 1, 'id_x_lt': to + 1 });
-        if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
-        return json.data;
+        // Pagination dalam batas from-to
+        let allData = [];
+        let curTo   = to + 1;
+        while (true) {
+            const json = await apiGet(CFG.SRC_TABLE, { id_x_gt: from - 1, id_x_lt: curTo });
+            if (!json.success || !json.data || json.data.length === 0) break;
+            allData = allData.concat(json.data);
+            const ids = json.data.map(r => r.id_x);
+            curTo = Math.min(...ids); // geser batas atas ke id terkecil batch ini
+            if (json.data.length < 100 || curTo <= from) break;
+        }
+        if (!allData.length) throw new Error('Data tidak ditemukan dalam range tersebut');
+        return allData;
     }
     if (currentMode === 'date_single') {
         const tgl = document.getElementById('input-date-single').value;
         if (!tgl) throw new Error('Tanggal tes tidak boleh kosong');
-        // Ambil semua data lalu filter client-side berdasarkan tgl_tes di x_02
-        const json = await apiGet(CFG.SRC_TABLE, {});
+        const json = await apiGet(CFG.SRC_TABLE, { x_02_like: tgl });
         if (!json.success) throw new Error(json.message || 'Gagal ambil data');
+        // Filter ketat client-side: pastikan tgl_tes benar-benar cocok (bukan kebetulan ada string tanggal lain di x_02)
         return (json.data || []).filter(row => {
             try {
                 const bio = JSON.parse(row.x_02 || '{}');
@@ -774,21 +803,41 @@ async function fetchSourceData() {
         const sampai = document.getElementById('input-date-to').value;
         if (!dari || !sampai) throw new Error('Tanggal dari dan sampai tidak boleh kosong');
         if (dari > sampai) throw new Error('Tanggal dari tidak boleh lebih besar dari tanggal sampai');
-        // Ambil semua data lalu filter client-side
-        const json = await apiGet(CFG.SRC_TABLE, {});
-        if (!json.success) throw new Error(json.message || 'Gagal ambil data');
-        return (json.data || []).filter(row => {
-            try {
-                const bio = JSON.parse(row.x_02 || '{}');
-                const tgl = (bio.tgl_tes || '').slice(0, 10);
-                return tgl >= dari && tgl <= sampai;
-            } catch { return false; }
+        // Untuk range: ambil per tanggal satu per satu lalu gabung
+        // Generate semua tanggal dalam range
+        const dates = [];
+        let cur = new Date(dari);
+        const end = new Date(sampai);
+        while (cur <= end) {
+            dates.push(cur.toISOString().slice(0, 10));
+            cur.setDate(cur.getDate() + 1);
+        }
+        // Fetch paralel semua tanggal sekaligus
+        const results = await Promise.all(
+            dates.map(tgl => apiGet(CFG.SRC_TABLE, { x_02_like: tgl }))
+        );
+        let allData = [];
+        results.forEach((json, i) => {
+            if (!json.success || !json.data) return;
+            const tgl = dates[i];
+            const filtered = json.data.filter(row => {
+                try {
+                    const bio = JSON.parse(row.x_02 || '{}');
+                    return (bio.tgl_tes || '').slice(0, 10) === tgl;
+                } catch { return false; }
+            });
+            allData = allData.concat(filtered);
+        });
+        // Hapus duplikat (kalau ada id_x sama dari request berbeda)
+        const seen = new Set();
+        return allData.filter(row => {
+            if (seen.has(row.id_x)) return false;
+            seen.add(row.id_x);
+            return true;
         });
     }
     // all
-    const json = await apiGet(CFG.SRC_TABLE, {});
-    if (!json.success) throw new Error(json.message || 'Gagal ambil data');
-    return json.data;
+    return await fetchAllSource();
 }
 
 // =========================================================
