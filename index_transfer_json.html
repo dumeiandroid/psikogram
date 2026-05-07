@@ -675,12 +675,12 @@ let previewRows    = [];   // array of { srcRow, mapped, existingId, status }
 // =========================================================
 function switchMode(mode) {
     currentMode = mode;
-    const modeList  = ['single','range','all','date_single','date_range'];
+    const modeList = ['single','range','all','date_single','date_range'];
     document.querySelectorAll('.mode-tab').forEach((t,i) => {
         t.classList.toggle('active', modeList[i] === mode);
     });
-    document.querySelectorAll('.mode-panel').forEach((p,i) => {
-        p.classList.toggle('active', 'panel-' + modeList[i] === p.id);
+    document.querySelectorAll('.mode-panel').forEach(p => {
+        p.classList.toggle('active', p.id === 'panel-' + mode);
     });
 }
 
