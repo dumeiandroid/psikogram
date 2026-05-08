@@ -1060,59 +1060,44 @@ function hitungKarir(rawRow) {
     const x13 = {};
 
     // TES 20: RIASEC (who_20)
-    // SAMA dengan karir_engine.js: 108 item = 6 kategori x 18 soal, urutan R,I,A,S,E,C, jawaban B = ya
     const raw20 = x07['who_20'] || '';
     if (raw20 && KE) {
-        const arr = raw20.split(';').filter(v => v !== '');
-        const ORDER20 = ['R', 'I', 'A', 'S', 'E', 'C'];
+        const arr = raw20.split(';').filter(v => v);
         const scoresObj = {};
-        ORDER20.forEach((id, i) => {
-            const blok = arr.slice(i * 18, (i + 1) * 18);
-            scoresObj[id] = blok.filter(v => v === 'B').length;
+        KE.DATA.RIASEC_CATEGORIES.forEach((c,i) => {
+            scoresObj[c.id] = arr.slice(i*8, i*8+8).filter(v => v === 'B').length;
         });
-        const combined20 = KE.DATA.RIASEC_CATEGORIES.map(c => ({...c, score: scoresObj[c.id]||0}));
-        combined20.sort((a,b) => b.score - a.score);
-        const top3_20 = combined20.slice(0,3);
-        const suggestions20 = KE.DATA.RIASEC_SUGGESTIONS || [];
-        x12['tes20'] = { dominan: combined20[0].id, careerCode: top3_20.map(c=>c.id).join(''), categories: combined20.map(c=>({id:c.id,nama:c.name,score:c.score,color:c.color})), top3: top3_20.map(c=>({id:c.id,nama:c.name,score:c.score})) };
-        x13['tes20'] = { dominan: combined20[0].name, careerCode: top3_20.map(c=>c.id).join(''), categories: combined20.map(c=>({id:c.id,name:c.name,nama:c.name,score:c.score,color:c.color})), top3: top3_20.map(c=>({id:c.id,name:c.name,nama:c.name,desc:c.desc,careers:c.careers,color:c.color})), suggestions: suggestions20 };
+        const sorted = KE.DATA.RIASEC_CATEGORIES.map(c => ({...c, score: scoresObj[c.id]||0})).sort((a,b)=>b.score-a.score);
+        x12['tes20'] = { dominan: sorted[0].id, top3: sorted.slice(0,3).map(c=>({id:c.id,nama:c.name,score:c.score})) };
+        x13['tes20'] = { dominan: sorted[0].name, top3: sorted.slice(0,3).map(c=>({id:c.id,nama:c.name,desc:c.desc,careers:c.careers})) };
     }
 
     // TES 21: Jiwa Kepemimpinan (who_21) — skor numerik
     const raw21 = x07['who_21'] || '';
     if (raw21 && KE) {
         const arr = raw21.split(';').filter(v => v);
-        const nilaiMap21 = { A:0, B:1, C:2, D:3 };
-        const totalSkor = arr.reduce((s,v) => s + (nilaiMap21[v.trim()] !== undefined ? nilaiMap21[v.trim()] : (parseInt(v)||0)), 0);
+        const totalSkor = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
         const result = KE.DATA.KEPEMIMPINAN_LEVELS.find(l => totalSkor <= l.maxSkor) || KE.DATA.KEPEMIMPINAN_LEVELS[KE.DATA.KEPEMIMPINAN_LEVELS.length-1];
         x12['tes21'] = { skor: totalSkor, maxSkor: 42 };
         x13['tes21'] = { title: result.title, description: result.description, characteristics: result.characteristics||[], suggestions: result.suggestions||[] };
     }
 
     // TES 22: Gaya Kepemimpinan (who_22)
-    // SAMA dengan karir_engine.js: 28 soal, tiap 7 soal = 1 style, urutan: pat, oto, lais, demo, jawaban A = ya
     const raw22 = x07['who_22'] || '';
     if (raw22 && KE) {
-        const arr = raw22.split(';').filter(v => v !== '');
-        const styleOrder22 = ['pat', 'oto', 'lais', 'demo'];
-        const combined22 = KE.DATA.GAYA_KEPEMIMPINAN_STYLES.map(s => {
-            const i = styleOrder22.indexOf(s.id);
-            const blok = arr.slice(i * 7, (i + 1) * 7);
-            const score = blok.filter(v => v === 'A').length;
-            return { ...s, score };
-        });
-        combined22.sort((a,b) => b.score - a.score);
-        const dominan22 = combined22[0];
-        x12['tes22'] = { dominan: dominan22.id||dominan22.name, scores: combined22.map(s=>({id:s.id,name:s.name,nama:s.name,score:s.score,color:s.color,icon:s.icon})) };
-        x13['tes22'] = { styles: combined22.map(s=>({id:s.id,name:s.name,nama:s.name,score:s.score,color:s.color,icon:s.icon})), dominan: { id:dominan22.id, name:dominan22.name, title:dominan22.name, icon:dominan22.icon||'', color:dominan22.color||'', description:dominan22.description||dominan22.desc||'', characteristics:dominan22.characteristics||[], strengths:dominan22.strengths||[], weaknesses:dominan22.weaknesses||[] } };
+        const arr = raw22.split(';').filter(v => v);
+        const styles = KE.DATA.GAYA_KEPEMIMPINAN_STYLES.map((s,i) => ({
+            ...s, score: arr.slice(i*5, i*5+5).filter(v => v === 'A').length
+        })).sort((a,b) => b.score-a.score);
+        x12['tes22'] = { dominan: styles[0].id||styles[0].name, scores: styles.map(s=>({nama:s.name,score:s.score})) };
+        x13['tes22'] = { dominan: styles[0].name, description: styles[0].description||'', characteristics: styles[0].characteristics||[] };
     }
 
     // TES 23: Motivasi (who_23) — total skor
     const raw23 = x07['who_23'] || '';
     if (raw23 && KE) {
         const arr = raw23.split(';').filter(v => v);
-        const nilaiMap23 = { A:1, B:2, C:3, D:4, E:5 };
-        const total = arr.reduce((s,v) => s + (nilaiMap23[v.trim()] !== undefined ? nilaiMap23[v.trim()] : (parseInt(v)||0)), 0);
+        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
         const result = KE.DATA.MOTIVASI_LEVELS.find(l => total >= l.minSkor) || KE.DATA.MOTIVASI_LEVELS[0];
         x12['tes23'] = { skor: total, maxSkor: 70, persen: Math.round(total/70*100) };
         x13['tes23'] = { title: result.title||result.level, description: result.description||'', suggestions: result.suggestions||[] };
@@ -1122,8 +1107,7 @@ function hitungKarir(rawRow) {
     const raw24 = x07['who_24'] || '';
     if (raw24 && KE) {
         const arr = raw24.split(';').filter(v => v);
-        const nilaiMap24 = { A:3, B:2, C:1, D:0 };
-        const total = arr.reduce((s,v) => s + (nilaiMap24[v.trim()] !== undefined ? nilaiMap24[v.trim()] : (parseInt(v)||0)), 0);
+        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
         const result = KE.DATA.MANWAK_LEVELS ? (KE.DATA.MANWAK_LEVELS.find(l => total >= l.minSkor) || KE.DATA.MANWAK_LEVELS[0]) : null;
         x12['tes24'] = { skor: total, maxSkor: 30 };
         if (result) x13['tes24'] = { title: result.title||result.level, description: result.description||'', suggestions: result.suggestions||[] };
@@ -1133,11 +1117,7 @@ function hitungKarir(rawRow) {
     const raw25 = x07['who_25'] || '';
     if (raw25 && KE) {
         const arr = raw25.split(';').filter(v => v);
-        // Stres: q1-9 → A=1,B=0; q10-12 → B=1,A=0
-        const total = arr.reduce((s,v,i) => {
-          if (i < 9) return s + (v.trim()==='A' ? 1 : 0);
-          else       return s + (v.trim()==='B' ? 1 : 0);
-        }, 0);
+        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
         const result = KE.DATA.STRES_LEVELS ? (KE.DATA.STRES_LEVELS.find(l => total >= l.minSkor) || KE.DATA.STRES_LEVELS[0]) : null;
         x12['tes25'] = { skor: total, maxSkor: 12 };
         if (result) x13['tes25'] = { title: result.title||result.level, description: result.description||'', suggestions: result.suggestions||[] };
@@ -1147,8 +1127,7 @@ function hitungKarir(rawRow) {
     const raw27 = x07['who_27'] || '';
     if (raw27 && KE) {
         const arr = raw27.split(';').filter(v => v);
-        const nilaiMap27 = { A:4, B:3, C:2, D:1, E:0 };
-        const total = arr.reduce((s,v) => s + (nilaiMap27[v.trim()] !== undefined ? nilaiMap27[v.trim()] : (parseInt(v)||0)), 0);
+        const total = arr.reduce((s,v) => s + (parseInt(v)||0), 0);
         const cfg = KE.DATA.KEBERANIAN_CONFIG;
         const maxSkor = cfg ? (cfg.maxSkor || 50) : 50;
         const result = cfg && cfg.levels ? (cfg.levels.find(l => total >= l.minSkor) || cfg.levels[0]) : null;

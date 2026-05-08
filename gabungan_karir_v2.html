@@ -151,26 +151,62 @@ function icard(title,items,color){return `<div class="ic2" style="border-color:$
 
 /* ─ TES 20 RIASEC ─ */
 function r20(d){
-  const {categories,top3,careerCode,suggestions}=d;
-  const bars=categories.map(c=>{const w=Math.max((c.score/18*100).toFixed(0),4);return`<div class="rbar"><div class="rl"><span>${c.name} (${c.id})</span><span>${c.score}/18</span></div><div class="rb" style="background:${c.color};width:${w}%"><span>${c.score}</span></div></div>`;}).join('');
-  _('b20').innerHTML=`<div style="text-align:center;margin-bottom:14px"><div class="rbadge" style="background:#dbeafe;color:#1e40af">🏷️ Kode Karier: <strong style="font-size:20px;letter-spacing:4px;margin-left:8px">${careerCode}</strong></div></div>
+  const COLORS={R:'#e74c3c',I:'#3498db',A:'#9b59b6',S:'#2ecc71',E:'#f39c12',C:'#95a5a6'};
+  const cats=d.categories||[];
+  const top3=d.top3||cats.slice(0,3);
+  const kode=d.careerCode||(top3.map(t=>t.id).join(''))||d.dominan||'—';
+  const suggestions=d.suggestions||[];
+  // Normalisasi top3: pastikan punya .title, .description, .color untuk rcard
+  const top3n=top3.map(t=>({
+    ...t,
+    name: t.name||t.nama||t.id,
+    title: t.name||t.nama||t.id,
+    description: t.desc||t.description||'',
+    color: t.color||COLORS[t.id]||'#374151',
+    careers: t.careers||[]
+  }));
+  const bars=cats.map(c=>{
+    const col=c.color||COLORS[c.id]||'#374151';
+    const w=Math.max((c.score/18*100).toFixed(0),4);
+    return `<div class="rbar"><div class="rl"><span>${c.name||c.nama} (${c.id})</span><span>${c.score}/18</span></div><div class="rb" style="background:${col};width:${w}%"><span>${c.score}</span></div></div>`;
+  }).join('');
+  _('b20').innerHTML=`<div style="text-align:center;margin-bottom:14px"><div class="rbadge" style="background:#dbeafe;color:#1e40af">🏷️ Kode Karier: <strong style="font-size:20px;letter-spacing:4px;margin-left:8px">${kode}</strong></div></div>
   ${bars}
-  <div class="rc" style="border-color:${top3[0].color};margin-top:14px"><h3 style="color:${top3[0].color}">🏆 Tipe Dominan: ${top3[0].name}</h3><p>${top3[0].desc}</p></div>
-  <div class="ig">${top3.map((t,i)=>icard(`${['🥇','🥈','🥉'][i]} ${t.name}`,t.careers,t.color)).join('')}</div>
-  ${sugg(suggestions.slice(0,5),'Saran Pengembangan Karier')}`;
+  <div class="rc" style="border-color:${top3n[0].color};margin-top:14px"><h3 style="color:${top3n[0].color}">🏆 Tipe Dominan: ${top3n[0].name}</h3><p>${top3n[0].description}</p></div>
+  <div class="ig">${top3n.map((t,i)=>icard(`${['🥇','🥈','🥉'][i]} ${t.name}`,t.careers,t.color)).join('')}</div>
+  ${suggestions.length?sugg(suggestions.slice(0,5),'Saran Pengembangan Karier'):''}`;
 }
 
 /* ─ TES 21 KEPEMIMPINAN ─ */
 function r21(d){
-  const {skor,maxSkor,result}=d;
-  _('b21').innerHTML=`${skorBox(skor,maxSkor,result.color,'skor rendah = kepemimpinan kuat')}${rcard(result)}${icard('💫 Karakteristik',result.characteristics,result.color)}${sugg(result.suggestions)}`;
+  // Data: {skor, maxSkor, title, description, characteristics, suggestions}
+  const col='#7c3aed';
+  _('b21').innerHTML=`${skorBox(d.skor,d.maxSkor,col,'skor rendah = kepemimpinan kuat')}
+  <div class="rc" style="border-color:${col}"><h3 style="color:${col}">${d.title||'Kepemimpinan'}</h3><p>${d.description||''}</p></div>
+  ${icard('💫 Karakteristik',d.characteristics||[],col)}
+  ${sugg(d.suggestions||[])}`;
 }
 
 /* ─ TES 22 GAYA ─ */
 function r22(d){
-  const {styles,dominan}=d;
-  const SUGG={demo:['Tetapkan batas waktu diskusi untuk hindari analysis paralysis','Latih kemampuan membuat keputusan cepat saat situasi mendesak','Pastikan ada follow-through jelas setelah keputusan bersama'],oto:['Praktikkan mendengarkan aktif — beri kesempatan tim berbicara','Mulai delegasi tugas untuk mengembangkan tim','Kembangkan empati dan emotional intelligence'],lais:['Tetapkan ekspektasi dan guidelines yang jelas','Lakukan check-in rutin agar tim tidak kehilangan arah','Berikan feedback lebih sering, bukan hanya saat masalah'],pat:['Dorong kemandirian tim dengan tantangan terukur','Pisahkan hubungan personal dan profesional','Biarkan tim belajar dari kesalahan mereka sendiri']};
-  const bars=styles.map(s=>`<div class="srow"><div class="slbl">${s.icon} ${s.name}</div><div class="strk"><div class="sfill" style="width:${(s.score/7*100).toFixed(0)}%;background:${s.color}"><span>${s.score}</span></div></div><div class="ssc" style="color:${s.color}">${s.score}/7</div></div>`).join('');
+  const SUGG={oto:['Praktikkan mendengarkan aktif — beri kesempatan tim berbicara','Mulai delegasi tugas untuk mengembangkan tim','Kembangkan empati dan emotional intelligence'],demo:['Tetapkan batas waktu diskusi untuk hindari analysis paralysis','Latih kemampuan membuat keputusan cepat saat situasi mendesak','Pastikan ada follow-through jelas setelah keputusan bersama'],lais:['Tetapkan ekspektasi dan guidelines yang jelas','Lakukan check-in rutin agar tim tidak kehilangan arah','Berikan feedback lebih sering, bukan hanya saat masalah'],pat:['Dorong kemandirian tim dengan tantangan terukur','Pisahkan hubungan personal dan profesional','Biarkan tim belajar dari kesalahan mereka sendiri']};
+  // Support format engine {styles,dominan} dan format lama {scores,...}
+  const styles=d.styles||d.scores||[];
+  // Jika dominan sudah object lengkap (format engine/transfer baru), pakai langsung
+  const dominanRaw = (d.dominan && typeof d.dominan === 'object') ? d.dominan : null;
+  const dominanId = dominanRaw ? dominanRaw.id : (d.dominanId||d.dominan||'');
+  const dominanRow = dominanRaw || styles.find(s=>s.id===dominanId||s.name===dominanId||s.nama===dominanId)||styles[0]||{};
+  const dominan={
+    id: dominanRow.id||dominanId||'',
+    name: dominanRow.name||dominanRow.nama||d.dominanNama||dominanId,
+    title: dominanRow.name||dominanRow.nama||d.dominanNama||dominanId,
+    icon: dominanRow.icon||d.dominanIcon||'🎯',
+    color: dominanRow.color||d.color||'#374151',
+    description: dominanRow.description||d.description||'',
+    strengths: dominanRow.strengths||d.strengths||[],
+    weaknesses: dominanRow.weaknesses||d.weaknesses||[]
+  };
+  const bars=styles.map(s=>`<div class="srow"><div class="slbl">${s.icon||''} ${s.name||s.nama}</div><div class="strk"><div class="sfill" style="width:${(s.score/7*100).toFixed(0)}%;background:${s.color}"><span>${s.score}</span></div></div><div class="ssc" style="color:${s.color}">${s.score}/7</div></div>`).join('');
   _('b22').innerHTML=`<div style="text-align:center;margin-bottom:14px"><div class="rbadge" style="background:${dominan.color}20;color:${dominan.color}">${dominan.icon} Gaya Dominan: ${dominan.name}</div></div>
   ${bars}${rcard(dominan)}
   <div class="ig">${icard('💪 Kekuatan',dominan.strengths,'#22c55e')}${icard('⚠️ Kelemahan',dominan.weaknesses,'#f59e0b')}</div>
@@ -179,31 +215,39 @@ function r22(d){
 
 /* ─ TES 23 MOTIVASI ─ */
 function r23(d){
-  const {skor,maxSkor,percentage,result}=d;
-  const factors=(result.factors||[]).map(f=>`<div class="ind pos">${f.icon} ${f.text}</div>`).join('');
-  _('b23').innerHTML=`${skorBox(skor,maxSkor,result.color,percentage+'%')}${rcard(result)}<div class="indg">${factors}</div>${sugg(result.suggestions)}`;
+  // Data: {skor, maxSkor, persen, title, description, suggestions}
+  const col='#d97706';
+  _('b23').innerHTML=`${skorBox(d.skor,d.maxSkor,col,(d.persen||0)+'%')}
+  <div class="rc" style="border-color:${col}"><h3 style="color:${col}">${d.title||'Motivasi Kepemimpinan'}</h3><p>${d.description||''}</p></div>
+  ${sugg(d.suggestions||[])}`;
 }
 
 /* ─ TES 24 MANWAK ─ */
 function r24(d){
-  const {skor,maxSkor,result}=d;
-  const warn=result.warning?`<div class="warn"><h4>⚠️ Perhatian</h4><p>${result.warning}</p></div>`:'';
-  const asp=(result.aspects||[]).map(a=>`<div class="ind pos">${a.icon} ${a.text}</div>`).join('');
-  _('b24').innerHTML=`${skorBox(skor,maxSkor,result.color)}${warn}${rcard(result)}<div class="indg">${asp}</div>${sugg(result.suggestions)}`;
+  // Data: {skor, maxSkor, title, description, suggestions}
+  const col='#0284c7';
+  _('b24').innerHTML=`${skorBox(d.skor,d.maxSkor,col)}
+  <div class="rc" style="border-color:${col}"><h3 style="color:${col}">${d.title||'Manajemen Waktu'}</h3><p>${d.description||''}</p></div>
+  ${sugg(d.suggestions||[])}`;
 }
 
 /* ─ TES 25 STRES ─ */
 function r25(d){
-  const {skor,maxSkor,result}=d;
-  const warn=result.warning?`<div class="warn"><h4>⚠️ Perhatian Penting</h4><p>${result.warning}</p></div>`:'';
-  const inds=(result.indicators||[]).map(i=>`<div class="ind ${i.type==='positive'?'pos':'neg'}">${i.icon} ${i.text}</div>`).join('');
-  _('b25').innerHTML=`${skorBox(skor,maxSkor,result.color,'skor stres terdeteksi')}${warn}${rcard(result)}<div class="indg">${inds}</div>${sugg(result.suggestions,skor>=4?'Langkah Penanganan Stres':'Saran Menjaga Kesehatan Mental')}`;
+  // Data: {skor, maxSkor, title, description, suggestions}
+  const col='#059669';
+  _('b25').innerHTML=`${skorBox(d.skor,d.maxSkor,col,'skor stres terdeteksi')}
+  <div class="rc" style="border-color:${col}"><h3 style="color:${col}">${d.title||'Tingkat Stres'}</h3><p>${d.description||''}</p></div>
+  ${sugg(d.suggestions||[],'Saran Menjaga Kesehatan Mental')}`;
 }
 
 /* ─ TES 27 KEBERANIAN ─ */
 function r27(d){
-  const {skor,maxSkor,percentage,result}=d;
-  _('b27').innerHTML=`${skorBox(skor,maxSkor,result.color,percentage+'%')}${rcard(result)}${icard('🔍 Ciri-ciri',result.traits,result.color)}${sugg(result.suggestions)}`;
+  // Data: {skor, maxSkor, persen, title, description, traits, suggestions}
+  const col='#db2777';
+  _('b27').innerHTML=`${skorBox(d.skor,d.maxSkor,col,(d.persen||0)+'%')}
+  <div class="rc" style="border-color:${col}"><h3 style="color:${col}">${d.title||'Keberanian'}</h3><p>${d.description||''}</p></div>
+  ${icard('🔍 Ciri-ciri',d.traits||[],col)}
+  ${sugg(d.suggestions||[])}`;
 }
 
 /* ─ MAIN LOAD ─ */
@@ -227,17 +271,29 @@ async function main(){
     for(const xKey of['x_12','x_13']){
       try{
         const parsed=JSON.parse(row[xKey]||'{}');
-        if(parsed.karir&&Object.keys(parsed.karir).length)karirData=parsed.karir;
+        if(parsed.karir&&Object.keys(parsed.karir).length){
+          for(const[tk,tv]of Object.entries(parsed.karir)){
+            if(!karirData[tk])karirData[tk]={};
+            Object.assign(karirData[tk],tv);
+          }
+        }
       }catch(e){}
     }
     if(!Object.keys(karirData).length)throw new Error('Data karir tidak tersedia untuk token ini.');
 
     // Data diri dari row rekap
+    let x02={};
+    try{x02=JSON.parse(row.x_02||'{}');}catch(e){}
+    let tglTes='';
+    try{
+      const arr=JSON.parse(row.x_07||'[]');
+      tglTes=Array.isArray(arr)?(arr.find(v=>v)||''):(row.x_07||'');
+    }catch(e){tglTes=row.x_07||'';}
     _dd={
-      nama:row.x_02||row.nama||'—',
-      usia:row.x_03||row.usia||'',
-      pendidikan:row.x_05||row.pendidikan||row.jabatan||'—',
-      tgl_tes:row.x_07||row.tgl_tes||''
+      nama:x02.nama||row.nama||'—',
+      usia:x02.usia||row.x_03||row.usia||'',
+      pendidikan:x02.pendidikan||row.x_05||row.pendidikan||'—',
+      tgl_tes:x02.tanggal||tglTes||'—'
     };
     _tgl=_dd.tgl_tes;
 
