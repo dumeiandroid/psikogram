@@ -401,10 +401,9 @@ const PotensiEngine = (() => {
   function score02(jawabanStr) {
     const arr = jawabanStr.split(';').filter(v => v !== '');
     let skorKiri = 0, skorKanan = 0;
-    // A = otak kiri, B = otak kanan (sesuai logika transfer)
-    arr.forEach(v => {
-      if (v === 'A') skorKiri++;
-      else if (v === 'B') skorKanan++;
+    arr.forEach((v, i) => {
+      if (i < 11) { if (v === 'A') skorKiri++; }
+      else { if (v === 'A') skorKanan++; }
     });
     const total = skorKiri + skorKanan || 1;
     const persentase = {

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Karir & Kepribadian</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#1e293b}
+#topbar{background:#4f46e5;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#topbar button{padding:7px 16px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+.btn-prev{background:#fff;color:#4f46e5}.btn-prev:hover{background:#e0e7ff}
+.btn-dl{background:#22c55e;color:#fff}.btn-dl:hover{background:#16a34a}.btn-dl:disabled{opacity:.5;cursor:not-allowed}
+#topbar .ttl{color:#fff;font-weight:700;font-size:15px;margin-right:auto}
+#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:16px}
+.spinner{width:48px;height:48px;border:5px solid #c7d2fe;border-top-color:#4f46e5;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:#64748b;font-size:15px}
+#err{display:none;text-align:center;padding:60px 20px;color:#dc2626}
+#laporan{display:none;max-width:920px;margin:24px auto;padding:0 16px 60px}
+.cover{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-radius:16px;padding:36px 32px;margin-bottom:24px;text-align:center}
+.cover h1{font-size:26px;margin-bottom:8px}
+.cover p{opacity:.85;font-size:14px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:24px}
+.mi{background:rgba(255,255,255,.15);border-radius:10px;padding:12px;text-align:left}
+.mi small{display:block;opacity:.7;font-size:11px;margin-bottom:4px}
+.mi strong{font-size:14px}
+.sec{background:#fff;border-radius:16px;margin-bottom:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+.sec-h{padding:16px 24px;display:flex;align-items:center;gap:12px;color:#fff}
+.sec-h .ic{font-size:26px}
+.sec-h h2{font-size:16px;font-weight:700;margin-bottom:2px}
+.sec-h p{font-size:12px;opacity:.8}
+.sec-b{padding:20px 24px}
+.sb{text-align:center;padding:20px;background:#f8fafc;border-radius:12px;margin-bottom:14px}
+.sa{font-size:52px;font-weight:800;line-height:1}
+.sl{font-size:13px;color:#64748b;margin-top:4px}
+.sbar{height:10px;background:#e2e8f0;border-radius:5px;margin-top:12px;overflow:hidden}
+.sbar-f{height:100%;border-radius:5px}
+.rbadge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:30px;font-weight:700;font-size:14px;margin:10px 0}
+.rc{border-left:4px solid;border-radius:10px;padding:14px 18px;background:#f8fafc;margin:10px 0}
+.rc h3{font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.rc p{font-size:13px;line-height:1.7;color:#374151}
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:10px 0}
+.ic2{background:#f8fafc;border-radius:10px;padding:12px;border-left:3px solid}
+.ic2 h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:6px}
+.ic2 ul{list-style:none;padding:0}
+.ic2 li{font-size:13px;color:#374151;padding:2px 0 2px 13px;position:relative;line-height:1.4}
+.ic2 li:before{content:"•";position:absolute;left:3px;font-weight:700}
+.rbar{margin:5px 0}
+.rl{display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px}
+.rb{height:20px;border-radius:4px;min-width:4%;display:flex;align-items:center;padding-left:6px}
+.rb span{font-size:11px;color:#fff;font-weight:700}
+.srow{display:flex;align-items:center;gap:10px;margin:5px 0}
+.slbl{width:110px;font-size:12px;font-weight:600;text-align:right;flex-shrink:0}
+.strk{flex:1;height:22px;background:#e2e8f0;border-radius:6px;overflow:hidden}
+.sfill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:8px}
+.sfill span{font-size:11px;color:#fff;font-weight:700}
+.ssc{width:36px;font-size:13px;font-weight:700;text-align:right;flex-shrink:0}
+.sugg{background:#f0fdf4;border-left:4px solid #22c55e;border-radius:10px;padding:14px 18px;margin-top:12px}
+.sugg h4{color:#15803d;font-size:13px;margin-bottom:8px}
+.sugg ul{list-style:none;padding:0}
+.sugg li{font-size:13px;color:#166534;line-height:1.6;padding:3px 0 3px 18px;position:relative}
+.sugg li:before{content:"💡";position:absolute;left:0;font-size:11px}
+.warn{background:#fef3c7;border-left:4px solid #f59e0b;border-radius:10px;padding:12px 16px;margin:10px 0}
+.warn h4{color:#92400e;font-size:13px;margin-bottom:4px}
+.warn p{font-size:13px;color:#92400e;line-height:1.5}
+.indg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:10px 0}
+.ind{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8fafc;border-radius:8px;font-size:13px;color:#374151}
+.ind.pos{border-left:3px solid #22c55e}.ind.neg{border-left:3px solid #ef4444}
+#mp{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;flex-direction:column;align-items:center;padding:16px;overflow-y:auto}
+#mp.open{display:flex}
+.pc{background:#fff;border-radius:12px;padding:12px 16px;width:100%;max-width:900px;margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.pc strong{color:#4f46e5;font-size:14px;flex:0 0 100%}
+.fsc{display:flex;align-items:center;gap:6px;background:#ede9fe;padding:6px 12px;border-radius:8px}
+.fsc span{font-size:12px;font-weight:700;color:#4f46e5}
+.fsb{width:26px;height:26px;border-radius:50%;border:1px solid #4f46e5;background:#fff;color:#4f46e5;font-size:15px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center}
+.fsb:hover{background:#4f46e5;color:#fff}
+.fsv{min-width:34px;text-align:center;font-weight:700;font-size:13px;color:#333}
+.pcr{margin-left:auto;display:flex;gap:8px}
+#pif{width:100%;max-width:900px;height:80vh;border:none;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+@media print{#topbar,#mp{display:none!important}}
+@media(max-width:600px){.sec-b{padding:14px}.cover{padding:22px 16px}.slbl{width:75px;font-size:11px}}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <span class="ttl">📋 Laporan Karir & Kepribadian</span>
+  <button class="btn-prev" onclick="bukaPreview()">🔍 Preview PDF</button>
+  <button class="btn-dl" id="btnDl" onclick="downloadPDF()" disabled>📥 Download PDF</button>
+</div>
+
+<div id="loading"><div class="spinner"></div><p>Memuat data laporan...</p></div>
+<div id="err"><div style="font-size:40px;margin-bottom:12px">⚠️</div><h2 id="errmsg"></h2><p style="color:#64748b;font-size:14px;margin-top:8px">Pastikan URL mengandung <code>?token=xxx</code></p></div>
+
+<div id="laporan">
+  <div class="cover">
+    <h1>📋 Laporan Karir &amp; Kepribadian</h1>
+    <p>Hasil lengkap dari 7 tes psikologi karir</p>
+    <div class="meta">
+      <div class="mi"><small>Nama</small><strong id="cv-nama">—</strong></div>
+      <div class="mi"><small>Usia</small><strong id="cv-usia">—</strong></div>
+      <div class="mi"><small>Pendidikan</small><strong id="cv-didik">—</strong></div>
+      <div class="mi"><small>Tanggal</small><strong id="cv-tgl">—</strong></div>
+    </div>
+  </div>
+
+  <div class="sec" id="sec20"><div class="sec-h" style="background:linear-gradient(135deg,#2980b9,#3498db)"><span class="ic">🎯</span><div><h2>Tes 1 — Minat Karier (RIASEC)</h2><p>Profil minat berdasarkan teori Holland</p></div></div><div class="sec-b" id="b20"></div></div>
+  <div class="sec" id="sec21"><div class="sec-h" style="background:linear-gradient(135deg,#27ae60,#2ecc71)"><span class="ic">👑</span><div><h2>Tes 2 — Jiwa Kepemimpinan</h2><p>Evaluasi potensi dan kualitas kepemimpinan</p></div></div><div class="sec-b" id="b21"></div></div>
+  <div class="sec" id="sec22"><div class="sec-h" style="background:linear-gradient(135deg,#e84393,#f5576c)"><span class="ic">🎭</span><div><h2>Tes 3 — Gaya Kepemimpinan</h2><p>Analisis 4 tipe gaya memimpin</p></div></div><div class="sec-b" id="b22"></div></div>
+  <div class="sec" id="sec23"><div class="sec-h" style="background:linear-gradient(135deg,#f39c12,#e67e22)"><span class="ic">🔥</span><div><h2>Tes 4 — Motivasi Kepemimpinan</h2><p>Keinginan dan dorongan untuk memimpin</p></div></div><div class="sec-b" id="b23"></div></div>
+  <div class="sec" id="sec24"><div class="sec-h" style="background:linear-gradient(135deg,#2980b9,#16a085)"><span class="ic">⏰</span><div><h2>Tes 5 — Manajemen Waktu</h2><p>Evaluasi kemampuan mengelola waktu</p></div></div><div class="sec-b" id="b24"></div></div>
+  <div class="sec" id="sec25"><div class="sec-h" style="background:linear-gradient(135deg,#8e44ad,#9b59b6)"><span class="ic">😰</span><div><h2>Tes 6 — Analisis Stres Kerja</h2><p>Kondisi psikologis dalam lingkungan kerja</p></div></div><div class="sec-b" id="b25"></div></div>
+  <div class="sec" id="sec27"><div class="sec-h" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)"><span class="ic">🦁</span><div><h2>Tes 7 — Keberanian Diri</h2><p>Tingkat keberanian menghadapi tantangan</p></div></div><div class="sec-b" id="b27"></div></div>
+</div>
+
+<div id="mp">
+  <div class="pc">
+    <strong>🔍 Preview PDF Laporan</strong>
+    <div class="fsc"><span>Font Size:</span>
+      <button class="fsb" onclick="ubahFS(-0.5)">−</button>
+      <span class="fsv" id="fslbl">11pt</span>
+      <button class="fsb" onclick="ubahFS(+0.5)">+</button>
+    </div>
+    <div class="pcr">
+      <button onclick="downloadPDF()" style="background:#22c55e;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">📥 Download</button>
+      <button onclick="tutupPreview()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">✕ Tutup</button>
+    </div>
+  </div>
+  <iframe id="pif"></iframe>
+</div>
+
+<script>
+const _= id=>document.getElementById(id);
+let _all={}, _dd={}, _tgl='', _fs=11;
+
+/* ─ RENDER HELPERS ─ */
+function skorBox(skor,max,color,label=''){
+  const p=max?(skor/max*100).toFixed(1):0;
+  return `<div class="sb"><div class="sa" style="color:${color}">${skor}</div>
+    <div class="sl">dari ${max} poin${label?' — '+label:''}</div>
+    ${max?`<div class="sbar"><div class="sbar-f" style="width:${p}%;background:${color}"></div></div>`:''}
+  </div>`;
+}
+function rcard(r){return `<div class="rc" style="border-color:${r.color}"><h3 style="color:${r.color}">${r.icon||''} ${r.title}</h3><p>${r.description}</p></div>`;}
+function sugg(list,title='Saran Pengembangan'){return `<div class="sugg"><h4>💡 ${title}</h4><ul>${list.map(s=>`<li>${s}</li>`).join('')}</ul></div>`;}
+function icard(title,items,color){return `<div class="ic2" style="border-color:${color}"><h4>${title}</h4><ul>${items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;}
+
+/* ─ TES 20 RIASEC ─ */
+function r20(d){
+  const {categories,top3,careerCode,suggestions}=d;
+  const bars=categories.map(c=>{const w=Math.max((c.score/18*100).toFixed(0),4);return`<div class="rbar"><div class="rl"><span>${c.name} (${c.id})</span><span>${c.score}/18</span></div><div class="rb" style="background:${c.color};width:${w}%"><span>${c.score}</span></div></div>`;}).join('');
+  _('b20').innerHTML=`<div style="text-align:center;margin-bottom:14px"><div class="rbadge" style="background:#dbeafe;color:#1e40af">🏷️ Kode Karier: <strong style="font-size:20px;letter-spacing:4px;margin-left:8px">${careerCode}</strong></div></div>
+  ${bars}
+  <div class="rc" style="border-color:${top3[0].color};margin-top:14px"><h3 style="color:${top3[0].color}">🏆 Tipe Dominan: ${top3[0].name}</h3><p>${top3[0].desc}</p></div>
+  <div class="ig">${top3.map((t,i)=>icard(`${['🥇','🥈','🥉'][i]} ${t.name}`,t.careers,t.color)).join('')}</div>
+  ${sugg(suggestions.slice(0,5),'Saran Pengembangan Karier')}`;
+}
+
+/* ─ TES 21 KEPEMIMPINAN ─ */
+function r21(d){
+  const {skor,maxSkor,result}=d;
+  _('b21').innerHTML=`${skorBox(skor,maxSkor,result.color,'skor rendah = kepemimpinan kuat')}${rcard(result)}${icard('💫 Karakteristik',result.characteristics,result.color)}${sugg(result.suggestions)}`;
+}
+
+/* ─ TES 22 GAYA ─ */
+function r22(d){
+  const {styles,dominan}=d;
+  const SUGG={demo:['Tetapkan batas waktu diskusi untuk hindari analysis paralysis','Latih kemampuan membuat keputusan cepat saat situasi mendesak','Pastikan ada follow-through jelas setelah keputusan bersama'],oto:['Praktikkan mendengarkan aktif — beri kesempatan tim berbicara','Mulai delegasi tugas untuk mengembangkan tim','Kembangkan empati dan emotional intelligence'],lais:['Tetapkan ekspektasi dan guidelines yang jelas','Lakukan check-in rutin agar tim tidak kehilangan arah','Berikan feedback lebih sering, bukan hanya saat masalah'],pat:['Dorong kemandirian tim dengan tantangan terukur','Pisahkan hubungan personal dan profesional','Biarkan tim belajar dari kesalahan mereka sendiri']};
+  const bars=styles.map(s=>`<div class="srow"><div class="slbl">${s.icon} ${s.name}</div><div class="strk"><div class="sfill" style="width:${(s.score/7*100).toFixed(0)}%;background:${s.color}"><span>${s.score}</span></div></div><div class="ssc" style="color:${s.color}">${s.score}/7</div></div>`).join('');
+  _('b22').innerHTML=`<div style="text-align:center;margin-bottom:14px"><div class="rbadge" style="background:${dominan.color}20;color:${dominan.color}">${dominan.icon} Gaya Dominan: ${dominan.name}</div></div>
+  ${bars}${rcard(dominan)}
+  <div class="ig">${icard('💪 Kekuatan',dominan.strengths,'#22c55e')}${icard('⚠️ Kelemahan',dominan.weaknesses,'#f59e0b')}</div>
+  ${sugg(SUGG[dominan.id]||[])}`;
+}
+
+/* ─ TES 23 MOTIVASI ─ */
+function r23(d){
+  const {skor,maxSkor,percentage,result}=d;
+  const factors=(result.factors||[]).map(f=>`<div class="ind pos">${f.icon} ${f.text}</div>`).join('');
+  _('b23').innerHTML=`${skorBox(skor,maxSkor,result.color,percentage+'%')}${rcard(result)}<div class="indg">${factors}</div>${sugg(result.suggestions)}`;
+}
+
+/* ─ TES 24 MANWAK ─ */
+function r24(d){
+  const {skor,maxSkor,result}=d;
+  const warn=result.warning?`<div class="warn"><h4>⚠️ Perhatian</h4><p>${result.warning}</p></div>`:'';
+  const asp=(result.aspects||[]).map(a=>`<div class="ind pos">${a.icon} ${a.text}</div>`).join('');
+  _('b24').innerHTML=`${skorBox(skor,maxSkor,result.color)}${warn}${rcard(result)}<div class="indg">${asp}</div>${sugg(result.suggestions)}`;
+}
+
+/* ─ TES 25 STRES ─ */
+function r25(d){
+  const {skor,maxSkor,result}=d;
+  const warn=result.warning?`<div class="warn"><h4>⚠️ Perhatian Penting</h4><p>${result.warning}</p></div>`:'';
+  const inds=(result.indicators||[]).map(i=>`<div class="ind ${i.type==='positive'?'pos':'neg'}">${i.icon} ${i.text}</div>`).join('');
+  _('b25').innerHTML=`${skorBox(skor,maxSkor,result.color,'skor stres terdeteksi')}${warn}${rcard(result)}<div class="indg">${inds}</div>${sugg(result.suggestions,skor>=4?'Langkah Penanganan Stres':'Saran Menjaga Kesehatan Mental')}`;
+}
+
+/* ─ TES 27 KEBERANIAN ─ */
+function r27(d){
+  const {skor,maxSkor,percentage,result}=d;
+  _('b27').innerHTML=`${skorBox(skor,maxSkor,result.color,percentage+'%')}${rcard(result)}${icard('🔍 Ciri-ciri',result.traits,result.color)}${sugg(result.suggestions)}`;
+}
+
+/* ─ MAIN LOAD ─ */
+async function main(){
+  const token=new URLSearchParams(location.search).get('token');
+  if(!token){_('loading').style.display='none';_('err').style.display='block';_('errmsg').textContent='Token tidak ditemukan di URL.';return;}
+  try{
+    // Ambil data dari rekap_nilai1 berdasarkan token (x_01)
+    const API='https://lidan-co-id.pages.dev/api/db_psikogram1';
+    const url=new URL(API);
+    url.searchParams.set('table','rekap_nilai1');
+    url.searchParams.set('x_01',token);
+    const res=await fetch(url.toString(),{headers:{'Content-Type':'application/json','X-Custom-Auth':'admin'}});
+    if(!res.ok)throw new Error('Gagal mengambil data (HTTP '+res.status+')');
+    const json=await res.json();
+    if(!json.success||!json.data||json.data.length===0)throw new Error('Data tidak ditemukan untuk token: '+token);
+
+    const row=json.data[0];
+    // Parse x_12 dan x_13 — ambil yang tersedia
+    let karirData={};
+    for(const xKey of['x_12','x_13']){
+      try{
+        const parsed=JSON.parse(row[xKey]||'{}');
+        if(parsed.karir&&Object.keys(parsed.karir).length)karirData=parsed.karir;
+      }catch(e){}
+    }
+    if(!Object.keys(karirData).length)throw new Error('Data karir tidak tersedia untuk token ini.');
+
+    // Data diri dari row rekap
+    _dd={
+      nama:row.x_02||row.nama||'—',
+      usia:row.x_03||row.usia||'',
+      pendidikan:row.x_05||row.pendidikan||row.jabatan||'—',
+      tgl_tes:row.x_07||row.tgl_tes||''
+    };
+    _tgl=_dd.tgl_tes;
+
+    // Map dari key rekap ke key render (tes20→'20', dst)
+    const tes={};
+    for(const[k,v]of Object.entries(karirData)){
+      const num=k.replace('tes','');
+      tes[num]=v;
+    }
+    _all=tes;
+
+    if(!Object.keys(tes).length)throw new Error('Tidak ada data tes yang ditemukan untuk token ini.');
+
+    // Sembunyikan section tes yang tidak ada datanya
+    ['20','21','22','23','24','25','27'].forEach(id=>{
+      if(!tes[id])_('sec'+id).style.display='none';
+    });
+
+    // Isi cover
+    _('cv-nama').textContent=_dd.nama||'—';
+    _('cv-usia').textContent=(_dd.usia?_dd.usia+' Tahun':'—');
+    _('cv-didik').textContent=_dd.pendidikan||'—';
+    _('cv-tgl').textContent=_tgl||'—';
+
+    // Render tiap tes
+    if(tes['20'])r20(tes['20']);
+    if(tes['21'])r21(tes['21']);
+    if(tes['22'])r22(tes['22']);
+    if(tes['23'])r23(tes['23']);
+    if(tes['24'])r24(tes['24']);
+    if(tes['25'])r25(tes['25']);
+    if(tes['27'])r27(tes['27']);
+
+    _('loading').style.display='none';
+    _('laporan').style.display='block';
+    _('btnDl').disabled=false;
+  }catch(e){_('loading').style.display='none';_('err').style.display='block';_('errmsg').textContent=e.message;}
+}
+
+/* ─ PDF HELPERS ─ */
+function pBar(label,val,max,color){
+  const p=Math.min(Math.max(Math.round(val/max*100),2),98);
+  const r=100-p;
+  return[
+    {text:label,fontSize:_fs-1,bold:true,margin:[0,3,0,1]},
+    {table:{widths:[p+'%',r+'%'],body:[[
+      {text:`${val}/${max}`,fontSize:_fs-2,color:'#fff',fillColor:color,bold:true,border:[false,false,false,false],margin:[4,2,4,2]},
+      {text:'',border:[false,false,false,false],fillColor:'#e2e8f0',margin:[0,2,0,2]}
+    ]]},layout:{hLineWidth:()=>0,vLineWidth:()=>0},margin:[0,1,0,6]}
+  ];
+}
+function pSec(title,color){return{table:{widths:['*'],body:[[{text:title,bold:true,fontSize:_fs+1,color:'#fff',fillColor:color,border:[false,false,false,false],margin:[10,8,10,8]}]]},layout:{hLineWidth:()=>0,vLineWidth:()=>0},margin:[0,16,0,8]};}
+function pList(items,color='#166534'){return items.map(t=>({text:'• '+t,fontSize:_fs-1,color,margin:[8,1,0,1]}));}
+
+async function buatDoc(){
+  const FS=_fs, nama=_dd.nama||'—', usia=_dd.usia?_dd.usia+' Tahun':'—', didik=_dd.pendidikan||_dd.jabatan||'—', tgl=_tgl||'—';
+  const C=[];
+  C.push({text:'LAPORAN KARIR & KEPRIBADIAN',bold:true,fontSize:FS+8,alignment:'center',color:'#4f46e5',margin:[0,20,0,6]});
+  C.push({text:'Hasil Lengkap 7 Tes Psikologi Karir',fontSize:FS,alignment:'center',color:'#64748b',margin:[0,0,0,20]});
+  C.push({canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:2,lineColor:'#4f46e5'}],margin:[0,0,0,16]});
+  C.push({table:{widths:['*','*'],body:[
+    [{text:'Nama',fontSize:FS,bold:true,border:[false,false,false,false]},{text:nama,fontSize:FS,border:[false,false,false,false]}],
+    [{text:'Usia',fontSize:FS,bold:true,border:[false,false,false,false]},{text:usia,fontSize:FS,border:[false,false,false,false]}],
+    [{text:'Pendidikan',fontSize:FS,bold:true,border:[false,false,false,false]},{text:didik,fontSize:FS,border:[false,false,false,false]}],
+    [{text:'Tanggal',fontSize:FS,bold:true,border:[false,false,false,false]},{text:tgl,fontSize:FS,border:[false,false,false,false]}],
+  ]},layout:{hLineWidth:()=>0,vLineWidth:()=>0},margin:[0,0,0,20]});
+
+  if(_all['20']){
+    const {categories,top3,careerCode}=_all['20'];
+    C.push(pSec('MINAT KARIER (RIASEC)','#2980b9'));
+    C.push({text:'Kode Karier: '+careerCode,bold:true,fontSize:FS+4,color:'#2980b9',margin:[0,0,0,10]});
+    categories.forEach(c=>C.push(...pBar(`${c.name} (${c.id})`,c.score,18,c.color)));
+    C.push({text:'Tipe Dominan: '+top3[0].name,bold:true,fontSize:FS,color:top3[0].color,margin:[0,8,0,2]});
+    C.push({text:top3[0].desc,fontSize:FS-1,color:'#374151',margin:[0,0,0,2]});
+    C.push({text:'Karier: '+top3[0].careers.join(', '),fontSize:FS-1,color:'#64748b',italics:true,margin:[0,0,0,4]});
+  }
+  if(_all['21']){
+    const {skor,maxSkor,result}=_all['21'];
+    C.push(pSec('JIWA KEPEMIMPINAN','#27ae60'));
+    C.push(...pBar('Skor (rendah = kepemimpinan kuat)',skor,maxSkor,result.color));
+    C.push({text:result.icon+' '+result.title,bold:true,fontSize:FS+1,color:result.color,margin:[0,6,0,4]});
+    C.push({text:result.description,fontSize:FS-1,color:'#374151',margin:[0,0,0,4]});
+    C.push({text:'Karakteristik:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+    C.push(...pList(result.characteristics.slice(0,4)));
+    C.push({text:'Saran:',bold:true,fontSize:FS-1,margin:[0,6,0,2]});
+    C.push(...pList(result.suggestions.slice(0,4),'#15803d'));
+  }
+  if(_all['22']){
+    const {styles,dominan}=_all['22'];
+    C.push(pSec('GAYA KEPEMIMPINAN','#e84393'));
+    styles.forEach(s=>C.push(...pBar(s.icon+' '+s.name,s.score,7,s.color)));
+    C.push({text:'Gaya Dominan: '+dominan.icon+' '+dominan.name,bold:true,fontSize:FS+1,color:dominan.color,margin:[0,6,0,4]});
+    C.push({text:dominan.desc,fontSize:FS-1,color:'#374151',margin:[0,0,0,4]});
+    C.push({text:'Kekuatan:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+    C.push(...pList(dominan.strengths.slice(0,3)));
+    C.push({text:'Kelemahan:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+    C.push(...pList(dominan.weaknesses.slice(0,3),'#92400e'));
+  }
+  if(_all['23']){
+    const {skor,maxSkor,percentage,result}=_all['23'];
+    C.push(pSec('MOTIVASI KEPEMIMPINAN','#f39c12'));
+    C.push(...pBar('Skor Motivasi',skor,maxSkor,result.color));
+    C.push({text:result.icon+' '+result.title+' ('+percentage+'%)',bold:true,fontSize:FS+1,color:result.color,margin:[0,6,0,4]});
+    C.push({text:result.description,fontSize:FS-1,color:'#374151',margin:[0,0,0,4]});
+    C.push({text:'Saran:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+    C.push(...pList((result.suggestions||[]).slice(0,4),'#15803d'));
+  }
+  if(_all['24']){
+    const {skor,maxSkor,result}=_all['24'];
+    C.push(pSec('MANAJEMEN WAKTU','#16a085'));
+    C.push(...pBar('Skor Manajemen Waktu',skor,maxSkor,result.color));
+    if(result.warning)C.push({text:'⚠️ '+result.warning,fontSize:FS-2,color:'#92400e',margin:[0,4,0,6]});
+    C.push({text:result.icon+' '+result.title,bold:true,fontSize:FS+1,color:result.color,margin:[0,6,0,4]});
+    C.push({text:result.description,fontSize:FS-1,color:'#374151',margin:[0,0,0,4]});
+    C.push({text:'Saran:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+    C.push(...pList((result.suggestions||[]).slice(0,5),'#15803d'));
+  }
+  if(_all['25']){
+    const {skor,maxSkor,result}=_all['25'];
+    C.push(pSec('ANALISIS STRES KERJA','#8e44ad'));
+    C.push(...pBar('Skor Stres Terdeteksi',skor,maxSkor,result.color));
+    if(result.warning)C.push({text:'⚠️ '+result.warning,fontSize:FS-2,color:'#92400e',margin:[0,4,0,6]});
+    C.push({text:result.icon+' '+result.title,bold:true,fontSize:FS+1,color:result.color,margin:[0,6,0,4]});
+    C.push({text:result.description,fontSize:FS-1,color:'#374151',margin:[0,0,0,4]});
+    C.push({text:'Saran:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+    C.push(...pList((result.suggestions||[]).slice(0,5)));
+  }
+  if(_all['27']){
+    const {skor,maxSkor,percentage,result}=_all['27'];
+    C.push(pSec('KEBERANIAN DIRI','#6366f1'));
+    C.push(...pBar('Skor Keberanian',skor,maxSkor,result.color));
+    C.push({text:result.icon+' '+result.title+' ('+percentage+'%)',bold:true,fontSize:FS+1,color:result.color,margin:[0,6,0,4]});
+    C.push({text:result.description,fontSize:FS-1,color:'#374151',margin:[0,0,0,4]});
+    C.push({text:'Ciri-ciri:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+    C.push(...pList(result.traits||[]));
+    C.push({text:'Saran:',bold:true,fontSize:FS-1,margin:[0,6,0,2]});
+    C.push(...pList((result.suggestions||[]).slice(0,4),'#15803d'));
+  }
+
+  return{pageSize:'A4',pageMargins:[36,36,36,36],content:C,defaultStyle:{font:'Roboto',lineHeight:1.4},
+    footer:(cur,tot)=>({text:`Laporan Karir | Hal. ${cur}/${tot}`,fontSize:8,color:'#94a3b8',alignment:'center',margin:[0,8,0,0]})};
+}
+
+/* ─ PREVIEW & DOWNLOAD ─ */
+async function bukaPreview(){
+  _('mp').classList.add('open');
+  _('fslbl').textContent=_fs+'pt';
+  const doc=await buatDoc();
+  pdfMake.createPdf(doc).getDataUrl(u=>{_('pif').src=u;});
+}
+function tutupPreview(){_('mp').classList.remove('open');_('pif').src='';}
+async function ubahFS(d){
+  _fs=Math.max(7,Math.min(16,_fs+d));
+  _('fslbl').textContent=_fs+'pt';
+  const doc=await buatDoc();
+  pdfMake.createPdf(doc).getDataUrl(u=>{_('pif').src=u;});
+}
+async function downloadPDF(){
+  const btn=_('btnDl');btn.disabled=true;btn.textContent='⏳ Membuat PDF...';
+  try{const doc=await buatDoc();pdfMake.createPdf(doc).download(`Laporan-Karir-${_dd.nama||'hasil'}-${new Date().toISOString().split('T')[0]}.pdf`);}
+  finally{btn.disabled=false;btn.innerHTML='📥 Download PDF';}
+}
+
+main();
+</script>
+</body>
+</html>

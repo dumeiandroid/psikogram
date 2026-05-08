@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Asmara & Hubungan</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<style>
+/* ── Reset & Base ── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+
+/* ── Loading ── */
+#loading-screen{position:fixed;inset:0;background:rgba(198,40,100,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:white;text-align:center}
+.spinner{width:48px;height:48px;border:5px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading-screen.hidden{display:none}
+
+/* ── Topbar ── */
+.topbar{background:#c62864;padding:10px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.topbar button,.topbar a{background:white;color:#c62864;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;text-decoration:none;display:inline-block;transition:.2s}
+.topbar button:hover{background:#ffe4ef}
+.topbar .btn-pdf{background:#28a745;color:white}
+.topbar .btn-pdf:hover{background:#218838}
+
+/* ── Main Container ── */
+.wrap{max-width:900px;margin:24px auto;padding:0 16px}
+
+/* ── Profil Peserta ── */
+.profil-card{background:white;border-radius:14px;padding:24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);border-top:5px solid #c62864}
+.profil-card h2{font-size:1.4em;color:#c62864;margin-bottom:14px;text-align:center}
+.profil-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.profil-item{display:flex;flex-direction:column}
+.profil-label{font-size:.78em;color:#c62864;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.profil-value{font-size:1em;color:#222;font-weight:600}
+
+/* ── Tes Section ── */
+.tes-section{background:white;border-radius:14px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}
+.tes-header{padding:16px 22px;color:white;display:flex;align-items:center;gap:12px}
+.tes-header .tes-icon{font-size:1.8em}
+.tes-header h3{font-size:1.15em;margin:0}
+.tes-header p{font-size:.85em;opacity:.9;margin:2px 0 0}
+.tes-body{padding:22px}
+
+/* ── Hasil Dominan ── */
+.hasil-dominan{border-left:5px solid;border-radius:10px;padding:16px 20px;margin-bottom:18px}
+.hasil-dominan .tipe-nama{font-size:1.4em;font-weight:800;margin-bottom:6px}
+.hasil-dominan .tipe-desc{font-size:.95em;color:#444;line-height:1.7}
+
+/* ── Score Bar (gantikan Chart.js) ── */
+.score-bars{margin:16px 0}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-label{font-size:.85em;font-weight:600;color:#333;min-width:110px;text-align:right}
+.bar-track{flex:1;height:22px;background:#f0f0f0;border-radius:11px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:11px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.75em;font-weight:700;color:white;transition:width .5s ease;min-width:22px}
+.bar-val{font-size:.85em;font-weight:700;min-width:42px;color:#444}
+.bar-row.dominant .bar-label{color:#c62864;font-weight:800}
+.bar-row.dominant .bar-fill{box-shadow:0 2px 8px rgba(0,0,0,.25)}
+
+/* ── Score tunggal (total skor) ── */
+.score-hero{text-align:center;padding:20px;background:#fafafa;border-radius:10px;margin-bottom:16px}
+.score-big{font-size:4em;font-weight:900;line-height:1}
+.score-sub{color:#777;font-size:.9em;margin-top:4px}
+
+/* ── Gauge visual (setengah lingkaran via CSS) ── */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;margin:16px 0}
+.gauge-bar{width:280px;height:20px;background:linear-gradient(to right,#e74c3c,#fdcb6e,#00b894);border-radius:10px;position:relative;margin-bottom:6px}
+.gauge-indicator{position:absolute;top:-5px;width:6px;height:30px;background:#2d3436;border-radius:3px;transform:translateX(-3px);transition:left .5s}
+.gauge-labels-row{display:flex;justify-content:space-between;width:280px;font-size:.75em;color:#666}
+
+/* ── Spektrum Kesetiaan ── */
+.loyalty-bar{width:100%;height:30px;background:linear-gradient(to right,#2ecc71 0%,#3498db 50%,#e74c3c 100%);border-radius:15px;position:relative;margin:12px 0}
+.loyalty-indicator{position:absolute;top:-6px;width:5px;height:42px;background:#2d3436;border-radius:3px;transform:translateX(-2px);transition:left .5s}
+.loyalty-labels{display:flex;justify-content:space-between;font-size:.78em;margin-top:4px;color:#555}
+
+/* ── Info Sections ── */
+.info-block{background:#f8f9fa;border-radius:10px;padding:16px 18px;margin-top:14px}
+.info-block h4{font-size:1em;color:#333;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.info-block ul{list-style:none;padding:0}
+.info-block li{padding:6px 0 6px 22px;position:relative;color:#555;font-size:.9em;line-height:1.5;border-bottom:1px solid #eee}
+.info-block li:last-child{border-bottom:none}
+.info-block li:before{content:"✓";position:absolute;left:0;color:#c62864;font-weight:700}
+
+/* ── Grid dimensi sahabat ── */
+.dim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0}
+.dim-card{background:#f8f9fa;padding:12px 8px;border-radius:8px;text-align:center;border-top:3px solid #6c5ce7}
+.dim-label{font-size:.75em;color:#666;margin-bottom:5px}
+.dim-score{font-size:1.5em;font-weight:800;color:#6c5ce7}
+.dim-max{font-size:.75em;color:#999}
+
+/* ── Strengths/Weaknesses grid ── */
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px}
+.sw-box{padding:14px;border-radius:10px;border-left:4px solid}
+.sw-box.strength{background:#f0fff4;border-color:#22c55e}
+.sw-box.weakness{background:#fef2f2;border-color:#ef4444}
+.sw-box h5{font-size:.9em;margin-bottom:8px}
+.sw-box.strength h5{color:#22c55e}
+.sw-box.weakness h5{color:#ef4444}
+.sw-box ul{list-style:none;padding:0}
+.sw-box li{font-size:.85em;padding:4px 0;color:#444;border-bottom:1px solid rgba(0,0,0,.05)}
+.sw-box li:last-child{border-bottom:none}
+
+/* ── Warning box ── */
+.warn-box{background:#fff3cd;border-left:4px solid #ffc107;padding:14px;border-radius:8px;margin:12px 0}
+.warn-box h5{color:#856404;margin-bottom:6px;font-size:.9em}
+.warn-box p{color:#856404;font-size:.85em;line-height:1.6}
+
+/* ── Indicator grid (18) ── */
+.ind-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0}
+.ind-item{padding:12px;background:#f8f9fa;border-radius:8px;border-left:3px solid}
+.ind-item.positive{border-color:#27ae60}
+.ind-item.negative{border-color:#e74c3c}
+.ind-item .ind-icon{font-size:1.2em;margin-bottom:4px}
+.ind-item .ind-text{font-size:.85em;color:#333;line-height:1.4}
+
+/* ── Skor semua tipe (tes 13) ── */
+.scores-mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin:14px 0}
+.score-mini-card{background:#f8f9fa;padding:10px;border-radius:8px;text-align:center;border-top:3px solid #d63031}
+.score-mini-label{font-size:.78em;color:#666;margin-bottom:4px}
+.score-mini-val{font-size:1.6em;font-weight:800;color:#d63031}
+.score-mini-sub{font-size:.72em;color:#999}
+
+/* ── Modal Preview ── */
+#modal-preview{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:20000;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px;overflow-y:auto}
+#modal-preview.open{display:flex}
+.preview-ctrl{background:white;border-radius:10px;padding:12px 16px;width:100%;max-width:900px;margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.preview-ctrl strong{color:#c62864;font-size:14px;flex:0 0 100%}
+.zoom-box{display:flex;align-items:center;gap:6px;background:#ffe4ef;padding:6px 12px;border-radius:8px}
+.zoom-box span{font-size:12px;font-weight:700;color:#c62864}
+.zoom-btn{width:26px;height:26px;border-radius:50%;border:1px solid #c62864;background:white;color:#c62864;font-size:15px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center}
+#preview-iframe{width:100%;max-width:900px;height:80vh;border:none;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+#preview-loading{color:white;font-size:14px;margin-bottom:8px;display:none}
+
+/* ── Error / Empty ── */
+.err-box{text-align:center;padding:40px;color:#e74c3c}
+.empty-box{text-align:center;padding:30px;color:#999;font-style:italic;font-size:.9em}
+
+/* ── Print ── */
+@media print{.topbar,#modal-preview{display:none!important}body{background:white}.tes-section{page-break-inside:avoid;box-shadow:none}}
+
+/* ── Mobile ── */
+@media(max-width:600px){.wrap{padding:0 10px}.tes-body{padding:14px}.score-big{font-size:3em}.bar-label{min-width:80px;font-size:.78em}}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <p style="font-size:18px;font-weight:700">Memuat Laporan Asmara...</p>
+  <p style="font-size:13px;opacity:.8;margin-top:6px" id="loading-info">Mengambil data dari server...</p>
+</div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <button onclick="window.history.back()">← Kembali</button>
+  <button class="btn-pdf" onclick="bukaPreview()">🔍 Preview PDF</button>
+  <button class="btn-pdf" onclick="downloadPDF()">📥 Download PDF</button>
+  <button onclick="window.print()">🖨️ Print</button>
+</div>
+
+<!-- Modal Preview PDF -->
+<div id="modal-preview">
+  <div class="preview-ctrl">
+    <strong>🔍 Preview Laporan PDF</strong>
+    <div class="zoom-box">
+      <span>Ukuran Font:</span>
+      <button class="zoom-btn" onclick="ubahFont(-0.5)">−</button>
+      <span id="label-fs" style="min-width:36px;text-align:center">10pt</span>
+      <button class="zoom-btn" onclick="ubahFont(+0.5)">+</button>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button onclick="downloadPDF()" style="background:#28a745;color:white;border:none;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">📥 Download PDF</button>
+      <button onclick="tutupPreview()" style="background:#dc3545;color:white;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">✕ Tutup</button>
+    </div>
+  </div>
+  <div id="preview-loading">⏳ Memuat preview...</div>
+  <iframe id="preview-iframe"></iframe>
+</div>
+
+<!-- Content -->
+<div class="wrap" id="mainWrap">
+  <!-- Diisi JS -->
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE & CONFIG
+// ═══════════════════════════════════════
+let _results = {};       // { '09': result, '12': result, ... }
+let _dataDiri = {};
+let _previewFS = 10;
+let _debounce = null;
+
+const TES_LIST = ['09','12','13','14','15','16','17','18'];
+const TES_INFO = {
+  '09': { title:'Pola Asuh Orangtua',              subtitle:'Seperti apa pola asuh yang saya terima?',                 icon:'👨‍👩‍👧‍👦', color:'#667eea' },
+  '12': { title:'Tipe Cinta',                       subtitle:'Bagaimana saya mengekspresikan dan menerima cinta?',       icon:'💖',        color:'#ff4d94' },
+  '13': { title:'Jenis Cinta (Lee\'s Love Styles)', subtitle:'Hasil analisis berdasarkan teori gaya cinta',             icon:'❤️‍🔥',     color:'#d63031' },
+  '14': { title:'Kecanduan Hubungan',               subtitle:'Analisis pola ketergantungan dalam hubungan romantis',    icon:'🔗',        color:'#764ba2' },
+  '15': { title:'Mengenal Pasangan',                subtitle:'Seberapa dalam saya mengenal pasangan saya?',             icon:'💑',        color:'#6c5ce7' },
+  '16': { title:'Kesetiaan',                        subtitle:'Apakah saya termasuk orang yang setia?',                  icon:'💍',        color:'#2c3e50' },
+  '17': { title:'Sahabat yang Baik',                subtitle:'Analisis kualitas persahabatan berdasarkan 10 dimensi',   icon:'🤝',        color:'#6c5ce7' },
+  '18': { title:'Siap Pendamping Hidup',            subtitle:'Apakah pasangan siap menjadi pendamping hidup?',          icon:'💒',        color:'#ff6b6b' },
+};
+
+// ── Konfigurasi minimal per tes (dibutuhkan render functions tanpa engine) ──
+// Berisi: tipe, opsi, totalSoal, maxSkor, minSkor, typesList, maxPerTipe,
+//         dimensionLabels — sesuai struktur asmara_engine.js CONFIG.
+const TES_CONFIG = {
+  '09': {
+    tipe: 'pilihan-tertinggi',
+    opsi: ['A','B','C'],
+    totalSoal: 10,
+    types: {
+      A: { name:'OTORITER (Authoritarian)',  color:'#c0392b', icon:'👮' },
+      B: { name:'DEMOKRATIS (Authoritative)',color:'#27ae60', icon:'🤝' },
+      C: { name:'PERMISIF (Permissive)',     color:'#f39c12', icon:'🎈' },
+    },
+  },
+  '12': {
+    tipe: 'pilihan-tertinggi',
+    opsi: ['A','B','C','D'],
+    totalSoal: 10,
+    types: {
+      A: { name:'ROMANTIS',    color:'#ff4757', icon:'💕' },
+      B: { name:'DOMESTIK',    color:'#2ed573', icon:'🏡' },
+      C: { name:'PETUALANG',   color:'#ffa502', icon:'✈️' },
+      D: { name:'ELEGAN',      color:'#5352ed', icon:'👑' },
+    },
+  },
+  '13': {
+    tipe: 'skala-per-tipe',
+    typesList: ['Eros','Ludus','Storge','Pragma','Mania','Agape'],
+    soalPerTipe: 7,
+    maxPerTipe: 35,
+  },
+  '14': {
+    tipe: 'total-level',
+    maxSkor: 30,
+  },
+  '15': {
+    tipe: 'total-level',
+    maxSkor: 22,
+  },
+  '16': {
+    tipe: 'pointmap-level',
+    minSkor: 10,
+    maxSkor: 30,
+  },
+  '17': {
+    tipe: 'pointmap-level',
+    maxSkor: 30,
+    dimensionLabels: [
+      'Kepercayaan','Dukungan','Komunikasi','Empati','Loyalitas',
+      'Kejujuran','Ketersediaan','Pengertian','Kebersamaan','Penghargaan'
+    ],
+  },
+  '18': {
+    tipe: 'total-level',
+    minSkor: 12,
+    maxSkor: 36,
+  },
+};
+
+// ═══════════════════════════════════════
+// LOAD SEMUA TES
+// ═══════════════════════════════════════
+async function loadAll() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  if (!token) {
+    showFatalError('Token tidak ditemukan di URL.<br><br>Contoh: <code>gabungan_asmara_v2.html?token=XXXX</code>');
+    return;
+  }
+
+  try {
+    // Ambil data dari rekap_nilai1 berdasarkan token (x_01)
+    const API = 'https://lidan-co-id.pages.dev/api/db_psikogram1';
+    const url = new URL(API);
+    url.searchParams.set('table', 'rekap_nilai1');
+    url.searchParams.set('x_01', token);
+    const res = await fetch(url.toString(), { headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': 'admin' } });
+    if (!res.ok) throw new Error('Gagal mengambil data (HTTP ' + res.status + ')');
+    const json = await res.json();
+    if (!json.success || !json.data || json.data.length === 0)
+      throw new Error('Data tidak ditemukan untuk token: ' + token);
+
+    const row = json.data[0];
+
+    // ── Data diri dari x_02 (JSON biodata) ──
+    let bio = {};
+    try { bio = JSON.parse(row.x_02 || '{}'); } catch(e) {}
+    _dataDiri = {
+      nama       : bio.nama       || row.nama        || '—',
+      usia       : bio.usia       || row.usia         || '',
+      pendidikan : bio.pendidikan || row.pendidikan   || '—',
+      tgl_tes    : bio.tanggal    || bio.tgl_tes      || row.tgl_tes || '',
+    };
+
+    // ── Parse x_12 (angka) dan x_13 (teks) — ambil bagian asmara ──
+    let asmara12 = {};  // { tes09: {...}, tes12: {...}, ... }
+    let asmara13 = {};
+    try {
+      const parsed12 = JSON.parse(row.x_12 || '{}');
+      if (parsed12.asmara) asmara12 = parsed12.asmara;
+    } catch(e) {}
+    try {
+      const parsed13 = JSON.parse(row.x_13 || '{}');
+      if (parsed13.asmara) asmara13 = parsed13.asmara;
+    } catch(e) {}
+
+    if (!Object.keys(asmara12).length && !Object.keys(asmara13).length)
+      throw new Error('Data asmara tidak tersedia untuk token ini. Pastikan data sudah ditransfer.');
+
+    // ── Rekonstruksi result object per tes ──────────────────────────────
+    // render functions (renderTes09, dst) mengharapkan struktur:
+    //   { typeInfo, scores, persen, dominant, config, total, level, skorList }
+    // Kita bangun kembali dari x_12 (angka) + x_13 (teks) yang tersimpan.
+    const loaded = {};
+
+    TES_LIST.forEach(id => {
+      const key12 = `tes${id}`;
+      const d12   = asmara12[key12];
+      const d13   = asmara13[key12];
+
+      if (!d12 && !d13) {
+        loaded[id] = { error: 'Data tes ini belum tersedia' };
+        return;
+      }
+
+      const cfg = TES_CONFIG[id];
+
+      // typeInfo: ambil dari x_13 (lebih lengkap) dengan fallback ke cfg jika ada
+      // x_13 menyimpan semua field typeInfo yang diperlukan render function
+      const typeInfo = d13 || {};
+
+      // Susun result object sesuai tipe
+      const tipe = cfg ? cfg.tipe : null;
+
+      if (tipe === 'pilihan-tertinggi' && d12) {
+        loaded[id] = {
+          dominant : d12.dominant,
+          scores   : d12.scores   || {},
+          persen   : d12.persen   || {},
+          typeInfo,
+          config   : cfg,
+        };
+      } else if (tipe === 'skala-per-tipe' && d12) {
+        loaded[id] = {
+          dominant : d12.dominant,
+          scores   : d12.scores   || {},
+          typeInfo,
+          config   : cfg,
+        };
+      } else if (tipe === 'total-level' && d12) {
+        loaded[id] = {
+          level    : d12.level,
+          total    : d12.skor,
+          typeInfo,
+          config   : cfg,
+        };
+      } else if (tipe === 'pointmap-level' && d12) {
+        loaded[id] = {
+          level    : d12.level,
+          total    : d12.skor,
+          skorList : d12.skorList || [],
+          typeInfo,
+          config   : cfg,
+        };
+      } else {
+        // Fallback: simpan mentah, render akan menangani
+        loaded[id] = { ...d12, typeInfo, config: cfg };
+      }
+    });
+
+    _results = loaded;
+    renderAll();
+  } catch(e) {
+    showFatalError(e.message || 'Terjadi kesalahan saat memuat data.');
+  }
+  document.getElementById('loading-screen').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════
+// RENDER SEMUA
+// ═══════════════════════════════════════
+function renderAll() {
+  const wrap = document.getElementById('mainWrap');
+  let html = renderProfil();
+  for (const id of TES_LIST) {
+    html += renderTes(id, _results[id]);
+  }
+  wrap.innerHTML = html;
+}
+
+function renderProfil() {
+  const d = _dataDiri;
+  return `
+  <div class="profil-card">
+    <h2>📋 Informasi Peserta</h2>
+    <div class="profil-grid">
+      <div class="profil-item"><span class="profil-label">Nama Lengkap</span><span class="profil-value">${d.nama||'-'}</span></div>
+      <div class="profil-item"><span class="profil-label">Usia</span><span class="profil-value">${d.usia||'-'} Tahun</span></div>
+      <div class="profil-item"><span class="profil-label">Pendidikan</span><span class="profil-value">${d.pendidikan||'-'}</span></div>
+      <div class="profil-item"><span class="profil-label">Tanggal Tes</span><span class="profil-value">${d.tgl_tes||'-'}</span></div>
+    </div>
+  </div>`;
+}
+
+function renderTes(id, r) {
+  const info = TES_INFO[id];
+  const header = `
+  <div class="tes-section">
+    <div class="tes-header" style="background:${info.color}">
+      <span class="tes-icon">${info.icon}</span>
+      <div><h3>${info.title}</h3><p>${info.subtitle}</p></div>
+    </div>
+    <div class="tes-body">`;
+  const footer = `</div></div>`;
+
+  if (r.error) {
+    return header + `<div class="empty-box">⚠️ ${r.error}</div>` + footer;
+  }
+
+  let body = '';
+  if (id === '09') body = renderTes09(r);
+  else if (id === '12') body = renderTes12(r);
+  else if (id === '13') body = renderTes13(r);
+  else if (id === '14') body = renderTes14(r);
+  else if (id === '15') body = renderTes15(r);
+  else if (id === '16') body = renderTes16(r);
+  else if (id === '17') body = renderTes17(r);
+  else if (id === '18') body = renderTes18(r);
+
+  return header + body + footer;
+}
+
+// ── TES 09: Pola Asuh (pilihan-tertinggi A/B/C) ──
+function renderTes09(r) {
+  const { typeInfo, scores, persen, dominant, config } = r;
+  const types = config.types, keys = config.opsi;
+  const total = config.totalSoal;
+  // Warna & icon: dari typeInfo (x_13) jika ada, fallback ke TES_CONFIG
+  const tiColor = typeInfo.color || (types[dominant] && types[dominant].color) || '#667eea';
+  const tiIcon  = typeInfo.icon  || (types[dominant] && types[dominant].icon)  || '👨‍👩‍👧‍👦';
+  const tiName  = typeInfo.nama  || typeInfo.name || (types[dominant] && types[dominant].name) || dominant;
+  return `
+    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${tiColor}">
+      <div class="tipe-nama" style="color:${tiColor}">${tiIcon} ${tiName}</div>
+      <div class="tipe-desc">${typeInfo.description||''}</div>
+    </div>
+    <div class="score-bars">
+      ${keys.map(k=>`
+      <div class="bar-row ${dominant===k?'dominant':''}">
+        <span class="bar-label">${types[k].name.split('(')[0].trim()}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${persen[k]||0}%;background:${types[k].color}">${(persen[k]||0)>15?(persen[k]||0)+'%':''}</div></div>
+        <span class="bar-val">${scores[k]||0}/${total}</span>
+      </div>`).join('')}
+    </div>
+    ${infoBlock('🎯 Karakteristik', typeInfo.characteristics)}
+    ${infoBlock('📊 Dampak pada Anak', typeInfo.impact)}
+    ${infoBlock('💡 Saran', typeInfo.advice)}`;
+}
+
+// ── TES 12: Tipe Cinta (pilihan-tertinggi A/B/C/D) ──
+function renderTes12(r) {
+  const { typeInfo, scores, persen, dominant, config } = r;
+  const types = config.types, keys = config.opsi;
+  const total = config.totalSoal;
+  const tiColor = typeInfo.color || (types[dominant] && types[dominant].color) || '#ff4d94';
+  const tiIcon  = typeInfo.icon  || (types[dominant] && types[dominant].icon)  || '💖';
+  const tiName  = typeInfo.nama  || typeInfo.name || (types[dominant] && types[dominant].name) || dominant;
+  return `
+    <div class="hasil-dominan" style="background:#fff5f8;border-color:${tiColor}">
+      <div class="tipe-nama" style="color:${tiColor}">${tiIcon} TIPE ${tiName}</div>
+      <div class="tipe-desc">${typeInfo.description||''}</div>
+    </div>
+    <div class="score-bars">
+      ${keys.map(k=>`
+      <div class="bar-row ${dominant===k?'dominant':''}">
+        <span class="bar-label">${types[k].icon} ${types[k].name}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${persen[k]||0}%;background:${types[k].color}">${(persen[k]||0)>15?(persen[k]||0)+'%':''}</div></div>
+        <span class="bar-val">${scores[k]||0}/${total}</span>
+      </div>`).join('')}
+    </div>
+    ${infoBlock('💝 Karakteristik', typeInfo.characteristics)}
+    ${infoBlock('💪 Kekuatan', typeInfo.strengths)}
+    ${infoBlock('💑 Pasangan Cocok', typeInfo.ideal_partner)}
+    ${infoBlock('💡 Tips', typeInfo.advice)}`;
+}
+
+// ── TES 13: Jenis Cinta Lee (skala-per-tipe) ──
+function renderTes13(r) {
+  const { typeInfo, scores, dominant, config } = r;
+  const tl = config.typesList, max = config.maxPerTipe;
+  const tiIcon = typeInfo.icon || '❤️‍🔥';
+  const tiName = typeInfo.nama || typeInfo.name || dominant;
+  return `
+    <div class="hasil-dominan" style="background:#fff5f5;border-color:#d63031">
+      <div class="tipe-nama" style="color:#d63031">${tiIcon} ${tiName}</div>
+      <div class="tipe-desc">${typeInfo.description||''}</div>
+    </div>
+    <div class="scores-mini">
+      ${tl.map(t=>`
+      <div class="score-mini-card" style="${dominant===t?'background:#fff0f0;':''}">
+        <div class="score-mini-label">${t}</div>
+        <div class="score-mini-val" style="color:${dominant===t?'#d63031':'#555'}">${scores[t]||0}</div>
+        <div class="score-mini-sub">dari ${max}</div>
+      </div>`).join('')}
+    </div>
+    <div class="score-bars">
+      ${tl.map(t=>{const pct=Math.round((scores[t]||0)/max*100); return`
+      <div class="bar-row ${dominant===t?'dominant':''}">
+        <span class="bar-label">${t}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${dominant===t?'#d63031':'#aaa'}">${pct>12?pct+'%':''}</div></div>
+        <span class="bar-val">${scores[t]||0}</span>
+      </div>`;}).join('')}
+    </div>
+    ${infoBlock('Karakteristik Anda', typeInfo.characteristics)}
+    ${infoBlock('Saran untuk Anda', typeInfo.advice)}`;
+}
+
+// ── TES 14: Kecanduan Hubungan (total-level) ──
+function renderTes14(r) {
+  const { typeInfo, total, config } = r;
+  const max = config.maxSkor;
+  const pct = Math.round((total||0)/max*100);
+  const color = typeInfo.color || '#764ba2';
+  const title = typeInfo.title || typeInfo.nama || '';
+  return `
+    <div class="score-hero">
+      <div class="score-big" style="color:${color}">${total||0}</div>
+      <div class="score-sub">dari ${max} maksimal</div>
+      <div class="gauge-wrap" style="margin-top:14px">
+        <div class="gauge-bar" style="background:linear-gradient(to right,#27ae60,#fdcb6e,#d63031)">
+          <div class="gauge-indicator" style="left:${pct}%"></div>
+        </div>
+        <div class="gauge-labels-row"><span style="color:#27ae60">Seimbang</span><span style="color:#d63031">Kecanduan</span></div>
+      </div>
+    </div>
+    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${color}">
+      <div class="tipe-nama" style="color:${color}">${title}</div>
+      <div class="tipe-desc">${typeInfo.description||''}</div>
+    </div>
+    ${infoBlock('Karakteristik Anda', typeInfo.characteristics)}
+    ${infoBlock('💡 Saran', typeInfo.advice)}`;
+}
+
+// ── TES 15: Mengenal Pasangan (total-level) ──
+function renderTes15(r) {
+  const { typeInfo, total, config } = r;
+  const max = config.maxSkor;
+  const pct = Math.round((total||0)/max*100);
+  const colorCls = r.level==='excellent'?'#00b894':r.level==='good'?'#fdcb6e':'#d63031';
+  const title = typeInfo.title || typeInfo.nama || '';
+  return `
+    <div class="score-hero">
+      <div class="score-big" style="color:${colorCls}">${total||0}</div>
+      <div class="score-sub">dari ${max} jawaban YA</div>
+      <div class="gauge-wrap" style="margin-top:14px">
+        <div class="gauge-bar" style="background:linear-gradient(to right,#d63031,#fdcb6e,#00b894)">
+          <div class="gauge-indicator" style="left:${pct}%"></div>
+        </div>
+        <div class="gauge-labels-row"><span style="color:#d63031">Perlu Kerja</span><span style="color:#fdcb6e">Cukup</span><span style="color:#00b894">Sangat Kuat</span></div>
+      </div>
+    </div>
+    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${colorCls}">
+      <div class="tipe-nama" style="color:${colorCls}">${title}</div>
+      <div class="tipe-desc">${typeInfo.description||''}</div>
+    </div>
+    ${typeInfo.characteristics ? infoBlock('📋 Profil Hubungan', typeInfo.characteristics) : ''}
+    ${typeInfo.strengths || typeInfo.weaknesses ? `
+    <div class="sw-grid">
+      ${typeInfo.strengths ? `<div class="sw-box strength"><h5>✅ Kekuatan</h5><ul>${typeInfo.strengths.map(s=>`<li>${s}</li>`).join('')}</ul></div>` : ''}
+      ${typeInfo.weaknesses ? `<div class="sw-box weakness"><h5>⚠️ Perlu Diperbaiki</h5><ul>${typeInfo.weaknesses.map(w=>`<li>${w}</li>`).join('')}</ul></div>` : ''}
+    </div>` : ''}
+    ${infoBlock('💡 Saran', typeInfo.advice)}`;
+}
+
+// ── TES 16: Kesetiaan (pointmap-level) ──
+function renderTes16(r) {
+  const { typeInfo, total, config } = r;
+  const max = config.maxSkor, min = config.minSkor || 10;
+  const pct = Math.round(((total||min)-min)/(max-min)*100);
+  const colorMap = { adventurous:'#e74c3c', loyal:'#3498db', rigid:'#2ecc71' };
+  const color = typeInfo.color || colorMap[typeInfo.colorClass] || colorMap[r.level] || '#3498db';
+  const title = typeInfo.title || typeInfo.nama || '';
+  return `
+    <div class="score-hero">
+      <div class="score-big" style="color:${color}">${total||0}</div>
+      <div class="score-sub">dari ${max} poin</div>
+    </div>
+    <div style="margin:4px 0 16px;padding:0 10px">
+      <div class="loyalty-bar">
+        <div class="loyalty-indicator" style="left:${pct}%"></div>
+      </div>
+      <div class="loyalty-labels">
+        <span style="color:#2ecc71;font-weight:700">Sangat Setia (Kaku)</span>
+        <span style="color:#3498db;font-weight:700">Seimbang</span>
+        <span style="color:#e74c3c;font-weight:700">Rentan</span>
+      </div>
+    </div>
+    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${color}">
+      <div class="tipe-nama" style="color:${color}">${title}</div>
+      <div class="tipe-desc">${typeInfo.description||''}</div>
+    </div>
+    ${infoBlock('📋 Karakteristik', typeInfo.characteristics)}
+    ${typeInfo.risks && typeInfo.risks.length ? `<div class="warn-box"><h5>⚠️ Risiko yang Perlu Diwaspadai</h5><ul style="padding-left:16px">${typeInfo.risks.map(r=>`<li style="color:#856404;font-size:.85em;margin-bottom:3px">${r}</li>`).join('')}</ul></div>` : ''}
+    ${typeInfo.strengths || typeInfo.weaknesses ? `
+    <div class="sw-grid">
+      ${typeInfo.strengths ? `<div class="sw-box strength"><h5>✅ Kekuatan</h5><ul>${typeInfo.strengths.map(s=>`<li>${s}</li>`).join('')}</ul></div>` : ''}
+      ${typeInfo.weaknesses ? `<div class="sw-box weakness"><h5>⚠️ Perlu Diperhatikan</h5><ul>${typeInfo.weaknesses.map(w=>`<li>${w}</li>`).join('')}</ul></div>` : ''}
+    </div>` : ''}
+    ${infoBlock('💡 Saran', typeInfo.advice)}`;
+}
+
+// ── TES 17: Sahabat (pointmap-level + dimensi) ──
+function renderTes17(r) {
+  const { typeInfo, total, skorList, config } = r;
+  const max = config.maxSkor;
+  const dimLabels = config.dimensionLabels;
+  const color = typeInfo.color || '#6c5ce7';
+  const icon  = typeInfo.icon  || '🤝';
+  const title = typeInfo.title || typeInfo.nama || '';
+  const listSkor = Array.isArray(skorList) ? skorList : [];
+  return `
+    <div class="score-hero">
+      <div class="score-big" style="color:${color}">${total||0}</div>
+      <div class="score-sub">dari ${max} poin</div>
+    </div>
+    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${color}">
+      <div class="tipe-nama" style="color:${color}">${icon} ${title}</div>
+      <div class="tipe-desc">${typeInfo.description||''}</div>
+    </div>
+    ${listSkor.length ? `
+    <div class="dim-grid">
+      ${listSkor.map((s,i)=>`
+      <div class="dim-card" style="border-top-color:${color}">
+        <div class="dim-label">${dimLabels[i]||''}</div>
+        <div class="dim-score" style="color:${color}">${s}<span class="dim-max">/3</span></div>
+      </div>`).join('')}
+    </div>
+    <div class="score-bars">
+      ${dimLabels.map((lbl,i)=>{const pct=Math.round((listSkor[i]||0)/3*100); return`
+      <div class="bar-row">
+        <span class="bar-label" style="font-size:.78em">${lbl}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}">${pct>20?pct+'%':''}</div></div>
+        <span class="bar-val">${listSkor[i]||0}/3</span>
+      </div>`;}).join('')}
+    </div>` : ''}
+    ${infoBlock('💫 Karakteristik', typeInfo.characteristics)}
+    ${infoBlock('💡 Saran Pengembangan', typeInfo.advice || typeInfo.suggestions)}`;
+}
+
+// ── TES 18: Siap Pendamping (total-level) ──
+function renderTes18(r) {
+  const { typeInfo, total, config } = r;
+  const min = config.minSkor, max = config.maxSkor;
+  const pct = Math.round(((total||min)-min)/(max-min)*100);
+  const color = typeInfo.color || '#ff6b6b';
+  const icon  = typeInfo.icon  || '💒';
+  const title = typeInfo.title || typeInfo.nama || '';
+  const indicators = Array.isArray(typeInfo.indicators) ? typeInfo.indicators : [];
+  return `
+    <div class="score-hero">
+      <div class="score-big" style="color:${color}">${total||0}</div>
+      <div class="score-sub">Skor Kesiapan Hubungan (${min}–${max})</div>
+      <div class="gauge-wrap" style="margin-top:14px">
+        <div class="gauge-bar" style="background:linear-gradient(to right,#e74c3c,#f39c12,#27ae60)">
+          <div class="gauge-indicator" style="left:${pct}%"></div>
+        </div>
+        <div class="gauge-labels-row"><span style="color:#e74c3c">Kurang</span><span style="color:#f39c12">Cukup</span><span style="color:#27ae60">Ideal</span></div>
+      </div>
+    </div>
+    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${color}">
+      <div class="tipe-nama" style="color:${color}">${icon} ${title}</div>
+      <div class="tipe-desc">${typeInfo.description||''}</div>
+    </div>
+    ${typeInfo.warning ? `<div class="warn-box"><h5>⚠️ Perhatian Penting</h5><p>${typeInfo.warning}</p></div>` : ''}
+    ${indicators.length ? `
+    <div class="ind-grid">
+      ${indicators.map(ind=>`
+      <div class="ind-item ${ind.type||''}">
+        <div class="ind-icon">${ind.icon||''}</div>
+        <div class="ind-text">${ind.text||''}</div>
+      </div>`).join('')}
+    </div>` : ''}
+    ${infoBlock('💡 Saran', typeInfo.advice || typeInfo.suggestions)}`;
+}
+
+// ── Helper: info block ──
+function infoBlock(title, items) {
+  if (!items || !items.length) return '';
+  return `
+  <div class="info-block">
+    <h4>${title}</h4>
+    <ul>${items.map(t=>`<li>${t}</li>`).join('')}</ul>
+  </div>`;
+}
+
+// ── Fatal error ──
+function showFatalError(msg) {
+  document.getElementById('loading-screen').innerHTML = `
+    <div style="color:white;font-size:16px;text-align:center;padding:40px;max-width:500px">
+      ⚠️ ${msg}<br><br>
+      <button onclick="location.reload()" style="margin-top:12px;padding:10px 24px;background:#4fffb0;color:#0d0f14;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">↻ Coba Lagi</button>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// PREVIEW & PDF (pdfMake)
+// ═══════════════════════════════════════
+let _debounceTimer = null;
+
+function bukaPreview() {
+  document.getElementById('modal-preview').classList.add('open');
+  document.getElementById('label-fs').textContent = _previewFS + 'pt';
+  renderPreview();
+}
+function tutupPreview() {
+  document.getElementById('modal-preview').classList.remove('open');
+  const iframe = document.getElementById('preview-iframe');
+  if (iframe.src.startsWith('blob:')) URL.revokeObjectURL(iframe.src);
+  iframe.src = '';
+}
+function ubahFont(delta) {
+  _previewFS = Math.max(7, Math.min(14, Math.round((_previewFS+delta)*10)/10));
+  document.getElementById('label-fs').textContent = _previewFS + 'pt';
+  clearTimeout(_debounceTimer);
+  _debounceTimer = setTimeout(renderPreview, 400);
+}
+function renderPreview() {
+  const loading = document.getElementById('preview-loading');
+  const iframe  = document.getElementById('preview-iframe');
+  loading.style.display = 'block';
+  const docDef = buatDocDef(_previewFS);
+  pdfMake.createPdf(docDef).getBlob(blob => {
+    const oldUrl = iframe.src;
+    iframe.src = URL.createObjectURL(blob);
+    if (oldUrl && oldUrl.startsWith('blob:')) URL.revokeObjectURL(oldUrl);
+    loading.style.display = 'none';
+  });
+}
+function downloadPDF() {
+  const d = _dataDiri;
+  const nama = d.nama || 'laporan';
+  const docDef = buatDocDef(_previewFS);
+  pdfMake.createPdf(docDef).download(`Laporan-Asmara-${nama}.pdf`);
+}
+
+// ── Buat docDef pdfMake ──
+function buatDocDef(FS) {
+  const PINK = '#c62864', GRAY = '#f5f5f5', DARK = '#1a1a2e';
+  const d = _dataDiri;
+
+  // Helper styles
+  const H = (txt, col=PINK, fs=FS+1) => ({ text:txt, fontSize:fs, bold:true, color:col, margin:[0,8,0,3] });
+  const P = (txt, fs=FS) => ({ text:txt, fontSize:fs, margin:[0,0,0,3], alignment:'justify' });
+  const UL = (items, fs=FS) => ({ ul: items.map(t=>({ text:t, fontSize:fs, margin:[0,1,0,1] })), margin:[8,2,0,6] });
+  const SEP = () => ({ canvas:[{ type:'line', x1:0,y1:0,x2:515,y2:0,lineWidth:0.5,lineColor:'#ddd' }], margin:[0,6,0,6] });
+
+  // Bar visual teks (gantikan chart)
+  function barRow(label, val, max, color=PINK) {
+    const pct = Math.max(0, Math.min(100, Math.round(val / max * 100)));
+    const w = Math.round(200 * pct / 100);
+    return { columns:[
+      { text:label, width:110, fontSize:FS-1, color:DARK },
+      { width:'*', canvas:[
+          { type:'rect', x:0, y:4, w:200, h:10, r:2, color:'#eeeeee', lineWidth:0.5, lineColor:'#cccccc' },
+          { type:'rect', x:0, y:4, w:w||1,   h:10, r:2, color:color }
+        ]
+      },
+      { text:`${val}/${max}`, width:40, fontSize:FS-1, color:'#555', alignment:'right' }
+    ], margin:[0,3,0,3] };
+  }
+
+  const content = [];
+
+  // ── Cover / Profil ──
+  content.push({ text:'LAPORAN ASMARA & HUBUNGAN', bold:true, fontSize:FS+6, color:PINK, alignment:'center', margin:[0,0,0,4] });
+  content.push({ text:'Analisis Komprehensif Gaya Cinta & Hubungan Interpersonal', fontSize:FS, color:'#666', alignment:'center', margin:[0,0,0,14] });
+  content.push(SEP());
+  content.push({
+    table:{ widths:['auto','auto','*'], body:[
+      [{ text:'Nama',             fontSize:FS, border:[false,false,false,false] },{ text:':', fontSize:FS, border:[false,false,false,false] },{ text:d.nama||'-', fontSize:FS, bold:true, border:[false,false,false,false] }],
+      [{ text:'Usia',             fontSize:FS, border:[false,false,false,false] },{ text:':', fontSize:FS, border:[false,false,false,false] },{ text:(d.usia||'-')+' Tahun', fontSize:FS, border:[false,false,false,false] }],
+      [{ text:'Pendidikan',       fontSize:FS, border:[false,false,false,false] },{ text:':', fontSize:FS, border:[false,false,false,false] },{ text:d.pendidikan||'-', fontSize:FS, border:[false,false,false,false] }],
+      [{ text:'Tanggal Tes',      fontSize:FS, border:[false,false,false,false] },{ text:':', fontSize:FS, border:[false,false,false,false] },{ text:d.tgl_tes||'-', fontSize:FS, border:[false,false,false,false] }],
+    ]}, layout:{ hLineWidth:()=>0, vLineWidth:()=>0 }, margin:[0,4,0,10]
+  });
+  content.push(SEP());
+
+  // ── Loop setiap tes ──
+  TES_LIST.forEach(id => {
+    const r = _results[id];
+    const info = TES_INFO[id];
+    if (!r || r.error) {
+      content.push(H(`${info.icon} ${info.title}`, PINK, FS+2));
+      content.push(P(`⚠️ Data tidak tersedia: ${r?.error||''}`, FS-1));
+      content.push(SEP());
+      return;
+    }
+
+    // Header tes
+    content.push({ text:`${info.icon}  ${info.title}`, fontSize:FS+2, bold:true, color:'white', fillColor:info.color, margin:[4,8,4,4], padding:[6,6,6,6] });
+    content.push(P(info.subtitle, FS-1));
+
+    // Konten per tes
+    if (id === '09' || id === '12') {
+      const { typeInfo, scores, dominant, config } = r;
+      const keys = config.opsi, types = config.types, total = config.totalSoal;
+      content.push(H(`${typeInfo.icon} ${typeInfo.name}`, info.color));
+      content.push(P(typeInfo.description));
+      // Bar chart
+      keys.forEach(k => {
+        const pct = Math.round(scores[k]/total*100);
+        content.push(barRow(types[k].name.split('(')[0].trim(), scores[k], total, dominant===k?info.color:'#aaa'));
+      });
+      if (typeInfo.characteristics) { content.push(H('Karakteristik',DARK,FS)); content.push(UL(typeInfo.characteristics)); }
+      if (typeInfo.advice) { content.push(H('Saran',DARK,FS)); content.push(UL(typeInfo.advice)); }
+    }
+    else if (id === '13') {
+      const { typeInfo, scores, dominant, config } = r;
+      const tl = config.typesList, max = config.maxPerTipe;
+      content.push(H(`${typeInfo.icon} ${typeInfo.name}`, '#d63031'));
+      content.push(P(typeInfo.description));
+      tl.forEach(t => content.push(barRow(t, scores[t], max, dominant===t?'#d63031':'#aaa')));
+      if (typeInfo.characteristics) { content.push(H('Karakteristik',DARK,FS)); content.push(UL(typeInfo.characteristics)); }
+      if (typeInfo.advice) { content.push(H('Saran',DARK,FS)); content.push(UL(typeInfo.advice)); }
+    }
+    else if (id === '14') {
+      const { typeInfo, total, config } = r;
+      content.push({ text:`Total Skor: ${total} / ${config.maxSkor}`, fontSize:FS+1, bold:true, color:typeInfo.color, margin:[0,4,0,4] });
+      content.push(barRow('Skor Kamu', total, config.maxSkor, typeInfo.color));
+      content.push(H(typeInfo.title, typeInfo.color));
+      content.push(P(typeInfo.description));
+      if (typeInfo.characteristics) { content.push(H('Karakteristik',DARK,FS)); content.push(UL(typeInfo.characteristics)); }
+      if (typeInfo.advice) { content.push(H('Saran',DARK,FS)); content.push(UL(typeInfo.advice)); }
+    }
+    else if (id === '15') {
+      const { typeInfo, total, config } = r;
+      const colorCls = r.level==='excellent'?'#00b894':r.level==='good'?'#fdcb6e':'#d63031';
+      content.push({ text:`Skor: ${total} dari ${config.maxSkor}`, fontSize:FS+1, bold:true, color:colorCls, margin:[0,4,0,4] });
+      content.push(barRow('Mengenal Pasangan', total, config.maxSkor, colorCls));
+      content.push(H(typeInfo.title, colorCls));
+      content.push(P(typeInfo.description));
+      if (typeInfo.characteristics) { content.push(H('Profil Hubungan',DARK,FS)); content.push(UL(typeInfo.characteristics)); }
+      if (typeInfo.strengths) { content.push(H('✅ Kekuatan',DARK,FS)); content.push(UL(typeInfo.strengths)); }
+      if (typeInfo.weaknesses) { content.push(H('⚠️ Perlu Diperbaiki',DARK,FS)); content.push(UL(typeInfo.weaknesses)); }
+      if (typeInfo.advice) { content.push(H('Saran',DARK,FS)); content.push(UL(typeInfo.advice)); }
+    }
+    else if (id === '16') {
+      const { typeInfo, total, config } = r;
+      const colorMap = { adventurous:'#e74c3c', loyal:'#3498db', rigid:'#2ecc71' };
+      const color = colorMap[typeInfo.colorClass]||'#3498db';
+      content.push({ text:`Skor: ${total} dari ${config.maxSkor}`, fontSize:FS+1, bold:true, color, margin:[0,4,0,4] });
+      content.push(barRow('Kesetiaan', total-10, 20, color));
+      content.push(H(typeInfo.title, color));
+      content.push(P(typeInfo.description));
+      if (typeInfo.characteristics) { content.push(H('Karakteristik',DARK,FS)); content.push(UL(typeInfo.characteristics)); }
+      if (typeInfo.risks) { content.push(H('⚠️ Risiko',DARK,FS)); content.push(UL(typeInfo.risks)); }
+      if (typeInfo.strengths) { content.push(H('✅ Kekuatan',DARK,FS)); content.push(UL(typeInfo.strengths)); }
+      if (typeInfo.weaknesses) { content.push(H('Perlu Diperhatikan',DARK,FS)); content.push(UL(typeInfo.weaknesses)); }
+      if (typeInfo.advice) { content.push(H('Saran',DARK,FS)); content.push(UL(typeInfo.advice)); }
+    }
+    else if (id === '17') {
+      const { typeInfo, total, skorList, config } = r;
+      const dimLabels = config.dimensionLabels;
+      content.push({ text:`Skor: ${total} dari ${config.maxSkor}`, fontSize:FS+1, bold:true, color:typeInfo.color, margin:[0,4,0,4] });
+      content.push(H(`${typeInfo.icon} ${typeInfo.title}`, typeInfo.color));
+      content.push(P(typeInfo.description));
+      content.push(H('Skor per Dimensi', DARK, FS));
+      dimLabels.forEach((lbl,i) => content.push(barRow(lbl, skorList[i], 3, typeInfo.color)));
+      if (typeInfo.characteristics) { content.push(H('Karakteristik',DARK,FS)); content.push(UL(typeInfo.characteristics)); }
+      if (typeInfo.suggestions) { content.push(H('Saran',DARK,FS)); content.push(UL(typeInfo.suggestions)); }
+    }
+    else if (id === '18') {
+      const { typeInfo, total, config } = r;
+      content.push({ text:`Skor Kesiapan: ${total} (rentang ${config.minSkor}–${config.maxSkor})`, fontSize:FS+1, bold:true, color:typeInfo.color, margin:[0,4,0,4] });
+      content.push(barRow('Kesiapan', total-config.minSkor, config.maxSkor-config.minSkor, typeInfo.color));
+      content.push(H(`${typeInfo.icon} ${typeInfo.title}`, typeInfo.color));
+      content.push(P(typeInfo.description));
+      if (typeInfo.warning) { content.push({ text:`⚠️ ${typeInfo.warning}`, fontSize:FS-1, color:'#856404', background:'#fff3cd', margin:[0,4,0,6] }); }
+      if (typeInfo.indicators) {
+        content.push(H('Indikator Kesiapan', DARK, FS));
+        typeInfo.indicators.forEach(ind => content.push(P(`${ind.icon} ${ind.text}`, FS-1)));
+      }
+      if (typeInfo.suggestions) { content.push(H('Saran',DARK,FS)); content.push(UL(typeInfo.suggestions)); }
+    }
+
+    content.push(SEP());
+  });
+
+  // Footer
+  content.push({ text:`Laporan dibuat otomatis oleh sistem Asmara Engine`, fontSize:FS-2, color:'#aaa', alignment:'center', margin:[0,10,0,0] });
+
+  return {
+    pageSize: 'A4',
+    pageMargins: [30, 30, 30, 30],
+    content,
+    defaultStyle: { font:'Roboto', fontSize:FS, lineHeight:1.4 },
+    footer: (page, pages) => ({
+      text:`Halaman ${page} dari ${pages}`,
+      fontSize:8, color:'#999', alignment:'center', margin:[0,10,0,0]
+    })
+  };
+}
+
+// ═══════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════
+loadAll();
+</script>
+</body>
+</html>

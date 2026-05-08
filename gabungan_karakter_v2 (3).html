@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Karakter & Kepribadian</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+
+/* Loading */
+#loading-screen{position:fixed;inset:0;background:rgba(102,126,234,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:white;text-align:center}
+.spinner{width:48px;height:48px;border:5px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading-screen.hidden{display:none}
+
+/* Topbar */
+.topbar{background:#667eea;padding:10px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.topbar button{background:white;color:#667eea;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;transition:.2s}
+.topbar button:hover{background:#e8ecff}
+.topbar .btn-pdf{background:#28a745;color:white}
+.topbar .btn-pdf:hover{background:#218838}
+
+/* Main */
+.wrap{max-width:900px;margin:24px auto;padding:0 16px}
+
+/* Profil */
+.profil-card{background:white;border-radius:14px;padding:24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);border-top:5px solid #667eea}
+.profil-card h2{font-size:1.4em;color:#667eea;margin-bottom:14px;text-align:center}
+.profil-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.profil-item{display:flex;flex-direction:column}
+.profil-label{font-size:.78em;color:#667eea;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.profil-value{font-size:1em;color:#222;font-weight:600}
+
+/* MBTI badge */
+.mbti-banner{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-radius:14px;padding:20px 24px;margin-bottom:20px;text-align:center;box-shadow:0 4px 15px rgba(102,126,234,.4)}
+.mbti-code{font-size:3em;font-weight:900;letter-spacing:8px;margin-bottom:6px}
+.mbti-sub{font-size:.9em;opacity:.85}
+
+/* Tes section */
+.tes-section{background:white;border-radius:14px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}
+.tes-header{padding:16px 22px;color:white;display:flex;align-items:center;gap:12px}
+.tes-header .tes-icon{font-size:1.8em}
+.tes-header h3{font-size:1.15em;margin:0}
+.tes-header p{font-size:.85em;opacity:.9;margin:2px 0 0}
+.tes-body{padding:22px}
+
+/* Hasil dominan */
+.hasil-dominan{border-left:5px solid;border-radius:10px;padding:16px 20px;margin-bottom:18px}
+.hasil-dominan .tipe-nama{font-size:1.4em;font-weight:800;margin-bottom:6px}
+.hasil-dominan .tipe-desc{font-size:.95em;color:#444;line-height:1.7}
+
+/* Spectrum bar */
+.spectrum-wrap{display:flex;align-items:center;gap:14px;margin:16px 0;background:#f8f9fa;padding:16px;border-radius:10px}
+.spec-side{text-align:center;min-width:70px}
+.spec-icon{font-size:2em;margin-bottom:4px}
+.spec-name{font-size:.8em;font-weight:700;margin-bottom:2px}
+.spec-pct{font-size:1.5em;font-weight:800}
+.spec-bar-wrap{flex:1;position:relative;padding-top:28px}
+.spec-marker{position:absolute;top:0;transform:translateX(-50%);font-size:1.4em}
+.spec-bar{height:20px;border-radius:10px;overflow:hidden;display:flex}
+.spec-bar-fill{height:100%}
+.spec-legend{display:flex;justify-content:space-between;font-size:.72em;color:#888;margin-top:4px}
+
+/* Temp cards (tes 04) */
+.temp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:16px 0}
+.temp-card{background:#f8f9fa;padding:14px;border-radius:10px;border:2px solid;text-align:center}
+.temp-card.dominant{box-shadow:0 4px 16px rgba(0,0,0,.15);transform:scale(1.03)}
+.temp-icon{font-size:2em;margin-bottom:6px}
+.temp-name{font-size:.85em;font-weight:700;margin-bottom:4px}
+.temp-score{font-size:1.4em;font-weight:800}
+
+/* Score bars */
+.score-bars{margin:14px 0}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-label{font-size:.82em;font-weight:600;color:#333;min-width:100px;text-align:right}
+.bar-track{flex:1;height:20px;background:#f0f0f0;border-radius:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:10px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:.72em;font-weight:700;color:white;min-width:20px}
+.bar-val{font-size:.82em;font-weight:700;min-width:38px;color:#444}
+
+/* Info block */
+.info-block{background:#f8f9fa;border-radius:10px;padding:14px 16px;margin-top:12px}
+.info-block h4{font-size:.95em;color:#333;margin-bottom:8px}
+.info-block ul{list-style:none;padding:0}
+.info-block li{padding:5px 0 5px 20px;position:relative;color:#555;font-size:.88em;line-height:1.5;border-bottom:1px solid #eee}
+.info-block li:last-child{border-bottom:none}
+.info-block li:before{content:"✓";position:absolute;left:0;color:#667eea;font-weight:700}
+
+/* Careers */
+.careers-text{font-size:.9em;color:#555;line-height:1.8;padding:10px 0}
+
+/* SW grid */
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px}
+.sw-box{padding:12px;border-radius:8px;border-left:4px solid}
+.sw-box.strength{background:#f0fff4;border-color:#22c55e}
+.sw-box.weakness{background:#fef2f2;border-color:#ef4444}
+.sw-box h5{font-size:.85em;margin-bottom:6px}
+.sw-box.strength h5{color:#22c55e}
+.sw-box.weakness h5{color:#ef4444}
+.sw-box ul{list-style:none;padding:0}
+.sw-box li{font-size:.82em;padding:3px 0;color:#444;border-bottom:1px solid rgba(0,0,0,.05)}
+.sw-box li:last-child{border-bottom:none}
+
+/* Error/empty */
+.err-box,.empty-box{text-align:center;padding:30px;color:#e74c3c}
+.empty-box{color:#999;font-style:italic;font-size:.9em}
+
+/* Modal preview */
+#modal-preview{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:20000;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px;overflow-y:auto}
+#modal-preview.open{display:flex}
+.preview-ctrl{background:white;border-radius:10px;padding:12px 16px;width:100%;max-width:900px;margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.preview-ctrl strong{color:#667eea;font-size:14px;flex:0 0 100%}
+.zoom-box{display:flex;align-items:center;gap:6px;background:#e8ecff;padding:6px 12px;border-radius:8px}
+.zoom-box span{font-size:12px;font-weight:700;color:#667eea}
+.zoom-btn{width:26px;height:26px;border-radius:50%;border:1px solid #667eea;background:white;color:#667eea;font-size:15px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center}
+#preview-iframe{width:100%;max-width:900px;height:80vh;border:none;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+#preview-loading{color:white;font-size:14px;margin-bottom:8px;display:none}
+
+@media print{.topbar,#modal-preview{display:none!important}body{background:white}.tes-section{page-break-inside:avoid;box-shadow:none}}
+@media(max-width:600px){.wrap{padding:0 10px}.tes-body{padding:14px}.mbti-code{font-size:2em;letter-spacing:4px}.spectrum-wrap{flex-direction:column}.spec-bar-wrap{width:100%}}
+</style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <p style="font-size:18px;font-weight:700">Memuat Laporan Karakter...</p>
+  <p style="font-size:13px;opacity:.8;margin-top:6px" id="loading-info">Mengambil data dari server...</p>
+</div>
+
+<div class="topbar">
+  <button onclick="window.history.back()">← Kembali</button>
+  <button class="btn-pdf" onclick="bukaPreview()">🔍 Preview PDF</button>
+  <button class="btn-pdf" onclick="downloadPDF()">📥 Download PDF</button>
+  <button onclick="window.print()">🖨️ Print</button>
+</div>
+
+<div id="modal-preview">
+  <div class="preview-ctrl">
+    <strong>🔍 Preview Laporan PDF</strong>
+    <div class="zoom-box">
+      <span>Ukuran Font:</span>
+      <button class="zoom-btn" onclick="ubahFont(-0.5)">−</button>
+      <span id="label-fs" style="min-width:36px;text-align:center">10pt</span>
+      <button class="zoom-btn" onclick="ubahFont(+0.5)">+</button>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button onclick="downloadPDF()" style="background:#28a745;color:white;border:none;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">📥 Download PDF</button>
+      <button onclick="tutupPreview()" style="background:#dc3545;color:white;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">✕ Tutup</button>
+    </div>
+  </div>
+  <div id="preview-loading">⏳ Memuat preview...</div>
+  <iframe id="preview-iframe"></iframe>
+</div>
+
+<div class="wrap" id="mainWrap"></div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE & CONFIG
+// ═══════════════════════════════════════
+let _results = {};
+let _dataDiri = {};
+let _previewFS = 10;
+let _debounceTimer = null;
+
+// ── Data Temperamen (statis, tidak perlu engine) ──
+const TEMPERAMENTS_DATA = {
+  S: { name:'Sanguinis',   icon:'😄', color:'#e74c3c' },
+  K: { name:'Koleris',     icon:'🔥', color:'#e67e22' },
+  M: { name:'Melankolis',  icon:'🌙', color:'#3498db' },
+  P: { name:'Phlegmatis',  icon:'🌊', color:'#2ecc71' }
+};
+
+
+
+const TES_LIST = ['04','05','06','07','08'];
+const TES_INFO = {
+  '04': { title:'Temperamen',           subtitle:'Sanguinis, Koleris, Melankolis, atau Phlegmatis?', icon:'🎭', color:'#667eea' },
+  '05': { title:'Ekstrovert vs Introvert', subtitle:'Dari mana Anda mendapat energi?',              icon:'🎉', color:'#e74c3c' },
+  '06': { title:'Cara Berpikir',        subtitle:'Sensing atau Intuitif?',                          icon:'🧩', color:'#2980b9' },
+  '07': { title:'Pengambilan Keputusan',subtitle:'Thinking atau Feeling?',                          icon:'⚖️', color:'#8e44ad' },
+  '08': { title:'Gaya Hidup',           subtitle:'Judging atau Perceiving?',                        icon:'🎯', color:'#27ae60' },
+};
+
+// Mapping tes → huruf MBTI
+const MBTI_MAP = {
+  '05': { A:'E', B:'I' },
+  '06': { A:'S', B:'N' },
+  '07': { A:'T', B:'F' },
+  '08': { A:'J', B:'P' },
+};
+
+// ═══════════════════════════════════════
+// LOAD SEMUA TES
+// ═══════════════════════════════════════
+async function loadAll() {
+  const token = new URLSearchParams(window.location.search).get('token');
+  if (!token) {
+    showFatalError('Token tidak ditemukan di URL.<br><br>Contoh: <code>gabungan_karakter.html?token=XXXX</code>');
+    return;
+  }
+
+  try {
+    // Ambil data dari rekap_nilai1 berdasarkan token (x_01)
+    const API = 'https://lidan-co-id.pages.dev/api/db_psikogram1';
+    const url = new URL(API);
+    url.searchParams.set('table', 'rekap_nilai1');
+    url.searchParams.set('x_01', token);
+    const res = await fetch(url.toString(), { headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': 'admin' } });
+    if (!res.ok) throw new Error('Gagal mengambil data (HTTP ' + res.status + ')');
+    const json = await res.json();
+    if (!json.success || !json.data || json.data.length === 0)
+      throw new Error('Data tidak ditemukan untuk token: ' + token);
+
+    const row = json.data[0];
+
+    // Data diri dari row rekap
+    // x_02 berisi JSON string {"nama":"...","jk":"...","usia":"...","tanggal":"...","pendidikan":"..."}
+    let x02 = {};
+    try { x02 = JSON.parse(row.x_02 || '{}'); } catch(e) {}
+    // x_07 bisa berupa JSON array ["","",""] — ambil elemen pertama yang ada
+    let tglTes = '';
+    try {
+      const arr = JSON.parse(row.x_07 || '[]');
+      tglTes = Array.isArray(arr) ? (arr.find(v => v) || '') : (row.x_07 || '');
+    } catch(e) { tglTes = row.x_07 || ''; }
+    _dataDiri = {
+      nama:       x02.nama       || row.nama       || '—',
+      usia:       x02.usia       || row.x_03       || row.usia || '',
+      pendidikan: x02.pendidikan || row.x_05       || row.pendidikan || '—',
+      tgl_tes:    x02.tanggal    || tglTes         || '—'
+    };
+
+    // Parse x_12 (skor) dan x_13 (konten) — merge per-tes-key
+    let karakterData = {};
+    for (const xKey of ['x_12', 'x_13']) {
+      try {
+        const parsed = JSON.parse(row[xKey] || '{}');
+        if (parsed.karakter && Object.keys(parsed.karakter).length) {
+          for (const [tesKey, tesVal] of Object.entries(parsed.karakter)) {
+            if (!karakterData[tesKey]) karakterData[tesKey] = {};
+            Object.assign(karakterData[tesKey], tesVal);
+          }
+        }
+      } catch(e) {}
+    }
+    if (!Object.keys(karakterData).length)
+      throw new Error('Data karakter tidak tersedia untuk token ini.');
+
+    // Map dari tes04→'04', tes05→'05', dst
+    const loaded = {};
+    for (const [k, v] of Object.entries(karakterData)) {
+      const num = k.replace('tes', '');
+      loaded[num] = v;
+    }
+    _results = loaded;
+    renderAll();
+  } catch(e) {
+    showFatalError(e.message || 'Terjadi kesalahan saat memuat data.');
+  }
+  document.getElementById('loading-screen').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function renderAll() {
+  let html = renderProfil() + renderMBTI();
+  for (const id of TES_LIST) html += renderTes(id, _results[id]);
+  document.getElementById('mainWrap').innerHTML = html;
+}
+
+function renderProfil() {
+  const d = _dataDiri;
+  return `
+  <div class="profil-card">
+    <h2>📋 Informasi Peserta</h2>
+    <div class="profil-grid">
+      <div class="profil-item"><span class="profil-label">Nama Lengkap</span><span class="profil-value">${d.nama||'-'}</span></div>
+      <div class="profil-item"><span class="profil-label">Usia</span><span class="profil-value">${d.usia||'-'} Tahun</span></div>
+      <div class="profil-item"><span class="profil-label">Pendidikan</span><span class="profil-value">${d.pendidikan||'-'}</span></div>
+      <div class="profil-item"><span class="profil-label">Tanggal Tes</span><span class="profil-value">${d.tgl_tes||'-'}</span></div>
+    </div>
+  </div>`;
+}
+
+function renderMBTI() {
+  // Bangun kode MBTI dari hasil tes 05-08
+  let code = '';
+  for (const [id, map] of Object.entries(MBTI_MAP)) {
+    const r = _results[id];
+    if (r && !r.error && r.dominan) code += map[r.dominan] || '?';
+    else code += '?';
+  }
+  return `
+  <div class="mbti-banner">
+    <div style="font-size:.9em;opacity:.8;margin-bottom:6px">Kode Kepribadian MBTI Anda</div>
+    <div class="mbti-code">${code}</div>
+    <div class="mbti-sub">Berdasarkan kombinasi hasil tes 05–08</div>
+  </div>`;
+}
+
+function renderTes(id, r) {
+  const info = TES_INFO[id];
+  const hdr = `<div class="tes-section">
+    <div class="tes-header" style="background:${info.color}">
+      <span class="tes-icon">${info.icon}</span>
+      <div><h3>${info.title}</h3><p>${info.subtitle}</p></div>
+    </div><div class="tes-body">`;
+  const ftr = `</div></div>`;
+  if (r.error) return hdr + `<div class="empty-box">⚠️ ${r.error}</div>` + ftr;
+
+  let body = '';
+  if      (id === '04') body = render04(r);
+  else if (id === '05') body = renderSpektrum(r, { iconA:'🎉', nameA:'Ekstrovert', colorA:'#e74c3c', iconB:'📚', nameB:'Introvert', colorB:'#34495e', grad:'linear-gradient(to right,#e74c3c,#34495e)', legends:['Ekstrovert','Seimbang','Introvert'] });
+  else if (id === '06') body = renderSpektrum(r, { iconA:'🔍', nameA:'Sensing',   colorA:'#2980b9', iconB:'💡', nameB:'Intuitif',  colorB:'#8e44ad', grad:'linear-gradient(to right,#2980b9,#8e44ad)', legends:['Sensing','Seimbang','Intuitif'] });
+  else if (id === '07') body = renderSpektrum(r, { iconA:'🧠', nameA:'Thinking',  colorA:'#2980b9', iconB:'❤️', nameB:'Feeling',   colorB:'#e91e63', grad:'linear-gradient(to right,#2980b9,#e91e63)', legends:['Logika','Seimbang','Empati'] });
+  else if (id === '08') body = renderSpektrum(r, { iconA:'📋', nameA:'Judging',   colorA:'#27ae60', iconB:'🎈', nameB:'Perceiving',colorB:'#e67e22', grad:'linear-gradient(to right,#27ae60,#e67e22)', legends:['Terstruktur','Seimbang','Fleksibel'] });
+  return hdr + body + ftr;
+}
+
+// ── TES 04: Temperamen ──
+// Key mapping: x_12 pakai A/B/C/D → TEMPERAMENTS_DATA pakai S/K/M/P
+const TEMP_KEY_MAP = { A:'S', B:'K', C:'M', D:'P' };
+function render04(r) {
+  const T = TEMPERAMENTS_DATA;
+  // Ambil skor & persen dari x_12 (key A/B/C/D), konten dari x_13
+  const skor   = r.skor   || {};
+  const persen = r.persen || {};
+  const total  = r.total  || 0;
+  const dominanABCD = r.dominan || 'B';
+  const dominanKey  = TEMP_KEY_MAP[dominanABCD] || 'K';
+  const tConfig = T[dominanKey] || { name:r.nama||'—', icon:'🎭', color:'#667eea' };
+
+  // sortedSkor bisa [{key,skor}] dari x_12 atau tidak ada — buat dari skor object
+  let sorted = [];
+  if (r.sortedSkor && Array.isArray(r.sortedSkor)) {
+    sorted = r.sortedSkor.map(item => ({ abcd: item.key, tKey: TEMP_KEY_MAP[item.key]||item.key, sc: item.skor }));
+  } else {
+    sorted = Object.entries(skor).sort((a,b)=>b[1]-a[1]).map(([k,sc])=>({ abcd:k, tKey:TEMP_KEY_MAP[k]||k, sc }));
+  }
+
+  const tempCards = sorted.map(({abcd, tKey, sc}) => {
+    const td = T[tKey] || { name:tKey, icon:'🎭', color:'#999' };
+    const p  = persen[abcd] || 0;
+    return `
+    <div class="temp-card ${abcd===dominanABCD?'dominant':''}" style="border-color:${td.color}">
+      <div class="temp-icon">${td.icon}</div>
+      <div class="temp-name" style="color:${td.color}">${td.name}</div>
+      <div class="temp-score" style="color:${td.color}">${sc}/${total}</div>
+      <div style="color:#888;font-size:.8em">${p}%</div>
+    </div>`;}).join('');
+
+  const characteristics = r.characteristics || [];
+  const strengths       = r.strengths       || [];
+  const weaknesses      = r.weaknesses      || [];
+
+  return `
+    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${tConfig.color}">
+      <div class="tipe-nama" style="color:${tConfig.color}">${tConfig.icon} ${r.nama||tConfig.name}</div>
+      <div class="tipe-desc">${r.tagline||''} — ${r.description||''}</div>
+    </div>
+    <div class="temp-grid">${tempCards}</div>
+    <div class="score-bars">
+      ${sorted.map(({abcd,tKey,sc})=>{const td=T[tKey]||{name:tKey,color:'#999'};const p=persen[abcd]||0;return`
+      <div class="bar-row ${abcd===dominanABCD?'dominant':''}">
+        <span class="bar-label">${td.name}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${td.color}">${p>12?p+'%':''}</div></div>
+        <span class="bar-val">${sc}/${total}</span>
+      </div>`;}).join('')}
+    </div>
+    ${infoBlock('🎯 Karakteristik', characteristics)}
+    <div class="sw-grid">
+      <div class="sw-box strength"><h5>💪 Kekuatan</h5><ul>${strengths.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+      <div class="sw-box weakness"><h5>⚠️ Kelemahan</h5><ul>${weaknesses.map(w=>`<li>${w}</li>`).join('')}</ul></div>
+    </div>
+    ${infoBlock('💼 Karir yang Cocok', r.careers||[])}
+    ${infoBlock('💡 Saran', r.tips||[])}`;
+}
+
+// ── TES 05–08: Spektrum ──
+function renderSpektrum(r, opt) {
+  const skor   = r.skor   || {};
+  const persen = r.persen || {};
+  const total  = r.total  || 0;
+  const markerPosition = r.markerPosition != null ? r.markerPosition : (persen.A || 50);
+  const pA = persen.A || 0, pB = persen.B || 0;
+  const color = opt.colorA;
+  return `
+    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${color}">
+      <div class="tipe-nama" style="color:${color}">${opt.iconA} ${r.nama||opt.nameA}</div>
+      <div class="tipe-desc">${r.tagline||''} — ${r.description||''}</div>
+    </div>
+    <div class="spectrum-wrap">
+      <div class="spec-side">
+        <div class="spec-icon">${opt.iconA}</div>
+        <div class="spec-name" style="color:${opt.colorA}">${opt.nameA}</div>
+        <div class="spec-pct" style="color:${opt.colorA}">${pA}%</div>
+        <div style="font-size:.75em;color:#888">${skor.A}/${total}</div>
+      </div>
+      <div class="spec-bar-wrap">
+        <div class="spec-marker" style="left:${markerPosition}%">👤</div>
+        <div class="spec-bar" style="background:#eee">
+          <div class="spec-bar-fill" style="width:${pA}%;background:${opt.colorA}"></div>
+          <div class="spec-bar-fill" style="width:${pB}%;background:${opt.colorB}"></div>
+        </div>
+        <div class="spec-legend">
+          <span style="color:${opt.colorA}">${opt.legends[0]}</span>
+          <span style="color:#999">${opt.legends[1]}</span>
+          <span style="color:${opt.colorB}">${opt.legends[2]}</span>
+        </div>
+      </div>
+      <div class="spec-side">
+        <div class="spec-icon">${opt.iconB}</div>
+        <div class="spec-name" style="color:${opt.colorB}">${opt.nameB}</div>
+        <div class="spec-pct" style="color:${opt.colorB}">${pB}%</div>
+        <div style="font-size:.75em;color:#888">${skor.B}/${total}</div>
+      </div>
+    </div>
+    ${infoBlock('🎯 Karakteristik', r.characteristics||[])}
+    ${(r.strengths && r.strengths.length) ? `<div class="sw-grid">
+      <div class="sw-box strength"><h5>💪 Kekuatan</h5><ul>${(r.strengths||[]).map(s=>`<li>${s}</li>`).join('')}</ul></div>
+      ${(r.weaknesses && r.weaknesses.length)?`<div class="sw-box weakness"><h5>⚠️ Area Pengembangan</h5><ul>${r.weaknesses.map(w=>`<li>${w}</li>`).join('')}</ul></div>`:''}
+    </div>` : ''}
+    ${infoBlock('💼 Karir yang Cocok', r.careers||[])}
+    ${infoBlock('💡 Saran', r.tips||[])}`;
+}
+
+// Helper
+function infoBlock(title, items) {
+  if (!items || !items.length) return '';
+  return `<div class="info-block"><h4>${title}</h4><ul>${items.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
+}
+
+function showFatalError(msg) {
+  document.getElementById('loading-screen').innerHTML = `
+    <div style="color:white;font-size:16px;text-align:center;padding:40px;max-width:500px">
+      ⚠️ ${msg}<br><br>
+      <button onclick="location.reload()" style="margin-top:12px;padding:10px 24px;background:#4fffb0;color:#0d0f14;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">↻ Coba Lagi</button>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// PREVIEW & PDF
+// ═══════════════════════════════════════
+function bukaPreview() {
+  document.getElementById('modal-preview').classList.add('open');
+  document.getElementById('label-fs').textContent = _previewFS + 'pt';
+  renderPreview();
+}
+function tutupPreview() {
+  document.getElementById('modal-preview').classList.remove('open');
+  const iframe = document.getElementById('preview-iframe');
+  if (iframe.src.startsWith('blob:')) URL.revokeObjectURL(iframe.src);
+  iframe.src = '';
+}
+function ubahFont(delta) {
+  _previewFS = Math.max(7, Math.min(14, Math.round((_previewFS+delta)*10)/10));
+  document.getElementById('label-fs').textContent = _previewFS + 'pt';
+  clearTimeout(_debounceTimer);
+  _debounceTimer = setTimeout(renderPreview, 400);
+}
+function renderPreview() {
+  const loading = document.getElementById('preview-loading');
+  const iframe  = document.getElementById('preview-iframe');
+  loading.style.display = 'block';
+  pdfMake.createPdf(buatDocDef(_previewFS)).getBlob(blob => {
+    const old = iframe.src;
+    iframe.src = URL.createObjectURL(blob);
+    if (old && old.startsWith('blob:')) URL.revokeObjectURL(old);
+    loading.style.display = 'none';
+  });
+}
+function downloadPDF() {
+  pdfMake.createPdf(buatDocDef(_previewFS)).download(`Laporan-Karakter-${_dataDiri.nama||'peserta'}.pdf`);
+}
+
+// ── Build PDF docDef ──
+function buatDocDef(FS) {
+  const PURPLE = '#667eea', DARK = '#1a1a2e';
+  const d = _dataDiri;
+  const T = TEMPERAMENTS_DATA;
+
+  const H  = (txt, col=PURPLE, fs=FS+1) => ({ text:txt, fontSize:fs, bold:true, color:col, margin:[0,8,0,3] });
+  const P  = (txt, fs=FS) => ({ text:String(txt||''), fontSize:fs, margin:[0,0,0,3] });
+  const UL = (items, fs=FS) => ({ ul:(items||[]).map(t=>({ text:String(t), fontSize:fs, margin:[0,1,0,1] })), margin:[8,2,0,6] });
+  const SEP = () => ({ canvas:[{ type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:0.5,lineColor:'#ddd' }], margin:[0,6,0,6] });
+
+  function barRow(label, val, max, color=PURPLE) {
+    const pct = Math.max(0, Math.min(100, Math.round(val/max*100)));
+    const w = Math.round(200 * pct / 100);
+    return { columns:[
+      { text:String(label), width:110, fontSize:FS-1, color:DARK },
+      { width:'*', canvas:[
+          { type:'rect', x:0, y:4, w:200, h:10, r:2, color:'#eeeeee', lineWidth:0.5, lineColor:'#cccccc' },
+          { type:'rect', x:0, y:4, w:w||1, h:10, r:2, color:color }
+        ]
+      },
+      { text:`${val}/${max}`, width:40, fontSize:FS-1, color:'#555', alignment:'right' }
+    ], margin:[0,3,0,3] };
+  }
+
+  const content = [];
+
+  // Cover
+  content.push({ text:'LAPORAN KARAKTER & KEPRIBADIAN', bold:true, fontSize:FS+8, color:PURPLE, alignment:'center', margin:[0,0,0,4] });
+  content.push({ text:'Analisis Komprehensif Temperamen & Tipe Kepribadian MBTI', fontSize:FS, color:'#666', alignment:'center', margin:[0,0,0,14] });
+  content.push(SEP());
+
+  // Profil
+  content.push({ table:{ widths:['auto','auto','*'], body:[
+    [{ text:'Nama',       fontSize:FS, border:[false,false,false,false] },{ text:':', fontSize:FS, border:[false,false,false,false] },{ text:d.nama||'-',       fontSize:FS, bold:true, border:[false,false,false,false] }],
+    [{ text:'Usia',       fontSize:FS, border:[false,false,false,false] },{ text:':', fontSize:FS, border:[false,false,false,false] },{ text:(d.usia||'-')+' Tahun', fontSize:FS, border:[false,false,false,false] }],
+    [{ text:'Pendidikan', fontSize:FS, border:[false,false,false,false] },{ text:':', fontSize:FS, border:[false,false,false,false] },{ text:d.pendidikan||'-', fontSize:FS, border:[false,false,false,false] }],
+    [{ text:'Tanggal Tes',fontSize:FS, border:[false,false,false,false] },{ text:':', fontSize:FS, border:[false,false,false,false] },{ text:d.tgl_tes||'-',    fontSize:FS, border:[false,false,false,false] }],
+  ]}, layout:{ hLineWidth:()=>0, vLineWidth:()=>0 }, margin:[0,4,0,10] });
+  content.push(SEP());
+
+  // MBTI badge
+  let mbtiCode = '';
+  for (const [id, map] of Object.entries(MBTI_MAP)) {
+    const r = _results[id];
+    mbtiCode += (r && !r.error && r.dominan) ? (map[r.dominan]||'?') : '?';
+  }
+  content.push({ text:`Kode Kepribadian MBTI: ${mbtiCode}`, fontSize:FS+3, bold:true, color:PURPLE, alignment:'center', margin:[0,4,0,2] });
+  content.push({ text:'Berdasarkan kombinasi hasil tes 05–08', fontSize:FS-1, color:'#888', alignment:'center', margin:[0,0,0,10] });
+  content.push(SEP());
+
+  // Loop tes
+  TES_LIST.forEach(id => {
+    const r = _results[id];
+    const info = TES_INFO[id];
+
+    content.push({ text:`${info.icon}  ${info.title}`, fontSize:FS+2, bold:true, color:'white', fillColor:info.color, margin:[4,8,4,4] });
+    content.push(P(info.subtitle, FS-1));
+
+    if (!r || r.error) {
+      content.push(P(`⚠️ Data tidak tersedia: ${r?.error||''}`, FS-1));
+      content.push(SEP());
+      return;
+    }
+
+    if (id === '04') {
+      const { config, skor, persen, dominan, sortedSkor, total } = r;
+      content.push(H(`🎭 ${r.nama||'Temperamen'}`, info.color));
+      content.push(P(r.description||''));
+      sortedSkor.forEach(([k, sc]) => content.push(barRow(T[k].name, sc, total, T[k].color)));
+      if (r.characteristics) { content.push(H('Karakteristik', DARK, FS)); content.push(UL(r.characteristics)); }
+      if (r.strengths)       { content.push(H('💪 Kekuatan',   DARK, FS)); content.push(UL(r.strengths)); }
+      if (r.weaknesses)      { content.push(H('⚠️ Kelemahan',  DARK, FS)); content.push(UL(r.weaknesses)); }
+      if (r.careers)         { content.push(H('💼 Karir',      DARK, FS)); content.push(P(r.careers.join(' • '))); }
+      if (r.tips)            { content.push(H('💡 Saran',      DARK, FS)); content.push(UL(r.tips)); }
+    } else {
+      const { config, skor, persen, total } = r;
+      const mbtiLetter = MBTI_MAP[id]?.[r.dominan] || '';
+      content.push(H(`${r.nama||''} (${mbtiLetter})`, info.color));
+      content.push(P(`${r.tagline||''} — ${r.description||''}`));
+      content.push(barRow('A', skor.A, total, info.color));
+      content.push(barRow('B', skor.B, total, '#aaa'));
+      if (r.characteristics) { content.push(H('Karakteristik', DARK, FS)); content.push(UL(r.characteristics)); }
+      if (r.strengths)       { content.push(H('💪 Kekuatan',   DARK, FS)); content.push(UL(r.strengths)); }
+      if (r.weaknesses)      { content.push(H('⚠️ Area Pengembangan', DARK, FS)); content.push(UL(r.weaknesses)); }
+      if (r.careers)         { content.push(H('💼 Karir',      DARK, FS)); content.push(P(r.careers.join(' • '))); }
+      if (r.tips)            { content.push(H('💡 Saran',      DARK, FS)); content.push(UL(r.tips)); }
+    }
+    content.push(SEP());
+  });
+
+  content.push({ text:'Laporan dibuat otomatis oleh sistem Karakter Engine', fontSize:FS-2, color:'#aaa', alignment:'center', margin:[0,10,0,0] });
+
+  return {
+    pageSize:'A4',
+    pageMargins:[30,30,30,30],
+    content,
+    defaultStyle:{ font:'Roboto', fontSize:FS, lineHeight:1.4 },
+    footer:(page,pages) => ({ text:`Halaman ${page} dari ${pages}`, fontSize:8, color:'#999', alignment:'center', margin:[0,10,0,0] })
+  };
+}
+
+// ── MAIN ──
+loadAll();
+</script>
+</body>
+</html>

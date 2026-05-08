@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Potensi Diri</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#1e293b}
+#topbar{background:#7c3aed;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#topbar button{padding:7px 16px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+.btn-prev{background:#fff;color:#7c3aed}.btn-prev:hover{background:#ede9fe}
+.btn-dl{background:#22c55e;color:#fff}.btn-dl:hover{background:#16a34a}.btn-dl:disabled{opacity:.5;cursor:not-allowed}
+#topbar .ttl{color:#fff;font-weight:700;font-size:15px;margin-right:auto}
+#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:16px}
+.spinner{width:48px;height:48px;border:5px solid #ddd6fe;border-top-color:#7c3aed;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:#64748b;font-size:15px}
+#err{display:none;text-align:center;padding:60px 20px;color:#dc2626}
+#laporan{display:none;max-width:920px;margin:24px auto;padding:0 16px 60px}
+.cover{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-radius:16px;padding:36px 32px;margin-bottom:24px;text-align:center}
+.cover h1{font-size:26px;margin-bottom:8px}
+.cover p{opacity:.85;font-size:14px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:24px}
+.mi{background:rgba(255,255,255,.15);border-radius:10px;padding:12px;text-align:left}
+.mi small{display:block;opacity:.7;font-size:11px;margin-bottom:4px}
+.mi strong{font-size:14px}
+.sec{background:#fff;border-radius:16px;margin-bottom:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+.sec-h{padding:16px 24px;display:flex;align-items:center;gap:12px;color:#fff}
+.sec-h .ic{font-size:26px}
+.sec-h h2{font-size:16px;font-weight:700;margin-bottom:2px}
+.sec-h p{font-size:12px;opacity:.8}
+.sec-b{padding:20px 24px}
+.sb{text-align:center;padding:20px;background:#f8fafc;border-radius:12px;margin-bottom:14px}
+.sa{font-size:52px;font-weight:800;line-height:1}
+.sl{font-size:13px;color:#64748b;margin-top:4px}
+.sbar{height:10px;background:#e2e8f0;border-radius:5px;margin-top:12px;overflow:hidden}
+.sbar-f{height:100%;border-radius:5px}
+.rbadge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:30px;font-weight:700;font-size:14px;margin:10px 0}
+.rc{border-left:4px solid;border-radius:10px;padding:14px 18px;background:#f8fafc;margin:10px 0}
+.rc h3{font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.rc p{font-size:13px;line-height:1.7;color:#374151}
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:10px 0}
+.ic2{background:#f8fafc;border-radius:10px;padding:12px;border-left:3px solid}
+.ic2 h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:6px}
+.ic2 ul{list-style:none;padding:0}
+.ic2 li{font-size:13px;color:#374151;padding:2px 0 2px 13px;position:relative;line-height:1.4}
+.ic2 li:before{content:"•";position:absolute;left:3px;font-weight:700}
+.rbar{margin:5px 0}
+.rl{display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px}
+.rb{height:20px;border-radius:4px;min-width:4%;display:flex;align-items:center;padding-left:6px}
+.rb span{font-size:11px;color:#fff;font-weight:700}
+.srow{display:flex;align-items:center;gap:10px;margin:5px 0}
+.slbl{width:140px;font-size:12px;font-weight:600;text-align:right;flex-shrink:0}
+.strk{flex:1;height:22px;background:#e2e8f0;border-radius:6px;overflow:hidden}
+.sfill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:8px}
+.sfill span{font-size:11px;color:#fff;font-weight:700}
+.ssc{width:44px;font-size:13px;font-weight:700;text-align:right;flex-shrink:0}
+.sugg{background:#f0fdf4;border-left:4px solid #22c55e;border-radius:10px;padding:14px 18px;margin-top:12px}
+.sugg h4{color:#15803d;font-size:13px;margin-bottom:8px}
+.sugg ul{list-style:none;padding:0}
+.sugg li{font-size:13px;color:#166534;line-height:1.6;padding:3px 0 3px 18px;position:relative}
+.sugg li:before{content:"💡";position:absolute;left:0;font-size:11px}
+.brain-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.brain-box{background:#f8fafc;border-radius:12px;padding:16px;text-align:center;border:3px solid #e2e8f0}
+.brain-box.active{border-color:var(--bc);box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.brain-pct{font-size:2.5em;font-weight:800;margin:8px 0}
+.mi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0}
+.mi-card{background:#f8fafc;border-left:4px solid;border-radius:10px;padding:12px}
+.mi-card.dom{background:linear-gradient(135deg,#f8fafc,#e9ecef);box-shadow:0 3px 12px rgba(0,0,0,.1)}
+.mi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mi-name{font-weight:700;font-size:13px}
+.mi-score{font-size:1.3em;font-weight:800}
+.mi-bar{height:7px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.mi-fill{height:100%;border-radius:4px}
+.dom-badge{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;justify-content:center}
+.dbadge{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;background:rgba(124,58,237,.1);color:#7c3aed;border:2px solid rgba(124,58,237,.3)}
+#mp{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;flex-direction:column;align-items:center;padding:16px;overflow-y:auto}
+#mp.open{display:flex}
+.pc{background:#fff;border-radius:12px;padding:12px 16px;width:100%;max-width:900px;margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.pc strong{color:#7c3aed;font-size:14px;flex:0 0 100%}
+.fsc{display:flex;align-items:center;gap:6px;background:#ede9fe;padding:6px 12px;border-radius:8px}
+.fsc span{font-size:12px;font-weight:700;color:#7c3aed}
+.fsb{width:26px;height:26px;border-radius:50%;border:1px solid #7c3aed;background:#fff;color:#7c3aed;font-size:15px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center}
+.fsb:hover{background:#7c3aed;color:#fff}
+.fsv{min-width:34px;text-align:center;font-weight:700;font-size:13px;color:#333}
+.pcr{margin-left:auto;display:flex;gap:8px}
+#pif{width:100%;max-width:900px;height:80vh;border:none;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+@media print{#topbar,#mp{display:none!important}}
+@media(max-width:600px){.sec-b{padding:14px}.cover{padding:22px 16px}.slbl{width:90px;font-size:11px}.brain-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <span class="ttl">🧠 Laporan Potensi Diri</span>
+  <button class="btn-prev" onclick="bukaPreview()">🔍 Preview PDF</button>
+  <button class="btn-dl" id="btnDl" onclick="downloadPDF()" disabled>📥 Download PDF</button>
+</div>
+
+<div id="loading"><div class="spinner"></div><p>Memuat data laporan...</p></div>
+<div id="err"><div style="font-size:40px;margin-bottom:12px">⚠️</div><h2 id="errmsg"></h2><p style="color:#64748b;font-size:14px;margin-top:8px">Pastikan URL mengandung <code>?token=xxx</code></p></div>
+
+<div id="laporan">
+  <div class="cover">
+    <h1>🧠 Laporan Potensi Diri</h1>
+    <p>Hasil lengkap dari 3 tes psikologi potensi</p>
+    <div class="meta">
+      <div class="mi"><small>Nama</small><strong id="cv-nama">—</strong></div>
+      <div class="mi"><small>Usia</small><strong id="cv-usia">—</strong></div>
+      <div class="mi"><small>Pendidikan</small><strong id="cv-didik">—</strong></div>
+      <div class="mi"><small>Tanggal</small><strong id="cv-tgl">—</strong></div>
+    </div>
+  </div>
+
+  <div class="sec" id="sec01"><div class="sec-h" style="background:linear-gradient(135deg,#4a90e2,#667eea)"><span class="ic">📚</span><div><h2>Tes 1 — Gaya Belajar VAK</h2><p>Visual, Auditory, Kinestetik</p></div></div><div class="sec-b" id="b01"></div></div>
+  <div class="sec" id="sec02"><div class="sec-h" style="background:linear-gradient(135deg,#2980b9,#8e44ad)"><span class="ic">🧠</span><div><h2>Tes 2 — Dominasi Otak</h2><p>Analisis kecenderungan otak kiri vs otak kanan</p></div></div><div class="sec-b" id="b02"></div></div>
+  <div class="sec" id="sec03"><div class="sec-h" style="background:linear-gradient(135deg,#27ae60,#1abc9c)"><span class="ic">🌟</span><div><h2>Tes 3 — Kecerdasan Majemuk</h2><p>Multiple Intelligences — Howard Gardner</p></div></div><div class="sec-b" id="b03"></div></div>
+</div>
+
+<div id="mp">
+  <div class="pc">
+    <strong>🔍 Preview PDF Laporan Potensi</strong>
+    <div class="fsc"><span>Font Size:</span>
+      <button class="fsb" onclick="ubahFS(-0.5)">−</button>
+      <span class="fsv" id="fslbl">11pt</span>
+      <button class="fsb" onclick="ubahFS(+0.5)">+</button>
+    </div>
+    <div class="pcr">
+      <button onclick="downloadPDF()" style="background:#22c55e;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">📥 Download</button>
+      <button onclick="tutupPreview()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">✕ Tutup</button>
+    </div>
+  </div>
+  <iframe id="pif"></iframe>
+</div>
+
+<script>
+const _= id=>document.getElementById(id);
+let _all={}, _dd={}, _tgl='', _fs=11;
+
+/* ─ RENDER HELPERS ─ */
+function rcard(color,icon,title,desc){return `<div class="rc" style="border-color:${color}"><h3 style="color:${color}">${icon||''} ${title}</h3><p>${desc}</p></div>`;}
+function sugg(list,title='Saran & Tips'){return `<div class="sugg"><h4>💡 ${title}</h4><ul>${list.map(s=>`<li>${s}</li>`).join('')}</ul></div>`;}
+function icard(title,items,color){return `<div class="ic2" style="border-color:${color}"><h4>${title}</h4><ul>${items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;}
+
+/* ─ TES 01 GAYA BELAJAR ─ */
+function r01(d){
+  const {skor,persentase,dominant,config,data}=d;
+  const total=skor.A+skor.B+skor.C;
+  const bars=[
+    {label:'👁️ Visual',  pct:persentase.A, skor:skor.A, color:'#4a90e2'},
+    {label:'👂 Auditory', pct:persentase.B, skor:skor.B, color:'#f39c12'},
+    {label:'🤸 Kinestetik',pct:persentase.C,skor:skor.C, color:'#2ecc71'}
+  ];
+  const barsHTML=bars.map(b=>`<div class="srow">
+    <div class="slbl">${b.label}</div>
+    <div class="strk"><div class="sfill" style="width:${b.pct}%;background:${b.color}"><span>${b.skor}</span></div></div>
+    <div class="ssc" style="color:${b.color}">${b.pct}%</div>
+  </div>`).join('');
+  _('b01').innerHTML=`
+    <div style="text-align:center;margin-bottom:14px">
+      <div class="rbadge" style="background:${config.color}20;color:${config.color}">${config.icon} Gaya Dominan: ${config.name}</div>
+    </div>
+    ${barsHTML}
+    ${rcard(config.color,config.icon,config.name,config.description)}
+    ${icard('🎯 Karakteristik',config.characteristics,config.color)}
+    ${sugg(config.tips,'Tips Belajar Efektif')}`;
+}
+
+/* ─ TES 02 DOMINASI OTAK ─ */
+function r02(d){
+  const {skor,persentase,dominant,config}=d;
+  const isLeft=dominant==='LEFT',isRight=dominant==='RIGHT',isBal=dominant==='BALANCED';
+  const leftActive=isLeft||isBal,rightActive=isRight||isBal;
+  _('b02').innerHTML=`
+    <div class="brain-grid">
+      <div class="brain-box ${leftActive?'active':''}" style="--bc:#2980b9;${leftActive?'border-color:#2980b9':''}">
+        <div style="font-size:1.4em">🧠</div>
+        <div style="font-weight:700;color:#2980b9;margin:6px 0">Otak Kiri</div>
+        <div class="brain-pct" style="color:#2980b9">${persentase.kiri}%</div>
+        <div style="font-size:12px;color:#64748b">${skor.kiri} poin</div>
+      </div>
+      <div class="brain-box ${rightActive?'active':''}" style="--bc:#e74c3c;${rightActive?'border-color:#e74c3c':''}">
+        <div style="font-size:1.4em">🎨</div>
+        <div style="font-weight:700;color:#e74c3c;margin:6px 0">Otak Kanan</div>
+        <div class="brain-pct" style="color:#e74c3c">${persentase.kanan}%</div>
+        <div style="font-size:12px;color:#64748b">${skor.kanan} poin</div>
+      </div>
+    </div>
+    ${rcard(config.color,config.icon,config.name,config.description)}
+    <div class="ig">
+      ${icard('🎯 Karakteristik',config.characteristics,config.color)}
+      ${icard('💪 Kekuatan',config.strengths,config.color)}
+    </div>
+    ${icard('💼 Karier Cocok',config.careers,config.color)}
+    ${sugg(config.tips)}`;
+}
+
+/* ─ TES 03 KECERDASAN MAJEMUK ─ */
+function r03(d){
+  const {sorted,data:INTEL}=d;
+  const dominant=sorted.filter(([_,s])=>s>=8);
+  const cardsHTML=sorted.map(([name,score])=>{
+    const i=INTEL[name]||{};
+    const isDom=score>=8;
+    return `<div class="mi-card ${isDom?'dom':''}" style="border-color:${i.color}">
+      <div class="mi-top">
+        <div><div style="font-size:1.3em">${i.icon}</div><div class="mi-name" style="color:${i.color}">${name}</div></div>
+        <div class="mi-score" style="color:${i.color}">${score}/10</div>
+      </div>
+      <div class="mi-bar"><div class="mi-fill" style="width:${score*10}%;background:${i.color}"></div></div>
+    </div>`;
+  }).join('');
+
+  const domSection=dominant.length>0
+    ?`<div style="text-align:center;margin-bottom:14px">
+        <div style="font-weight:700;color:#7c3aed;margin-bottom:8px">🌟 Kecerdasan Dominan (skor ≥ 8)</div>
+        <div class="dom-badge">${dominant.map(([n])=>`<span class="dbadge">${INTEL[n]?.icon} ${n}</span>`).join('')}</div>
+      </div>`
+    :`<div class="rc" style="border-color:#f59e0b;background:#fef3c7"><h3 style="color:#92400e">💡 Kecerdasan Seimbang</h3><p style="color:#92400e">Tidak ada kecerdasan yang mencapai skor dominan (≥8). Anda memiliki kecerdasan yang seimbang di berbagai area.</p></div>`;
+
+  const detailHTML=dominant.slice(0,2).map(([name,score])=>{
+    const i=INTEL[name]||{};
+    return `<div class="ic2" style="border-color:${i.color};margin:10px 0">
+      <h4 style="color:${i.color};font-size:13px;text-transform:none">${i.icon} ${name} — ${score}/10</h4>
+      <p style="font-size:12px;color:#64748b;margin:4px 0 8px">${i.description}</p>
+      <p style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px">Karier: ${(i.careers||[]).join(', ')}</p>
+    </div>`;
+  }).join('');
+
+  const firstDom=dominant[0]?INTEL[dominant[0][0]]:null;
+  _('b03').innerHTML=`${domSection}<div class="mi-grid">${cardsHTML}</div>${detailHTML}
+    ${firstDom?sugg(firstDom.tips||[],'Tips Pengembangan'):''}`;
+}
+
+/* ─ MAIN LOAD ─ */
+async function main(){
+  const token=new URLSearchParams(location.search).get('token');
+  if(!token){_('loading').style.display='none';_('err').style.display='block';_('errmsg').textContent='Token tidak ditemukan di URL.';return;}
+  try{
+    // Ambil data dari rekap_nilai1 berdasarkan token (x_01)
+    const API='https://lidan-co-id.pages.dev/api/db_psikogram1';
+    const url=new URL(API);
+    url.searchParams.set('table','rekap_nilai1');
+    url.searchParams.set('x_01',token);
+    const res=await fetch(url.toString(),{headers:{'Content-Type':'application/json','X-Custom-Auth':'admin'}});
+    if(!res.ok)throw new Error('Gagal mengambil data (HTTP '+res.status+')');
+    const json=await res.json();
+    if(!json.success||!json.data||json.data.length===0)throw new Error('Data tidak ditemukan untuk token: '+token);
+
+    const row=json.data[0];
+    // Parse x_12 dan x_13 — ambil yang tersedia
+    let potensiData={};
+    for(const xKey of['x_12','x_13']){
+      try{
+        const parsed=JSON.parse(row[xKey]||'{}');
+        if(parsed.potensi)potensiData=parsed.potensi;
+      }catch(e){}
+    }
+    if(!Object.keys(potensiData).length)throw new Error('Data potensi tidak tersedia untuk token ini.');
+
+    // Data diri dari row rekap
+    _dd={
+      nama:row.x_02||row.nama||'—',
+      usia:row.x_03||row.usia||'',
+      pendidikan:row.x_05||row.pendidikan||row.jabatan||'—',
+      tgl_tes:row.x_07||row.tgl_tes||''
+    };
+    _tgl=_dd.tgl_tes;
+
+    // Map dari key rekap ke key render (tes01→'01', tes02→'02', dst)
+    _all={};
+    for(const[k,v]of Object.entries(potensiData)){
+      const num=k.replace('tes','');
+      _all[num]=v;
+    }
+
+    _('cv-nama').textContent=_dd.nama||'—';
+    _('cv-usia').textContent=(_dd.usia||'—')+(_dd.usia?' Tahun':'');
+    _('cv-didik').textContent=_dd.pendidikan||'—';
+    _('cv-tgl').textContent=_tgl||'—';
+
+    if(_all['01'])r01(_all['01']); else _('sec01').style.display='none';
+    if(_all['02'])r02(_all['02']); else _('sec02').style.display='none';
+    if(_all['03'])r03(_all['03']); else _('sec03').style.display='none';
+
+    _('loading').style.display='none';
+    _('laporan').style.display='block';
+    _('btnDl').disabled=false;
+  } catch(e){
+    _('loading').style.display='none';
+    _('err').style.display='block';
+    _('errmsg').textContent=e.message||'Terjadi kesalahan.';
+  }
+}
+
+/* ─ PDF HELPERS ─ */
+function pSec(title,color){return{text:title,bold:true,fontSize:_fs+2,color:'#fff',background:color,margin:[0,16,0,8],padding:[8,6]};}
+function pBar(label,val,max,color){
+  const pct=max?Math.round(val/max*100):0;
+  return[
+    {text:label+': '+val+'/'+max+' ('+pct+'%)',fontSize:_fs-1,color:'#374151',margin:[0,3,0,1]},
+    {canvas:[{type:'rect',x:0,y:0,w:Math.max(pct/100*460,4),h:10,r:3,color}],margin:[0,0,0,6]}
+  ];
+}
+function pList(items,color='#166534'){return items.map(t=>({text:'• '+t,fontSize:_fs-1,color,margin:[8,1,0,1]}));}
+
+async function buatDoc(){
+  const FS=_fs, nama=_dd.nama||'—', usia=_dd.usia?_dd.usia+' Tahun':'—', didik=_dd.pendidikan||_dd.jabatan||'—', tgl=_tgl||_dd.tgl_tes||'—';
+  const C=[];
+
+  C.push({text:'LAPORAN POTENSI DIRI',bold:true,fontSize:FS+8,alignment:'center',color:'#7c3aed',margin:[0,20,0,6]});
+  C.push({text:'Hasil Lengkap 3 Tes Psikologi Potensi',fontSize:FS,alignment:'center',color:'#64748b',margin:[0,0,0,20]});
+  C.push({canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:2,lineColor:'#7c3aed'}],margin:[0,0,0,16]});
+  C.push({table:{widths:['*','*'],body:[
+    [{text:'Nama',fontSize:FS,bold:true,border:[false,false,false,false]},{text:nama,fontSize:FS,border:[false,false,false,false]}],
+    [{text:'Usia',fontSize:FS,bold:true,border:[false,false,false,false]},{text:usia,fontSize:FS,border:[false,false,false,false]}],
+    [{text:'Pendidikan',fontSize:FS,bold:true,border:[false,false,false,false]},{text:didik,fontSize:FS,border:[false,false,false,false]}],
+    [{text:'Tanggal',fontSize:FS,bold:true,border:[false,false,false,false]},{text:tgl,fontSize:FS,border:[false,false,false,false]}],
+  ]},layout:{hLineWidth:()=>0,vLineWidth:()=>0},margin:[0,0,0,20]});
+
+  if(_all['01']){
+    const {skor,persentase,dominant,config,data}=_all['01'];
+    const total=skor.A+skor.B+skor.C;
+    C.push(pSec('GAYA BELAJAR VAK','#4a90e2'));
+    C.push(...pBar('👁️ Visual',skor.A,total,'#4a90e2'));
+    C.push(...pBar('👂 Auditory',skor.B,total,'#f39c12'));
+    C.push(...pBar('🤸 Kinestetik',skor.C,total,'#2ecc71'));
+    C.push({text:'Gaya Dominan: '+config.icon+' '+config.name,bold:true,fontSize:FS+1,color:config.color,margin:[0,8,0,4]});
+    C.push({text:config.description,fontSize:FS-1,color:'#374151',margin:[0,0,0,4]});
+    C.push({text:'Karakteristik:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+    C.push(...pList(config.characteristics.slice(0,4)));
+    C.push({text:'Tips Belajar:',bold:true,fontSize:FS-1,margin:[0,6,0,2]});
+    C.push(...pList(config.tips.slice(0,5),'#15803d'));
+  }
+
+  if(_all['02']){
+    const {skor,persentase,dominant,config}=_all['02'];
+    C.push(pSec('DOMINASI OTAK','#2980b9'));
+    C.push(...pBar('Otak Kiri',skor.kiri,skor.kiri+skor.kanan,'#2980b9'));
+    C.push(...pBar('Otak Kanan',skor.kanan,skor.kiri+skor.kanan,'#e74c3c'));
+    C.push({text:config.icon+' '+config.name,bold:true,fontSize:FS+1,color:config.color,margin:[0,8,0,4]});
+    C.push({text:config.description,fontSize:FS-1,color:'#374151',margin:[0,0,0,4]});
+    C.push({text:'Karakteristik:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+    C.push(...pList(config.characteristics.slice(0,5)));
+    C.push({text:'Karier Cocok:',bold:true,fontSize:FS-1,margin:[0,6,0,2]});
+    C.push({text:config.careers.join(', '),fontSize:FS-1,color:'#64748b',italics:true,margin:[8,0,0,4]});
+    C.push({text:'Tips:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+    C.push(...pList(config.tips,'#15803d'));
+  }
+
+  if(_all['03']){
+    const {sorted,data:INTEL}=_all['03'];
+    C.push(pSec('KECERDASAN MAJEMUK','#27ae60'));
+    sorted.forEach(([name,score])=>{
+      C.push(...pBar((INTEL[name]?.icon||'')+'  '+name,score,10,INTEL[name]?.color||'#95a5a6'));
+    });
+    const dominant=sorted.filter(([_,s])=>s>=8);
+    if(dominant.length>0){
+      C.push({text:'Kecerdasan Dominan: '+dominant.map(([n])=>n).join(', '),bold:true,fontSize:FS,color:'#7c3aed',margin:[0,8,0,4]});
+      dominant.slice(0,2).forEach(([name,score])=>{
+        const i=INTEL[name]||{};
+        C.push({text:i.icon+' '+name+' ('+score+'/10)',bold:true,fontSize:FS,color:i.color,margin:[0,6,0,2]});
+        C.push({text:i.description,fontSize:FS-1,color:'#374151',margin:[0,0,0,2]});
+        C.push({text:'Karier: '+( i.careers||[]).join(', '),fontSize:FS-1,color:'#64748b',italics:true,margin:[0,0,0,2]});
+        C.push({text:'Tips:',bold:true,fontSize:FS-1,margin:[0,4,0,2]});
+        C.push(...pList((i.tips||[]).slice(0,4),'#15803d'));
+      });
+    } else {
+      C.push({text:'Kecerdasan seimbang — tidak ada yang mencapai skor dominan (≥8).',fontSize:FS-1,color:'#92400e',margin:[0,6,0,4]});
+    }
+  }
+
+  return{
+    pageSize:'A4',pageMargins:[36,36,36,36],content:C,
+    defaultStyle:{font:'Roboto',lineHeight:1.4},
+    footer:(cur,tot)=>({text:`Laporan Potensi | Hal. ${cur}/${tot}`,fontSize:8,color:'#94a3b8',alignment:'center',margin:[0,8,0,0]})
+  };
+}
+
+/* ─ PREVIEW & DOWNLOAD ─ */
+async function bukaPreview(){
+  _('mp').classList.add('open');
+  _('fslbl').textContent=_fs+'pt';
+  const doc=await buatDoc();
+  pdfMake.createPdf(doc).getDataUrl(u=>{_('pif').src=u;});
+}
+function tutupPreview(){_('mp').classList.remove('open');_('pif').src='';}
+async function ubahFS(d){
+  _fs=Math.max(7,Math.min(16,_fs+d));
+  _('fslbl').textContent=_fs+'pt';
+  const doc=await buatDoc();
+  pdfMake.createPdf(doc).getDataUrl(u=>{_('pif').src=u;});
+}
+async function downloadPDF(){
+  const btn=_('btnDl');btn.disabled=true;btn.textContent='⏳ Membuat PDF...';
+  try{const doc=await buatDoc();pdfMake.createPdf(doc).download(`Laporan-Potensi-${_dd.nama||'hasil'}-${new Date().toISOString().split('T')[0]}.pdf`);}
+  finally{btn.disabled=false;btn.innerHTML='📥 Download PDF';}
+}
+
+main();
+</script>
+</body>
+</html>
