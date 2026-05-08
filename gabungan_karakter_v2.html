@@ -219,19 +219,33 @@ async function loadAll() {
     const row = json.data[0];
 
     // Data diri dari row rekap
+    // x_02 berisi JSON string {"nama":"...","jk":"...","usia":"...","tanggal":"...","pendidikan":"..."}
+    let x02 = {};
+    try { x02 = JSON.parse(row.x_02 || '{}'); } catch(e) {}
+    // x_07 bisa berupa JSON array ["","",""] — ambil elemen pertama yang ada
+    let tglTes = '';
+    try {
+      const arr = JSON.parse(row.x_07 || '[]');
+      tglTes = Array.isArray(arr) ? (arr.find(v => v) || '') : (row.x_07 || '');
+    } catch(e) { tglTes = row.x_07 || ''; }
     _dataDiri = {
-      nama: row.x_02 || row.nama || '—',
-      usia: row.x_03 || row.usia || '',
-      pendidikan: row.x_05 || row.pendidikan || row.jabatan || '—',
-      tgl_tes: row.x_07 || row.tgl_tes || ''
+      nama:       x02.nama       || row.nama       || '—',
+      usia:       x02.usia       || row.x_03       || row.usia || '',
+      pendidikan: x02.pendidikan || row.x_05       || row.pendidikan || '—',
+      tgl_tes:    x02.tanggal    || tglTes         || '—'
     };
 
-    // Parse x_12 dan x_13 — ambil karakter
+    // Parse x_12 (skor) dan x_13 (konten) — merge per-tes-key
     let karakterData = {};
     for (const xKey of ['x_12', 'x_13']) {
       try {
         const parsed = JSON.parse(row[xKey] || '{}');
-        if (parsed.karakter && Object.keys(parsed.karakter).length) karakterData = parsed.karakter;
+        if (parsed.karakter && Object.keys(parsed.karakter).length) {
+          for (const [tesKey, tesVal] of Object.entries(parsed.karakter)) {
+            if (!karakterData[tesKey]) karakterData[tesKey] = {};
+            Object.assign(karakterData[tesKey], tesVal);
+          }
+        }
       } catch(e) {}
     }
     if (!Object.keys(karakterData).length)
@@ -310,47 +324,76 @@ function renderTes(id, r) {
 }
 
 // ── TES 04: Temperamen ──
+// Key mapping: x_12 pakai A/B/C/D → TEMPERAMENTS_DATA pakai S/K/M/P
+const TEMP_KEY_MAP = { A:'S', B:'K', C:'M', D:'P' };
 function render04(r) {
-  const { config, skor, persen, dominan, sortedSkor, total } = r;
   const T = TEMPERAMENTS_DATA;
-  const tempCards = sortedSkor.map(([k, sc]) => `
-    <div class="temp-card ${k===dominan?'dominant':''}" style="border-color:${T[k].color}">
-      <div class="temp-icon">${T[k].icon}</div>
-      <div class="temp-name" style="color:${T[k].color}">${T[k].name}</div>
-      <div class="temp-score" style="color:${T[k].color}">${sc}/${total}</div>
-      <div style="color:#888;font-size:.8em">${persen[k]}%</div>
-    </div>`).join('');
+  // Ambil skor & persen dari x_12 (key A/B/C/D), konten dari x_13
+  const skor   = r.skor   || {};
+  const persen = r.persen || {};
+  const total  = r.total  || 0;
+  const dominanABCD = r.dominan || 'B';
+  const dominanKey  = TEMP_KEY_MAP[dominanABCD] || 'K';
+  const tConfig = T[dominanKey] || { name:r.nama||'—', icon:'🎭', color:'#667eea' };
+
+  // sortedSkor bisa [{key,skor}] dari x_12 atau tidak ada — buat dari skor object
+  let sorted = [];
+  if (r.sortedSkor && Array.isArray(r.sortedSkor)) {
+    sorted = r.sortedSkor.map(item => ({ abcd: item.key, tKey: TEMP_KEY_MAP[item.key]||item.key, sc: item.skor }));
+  } else {
+    sorted = Object.entries(skor).sort((a,b)=>b[1]-a[1]).map(([k,sc])=>({ abcd:k, tKey:TEMP_KEY_MAP[k]||k, sc }));
+  }
+
+  const tempCards = sorted.map(({abcd, tKey, sc}) => {
+    const td = T[tKey] || { name:tKey, icon:'🎭', color:'#999' };
+    const p  = persen[abcd] || 0;
+    return `
+    <div class="temp-card ${abcd===dominanABCD?'dominant':''}" style="border-color:${td.color}">
+      <div class="temp-icon">${td.icon}</div>
+      <div class="temp-name" style="color:${td.color}">${td.name}</div>
+      <div class="temp-score" style="color:${td.color}">${sc}/${total}</div>
+      <div style="color:#888;font-size:.8em">${p}%</div>
+    </div>`;}).join('');
+
+  const characteristics = r.characteristics || [];
+  const strengths       = r.strengths       || [];
+  const weaknesses      = r.weaknesses      || [];
+
   return `
-    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${config.color}">
-      <div class="tipe-nama" style="color:${config.color}">${config.icon} ${config.name}</div>
-      <div class="tipe-desc">${config.description}</div>
+    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${tConfig.color}">
+      <div class="tipe-nama" style="color:${tConfig.color}">${tConfig.icon} ${r.nama||tConfig.name}</div>
+      <div class="tipe-desc">${r.tagline||''} — ${r.description||''}</div>
     </div>
     <div class="temp-grid">${tempCards}</div>
     <div class="score-bars">
-      ${sortedSkor.map(([k,sc])=>{const p=persen[k];return`
-      <div class="bar-row">
-        <span class="bar-label">${T[k].name}</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${T[k].color}">${p>12?p+'%':''}</div></div>
+      ${sorted.map(({abcd,tKey,sc})=>{const td=T[tKey]||{name:tKey,color:'#999'};const p=persen[abcd]||0;return`
+      <div class="bar-row ${abcd===dominanABCD?'dominant':''}">
+        <span class="bar-label">${td.name}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${td.color}">${p>12?p+'%':''}</div></div>
         <span class="bar-val">${sc}/${total}</span>
       </div>`;}).join('')}
     </div>
-    ${infoBlock('🎯 Karakteristik', config.characteristics)}
+    ${infoBlock('🎯 Karakteristik', characteristics)}
     <div class="sw-grid">
-      <div class="sw-box strength"><h5>💪 Kekuatan</h5><ul>${config.strengths.map(s=>`<li>${s}</li>`).join('')}</ul></div>
-      <div class="sw-box weakness"><h5>⚠️ Kelemahan</h5><ul>${config.weaknesses.map(w=>`<li>${w}</li>`).join('')}</ul></div>
+      <div class="sw-box strength"><h5>💪 Kekuatan</h5><ul>${strengths.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+      <div class="sw-box weakness"><h5>⚠️ Kelemahan</h5><ul>${weaknesses.map(w=>`<li>${w}</li>`).join('')}</ul></div>
     </div>
-    ${infoBlock('💼 Karir yang Cocok', config.careers)}
-    ${infoBlock('💡 Saran', config.tips)}`;
+    ${infoBlock('💼 Karir yang Cocok', r.careers||[])}
+    ${infoBlock('💡 Saran', r.tips||[])}`;
 }
 
 // ── TES 05–08: Spektrum ──
 function renderSpektrum(r, opt) {
-  const { config, skor, persen, total, markerPosition } = r;
-  const pA = persen.A, pB = persen.B;
+  const skor   = r.skor   || {};
+  const persen = r.persen || {};
+  const total  = r.total  || 0;
+  const markerPosition = r.markerPosition != null ? r.markerPosition : (persen.A || 50);
+  const pA = persen.A || 0, pB = persen.B || 0;
+  const color = opt.colorA;
   return `
-    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${config.color}">
-      <div class="tipe-nama" style="color:${config.color}">${config.icon} ${config.name}</div>
-      <div class="tipe-desc">${config.tagline} — ${config.description}</div>
+    <div class="hasil-dominan" style="background:#f8f9fa;border-color:${color}">
+      <div class="tipe-nama" style="color:${color}">${opt.iconA} ${r.nama||opt.nameA}</div>
+      <div class="tipe-desc">${r.tagline||''} — ${r.description||''}</div>
     </div>
     <div class="spectrum-wrap">
       <div class="spec-side">
@@ -378,13 +421,13 @@ function renderSpektrum(r, opt) {
         <div style="font-size:.75em;color:#888">${skor.B}/${total}</div>
       </div>
     </div>
-    ${infoBlock('🎯 Karakteristik', config.characteristics)}
-    ${config.strengths ? `<div class="sw-grid">
-      <div class="sw-box strength"><h5>💪 Kekuatan</h5><ul>${config.strengths.map(s=>`<li>${s}</li>`).join('')}</ul></div>
-      ${config.weaknesses?`<div class="sw-box weakness"><h5>⚠️ Area Pengembangan</h5><ul>${config.weaknesses.map(w=>`<li>${w}</li>`).join('')}</ul></div>`:''}
+    ${infoBlock('🎯 Karakteristik', r.characteristics||[])}
+    ${(r.strengths && r.strengths.length) ? `<div class="sw-grid">
+      <div class="sw-box strength"><h5>💪 Kekuatan</h5><ul>${(r.strengths||[]).map(s=>`<li>${s}</li>`).join('')}</ul></div>
+      ${(r.weaknesses && r.weaknesses.length)?`<div class="sw-box weakness"><h5>⚠️ Area Pengembangan</h5><ul>${r.weaknesses.map(w=>`<li>${w}</li>`).join('')}</ul></div>`:''}
     </div>` : ''}
-    ${infoBlock('💼 Karir yang Cocok', config.careers)}
-    ${infoBlock('💡 Saran', config.tips)}`;
+    ${infoBlock('💼 Karir yang Cocok', r.careers||[])}
+    ${infoBlock('💡 Saran', r.tips||[])}`;
 }
 
 // Helper
@@ -503,26 +546,26 @@ function buatDocDef(FS) {
 
     if (id === '04') {
       const { config, skor, persen, dominan, sortedSkor, total } = r;
-      content.push(H(`${config.icon} ${config.name}`, info.color));
-      content.push(P(config.description));
+      content.push(H(`🎭 ${r.nama||'Temperamen'}`, info.color));
+      content.push(P(r.description||''));
       sortedSkor.forEach(([k, sc]) => content.push(barRow(T[k].name, sc, total, T[k].color)));
-      if (config.characteristics) { content.push(H('Karakteristik', DARK, FS)); content.push(UL(config.characteristics)); }
-      if (config.strengths)       { content.push(H('💪 Kekuatan',   DARK, FS)); content.push(UL(config.strengths)); }
-      if (config.weaknesses)      { content.push(H('⚠️ Kelemahan',  DARK, FS)); content.push(UL(config.weaknesses)); }
-      if (config.careers)         { content.push(H('💼 Karir',      DARK, FS)); content.push(P(config.careers.join(' • '))); }
-      if (config.tips)            { content.push(H('💡 Saran',      DARK, FS)); content.push(UL(config.tips)); }
+      if (r.characteristics) { content.push(H('Karakteristik', DARK, FS)); content.push(UL(r.characteristics)); }
+      if (r.strengths)       { content.push(H('💪 Kekuatan',   DARK, FS)); content.push(UL(r.strengths)); }
+      if (r.weaknesses)      { content.push(H('⚠️ Kelemahan',  DARK, FS)); content.push(UL(r.weaknesses)); }
+      if (r.careers)         { content.push(H('💼 Karir',      DARK, FS)); content.push(P(r.careers.join(' • '))); }
+      if (r.tips)            { content.push(H('💡 Saran',      DARK, FS)); content.push(UL(r.tips)); }
     } else {
       const { config, skor, persen, total } = r;
       const mbtiLetter = MBTI_MAP[id]?.[r.dominan] || '';
-      content.push(H(`${config.icon} ${config.name} (${mbtiLetter})`, info.color));
-      content.push(P(`${config.tagline} — ${config.description}`));
+      content.push(H(`${r.nama||''} (${mbtiLetter})`, info.color));
+      content.push(P(`${r.tagline||''} — ${r.description||''}`));
       content.push(barRow('A', skor.A, total, info.color));
       content.push(barRow('B', skor.B, total, '#aaa'));
-      if (config.characteristics) { content.push(H('Karakteristik', DARK, FS)); content.push(UL(config.characteristics)); }
-      if (config.strengths)       { content.push(H('💪 Kekuatan',   DARK, FS)); content.push(UL(config.strengths)); }
-      if (config.weaknesses)      { content.push(H('⚠️ Area Pengembangan', DARK, FS)); content.push(UL(config.weaknesses)); }
-      if (config.careers)         { content.push(H('💼 Karir',      DARK, FS)); content.push(P(config.careers.join(' • '))); }
-      if (config.tips)            { content.push(H('💡 Saran',      DARK, FS)); content.push(UL(config.tips)); }
+      if (r.characteristics) { content.push(H('Karakteristik', DARK, FS)); content.push(UL(r.characteristics)); }
+      if (r.strengths)       { content.push(H('💪 Kekuatan',   DARK, FS)); content.push(UL(r.strengths)); }
+      if (r.weaknesses)      { content.push(H('⚠️ Area Pengembangan', DARK, FS)); content.push(UL(r.weaknesses)); }
+      if (r.careers)         { content.push(H('💼 Karir',      DARK, FS)); content.push(P(r.careers.join(' • '))); }
+      if (r.tips)            { content.push(H('💡 Saran',      DARK, FS)); content.push(UL(r.tips)); }
     }
     content.push(SEP());
   });
