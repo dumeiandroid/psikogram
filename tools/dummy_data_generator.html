@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dummy Data Generator — Psikotes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161922;
+    --surface2: #1e2330;
+    --border: #2a3045;
+    --accent: #00e5a0;
+    --accent2: #00b8ff;
+    --warn: #ff6b35;
+    --text: #e8eaf0;
+    --muted: #6b7590;
+    --tag-bg: #1a2540;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 80px;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(0,229,160,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(0,184,255,0.06) 0%, transparent 60%);
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 36px 48px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    background: rgba(13,15,20,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .logo-mark {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700; font-size: 16px; color: #0d0f14;
+    flex-shrink: 0;
+  }
+  header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  header p { font-size: 12px; color: var(--muted); margin-top: 2px; letter-spacing: 0.5px; }
+  .header-badge {
+    margin-left: auto;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+  }
+
+  /* ── LAYOUT ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 85px);
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 28px 24px;
+    overflow-y: auto;
+    position: sticky;
+    top: 85px;
+    height: calc(100vh - 85px);
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    margin-top: 28px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* ── CONTROLS ── */
+  .control-group { margin-bottom: 16px; }
+  .control-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .control-group input[type="number"],
+  .control-group input[type="text"],
+  .control-group select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .control-group input:focus,
+  .control-group select:focus { border-color: var(--accent); }
+
+  /* ── RANGE CARD ── */
+  .range-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .range-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .range-card-title .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    background: var(--tag-bg);
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: var(--muted);
+  }
+  .range-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .range-row span {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .range-row input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .range-row input:focus { border-color: var(--accent2); }
+  .range-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #0d0f14;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 20px;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    padding: 9px 18px;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-secondary:hover { background: rgba(0,229,160,0.08); }
+
+  .btn-dl {
+    padding: 10px 22px;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-dl:hover { border-color: var(--accent2); background: rgba(0,184,255,0.06); }
+
+  /* ── CONTENT AREA ── */
+  .content {
+    padding: 32px 40px;
+  }
+
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .content-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .content-header p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .action-row { display: flex; gap: 10px; align-items: center; }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+  }
+  .stat-pill strong { color: var(--accent); font-weight: 700; }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .table-scroll { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  thead {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(42,48,69,0.5);
+    color: var(--text);
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-id { color: var(--muted); }
+  .td-code { color: var(--accent2); }
+  .td-json {
+    color: var(--accent);
+    max-width: 160px;
+  }
+  .td-null { color: var(--muted); font-style: italic; opacity: 0.5; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--muted);
+  }
+  .empty-state .icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+  .empty-state h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+    opacity: 0.6;
+  }
+  .empty-state p {
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: all 0.3s;
+    z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── PREFIX OPTIONS ── */
+  .prefix-options { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .prefix-chip {
+    padding: 5px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .prefix-chip:hover, .prefix-chip.active {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(0,184,255,0.07);
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  .info-box {
+    background: rgba(0,229,160,0.05);
+    border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">DG</div>
+  <div>
+    <h1>Dummy Data Generator</h1>
+    <p>PSIKOTES · JSON EXPORT · CONTOH DATA</p>
+  </div>
+  <div class="header-badge" id="rowBadge">0 rows</div>
+</header>
+
+<div class="main-grid">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar">
+
+    <div class="section-label">⚙ Konfigurasi Umum</div>
+
+    <div class="control-group">
+      <label>Jumlah Peserta</label>
+      <input type="number" id="jumlahPeserta" value="20" min="1" max="9999">
+    </div>
+
+    <div class="control-group">
+      <label>Prefix Kode Peserta</label>
+      <input type="text" id="prefixKode" value="CONTOH" placeholder="CONTOH">
+      <div class="prefix-options">
+        <span class="prefix-chip active" onclick="setPrefix('CONTOH')">CONTOH</span>
+        <span class="prefix-chip" onclick="setPrefix('PESERTA')">PESERTA</span>
+        <span class="prefix-chip" onclick="setPrefix('TES')">TES</span>
+        <span class="prefix-chip" onclick="setPrefix('DATA')">DATA</span>
+        <span class="prefix-chip" onclick="setPrefix('PSI')">PSI</span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Tanggal Tes</label>
+      <input type="text" id="tglTes" value="2025-05-01">
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">📊 x_05 · CFIT &amp; TKD</div>
+
+    <div class="info-box">Format: {"cfit1":9,"cfit2":5,...,"tkd3":29,"tkd6":17}</div>
+
+    <div class="range-card">
+      <div class="range-card-title">CFIT <span class="tag">x_05</span></div>
+      <div class="range-label">cfit1 (Seri 1)</div>
+      <div class="range-row"><input type="number" id="cfit1Min" value="6"><span>–</span><input type="number" id="cfit1Max" value="14"></div>
+      <div class="range-label">cfit2 (Seri 2)</div>
+      <div class="range-row"><input type="number" id="cfit2Min" value="3"><span>–</span><input type="number" id="cfit2Max" value="8"></div>
+      <div class="range-label">cfit3 (Seri 3)</div>
+      <div class="range-row"><input type="number" id="cfit3Min" value="2"><span>–</span><input type="number" id="cfit3Max" value="7"></div>
+      <div class="range-label">cfit4 (Seri 4)</div>
+      <div class="range-row"><input type="number" id="cfit4Min" value="1"><span>–</span><input type="number" id="cfit4Max" value="6"></div>
+    </div>
+
+    <div class="range-card">
+      <div class="range-card-title">TKD <span class="tag">x_05</span></div>
+      <div class="range-label">tkd3</div>
+      <div class="range-row"><input type="number" id="tkd3Min" value="18"><span>–</span><input type="number" id="tkd3Max" value="35"></div>
+      <div class="range-label">tkd6</div>
+      <div class="range-row"><input type="number" id="tkd6Min" value="10"><span>–</span><input type="number" id="tkd6Max" value="22"></div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">🎯 x_06 · RMIB &amp; EPPS</div>
+
+    <div class="info-box">RMIB: ranking 1–12 (8 kategori)<br>EPPS: 225 pilihan A/B</div>
+
+    <div class="range-card">
+      <div class="range-card-title">EPPS Bias <span class="tag">x_06</span></div>
+      <div class="range-label">Probabilitas A (0–100%)</div>
+      <div class="range-row"><input type="number" id="eppsPA" value="50" min="0" max="100"><span>%</span><span style="color:var(--accent);font-size:10px">A</span></div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">🧠 x_07 · WHO (Psikologi)</div>
+
+    <div class="info-box">who_1 s/d who_27: jawaban pilihan ganda per subtes. Opsi otomatis sesuai data asli.</div>
+
+    <button class="btn-primary" onclick="generateData()">▶ Generate Data</button>
+  </aside>
+
+  <!-- ══ CONTENT ══ -->
+  <main class="content">
+
+    <div class="content-header">
+      <div>
+        <h2>Preview Data</h2>
+        <p id="previewInfo">Belum ada data — konfigurasi lalu klik Generate</p>
+      </div>
+      <div class="action-row">
+        <button class="btn-secondary" onclick="copyJSON()">Copy JSON</button>
+        <button class="btn-dl" onclick="downloadJSON()">
+          ⬇ Download JSON
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-row" id="statsRow" style="display:none">
+      <div class="stat-pill">Peserta: <strong id="statTotal">0</strong></div>
+      <div class="stat-pill">Field: <strong>x_01, x_02, x_05, x_06, x_07</strong></div>
+      <div class="stat-pill">Format: <strong>JSON Array</strong></div>
+      <div class="stat-pill">EPPS: <strong>225 items</strong></div>
+      <div class="stat-pill">RMIB: <strong>8 kartu × 12 rank</strong></div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="previewTable">
+          <thead>
+            <tr>
+              <th>id_x</th>
+              <th>x_01</th>
+              <th>x_02 (biodata)</th>
+              <th>x_05 (CFIT+TKD)</th>
+              <th>x_06 (RMIB+EPPS)</th>
+              <th>x_07 (WHO)</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody">
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <div class="icon">⚡</div>
+                  <h3>Siap Generate</h3>
+                  <p>Atur konfigurasi di panel kiri lalu klik Generate Data</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA POOL ───────────────────────────────────────────────
+const PENDIDIKAN = ['SMA','D3','S1','S2'];
+const STATUS = ['Lajang','Menikah'];
+const JK = ['L','P'];
+
+// WHO specs: {key: {len, options}}
+const WHO_SPEC = {
+  who_1:  { len: 30,  opts: ['A','B','C'] },
+  who_2:  { len: 20,  opts: ['A','B'] },
+  who_3:  { len: 80,  opts: ['A','B'] },
+  who_4:  { len: 26,  opts: ['A','B','C','D'] },
+  who_5:  { len: 17,  opts: ['A','B'] },
+  who_6:  { len: 20,  opts: ['A','B'] },
+  who_7:  { len: 20,  opts: ['A','B'] },
+  who_8:  { len: 10,  opts: ['A','B'] },
+  who_9:  { len: 20,  opts: ['A','B'] },
+  who_12: { len: 20,  opts: ['A','B','C','D'] },
+  who_13: { len: 20,  opts: ['A','B'] },
+  who_14: { len: 20,  opts: ['A','B'] },
+  who_15: { len: 20,  opts: ['A','B'] },
+  who_16: { len: 20,  opts: ['A','B'] },
+  who_17: { len: 20,  opts: ['A','B'] },
+  who_18: { len: 20,  opts: ['A','B'] },
+  who_20: { len: 108, opts: ['A','B'] },
+  who_21: { len: 14,  opts: ['B','C'] },
+  who_22: { len: 28,  opts: ['A','B'] },
+  who_23: { len: 28,  opts: ['C','D'] },
+  who_24: { len: 10,  opts: ['A','B'] },
+  who_25: { len: 12,  opts: ['A','B'] },
+  who_27: { len: 10,  opts: ['B','C'] },
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────
+const rInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const pad = (n, w=3) => String(n).padStart(w, '0');
+
+function getVal(id) { return document.getElementById(id).value; }
+function getInt(id) { return parseInt(getVal(id)) || 0; }
+
+function genRmibRow() {
+  const nums = Array.from({length:12}, (_,i) => i+1);
+  for (let i = nums.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [nums[i], nums[j]] = [nums[j], nums[i]];
+  }
+  return nums.join(';');
+}
+
+function genEpps(pA) {
+  const items = Array.from({length:225}, () => Math.random() < pA ? 'A' : 'B');
+  return items.join(';') + ';';
+}
+
+function genX05() {
+  return JSON.stringify({
+    cfit1: rInt(getInt('cfit1Min'), getInt('cfit1Max')),
+    cfit2: rInt(getInt('cfit2Min'), getInt('cfit2Max')),
+    cfit3: rInt(getInt('cfit3Min'), getInt('cfit3Max')),
+    cfit4: rInt(getInt('cfit4Min'), getInt('cfit4Max')),
+    tkd3:  rInt(getInt('tkd3Min'),  getInt('tkd3Max')),
+    tkd6:  rInt(getInt('tkd6Min'),  getInt('tkd6Max')),
+  });
+}
+
+function genX06() {
+  const pA = getInt('eppsPA') / 100;
+  const obj = {};
+  for (let k = 1; k <= 8; k++) obj[`rmib_k${k}`] = genRmibRow();
+  obj.epps = genEpps(pA);
+  return JSON.stringify(obj);
+}
+
+function genX07() {
+  const obj = {};
+  for (const [key, spec] of Object.entries(WHO_SPEC)) {
+    const answers = Array.from({length: spec.len}, () => pick(spec.opts));
+    obj[key] = answers.join(';');
+  }
+  return JSON.stringify(obj);
+}
+
+function genBiodata(i, prefix) {
+  const usia = rInt(20, 35);
+  const jk = pick(JK);
+  const tgl = getVal('tglTes') || '2025-05-01';
+  return JSON.stringify({
+    nama: `${prefix}-${pad(i)}`,
+    jenis_kelamin: jk,
+    usia: String(usia),
+    tgl_tes: tgl,
+    pendidikan: pick(PENDIDIKAN),
+    status: pick(STATUS),
+  });
+}
+
+// ─── GLOBAL STATE ────────────────────────────────────────────
+let generatedData = [];
+
+// ─── GENERATE ────────────────────────────────────────────────
+function generateData() {
+  const n = getInt('jumlahPeserta');
+  if (n < 1 || n > 9999) { showToast('⚠ Jumlah peserta harus 1–9999'); return; }
+
+  const prefix = (getVal('prefixKode') || 'CONTOH').toUpperCase();
+  generatedData = [];
+
+  for (let i = 1; i <= n; i++) {
+    generatedData.push({
+      id_x: i,
+      x_01: `${prefix}-${pad(i)}`,
+      x_02: genBiodata(i, prefix),
+      x_03: null,
+      x_04: null,
+      x_05: genX05(),
+      x_06: genX06(),
+      x_07: genX07(),
+      x_08: null,
+      x_09: null,
+      x_10: null,
+      x_11: null,
+      x_12: null,
+      x_13: null,
+    });
+  }
+
+  renderTable(generatedData);
+  document.getElementById('rowBadge').textContent = `${n} rows`;
+  document.getElementById('statTotal').textContent = n;
+  document.getElementById('statsRow').style.display = 'flex';
+  document.getElementById('previewInfo').textContent = `${n} peserta · preview 50 baris pertama`;
+  showToast(`✓ ${n} data berhasil di-generate`);
+}
+
+// ─── RENDER ──────────────────────────────────────────────────
+function truncate(str, n=40) {
+  if (!str) return '<span class="td-null">null</span>';
+  return str.length > n ? str.slice(0, n) + '…' : str;
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('previewBody');
+  const preview = data.slice(0, 50);
+  tbody.innerHTML = preview.map(row => `
+    <tr>
+      <td class="td-id">${row.id_x}</td>
+      <td class="td-code">${row.x_01}</td>
+      <td>${truncate(row.x_02, 45)}</td>
+      <td class="td-json">${truncate(row.x_05, 50)}</td>
+      <td class="td-json">${truncate(row.x_06, 50)}</td>
+      <td class="td-json">${truncate(row.x_07, 50)}</td>
+    </tr>
+  `).join('');
+  if (data.length > 50) {
+    tbody.innerHTML += `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:14px;font-size:11px">… dan ${data.length - 50} baris lainnya (tidak ditampilkan, tersedia di download)</td></tr>`;
+  }
+}
+
+// ─── DOWNLOAD ────────────────────────────────────────────────
+function downloadJSON() {
+  if (!generatedData.length) { showToast('⚠ Generate data dulu'); return; }
+  const json = JSON.stringify(generatedData, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const prefix = (getVal('prefixKode') || 'CONTOH').toLowerCase();
+  a.href = url;
+  a.download = `dummy_data_${prefix}_${generatedData.length}peserta.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ File JSON berhasil didownload');
+}
+
+function copyJSON() {
+  if (!generatedData.length) { showToast('⚠ Generate data dulu'); return; }
+  navigator.clipboard.writeText(JSON.stringify(generatedData, null, 2))
+    .then(() => showToast('✓ JSON disalin ke clipboard'))
+    .catch(() => showToast('⚠ Gagal menyalin'));
+}
+
+// ─── UI HELPERS ──────────────────────────────────────────────
+function setPrefix(val) {
+  document.getElementById('prefixKode').value = val;
+  document.querySelectorAll('.prefix-chip').forEach(el => {
+    el.classList.toggle('active', el.textContent === val);
+  });
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Sync prefix chips with input
+document.getElementById('prefixKode').addEventListener('input', function() {
+  document.querySelectorAll('.prefix-chip').forEach(el => {
+    el.classList.toggle('active', el.textContent === this.value.toUpperCase());
+  });
+});
+
+// Auto-generate on load for preview
+window.addEventListener('load', () => {
+  generateData();
+});
+</script>
+</body>
+</html>
