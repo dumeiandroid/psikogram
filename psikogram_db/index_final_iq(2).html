@@ -550,7 +550,7 @@
         <!-- KETERANGAN NARASI OTOMATIS (x_12) -->
         <div id="narasi-section" style="display:none; margin-top:16px; padding:14px 16px; background:#f0edff; border-left:4px solid #5F4EDA; border-radius:6px;">
             <strong style="color:#5F4EDA; font-size:14px;">&#128221; Keterangan Psikologis:</strong>
-            <div id="narasi-text" style="margin:8px 0 0 0; text-align:justify; line-height:1.8; font-size:inherit; display:block; width:100%;"></div>
+            <p id="narasi-text" style="margin:8px 0 0 0; text-align:justify; line-height:1.8; font-size:inherit; display:block;"></p>
         </div>
 
         <!-- Tanda Tangan -->
@@ -1369,10 +1369,7 @@ function setupDownload() {
                         const obj = {};
                         if (!styleStr) return obj;
                         styleStr.split(';').forEach(s => {
-                            const idx = s.indexOf(':');
-                            if (idx < 0) return;
-                            const k = s.substring(0, idx).trim().toLowerCase();
-                            const v = s.substring(idx + 1).trim();
+                            const [k,v] = s.split(':').map(x => x.trim());
                             if (k && v) obj[k] = v;
                         });
                         return obj;
@@ -1396,10 +1393,8 @@ function setupDownload() {
                     function nodeToInline(node, inherited) {
                         const base = Object.assign({}, inherited);
                         if (node.nodeType === Node.TEXT_NODE) {
-                            // Ganti \n dengan spasi agar pdfMake tidak memecah baris
-                            // (baris yang berakhir \n tidak di-justify oleh pdfMake)
-                            const t = node.textContent.replace(/\n/g, ' ').replace(/  +/g, ' ');
-                            if (!t.trim()) return [];
+                            const t = node.textContent;
+                            if (!t) return [];
                             return [Object.assign({ text: t }, base)];
                         }
                         if (node.nodeType !== Node.ELEMENT_NODE) return [];
@@ -1416,9 +1411,10 @@ function setupDownload() {
                         if (tag === 'sup') cur.sup = true;
                         if (tag === 'sub') cur.sub = true;
 
-                        // inline font size dari <font size="N"> — size diabaikan agar konsisten dengan FS1
+                        // inline font size dari <font size="N">
                         if (tag === 'font') {
-                            // cur.fontSize dibiarkan dari inherited (FS1) agar tidak overflow margin PDF
+                            const sz = node.getAttribute('size');
+                            if (sz) cur.fontSize = execFontSizeToPt(sz);
                             const clr = node.getAttribute('color');
                             if (clr) cur.color = clr;
                             const face = node.getAttribute('face');
@@ -1507,12 +1503,8 @@ function setupDownload() {
 
                     // Parsing root HTML ke array pdfMake blocks
                     function htmlToPdfMake(htmlString, defaultFS) {
-                        // Jika tidak ada block tag, bungkus seluruh teks dalam <p> agar justify bekerja
-                        const hasBlockTag = /<(p|div|h[1-6]|ul|ol|blockquote|pre)[\s>]/i.test(htmlString);
-                        const processedHtml = hasBlockTag ? htmlString : `<p style="text-align:justify;">${htmlString}</p>`;
-
                         const tmp = document.createElement('div');
-                        tmp.innerHTML = processedHtml;
+                        tmp.innerHTML = htmlString;
                         const blocks = [];
 
                         function walk(node) {
@@ -1573,7 +1565,7 @@ function setupDownload() {
                     margin:[0,8,0,0]
                 }
             ],
-            defaultStyle: { font:'Roboto', alignment:'justify' }
+            defaultStyle: { font:'Roboto' }
         };
     };
 
@@ -2136,12 +2128,11 @@ async function simpanNarasi() {
 function tampilkanNarasi(teks) {
     if (teks && teks.trim()) {
         const el = document.getElementById('narasi-text');
-        // Cek apakah konten mengandung HTML block tag
+        // Cek apakah konten mengandung HTML tag
         if (/<[a-z][\s\S]*>/i.test(teks)) {
             el.innerHTML = teks;
         } else {
-            // Plain text: bungkus dalam <p> agar text-align:justify bekerja dengan benar
-            el.innerHTML = '<p style="margin:0; text-align:justify;">' + teks.replace(/\n/g, '<br>') + '</p>';
+            el.textContent = teks;
         }
         document.getElementById('narasi-section').style.display = 'block';
     } else {
