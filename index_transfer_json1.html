@@ -6,7 +6,6 @@
     <title>Transfer Data Psikogram JSON</title>
     <script src="https://psikogram.lidan.co.id/psikogram-engine-json.js?v=1"></script>
     <script src="https://psikogram.lidan.co.id/karakter_engine.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         // karakter_engine.js menggunakan const di top-level sehingga tidak otomatis masuk window.
         // Solusi: load ulang via fetch lalu eksekusi dengan window assignment eksplisit.
@@ -394,33 +393,6 @@
                 <span>Aktif: Membaca dari tabel <strong id="info-src">nilai1_json</strong>,
                 menyimpan ke tabel <strong id="info-dst">rekap_nilai1</strong></span>
             </div>
-
-            <!-- ══ FILTER PAKET ══ -->
-            <div class="form-grid" style="margin-top:14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: end;">
-                <div class="form-group">
-                    <label>🎯 Filter Paket (Opsional)</label>
-                    <div style="display:flex; gap:8px;">
-                        <select id="cfg-paket-filter" onchange="onPaketFilterChange()" style="flex:1;">
-                            <option value="">— Tidak difilter (tampilkan semua) —</option>
-                        </select>
-                        <button class="btn btn-secondary" style="padding:9px 12px; white-space:nowrap;"
-                            onclick="loadPaketListForFilter()" id="btn-reload-paket">↻ Muat</button>
-                    </div>
-                    <div id="paket-status-wrap" style="display:flex; gap:16px; margin-top:8px; font-size:13px; color:#444;">
-                        <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
-                            <input type="radio" name="paket-status" value="selesai" checked onchange="onPaketFilterChange()">
-                            ✅ Sudah Selesai
-                        </label>
-                        <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
-                            <input type="radio" name="paket-status" value="belum" onchange="onPaketFilterChange()">
-                            ⏳ Belum Selesai
-                        </label>
-                    </div>
-                    <div style="font-size:11px; color:#888; margin-top:4px;" id="paket-filter-desc">
-                        Jika dipilih, hanya peserta yang sudah <strong>selesai mengerjakan semua subtes</strong> dalam paket ini yang akan ditampilkan.
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -489,22 +461,6 @@
                         <input type="date" id="input-date-single">
                     </div>
                 </div>
-                <div id="belum-id-range-wrapper" style="display:none; margin-top:10px; padding:10px 14px; background:#fffbe6; border:1px solid #f0c040; border-radius:8px;">
-                    <p style="color:#8a6800; font-size:13px; margin-bottom:8px;">
-                        ⚠️ Mode <strong>Belum Selesai</strong>: peserta tanpa biodata tidak bisa difilter by tanggal.<br>
-                        Tentukan batas <strong>id_x</strong> untuk membatasi pencarian.
-                    </p>
-                    <div class="form-grid" style="grid-template-columns:1fr 1fr;">
-                        <div class="form-group">
-                            <label>id_x Dari</label>
-                            <input type="number" id="input-belum-id-from" placeholder="misal: 700">
-                        </div>
-                        <div class="form-group">
-                            <label>id_x Sampai</label>
-                            <input type="number" id="input-belum-id-to" placeholder="misal: 760">
-                        </div>
-                    </div>
-                </div>
                 <div class="btn-row">
                     <button class="btn btn-primary" onclick="fetchPreview('date_single')">🔍 Ambil &amp; Preview</button>
                 </div>
@@ -546,20 +502,9 @@
             </div>
 
             <!-- Select All -->
-            <div class="select-all-wrap" style="flex-wrap:wrap;">
-                <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-                    <input type="checkbox" id="chk-all" onchange="toggleSelectAll(this.checked)">
-                    <span>Pilih semua data dalam tabel</span>
-                </label>
-                <span style="color:#ddd;">|</span>
-                <button type="button" class="btn btn-secondary" style="padding:5px 12px; font-size:12px;"
-                    onclick="selectByStatus('new')">🆕 Pilih Baru (New)</button>
-                <button type="button" class="btn btn-secondary" style="padding:5px 12px; font-size:12px;"
-                    onclick="selectByStatus('update')">✏️ Pilih Update</button>
-                <button type="button" class="btn btn-secondary" style="padding:5px 12px; font-size:12px;"
-                    onclick="selectByStatus('none')">✖ Kosongkan Pilihan</button>
-                <button type="button" class="btn" style="padding:5px 12px; font-size:12px; background:#1d7a45; color:#fff; border:none; border-radius:6px; cursor:pointer;"
-                    onclick="downloadExcel()">⬇️ Download Excel</button>
+            <div class="select-all-wrap">
+                <input type="checkbox" id="chk-all" onchange="toggleSelectAll(this.checked)">
+                <label for="chk-all" style="cursor:pointer;">Pilih semua data dalam tabel</label>
             </div>
 
             <!-- Table Preview -->
@@ -638,18 +583,9 @@ const CFG = {
     API_DST    : 'https://lidan-co-id.pages.dev/api/db_psikogram1',            // API Tujuan (psikogram_db)
     SRC_TABLE  : 'nilai1_json',   // Diupdate dinamis via applyTableConfig()
     DST_TABLE  : 'rekap_nilai1',  // Diupdate dinamis via applyTableConfig()
-    PAKET_TABLE: 'alat_tes',      // Tabel definisi paket tes (sama db dengan SRC_TABLE)
     SECRET     : 'admin',
     DELAY_MS   : 300
 };
-
-// =========================================================
-// FILTER PAKET — STATE
-// =========================================================
-let paketList           = [];   // semua row dari tabel alat_tes [{id_x, x_01, x_02, x_03}]
-let selectedPaketItems  = null; // array item paket terpilih, atau null jika tidak difilter
-let selectedPaketName   = '';
-let paketFilterMode     = 'selesai'; // 'selesai' = tampilkan yg sudah lengkap, 'belum' = tampilkan yg belum lengkap
 
 // Default table names (untuk tombol reset)
 const DEFAULT_TABLES = { SRC: 'nilai1_json', DST: 'rekap_nilai1' };
@@ -755,148 +691,6 @@ function showToast(msg) {
 }
 
 // =========================================================
-// FILTER PAKET — LOAD DAFTAR PAKET DARI TABEL alat_tes
-// =========================================================
-async function loadPaketListForFilter() {
-    const sel = document.getElementById('cfg-paket-filter');
-    const btn = document.getElementById('btn-reload-paket');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-inline"></span>';
-    try {
-        const json = await apiGet(CFG.PAKET_TABLE, {});
-        if (!json.success || !json.data) throw new Error(json.message || 'Gagal memuat daftar paket');
-        paketList = json.data;
-
-        // Simpan value yang sedang terpilih (kalau ada) supaya tidak hilang saat reload
-        const prevValue = sel.value;
-
-        sel.innerHTML = '<option value="">— Tidak difilter (tampilkan semua) —</option>';
-        paketList.forEach((p, idx) => {
-            const opt = document.createElement('option');
-            opt.value = idx;
-            opt.textContent = p.x_01 || `(paket #${p.id_x})`;
-            sel.appendChild(opt);
-        });
-
-        // Restore pilihan sebelumnya jika masih ada di daftar baru
-        if (prevValue !== '' && paketList[prevValue]) {
-            sel.value = prevValue;
-        }
-        onPaketFilterChange();
-    } catch (e) {
-        showToast('⚠️ Gagal memuat daftar paket: ' + e.message);
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '↻ Muat';
-    }
-}
-
-function onPaketFilterChange() {
-    const sel  = document.getElementById('cfg-paket-filter');
-    const desc = document.getElementById('paket-filter-desc');
-    const val  = sel.value;
-
-    const radioChecked = document.querySelector('input[name="paket-status"]:checked');
-    paketFilterMode = radioChecked ? radioChecked.value : 'selesai';
-
-    if (val === '') {
-        selectedPaketItems = null;
-        selectedPaketName  = '';
-        desc.innerHTML = 'Jika dipilih, hanya peserta yang sudah <strong>selesai mengerjakan semua subtes</strong> dalam paket ini yang akan ditampilkan.';
-        return;
-    }
-
-    const paket = paketList[val];
-    if (!paket) return;
-    const items = (paket.x_02 || '').split('|').map(s => s.trim()).filter(Boolean);
-    selectedPaketItems = items;
-    selectedPaketName  = paket.x_01 || '';
-
-    const statusLabel = paketFilterMode === 'selesai' ? 'SUDAH selesai' : 'BELUM selesai';
-    const belumKet = paketFilterMode === 'belum'
-        ? ' <em style="color:#888;font-size:0.88em">(x_05/x_06/x_07 tidak mengandung semua item paket)</em>'
-        : '';
-    desc.innerHTML = `✅ Filter aktif: tampilkan peserta yang <strong>${statusLabel}</strong> mengerjakan <strong>${items.length} item</strong> (${items.map(i => i.replace('who:','who_')).join(', ')}).${belumKet}`;
-
-    // Tampilkan/sembunyikan input id_x range untuk mode belum + date_single
-    updateBelumIdRangeVisibility();
-
-    // Reset preview jika sudah ada, supaya tidak ada data lama yang belum kena filter baru
-    if (previewRows.length > 0) {
-        resetAll();
-        showToast('⚠️ Preview direset karena filter paket berubah. Silakan ambil data ulang.');
-    }
-}
-
-function updateBelumIdRangeVisibility() {
-    const wrapper = document.getElementById('belum-id-range-wrapper');
-    if (!wrapper) return;
-    // Tampil hanya jika: mode belum selesai DAN ada di panel date_single
-    const show = paketFilterMode === 'belum' && currentMode === 'date_single';
-    wrapper.style.display = show ? 'block' : 'none';
-}
-
-// =========================================================
-// FILTER PAKET — CEK KELENGKAPAN PESERTA
-// =========================================================
-// Normalisasi 1 id item paket → daftar kemungkinan nama key di data peserta.
-// Contoh: 'cfit2_a' → ['cfit2_a','cfit2'] ; 'apm1a' → ['apm1a','apm1'] ; 'ist7' → ['ist7']
-function normalizeItemKeyCandidates(id) {
-    const candidates = [id];
-    if (/_[ab]$/.test(id)) {
-        candidates.push(id.replace(/_[ab]$/, ''));           // cfit2_a -> cfit2, tkd6_a -> tkd6
-    } else if (/^[a-z]+\d+[ab]$/.test(id)) {
-        candidates.push(id.slice(0, -1));                     // apm1a -> apm1, apm2b -> apm2
-    }
-    return candidates;
-}
-
-function hasValue(obj, key) {
-    if (!obj) return false;
-    const v = obj[key];
-    return v !== undefined && v !== null && v !== '';
-}
-
-// Cek apakah satu item paket sudah dikerjakan peserta, dengan mencari di x_05 → x_06 → x_07
-function isItemDone(item, x05, x06, x07) {
-    // Item WHO: format 'who:9' di alat_tes → key data-nya 'who_9'
-    if (item.startsWith('who:')) {
-        const whoKey = 'who_' + item.slice(4);
-        return hasValue(x07, whoKey);
-    }
-
-    // Kasus khusus RMIB: bisa tersimpan sebagai 1 key 'rmib' ATAU 8 bagian rmib_k1..rmib_k8
-    if (item === 'rmib') {
-        if (hasValue(x06, 'rmib')) return true;
-        const bagian = ['rmib_k1','rmib_k2','rmib_k3','rmib_k4','rmib_k5','rmib_k6','rmib_k7','rmib_k8'];
-        return bagian.every(k => hasValue(x06, k));
-    }
-
-    // Subtes biasa: cek di x_05, x_06, x_07 (urutan sesuai kemungkinan terbesar lokasinya)
-    // dengan beberapa kandidat nama key (menangani suffix _a/_b/a/b yang dibuang di data asli)
-    const candidates = normalizeItemKeyCandidates(item);
-    for (const cand of candidates) {
-        if (hasValue(x05, cand)) return true;
-        if (hasValue(x06, cand)) return true;
-        if (hasValue(x07, cand)) return true;
-    }
-    return false;
-}
-
-// Cek apakah satu baris peserta (srcRow) sudah menyelesaikan SEMUA item dalam daftar paket
-function isPaketComplete(srcRow, paketItems) {
-    if (!paketItems || paketItems.length === 0) return true;
-
-    let x05 = {}, x06 = {}, x07 = {};
-    try { x05 = JSON.parse(srcRow.x_05 || '{}'); } catch(e) {}
-    try { x06 = JSON.parse(srcRow.x_06 || '{}'); } catch(e) {}
-    try { x07 = JSON.parse(srcRow.x_07 || '{}'); } catch(e) {}
-
-    // Cek setiap item paket — semua harus ada nilainya
-    return paketItems.every(item => isItemDone(item, x05, x06, x07));
-}
-
-// =========================================================
 // STATE
 // =========================================================
 let currentMode    = 'single';
@@ -914,7 +708,6 @@ function switchMode(mode) {
     document.querySelectorAll('.mode-panel').forEach(p => {
         p.classList.toggle('active', p.id === 'panel-' + mode);
     });
-    updateBelumIdRangeVisibility();
 }
 
 // =========================================================
@@ -991,61 +784,6 @@ async function apiPut(table, id_x, body) {
 // =========================================================
 // FETCH SOURCE DATA
 // =========================================================
-// Ambil semua data untuk 1 tanggal dengan pagination (x_02_like + id_x_lt)
-// Jika mode 'belum': fetch semua data lalu filter client-side
-// agar peserta yang x_02 kosong/null (tidak isi biodata) ikut tertangkap
-async function fetchByTanggal(tgl) {
-    // Mode belum selesai: fetch dalam range id_x, filter client-side
-    // (tangkap x_02 kosong juga — peserta belum isi biodata/tidak datang)
-    if (paketFilterMode === 'belum') {
-        const idFrom = parseInt(document.getElementById('input-belum-id-from')?.value || '0');
-        const idTo   = parseInt(document.getElementById('input-belum-id-to')?.value   || '0');
-        if (!idFrom || !idTo || idFrom > idTo) {
-            throw new Error('Mode Belum Selesai: isi dulu batas id_x Dari dan Sampai.');
-        }
-        // Fetch dalam range id_x dengan pagination
-        let allData = [];
-        let curTo   = idTo + 1;
-        while (true) {
-            const json = await apiGet(CFG.SRC_TABLE, { id_x_gt: idFrom - 1, id_x_lt: curTo });
-            if (!json.success || !json.data || json.data.length === 0) break;
-            allData = allData.concat(json.data);
-            const ids = json.data.map(r => r.id_x);
-            curTo = Math.min(...ids);
-            if (json.data.length < 100 || curTo <= idFrom) break;
-        }
-        // Filter client-side: x_02 kosong ATAU tgl_tes cocok
-        return allData.filter(row => {
-            const x02 = (row.x_02 || '').trim();
-            if (!x02 || x02 === '{}' || x02 === 'null') return true;
-            try {
-                const bio = JSON.parse(x02);
-                return (bio.tgl_tes || '').slice(0, 10) === tgl;
-            } catch { return false; }
-        });
-    }
-    // Mode selesai: cukup fetch yang tgl_tes cocok saja
-    let allData = [];
-    let lastId  = null;
-    while (true) {
-        const params = { x_02_like: tgl };
-        if (lastId) params.id_x_lt = lastId;
-        const json = await apiGet(CFG.SRC_TABLE, params);
-        if (!json.success || !json.data || json.data.length === 0) break;
-        const filtered = json.data.filter(row => {
-            try {
-                const bio = JSON.parse(row.x_02 || '{}');
-                return (bio.tgl_tes || '').slice(0, 10) === tgl;
-            } catch { return false; }
-        });
-        allData = allData.concat(filtered);
-        const ids = json.data.map(r => r.id_x);
-        lastId = Math.min(...ids);
-        if (json.data.length < 100) break;
-    }
-    return allData;
-}
-
 async function fetchSourceData() {
     if (currentMode === 'single') {
         const id = parseInt(document.getElementById('input-single-id').value);
@@ -1076,13 +814,23 @@ async function fetchSourceData() {
     if (currentMode === 'date_single') {
         const tgl = document.getElementById('input-date-single').value;
         if (!tgl) throw new Error('Tanggal tes tidak boleh kosong');
-        return await fetchByTanggal(tgl);
+        const json = await apiGet(CFG.SRC_TABLE, { x_02_like: tgl });
+        if (!json.success) throw new Error(json.message || 'Gagal ambil data');
+        // Filter ketat client-side: pastikan tgl_tes benar-benar cocok (bukan kebetulan ada string tanggal lain di x_02)
+        return (json.data || []).filter(row => {
+            try {
+                const bio = JSON.parse(row.x_02 || '{}');
+                return (bio.tgl_tes || '').slice(0, 10) === tgl;
+            } catch { return false; }
+        });
     }
     if (currentMode === 'date_range') {
         const dari   = document.getElementById('input-date-from').value;
         const sampai = document.getElementById('input-date-to').value;
         if (!dari || !sampai) throw new Error('Tanggal dari dan sampai tidak boleh kosong');
         if (dari > sampai) throw new Error('Tanggal dari tidak boleh lebih besar dari tanggal sampai');
+        // Untuk range: ambil per tanggal satu per satu lalu gabung
+        // Generate semua tanggal dalam range
         const dates = [];
         let cur = new Date(dari);
         const end = new Date(sampai);
@@ -1090,16 +838,28 @@ async function fetchSourceData() {
             dates.push(cur.toISOString().slice(0, 10));
             cur.setDate(cur.getDate() + 1);
         }
+        // Fetch paralel semua tanggal sekaligus
+        const results = await Promise.all(
+            dates.map(tgl => apiGet(CFG.SRC_TABLE, { x_02_like: tgl }))
+        );
         let allData = [];
-        for (const tgl of dates) {
-            const rows = await fetchByTanggal(tgl);
-            allData = allData.concat(rows);
-        }
-        // Hapus duplikat
+        results.forEach((json, i) => {
+            if (!json.success || !json.data) return;
+            const tgl = dates[i];
+            const filtered = json.data.filter(row => {
+                try {
+                    const bio = JSON.parse(row.x_02 || '{}');
+                    return (bio.tgl_tes || '').slice(0, 10) === tgl;
+                } catch { return false; }
+            });
+            allData = allData.concat(filtered);
+        });
+        // Hapus duplikat (kalau ada id_x sama dari request berbeda)
         const seen = new Set();
         return allData.filter(row => {
             if (seen.has(row.id_x)) return false;
-            seen.add(row.id_x); return true;
+            seen.add(row.id_x);
+            return true;
         });
     }
     // all
@@ -1693,28 +1453,10 @@ async function fetchPreview(mode) {
 
     try {
         // 1. Ambil data sumber
-        let srcData = await fetchSourceData();
-
-        // 1b. Terapkan filter paket (jika dipilih) — hanya peserta yang sudah
-        //     selesai mengerjakan SEMUA item dalam paket yang lolos
-        if (selectedPaketItems && selectedPaketItems.length > 0) {
-            const totalSebelumFilter = srcData.length;
-            srcData = srcData.filter(row => {
-                const complete = isPaketComplete(row, selectedPaketItems);
-                return paketFilterMode === 'selesai' ? complete : !complete;
-            });
-            const labelMode = paketFilterMode === 'selesai' ? 'sudah lengkap' : 'belum lengkap';
-            showToast(`🎯 Filter paket "${selectedPaketName}" (${labelMode}): ${srcData.length} dari ${totalSebelumFilter} peserta.`);
-        }
-
+        const srcData = await fetchSourceData();
         if (!srcData || srcData.length === 0) {
             tbody.innerHTML = '';
             emptyState.style.display = 'block';
-            emptyState.querySelector('div:last-child').textContent = selectedPaketItems
-                ? (paketFilterMode === 'selesai'
-                    ? `Tidak ada peserta yang sudah lengkap mengerjakan paket "${selectedPaketName}"`
-                    : `Semua peserta sudah lengkap mengerjakan paket "${selectedPaketName}" (tidak ada yang belum selesai)`)
-                : 'Tidak ada data ditemukan';
             updateStats();
             return;
         }
@@ -1866,56 +1608,6 @@ function toggleSelectAll(checked) {
     });
     updateStats();
     updateTransferBtn();
-}
-
-// Pilih baris berdasarkan status: 'new', 'update', atau 'none' (kosongkan semua)
-function selectByStatus(filterStatus) {
-    previewRows.forEach((row, idx) => {
-        if (row.status === 'error') return;
-        const checked = filterStatus === 'none' ? false : (row.status === filterStatus);
-        row.checked = checked;
-        const chk = document.getElementById(`chk-${idx}`);
-        if (chk) chk.checked = checked;
-        const tr = document.getElementById(`row-${idx}`);
-        if (tr) tr.classList.toggle('selected', checked);
-    });
-    // Sinkronkan state checkbox "pilih semua"
-    const allCheckable = previewRows.filter(r => r.status !== 'error');
-    const allChecked   = allCheckable.length > 0 && allCheckable.every(r => r.checked);
-    document.getElementById('chk-all').checked = allChecked;
-
-    updateStats();
-    updateTransferBtn();
-}
-
-// =========================================================
-// DOWNLOAD EXCEL
-// =========================================================
-function downloadExcel() {
-    if (!previewRows || previewRows.length === 0) {
-        showToast('⚠️ Tidak ada data untuk didownload.'); return;
-    }
-
-    // Ambil kode (x_01) dan nama dari biodata (x_02)
-    const rows = previewRows.map(r => {
-        const kode = r.srcRow ? (r.srcRow.x_01 || '') : '';
-        let nama = '';
-        try { nama = JSON.parse(r.srcRow.x_02 || '{}').nama || ''; } catch(e) {}
-        return { 'Kode': kode, 'Nama': nama };
-    });
-
-    // Buat workbook pakai SheetJS
-    const ws = XLSX.utils.json_to_sheet(rows);
-    // Lebar kolom
-    ws['!cols'] = [{ wch: 20 }, { wch: 40 }];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Peserta');
-
-    // Nama file pakai nama paket + tanggal hari ini
-    const tgl = new Date().toISOString().slice(0,10);
-    const namaFile = `peserta_${selectedPaketName || 'semua'}_${tgl}.xlsx`;
-    XLSX.writeFile(wb, namaFile);
-    showToast(`✅ Download ${rows.length} peserta → ${namaFile}`);
 }
 
 // =========================================================
@@ -2105,13 +1797,6 @@ function resetAll() {
     document.getElementById('chk-all').checked = false;
     updateStats();
 }
-
-// =========================================================
-// INIT
-// =========================================================
-document.addEventListener('DOMContentLoaded', () => {
-    loadPaketListForFilter();
-});
 </script>
 </body>
 </html>
