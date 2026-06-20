@@ -2529,7 +2529,6 @@ function renderBiodataReadonlyInner(wrap, bio) {
     // ── DATA DIRI ──
     html += `<div class="ro-section-title">👤 Data Diri</div>`;
     html += `<div class="ro-grid">`;
-    html += roFieldSafe('No. ID CPMI', bio.id_cpmi);
     html += roFieldSafe('Nama Lengkap', bio.bioNama);
     html += roFieldSafe('Jenis Kelamin', bio.bioGender);
     html += roFieldSafe('Usia', bio.bioUsia);
@@ -2569,7 +2568,7 @@ function renderBiodataReadonlyInner(wrap, bio) {
             { key: 'periode',     label: 'Periode' },
             { key: 'keterangan',  label: 'Keterangan' },
         ],
-        bio.pendidikan
+        bio.riwayatPendidikan
     );
 
     // ── KURSUS / PELATIHAN ──
@@ -2685,63 +2684,6 @@ function renderBiodataReadonlyInner(wrap, bio) {
         html += `</div>`;
     }
     html += `</div>`;
-
-    // ── KUESIONER ──
-    const kues = bio.kuesioner || {};
-    html += `<div class="ro-section-title">📋 Kuesioner</div>`;
-
-    const renderKuesionerBlok = (title, obj, labels) => {
-        let h = `<div class="ro-kondisi-box"><div class="ro-kondisi-title">${escapeHtml(title)}</div>`;
-        h += `<div class="ro-grid" style="grid-template-columns:1fr;">`;
-        labels.forEach(l => { h += roFieldSafe(l.label, obj[l.key]); });
-        h += `</div></div>`;
-        return h;
-    };
-
-    html += renderKuesionerBlok('1. Pengalaman Sukses', kues.sukses || {}, [
-        { key: 'a', label: 'a. Ceritakan Peristiwanya' },
-        { key: 'b', label: 'b. Bagaimana situasinya pada waktu itu? Apa penyebabnya?' },
-        { key: 'c', label: 'c. Siapa saja yang terlibat? Apa peranan mereka dalam peristiwa itu?' },
-        { key: 'd', label: 'd. Apa yang Anda pikirkan pada waktu itu?' },
-        { key: 'e', label: 'e. Apa yang Anda rasakan pada waktu itu?' },
-        { key: 'f', label: 'f. Jelaskan hal-hal yang Anda lakukan pada waktu itu?' },
-        { key: 'g', label: 'g. Bagaimana akhir peristiwa itu? Apa dampak/hasil dari tindakan Anda?' },
-    ]);
-
-    html += renderKuesionerBlok('2. Pengalaman Kurang Sesuai Harapan', kues.kurangSesuai || {}, [
-        { key: 'a', label: 'a. Ceritakan Peristiwanya' },
-        { key: 'b', label: 'b. Bagaimana situasinya pada waktu itu? Apa penyebabnya?' },
-        { key: 'c', label: 'c. Siapa saja yang terlibat? Apa peranan mereka dalam peristiwa itu?' },
-        { key: 'd', label: 'd. Apa yang Anda pikirkan pada waktu itu?' },
-        { key: 'e', label: 'e. Apa yang Anda rasakan pada waktu itu?' },
-        { key: 'f', label: 'f. Jelaskan hal-hal yang Anda lakukan pada waktu itu?' },
-        { key: 'h', label: 'h. Bagaimana akhir peristiwa itu? Apa dampak/hasil dari tindakan Anda?' },
-    ]);
-
-    html += renderKuesionerBlok('3. Situasi Perubahan yang Menantang', kues.perubahan || {}, [
-        { key: 'a', label: 'a. Ceritakan Peristiwanya' },
-        { key: 'b', label: 'b. Bagaimana situasinya pada waktu itu? Apa penyebabnya?' },
-        { key: 'c', label: 'c. Siapa saja yang terlibat? Apa peranan mereka dalam peristiwa itu?' },
-        { key: 'd', label: 'd. Apa yang Anda pikirkan pada waktu itu?' },
-        { key: 'e', label: 'e. Apa yang Anda rasakan pada waktu itu?' },
-        { key: 'f', label: 'f. Jelaskan hal-hal yang Anda lakukan pada waktu itu?' },
-        { key: 'i', label: 'i. Bagaimana akhir peristiwa itu? Apa dampak/hasil dari tindakan Anda?' },
-    ]);
-
-    html += renderKuesionerBlok('4. Kerja Sama dalam Kelompok', kues.kerjaTim || {}, [
-        { key: 'a', label: 'a. Ceritakan Peristiwanya' },
-        { key: 'b', label: 'b. Bagaimana situasinya pada waktu itu? Apa penyebabnya?' },
-        { key: 'c', label: 'c. Siapa saja yang terlibat? Apa peran Anda pribadi dan tim kerja Anda dalam peristiwa itu?' },
-        { key: 'd', label: 'd. Apa yang Anda pikirkan pada waktu itu?' },
-        { key: 'e', label: 'e. Apa yang Anda rasakan pada waktu itu?' },
-        { key: 'f', label: 'f. Jelaskan hal-hal yang Anda lakukan pada waktu itu?' },
-        { key: 'j', label: 'j. Bagaimana akhir peristiwa itu? Apa dampak/hasil dari tindakan Anda?' },
-    ]);
-
-    html += `<div class="ro-kondisi-box"><div class="ro-kondisi-title">5. Kekuatan &amp; Kelemahan</div>`;
-    html += `<div class="ro-grid" style="grid-template-columns:1fr;">`;
-    html += roFieldSafe('Jawaban', kues.kekuatanKelemahan);
-    html += `</div></div>`;
 
     wrap.innerHTML = html;
 }
