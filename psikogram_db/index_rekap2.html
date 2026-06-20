@@ -119,14 +119,6 @@
             transition: opacity .15s;
         }
         .btn-link-gabungan:hover { opacity: .85; }
-        .btn-link-cpmi {
-            background: #15803d; color: white;
-            border-radius: 6px; padding: 4px 12px;
-            font-size: 11px; cursor: pointer; border: none;
-            text-decoration: none; display: inline-block;
-            transition: opacity .15s;
-        }
-        .btn-link-cpmi:hover { opacity: .85; }
         .sert-group {
             display: inline-flex; align-items: center; gap: 0;
             border: 1px solid #b45309; border-radius: 6px; overflow: hidden;
@@ -440,7 +432,6 @@
                         const link    = `index_final.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkIQ  = `index_final_iq.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkGabungan = `https://psikogram.lidan.co.id/psikogram_db/index_final_gabungan?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
-                        const linkCpmi = `https://psikogram.lidan.co.id/psikogram_db/index_final_gabungan_cpmi?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkSert1 = `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkSert2 = `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq1?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         return `<tr>
@@ -451,7 +442,6 @@
                             <td><span class="tgl-text">${tgl}</span></td>
                             <td style="display:flex; gap:6px; align-items:center;">
                                 <a href="${link}" target="_blank" class="btn-link">📄 Full</a>
-                                <a href="${linkCpmi}" target="_blank" class="btn-link-cpmi">🧾 CPMI</a>
                                 <a href="${linkGabungan}" target="_blank" class="btn-link-gabungan">🔗 Gabungan</a>
                                 <a href="${linkIQ}" target="_blank" class="btn-link-iq">🧠 IQ</a>
                                 <div class="sert-group">
