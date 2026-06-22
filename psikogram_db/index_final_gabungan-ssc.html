@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> -->
     <title>Profil Pemeriksaan Psikologis</title>
 
     <style>
@@ -82,7 +82,7 @@
         .container_a::before {
             content: ""; position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
-            background-image: url('gambar/logo1.png');
+            background-image: url('gambar/logo-ssc.png');
             background-size: 70%; background-position: center;
             background-repeat: no-repeat; opacity: 0.1; z-index: 0;
         }
@@ -95,11 +95,11 @@
             background-color: #5F4EDA; padding: 10px; border-radius: 8px;
         }
         .logo-container_a { margin-right: 10px; }
-        .logo { width: 130px; height: auto; }
+        .logo { width: 130px; height: auto; display: block; }
         .info-container_a {
             text-align: center; display: flex;
-            flex-direction: column; align-items: center; margin-left: -80px;
-            width: 95%;
+            flex-direction: column; align-items: center;
+            width: 100%;
         }
         .header-title  { font-size: 24px; font-weight: bold; color: white; margin: 2px 0; }
         .header-subtitle { font-size: 18px; font-style: italic; color: #e0f7fa; margin: 2px 0; }
@@ -475,18 +475,13 @@
         <!-- Header Institusi -->
         <div class="custom-header no-download">
             <div class="logo-container_a">
-                <img src="gambar/logo1.png" alt="Logo" class="logo"/>
+                <img src="gambar/logo-ssc1.png" alt="Logo" class="logo"/>
             </div>
             <div class="info-container_a">
-                <div class="header-title">PT. LIDAN INDAH ABADI</div>
-                <div class="header-subtitle">LIDAN PSIKOLOGI</div>
-                <div class="location">Regus Forum Nine, Lantai 9 CIMB NIAGA PLAZA</div>
-                <div class="address">Jalan Imam Bonjol No.9, Medan 20159, Sumatera Utara</div>
-                <div class="phone">Telepon: +62851-5960-1400</div>
-                <div class="website">
-                    Website: <a href="http://www.lidan.co.id">www.lidan.co.id</a>,
-                    Email: <a href="/cdn-cgi/l/email-protection#106063797b7f7c7f7779507c7974717e3e737f3e7974"><span class="__cf_email__" data-cfemail="611112080a0e0d0e0608210d0805000f4f020e4f0805">[email&#160;protected]</span></a>
-                </div>
+                <div class="header-title">BIRO KONSULTASI PSIKOLOGI DAN BIMBINGAN BELAJAR</div>
+                <div class="header-subtitle">SD-SMP-SMA/SMK-ALUMNI, PERSIAPAN SELEKSI PTN,KEDINASAN-TNI-POLRI DAN SMA UNGGULAN</div>
+                <div class="address">Jl. Asahan Komplek Megaland Blok A No. 16, Siopat Suhu Pematang Siantar, Lt2 G. 1B – R2 Jl. A.H.Nasution No.25b Simpang Pos Medan</div>
+                <div class="phone">Hp. 0822 9418 5814 (Dedy), 0877 4845 1289 (Dwi) Email: educationproxecla@gmail.com</div>
             </div>
         </div>
 
@@ -569,19 +564,19 @@
         <!-- Tanda Tangan -->
         <div class="signature" style="position:relative;">
             <!-- QR Code absolute di tengah, tidak ganggu layout -->
-            <div id="qr-wrap" style="position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
+            <!-- <div id="qr-wrap" style="position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
                 <a id="qr-link" href="#" target="_blank" title="Buka laporan online">
                     <div id="qr-code" style="display:inline-block;"></div>
                 </a>
                 <p style="font-size:10px; color:#888; margin:4px 0 0 0;">Scan untuk lihat laporan</p>
-            </div>
+            </div> -->
             <p style="text-align:right;"><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
             <p style="margin-top:-12px; text-align:right;">Psikolog,</p>
-            <div style="text-align:right;"><img src="gambar/ttd.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
+            <div style="text-align:right;"><img src="gambar/ttd-ssc1.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
             <p style="margin-top:-5px; text-align:right;"><strong>Dr. Karina M. Brahmana, M.Psi, Psikolog</strong></p>
             <p style="margin-top:-12px; text-align:right;">No SIPP: 20070136-2021-02-0799</p><br>
             <div class="enter"></div>
-            <img class="no-download" src="gambar/medsos.png" alt="Media Sosial" style="max-width:20%; height:auto;"/>
+            <!-- <img class="no-download" src="gambar/medsos.png" alt="Media Sosial" style="max-width:20%; height:auto;"/> -->
         </div>
     </div>
 </div>
@@ -1281,9 +1276,9 @@ function setupDownload() {
     async function getImages() {
         if (_imgCache) return _imgCache;
         const [logoB64, hdrB64, ttdB64] = await Promise.all([
-            toBase64('gambar/logo1.png'),
+            toBase64('gambar/logo-ssc.png'),
             toBase64('gambar/kop-ssc.png'),
-            toBase64('gambar/ttd.png')
+            toBase64('gambar/ttd-ssc.png')
         ]);
         _imgCache = { logoB64, hdrB64, ttdB64 };
         return _imgCache;
