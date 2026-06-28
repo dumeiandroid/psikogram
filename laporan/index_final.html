@@ -997,9 +997,9 @@ function setupDownload() {
     async function getImages() {
         if (_imgCache) return _imgCache;
         const [logoB64, hdrB64, ttdB64] = await Promise.all([
-            toBase64('gambar/logo1.png'),
-            toBase64('gambar/01d.jpg'),
-            toBase64('gambar/ttd.png')
+            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/logo1.png'),
+            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/01d.jpg'),
+            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/ttd.png')
         ]);
         _imgCache = { logoB64, hdrB64, ttdB64 };
         return _imgCache;
