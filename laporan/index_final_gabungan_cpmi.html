@@ -2819,7 +2819,9 @@ async function main() {
             document.getElementById('form-id-x-err').style.display = 'none';
             const params = new URLSearchParams({ id_x: idXVal, tabel: tabelVal });
             if (x01Val) params.set('x_01', x01Val);
-            window.location.href = `${window.location.pathname}?${params.toString()}`;
+            // Buka di tab baru — form di halaman ini tetap terbuka,
+            // tinggal ganti ID untuk membuka laporan lain
+            window.open(`${window.location.pathname}?${params.toString()}`, '_blank');
         };
         return;
     }
@@ -2828,7 +2830,9 @@ async function main() {
         const rawData = await fetchData(id_x);
 
         // Validasi x_01 jika ada di URL (opsional — untuk keamanan)
-        if (x_01 && String(rawData.x_01) !== String(x_01)) {
+        // Mode cepat: jika token diisi "xxx", validasi token DILEWATI (hanya id_x & tabel yg dicek)
+        const isQuickMode = x_01 && x_01.trim().toLowerCase() === 'xxx';
+        if (x_01 && !isQuickMode && String(rawData.x_01) !== String(x_01)) {
             throw new Error('Akses ditolak: parameter x_01 tidak valid.');
         }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <title>Profil Pemeriksaan Psikologis</title>
 
     <style>
@@ -82,7 +82,7 @@
         .container_a::before {
             content: ""; position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
-            background-image: url('https://psikogram.lidan.co.id/psikogram_db/gambar/logo-ssc.png');
+            background-image: url('https://psikogram.lidan.co.id/psikogram_db/gambar/logo1.png');
             background-size: 70%; background-position: center;
             background-repeat: no-repeat; opacity: 0.1; z-index: 0;
         }
@@ -95,11 +95,11 @@
             background-color: #5F4EDA; padding: 10px; border-radius: 8px;
         }
         .logo-container_a { margin-right: 10px; }
-        .logo { width: 130px; height: auto; display: block; }
+        .logo { width: 130px; height: auto; }
         .info-container_a {
             text-align: center; display: flex;
-            flex-direction: column; align-items: center;
-            width: 100%;
+            flex-direction: column; align-items: center; margin-left: -80px;
+            width: 95%;
         }
         .header-title  { font-size: 24px; font-weight: bold; color: white; margin: 2px 0; }
         .header-subtitle { font-size: 18px; font-style: italic; color: #e0f7fa; margin: 2px 0; }
@@ -383,6 +383,72 @@
         .skor-c  { background: #fff3cd; color: #856404; }  /* 5-6  Cukup  */
         .skor-b  { background: #cce5ff; color: #004085; }  /* 7-8  Baik   */
         .skor-bs { background: #d4edda; color: #155724; }  /* 9-10 Baik Sekali */
+
+        /* =============================================
+           BIODATA READ-ONLY + COPY — TAMBAHAN
+           ============================================= */
+        .ro-section-title {
+            margin: 26px 0 12px; padding: 7px 12px;
+            background: #5F4EDA; color: white;
+            border-radius: 6px; font-weight: bold; font-size: 14px;
+        }
+        .ro-section-title:first-child { margin-top: 0; }
+        .ro-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 10px 14px; margin-bottom: 6px;
+        }
+        .ro-field { margin-bottom: 4px; }
+        .ro-field label {
+            display: block; font-size: 11px; font-weight: bold;
+            color: #777; text-transform: uppercase; letter-spacing: .4px;
+            margin-bottom: 4px;
+        }
+        .ro-field-row {
+            display: flex; align-items: stretch; gap: 6px;
+        }
+        .ro-field-value {
+            flex: 1; min-width: 0;
+            padding: 8px 11px; border: 2px solid #e9ecef; border-radius: 6px;
+            background: #f8f9fa; color: #333; font-size: 13.5px;
+            word-break: break-word; white-space: pre-wrap;
+        }
+        .ro-field-value.empty { color: #aaa; font-style: italic; }
+        .btn-copy {
+            flex-shrink: 0; width: 36px;
+            border: 2px solid #e9ecef; border-radius: 6px;
+            background: white; color: #5F4EDA; cursor: pointer;
+            font-size: 14px; display: flex; align-items: center; justify-content: center;
+            transition: all .15s;
+        }
+        .btn-copy:hover { background: #5F4EDA; color: white; border-color: #5F4EDA; }
+        .btn-copy:disabled { opacity: .35; cursor: not-allowed; }
+        .btn-copy:disabled:hover { background: white; color: #5F4EDA; }
+
+        .ro-table-wrap { overflow-x: auto; margin-bottom: 6px; }
+        .ro-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .ro-table th {
+            background: #5F4EDA; color: white; padding: 7px 8px;
+            text-align: left; font-weight: 600; font-size: 11.5px;
+            white-space: nowrap;
+        }
+        .ro-table td {
+            padding: 7px 8px; border-bottom: 1px solid #e9ecef;
+            color: #333; vertical-align: top;
+        }
+        .ro-table td .ro-cell-row { display: flex; align-items: center; gap: 6px; }
+        .ro-table .btn-copy { width: 28px; height: 28px; font-size: 12px; }
+        .ro-empty-note {
+            color: #aaa; font-style: italic; font-size: 12.5px;
+            padding: 8px 2px;
+        }
+        .ro-kondisi-box {
+            border: 1px solid #e9ecef; border-radius: 8px;
+            padding: 10px 14px; margin-bottom: 10px; background: #fafafa;
+        }
+        .ro-kondisi-box .ro-kondisi-title { font-weight: bold; color: #444; font-size: 13px; margin-bottom: 8px; }
+        @media (max-width: 640px) {
+            .ro-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -475,13 +541,18 @@
         <!-- Header Institusi -->
         <div class="custom-header no-download">
             <div class="logo-container_a">
-                <img src="https://psikogram.lidan.co.id/psikogram_db/gambar/logo-ssc1.png" alt="Logo" class="logo"/>
+                <img src="https://psikogram.lidan.co.id/psikogram_db/gambar/logo1.png" alt="Logo" class="logo"/>
             </div>
             <div class="info-container_a">
-                <div class="header-title">BIRO KONSULTASI PSIKOLOGI DAN BIMBINGAN BELAJAR</div>
-                <div class="header-subtitle">SD-SMP-SMA/SMK-ALUMNI, PERSIAPAN SELEKSI PTN,KEDINASAN-TNI-POLRI DAN SMA UNGGULAN</div>
-                <div class="address">Jl. Asahan Komplek Megaland Blok A No. 16, Siopat Suhu Pematang Siantar, Lt2 G. 1B – R2 Jl. A.H.Nasution No.25b Simpang Pos Medan</div>
-                <div class="phone">Hp. 0822 9418 5814 (Dedy), 0877 4845 1289 (Dwi) Email: educationproxecla@gmail.com</div>
+                <div class="header-title">PT. LIDAN INDAH ABADI</div>
+                <div class="header-subtitle">LIDAN PSIKOLOGI</div>
+                <div class="location">Regus Forum Nine, Lantai 9 CIMB NIAGA PLAZA</div>
+                <div class="address">Jalan Imam Bonjol No.9, Medan 20159, Sumatera Utara</div>
+                <div class="phone">Telepon: +62851-5960-1400</div>
+                <div class="website">
+                    Website: <a href="http://www.lidan.co.id">www.lidan.co.id</a>,
+                    Email: <a href="/cdn-cgi/l/email-protection#106063797b7f7c7f7779507c7974717e3e737f3e7974"><span class="__cf_email__" data-cfemail="611112080a0e0d0e0608210d0805000f4f020e4f0805">[email&#160;protected]</span></a>
+                </div>
             </div>
         </div>
 
@@ -569,19 +640,19 @@
         <!-- Tanda Tangan -->
         <div class="signature" style="position:relative;">
             <!-- QR Code absolute di tengah, tidak ganggu layout -->
-            <!-- <div id="qr-wrap" style="position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
+            <div id="qr-wrap" style="position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
                 <a id="qr-link" href="#" target="_blank" title="Buka laporan online">
                     <div id="qr-code" style="display:inline-block;"></div>
                 </a>
                 <p style="font-size:10px; color:#888; margin:4px 0 0 0;">Scan untuk lihat laporan</p>
-            </div> -->
+            </div>
             <p style="text-align:right;"><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
             <p style="margin-top:-12px; text-align:right;">Psikolog,</p>
-            <div style="text-align:right;"><img src="https://psikogram.lidan.co.id/psikogram_db/gambar/ttd-ssc1.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
+            <div style="text-align:right;"><img src="https://psikogram.lidan.co.id/psikogram_db/gambar/ttd.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
             <p style="margin-top:-5px; text-align:right;"><strong>Dr. Karina M. Brahmana, M.Psi, Psikolog</strong></p>
             <p style="margin-top:-12px; text-align:right;">No SIPP: 20070136-2021-02-0799</p><br>
             <div class="enter"></div>
-            <!-- <img class="no-download" src="gambar/medsos.png" alt="Media Sosial" style="max-width:20%; height:auto;"/> -->
+            <img class="no-download" src="https://psikogram.lidan.co.id/psikogram_db/gambar/medsos.png" alt="Media Sosial" style="max-width:20%; height:auto;"/>
         </div>
     </div>
 </div>
@@ -660,6 +731,42 @@
         <div id="vak-temp-error" style="display:none; text-align:center; padding:30px; color:#e74c3c;">
             <p id="vak-temp-error-msg"></p>
         </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 4 — Hasil Tes WWQ
+     ═══════════════════════════════════════ -->
+<div class="batas-download" id="downloadContent4">
+    <div class="container_a" id="section-wwq">
+        <h3 style="text-align:center; background:#667eea; color:white; padding:8px; border-radius:6px; margin-bottom:16px;">📋 Hasil Tes WWQ (Work &amp; Wellbeing Questionnaire)</h3>
+        <div id="wwq-body">
+            <p style="color:#888; text-align:center; padding:20px;">Memuat data...</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 5 — Hasil Tes Kreplin
+     ═══════════════════════════════════════ -->
+<div class="batas-download" id="downloadContent5">
+    <div class="container_a" id="section-kreplin">
+        <h3 style="text-align:center; background:#667eea; color:white; padding:8px; border-radius:6px; margin-bottom:16px;">🧮 Hasil Tes Kreplin / Kraepelin</h3>
+        <div id="kreplin-body">
+            <p style="color:#888; text-align:center; padding:20px;">Memuat data...</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN AKHIR — Biodata Lengkap (Read-only + Copy)
+     Tidak ikut PDF — hanya tampil di layar browser
+     ═══════════════════════════════════════ -->
+<div class="container_a" id="section-biodata-ro">
+    <h3 style="text-align:center; background:#667eea; color:white; padding:8px; border-radius:6px; margin-bottom:16px;">🪪 Biodata Lengkap Peserta</h3>
+    <p style="text-align:center; color:#888; font-size:.85em; margin-top:-10px; margin-bottom:18px;">Klik ikon 📋 di samping tiap data untuk menyalin (copy) nilainya.</p>
+    <div id="biodata-ro-body">
+        <p style="color:#888; text-align:center; padding:20px;">Memuat data...</p>
     </div>
 </div>
 
@@ -798,6 +905,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 // =========================================================
@@ -1281,9 +1389,9 @@ function setupDownload() {
     async function getImages() {
         if (_imgCache) return _imgCache;
         const [logoB64, hdrB64, ttdB64] = await Promise.all([
-            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/logo-ssc.png'),
-            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/kop-ssc.png'),
-            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/ttd-ssc1.png')
+            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/logo1.png'),
+            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/01d.jpg'),
+            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/ttd.png')
         ]);
         _imgCache = { logoB64, hdrB64, ttdB64 };
         return _imgCache;
@@ -1465,6 +1573,8 @@ function setupDownload() {
         }
 
         const vakTempVisible = document.getElementById('vak-temp-content');
+        const hal6Content = []; // WWQ
+        const hal7Content = []; // Kreplin
         if (vakTempVisible && vakTempVisible.style.display !== 'none') {
             try {
                 const pdfW = 535;
@@ -1477,6 +1587,12 @@ function setupDownload() {
 
                 const saranImg = await screenshotToImg('temp-saran-section', pdfW);
                 if (saranImg) hal5Content.push({ image: saranImg.dataUrl, width: saranImg.width, height: saranImg.height });
+
+                const wwqImg = await screenshotToImg('section-wwq', pdfW);
+                if (wwqImg) hal6Content.push({ image: wwqImg.dataUrl, width: wwqImg.width, height: wwqImg.height });
+
+                const kreplinImg = await screenshotToImg('section-kreplin', pdfW);
+                if (kreplinImg) hal7Content.push({ image: kreplinImg.dataUrl, width: kreplinImg.width, height: kreplinImg.height });
 
             } catch(e) {
                 console.error('html2canvas error:', e);
@@ -1535,6 +1651,20 @@ function setupDownload() {
                     { text:'', pageBreak:'before' },
                     ...headerInstitusi(),
                     { stack: hal5Content, margin:[0,4,0,0] }
+                ] : []),
+
+                // Halaman 6 — Hasil Tes WWQ
+                ...(hal6Content.length > 0 ? [
+                    { text:'', pageBreak:'before' },
+                    ...headerInstitusi(),
+                    { stack: hal6Content, margin:[0,4,0,0] }
+                ] : []),
+
+                // Halaman 7 — Hasil Tes Kreplin
+                ...(hal7Content.length > 0 ? [
+                    { text:'', pageBreak:'before' },
+                    ...headerInstitusi(),
+                    { stack: hal7Content, margin:[0,4,0,0] }
                 ] : [])
             ],
             defaultStyle: { font:'Roboto' }
@@ -2010,11 +2140,615 @@ async function fetchAndRenderVakTemp(token) {
         loading.style.display = 'none';
         content.style.display = 'block';
 
+        // ── Render WWQ & Kreplin (pakai baris data yang SAMA, tidak perlu fetch lagi) ──
+        renderWWQ(data);
+        renderKreplin(data);
+        renderBiodataReadonly(data);
+
     } catch (e) {
         loading.style.display = 'none';
         errDiv.style.display  = 'block';
         errMsg.textContent    = 'Gagal memuat data: ' + e.message;
     }
+}
+
+// =========================================================
+// WWQ — port 1:1 dari wwq_view.html
+// =========================================================
+function hitungWWQ(jawabanStr) {
+    const w = jawabanStr.split(';').map(s => s.trim());
+    let satu=0,dua=0,tiga=0,empat=0,lima=0,enam=0,tujuh=0,delapan=0;
+
+    if(w[0] ==='A'){satu++;empat++;}
+    if(w[1] ==='A') satu++;
+    if(w[2] ==='A') dua++;
+    if(w[3] ==='A') dua++;
+    if(w[4] ==='A') dua++;
+    if(w[5] ==='A') dua++;
+    if(w[6] ==='A') dua++;
+    if(w[7] ==='A') satu++;
+    if(w[8] ==='A'){satu++;enam++;}
+    if(w[9] ==='A'){satu++;enam++;}
+    if(w[10]==='A') satu++;
+    if(w[11]==='A') satu++;
+    if(w[12]==='A') satu++;
+    if(w[13]==='B') tujuh++;
+    if(w[14]==='A') tujuh++;
+    if(w[15]==='A') tujuh++;
+    if(w[16]==='A') tujuh++;
+    if(w[17]==='B') tujuh++;
+    if(w[18]==='A'){satu++;lima++;}
+    if(w[19]==='B'){satu++;delapan++;}
+    if(w[20]==='B') satu++;
+    if(w[21]==='A') lima++;
+    if(w[22]==='A') lima++;
+    if(w[23]==='B') lima++;
+    if(w[24]==='A'){dua++;lima++;}
+    if(w[25]==='A'){dua++;lima++;}
+    if(w[26]==='A'){tiga++;lima++;}
+    if(w[27]==='A') lima++;
+    if(w[28]==='A') lima++;
+    if(w[29]==='A') lima++;
+    if(w[30]==='B'){lima++;enam++;}
+    if(w[31]==='B') dua++;
+    if(w[32]==='A') dua++;
+    if(w[33]==='A'){satu++;dua++;}
+    if(w[34]==='A'){tiga++;empat++;tujuh++;}
+    if(w[35]==='A') enam++;
+    if(w[36]==='A') lima++;
+    if(w[37]==='A') dua++;
+    if(w[38]==='A') dua++;
+    if(w[39]==='A'){satu++;dua++;}
+    if(w[40]==='A') dua++;
+    if(w[41]==='A') dua++;
+    if(w[42]==='B'){tiga++;empat++;}
+    if(w[43]==='A'){tiga++;empat++;}
+    if(w[44]==='B') empat++;
+    if(w[45]==='A'){tiga++;enam++;}
+    if(w[46]==='A') empat++;
+    if(w[47]==='B') tiga++;
+    if(w[48]==='A') tiga++;
+    if(w[49]==='A') tiga++;
+    if(w[50]==='A') tiga++;
+    if(w[51]==='A') tiga++;
+    if(w[52]==='A'){tiga++;empat++;}
+    if(w[53]==='A'){tiga++;lima++;}
+    if(w[54]==='B') empat++;
+    if(w[55]==='A') empat++;
+    if(w[56]==='B') empat++;
+    if(w[57]==='A') empat++;
+    if(w[58]==='A') empat++;
+    if(w[59]==='B') empat++;
+    if(w[60]==='B') empat++;
+    if(w[61]==='A') empat++;
+    if(w[62]==='A') empat++;
+    if(w[63]==='A'){empat++;enam++;}
+    if(w[64]==='A') enam++;
+    if(w[65]==='A') enam++;
+    if(w[66]==='A') enam++;
+    if(w[67]==='A') enam++;
+    if(w[68]==='A') enam++;
+    if(w[69]==='A') delapan++;
+    if(w[70]==='A') delapan++;
+    if(w[71]==='A') delapan++;
+    if(w[72]==='A') delapan++;
+    if(w[73]==='A') delapan++;
+    if(w[74]==='A') delapan++;
+
+    const skor_akhir = ((satu*28)+(dua*24)+(tiga*30)+(empat*20)+(lima*26)+(enam*36)+(tujuh*52)+(delapan*52))/8;
+    return {satu,dua,tiga,empat,lima,enam,tujuh,delapan,skor_akhir};
+}
+
+function renderWWQ(data) {
+    const wrap = document.getElementById('wwq-body');
+    if (!wrap) return;
+    let x07 = {};
+    try { x07 = JSON.parse(data.x_07 || '{}'); } catch(e) {}
+    const wwqStr = x07['who_wwq'] || '';
+
+    if (!wwqStr || wwqStr.split(';').length < 75) {
+        wrap.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">Data Tes WWQ belum tersedia.</p>';
+        window._wwqResult = null;
+        return;
+    }
+
+    const r = hitungWWQ(wwqStr);
+    const rows = [['Satu',r.satu],['Dua',r.dua],['Tiga',r.tiga],['Empat',r.empat],
+                  ['Lima',r.lima],['Enam',r.enam],['Tujuh',r.tujuh],['Delapan',r.delapan]];
+
+    wrap.innerHTML = `
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px;">
+            ${rows.map(([lbl,val]) => `
+            <div style="background:#f8f9fa; border-left:6px solid #667eea; border-radius:8px; padding:12px; text-align:center;">
+                <div style="font-size:1.5em; font-weight:bold; color:#2c3e50;">${val}</div>
+                <div style="font-size:.7em; color:#888; text-transform:uppercase;">${lbl}</div>
+            </div>`).join('')}
+        </div>
+        <div style="background:#667eea; color:white; border-radius:8px; padding:16px; text-align:center; margin-bottom:16px;">
+            <div style="font-size:.8em; letter-spacing:.06em; text-transform:uppercase; opacity:.85;">Skor Akhir</div>
+            <div style="font-size:2em; font-weight:bold;">${r.skor_akhir.toFixed(2)}</div>
+        </div>
+        <div style="background:#f8f9fa; border-radius:8px; padding:12px 14px;">
+            <strong style="font-size:.78em; color:#888; text-transform:uppercase;">Jawaban</strong>
+            <div style="font-family:monospace; font-size:.75em; color:#555; word-break:break-all; line-height:1.8; margin-top:6px;">${wwqStr}</div>
+        </div>
+    `;
+    window._wwqResult = r;
+}
+
+// =========================================================
+// KREPLIN — port 1:1 dari hasil_kreplin.html (+ Chart.js)
+// =========================================================
+function renderKreplin(data) {
+    const wrap = document.getElementById('kreplin-body');
+    if (!wrap) return;
+    let krep = {};
+    try { krep = JSON.parse(data.x_06 || '{}').kreplin || {}; } catch(e) {}
+
+    if (!krep.dikerjakan) {
+        wrap.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">Data Tes Kreplin belum tersedia.</p>';
+        window._kreplinResult = null;
+        return;
+    }
+
+    const dikerjakan = (krep.dikerjakan||'').split('|').map(v => parseInt(v.trim())||0);
+    const salah      = (krep.salah     ||'').split('|').map(v => parseInt(v.trim())||0);
+    const benar      = (krep.benar     ||'').split('|').map(v => parseInt(v.trim())||0);
+    while (dikerjakan.length < 45) dikerjakan.push(0);
+    while (salah.length < 45) salah.push(0);
+    while (benar.length < 45) benar.push(0);
+
+    const totalDikerjakan = dikerjakan.reduce((a,b)=>a+b,0);
+    const totalSalah      = salah.reduce((a,b)=>a+b,0);
+    const totalBenar      = benar.reduce((a,b)=>a+b,0);
+    const rataRata        = (totalDikerjakan/45).toFixed(1);
+    const akurasi         = totalDikerjakan>0 ? ((totalBenar/totalDikerjakan)*100).toFixed(1)+'%' : '—';
+
+    const s1 = salah.slice(5,10).reduce((a,b)=>a+b,0);
+    const s2 = salah.slice(20,25).reduce((a,b)=>a+b,0);
+    const s3 = salah.slice(35,40).reduce((a,b)=>a+b,0);
+
+    wrap.innerHTML = `
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px;">
+            <div style="background:#f8f9fa; border-left:6px solid #2ecc71; border-radius:8px; padding:12px; text-align:center;">
+                <div style="font-size:1.5em; font-weight:bold; color:#2ecc71;">${totalDikerjakan}</div>
+                <div style="font-size:.68em; color:#888; text-transform:uppercase;">Total Dikerjakan</div>
+            </div>
+            <div style="background:#f8f9fa; border-left:6px solid #4a90e2; border-radius:8px; padding:12px; text-align:center;">
+                <div style="font-size:1.5em; font-weight:bold; color:#4a90e2;">${rataRata}</div>
+                <div style="font-size:.68em; color:#888; text-transform:uppercase;">Rata-rata / Kolom</div>
+            </div>
+            <div style="background:#f8f9fa; border-left:6px solid #e74c3c; border-radius:8px; padding:12px; text-align:center;">
+                <div style="font-size:1.5em; font-weight:bold; color:#e74c3c;">${totalSalah}</div>
+                <div style="font-size:.68em; color:#888; text-transform:uppercase;">Total Salah</div>
+            </div>
+            <div style="background:#f8f9fa; border-left:6px solid #f39c12; border-radius:8px; padding:12px; text-align:center;">
+                <div style="font-size:1.5em; font-weight:bold; color:#f39c12;">${akurasi}</div>
+                <div style="font-size:.68em; color:#888; text-transform:uppercase;">Akurasi</div>
+            </div>
+        </div>
+
+        <div style="border:2px solid #e9ecef; border-radius:8px; padding:16px; margin-bottom:16px;">
+            <strong style="color:#2c3e50; display:block; margin-bottom:10px;">📈 Kurva Kerja — Jumlah Soal Dikerjakan</strong>
+            <div style="position:relative; height:220px;"><canvas id="chartKreplinDikerjakan"></canvas></div>
+        </div>
+        <div style="border:2px solid #e9ecef; border-radius:8px; padding:16px; margin-bottom:16px;">
+            <strong style="color:#2c3e50; display:block; margin-bottom:10px;">📊 Distribusi Kesalahan per Kolom</strong>
+            <div style="position:relative; height:220px;"><canvas id="chartKreplinSalah"></canvas></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px;">
+            <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center;">
+                <div style="font-size:1.3em; font-weight:bold; color:#e74c3c;">${s1}</div>
+                <div style="font-size:.65em; color:#888;">PERIODE I (Kolom 6–10)</div>
+            </div>
+            <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center;">
+                <div style="font-size:1.3em; font-weight:bold; color:#e74c3c;">${s2}</div>
+                <div style="font-size:.65em; color:#888;">PERIODE II (Kolom 21–25)</div>
+            </div>
+            <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center;">
+                <div style="font-size:1.3em; font-weight:bold; color:#e74c3c;">${s3}</div>
+                <div style="font-size:.65em; color:#888;">PERIODE III (Kolom 36–40)</div>
+            </div>
+        </div>
+
+        <div id="kreplin-interp" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"></div>
+    `;
+
+    const labels = Array.from({length:45},(_,i)=>i+1);
+
+    if (typeof Chart !== 'undefined') {
+        new Chart(document.getElementById('chartKreplinDikerjakan'), {
+            type: 'line',
+            data: { labels, datasets: [{ label:'Dikerjakan', data:dikerjakan, borderColor:'#2ecc71', backgroundColor:'rgba(46,204,113,.10)', borderWidth:2, pointRadius:2, fill:true, tension:.3 }] },
+            options: { responsive:true, maintainAspectRatio:false, animation:false,
+                plugins:{ legend:{ display:false } },
+                scales:{ x:{ ticks:{ font:{size:9} } }, y:{ beginAtZero:true } } }
+        });
+        new Chart(document.getElementById('chartKreplinSalah'), {
+            type: 'bar',
+            data: { labels, datasets: [{ label:'Salah', data:salah, backgroundColor:'rgba(231,76,60,.7)', borderColor:'#e74c3c', borderWidth:1 }] },
+            options: { responsive:true, maintainAspectRatio:false, animation:false,
+                plugins:{ legend:{ display:false } },
+                scales:{ x:{ ticks:{ font:{size:9} } }, y:{ beginAtZero:true, ticks:{ stepSize:1 } } } }
+        });
+    }
+
+    // Interpretasi otomatis (identik dengan hasil_kreplin.html)
+    const first10 = dikerjakan.slice(0,10).reduce((a,b)=>a+b,0)/10;
+    const last10  = dikerjakan.slice(35,45).reduce((a,b)=>a+b,0)/10;
+    const trend = last10 > first10*0.95 ? 'stabil' : last10 > first10*0.8 ? 'sedikit menurun' : 'menurun';
+    const konsistensi = Math.abs(s1-s2) <= 2 && Math.abs(s2-s3) <= 2 ? 'konsisten' : 'bervariasi';
+
+    const interp = [
+        { icon: trend==='stabil'?'📈':trend==='sedikit menurun'?'📉':'⚠️',
+          title: 'Kurva Kerja: '+trend.charAt(0).toUpperCase()+trend.slice(1),
+          desc: trend==='stabil' ? 'Produktivitas terjaga dari awal hingga akhir. Menunjukkan daya tahan yang baik.'
+              : trend==='sedikit menurun' ? 'Ada penurunan kecil di akhir. Normal terjadi karena kelelahan ringan.'
+              : 'Terjadi penurunan signifikan. Indikasi kelelahan atau kurang konsentrasi.' },
+        { icon: konsistensi==='konsisten'?'✅':'🔄',
+          title: 'Kesalahan: '+konsistensi.charAt(0).toUpperCase()+konsistensi.slice(1),
+          desc: konsistensi==='konsisten' ? 'Jumlah kesalahan stabil di tiap periode. Menunjukkan kontrol diri yang baik.'
+              : 'Fluktuasi kesalahan antar periode. Perlu perhatian pada faktor konsentrasi.' },
+        { icon: parseFloat(akurasi)>=90?'🎯':parseFloat(akurasi)>=75?'👍':'💡',
+          title: 'Akurasi: '+akurasi,
+          desc: parseFloat(akurasi)>=90 ? 'Tingkat akurasi sangat baik. Ketelitian tinggi dalam pengerjaan.'
+              : parseFloat(akurasi)>=75 ? 'Akurasi cukup baik. Masih ada ruang peningkatan ketelitian.'
+              : 'Akurasi perlu ditingkatkan. Perlu latihan konsentrasi lebih.' },
+        { icon: parseFloat(rataRata)>=12?'⚡':parseFloat(rataRata)>=8?'⏱️':'🐢',
+          title: `Kecepatan: ${rataRata} soal/kolom`,
+          desc: parseFloat(rataRata)>=12 ? 'Kecepatan pengerjaan tinggi. Menunjukkan kemampuan pemrosesan yang cepat.'
+              : parseFloat(rataRata)>=8 ? 'Kecepatan rata-rata. Sesuai dengan standar umumnya.'
+              : 'Kecepatan di bawah rata-rata. Perlu latihan kecepatan kalkulasi.' }
+    ];
+    document.getElementById('kreplin-interp').innerHTML = interp.map(it => `
+        <div style="background:#f8f9fa; border-radius:8px; padding:12px 14px; display:flex; gap:10px; align-items:flex-start;">
+            <div style="font-size:1.3em;">${it.icon}</div>
+            <div>
+                <div style="font-size:.85em; font-weight:600; color:#2c3e50;">${it.title}</div>
+                <div style="font-size:.75em; color:#888; line-height:1.5;">${it.desc}</div>
+            </div>
+        </div>`).join('');
+
+    window._kreplinResult = { totalDikerjakan, totalSalah, totalBenar, rataRata, akurasi };
+}
+
+// =========================================================
+// BIODATA READ-ONLY + COPY — sumber: data.x_02 (struktur cpmi.html)
+// Tidak fetch API baru — pakai baris data yang sama dari token
+// =========================================================
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+let _roCopyCounter = 0;
+
+function copyRoValue(btn, rawValue) {
+    const text = rawValue === null || rawValue === undefined ? '' : String(rawValue);
+    if (!text.trim()) return;
+
+    const doFeedback = () => {
+        const old = btn.innerHTML;
+        btn.innerHTML = '✓';
+        tampilToast('📋 Disalin: ' + (text.length > 60 ? text.slice(0, 60) + '…' : text), 'success');
+        setTimeout(() => { btn.innerHTML = old; }, 1200);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(doFeedback).catch(() => fallbackCopy(text, doFeedback));
+    } else {
+        fallbackCopy(text, doFeedback);
+    }
+}
+
+function fallbackCopy(text, cb) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); cb(); }
+    catch (e) { tampilToast('❌ Gagal menyalin.', 'error'); }
+    document.body.removeChild(ta);
+}
+
+/** Render satu field read-only + tombol copy. Nilai mentah disimpan di data-raw agar copy akurat. */
+function roFieldSafe(label, value) {
+    const id = 'ro-val-' + (_roCopyCounter++);
+    const hasVal = value !== null && value !== undefined && String(value).trim() !== '';
+    const display = hasVal ? escapeHtml(value) : '-';
+    return `
+        <div class="ro-field">
+            <label>${escapeHtml(label)}</label>
+            <div class="ro-field-row">
+                <div class="ro-field-value${hasVal ? '' : ' empty'}" id="${id}" data-raw="${escapeHtml(hasVal ? value : '')}">${display}</div>
+                <button type="button" class="btn-copy" title="Copy"
+                    ${hasVal ? '' : 'disabled'}
+                    onclick="copyRoValue(this, document.getElementById('${id}').dataset.raw)">📋</button>
+            </div>
+        </div>`;
+}
+
+/** Render tabel read-only (riwayat pendidikan/kerja/dst) dengan tombol copy per sel. */
+function roTable(columns, rows) {
+    // columns: [{key, label}], rows diharapkan array of object — tapi data lama
+    // (sebelum cpmi.html diperbaiki) bisa berupa string/undefined, jadi divalidasi dulu.
+    if (!Array.isArray(rows) || !rows.length) {
+        return `<p class="ro-empty-note">Belum ada data.</p>`;
+    }
+    const thead = columns.map(c => `<th>${escapeHtml(c.label)}</th>`).join('') + '<th style="width:1%;"></th>';
+    const tbody = rows.map(row => {
+        const cells = columns.map(c => {
+            const v = row[c.key];
+            const hasVal = v !== null && v !== undefined && String(v).trim() !== '';
+            const id = 'ro-val-' + (_roCopyCounter++);
+            return `<td>
+                <div class="ro-cell-row">
+                    <span id="${id}" data-raw="${escapeHtml(hasVal ? v : '')}">${hasVal ? escapeHtml(v) : '-'}</span>
+                    <button type="button" class="btn-copy" title="Copy"
+                        ${hasVal ? '' : 'disabled'}
+                        onclick="copyRoValue(this, document.getElementById('${id}').dataset.raw)">📋</button>
+                </div>
+            </td>`;
+        }).join('');
+        return `<tr>${cells}<td></td></tr>`;
+    }).join('');
+    return `<div class="ro-table-wrap"><table class="ro-table"><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table></div>`;
+}
+
+function renderBiodataReadonly(data) {
+    const wrap = document.getElementById('biodata-ro-body');
+    if (!wrap) return;
+
+    let bio = {};
+    try { bio = JSON.parse(data.x_02 || '{}'); } catch (e) { bio = {}; }
+
+    if (!bio || Object.keys(bio).length === 0) {
+        wrap.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">Data biodata lengkap belum tersedia.</p>';
+        return;
+    }
+
+    try {
+        renderBiodataReadonlyInner(wrap, bio);
+    } catch (e) {
+        console.error('[renderBiodataReadonly] error:', e);
+        wrap.innerHTML = '<p style="color:#e74c3c; text-align:center; padding:20px;">⚠️ Gagal menampilkan biodata: ' + escapeHtml(e.message) + '</p>';
+    }
+}
+
+function renderBiodataReadonlyInner(wrap, bio) {
+    const sos = bio.bioSosmed || {};
+    const sakit       = bio.riwayatSakit || {};
+    const kecelakaan  = bio.riwayatKecelakaan || {};
+    const psikotest   = bio.riwayatPsikotest || {};
+
+    let html = '';
+
+    // ── DATA DIRI ──
+    html += `<div class="ro-section-title">👤 Data Diri</div>`;
+    html += `<div class="ro-grid">`;
+    html += roFieldSafe('No. ID CPMI', bio.id_cpmi);
+    html += roFieldSafe('Nama Lengkap', bio.bioNama);
+    html += roFieldSafe('Jenis Kelamin', bio.bioGender);
+    html += roFieldSafe('Usia', bio.bioUsia);
+    html += roFieldSafe('NIK', bio.bioNIK);
+    html += roFieldSafe('Tempat Lahir', bio.bioTTLKota);
+    html += roFieldSafe('Tanggal Lahir', bio.bioTTLTgl);
+    html += roFieldSafe('Status Perkawinan', bio.bioStatusKawin);
+    html += roFieldSafe('Suku', bio.bioSuku);
+    html += roFieldSafe('Agama', bio.bioAgama);
+    html += roFieldSafe('No. Telepon', bio.bioTelp);
+    html += roFieldSafe('Email', bio.bioEmail);
+    html += roFieldSafe('Pendidikan Terakhir', bio.bioPend);
+    html += `</div>`;
+    html += `<div class="ro-grid" style="grid-template-columns:1fr;">`;
+    html += roFieldSafe('Alamat', bio.bioAlamat);
+    html += roFieldSafe('Hobi', bio.bioHobi);
+    html += roFieldSafe('Cita-cita', bio.bioCitaCita);
+    html += `</div>`;
+
+    // ── SOSIAL MEDIA ──
+    html += `<div class="ro-section-title">📱 Sosial Media</div>`;
+    html += `<div class="ro-grid">`;
+    html += roFieldSafe('LinkedIn', sos.linkedin);
+    html += roFieldSafe('Instagram', sos.instagram);
+    html += roFieldSafe('Facebook', sos.facebook);
+    html += roFieldSafe('Twitter', sos.twitter);
+    html += roFieldSafe('Lainnya', sos.lainnya);
+    html += `</div>`;
+
+    // ── RIWAYAT PENDIDIKAN ──
+    html += `<div class="ro-section-title">🎓 Riwayat Pendidikan</div>`;
+    html += roTable(
+        [
+            { key: 'lembaga',     label: 'Sekolah / Universitas' },
+            { key: 'jurusan',     label: 'Jurusan' },
+            { key: 'lokasi',      label: 'Kota' },
+            { key: 'periode',     label: 'Periode' },
+            { key: 'keterangan',  label: 'Keterangan' },
+        ],
+        bio.pendidikan
+    );
+
+    // ── KURSUS / PELATIHAN ──
+    html += `<div class="ro-section-title">📜 Kursus / Pelatihan</div>`;
+    html += roTable(
+        [
+            { key: 'lembaga',        label: 'Lembaga' },
+            { key: 'nama_pelatihan', label: 'Nama Pelatihan' },
+            { key: 'lokasi',         label: 'Kota' },
+            { key: 'periode',        label: 'Periode' },
+        ],
+        bio.kursus
+    );
+
+    // ── RIWAYAT KERJA ──
+    html += `<div class="ro-section-title">💼 Riwayat Pekerjaan</div>`;
+    html += roTable(
+        [
+            { key: 'instansi', label: 'Instansi / Perusahaan' },
+            { key: 'jabatan',  label: 'Jabatan & Status' },
+            { key: 'lokasi',   label: 'Kota' },
+            { key: 'periode',  label: 'Periode' },
+        ],
+        bio.pengalamanKerja
+    );
+
+    // ── ORGANISASI ──
+    html += `<div class="ro-section-title">🤝 Riwayat Organisasi</div>`;
+    html += roTable(
+        [
+            { key: 'nama_organisasi', label: 'Nama Organisasi' },
+            { key: 'jabatan',         label: 'Jabatan' },
+            { key: 'tempat',          label: 'Tempat' },
+            { key: 'lamanya',         label: 'Lamanya' },
+        ],
+        bio.organisasi
+    );
+
+    // ── KETERAMPILAN ──
+    html += `<div class="ro-section-title">🛠️ Keterampilan</div>`;
+    html += roTable(
+        [
+            { key: 'keterampilan', label: 'Keterampilan' },
+            { key: 'spesifikasi',  label: 'Spesifikasi' },
+            { key: 'sertifikasi',  label: 'Sertifikasi' },
+            { key: 'tingkat',      label: 'Tingkat' },
+        ],
+        bio.keterampilan
+    );
+
+    // ── OLAHRAGA ──
+    html += `<div class="ro-section-title">⚽ Olahraga</div>`;
+    html += roTable(
+        [
+            { key: 'jenis',  label: 'Jenis Olahraga' },
+            { key: 'status', label: 'Status' },
+        ],
+        bio.olahraga
+    );
+
+    // ── KESENIAN ──
+    html += `<div class="ro-section-title">🎨 Kesenian</div>`;
+    html += roTable(
+        [
+            { key: 'jenis',  label: 'Jenis Kesenian' },
+            { key: 'status', label: 'Status' },
+        ],
+        bio.kesenian
+    );
+
+    // ── KELUARGA ──
+    html += `<div class="ro-section-title">👨‍👩‍👧 Data Keluarga</div>`;
+    html += roTable(
+        [
+            { key: 'nama',      label: 'Nama' },
+            { key: 'gender',    label: 'Jenis Kelamin' },
+            { key: 'usia',      label: 'Usia' },
+            { key: 'hubungan',  label: 'Hubungan' },
+            { key: 'pekerjaan', label: 'Pekerjaan / Sekolah' },
+        ],
+        bio.keluarga
+    );
+
+    // ── RIWAYAT KESEHATAN ──
+    html += `<div class="ro-section-title">🏥 Riwayat Kesehatan</div>`;
+
+    html += `<div class="ro-kondisi-box"><div class="ro-kondisi-title">Riwayat Sakit Keras: ${escapeHtml(sakit.pernah === 'ya' ? 'Ya' : (sakit.pernah === 'tidak' ? 'Tidak' : '-'))}</div>`;
+    if (sakit.pernah === 'ya') {
+        html += `<div class="ro-grid">`;
+        html += roFieldSafe('Nama Penyakit', sakit.penyakit);
+        html += roFieldSafe('Kapan', sakit.kapan);
+        html += roFieldSafe('Akibat / Kondisi Sekarang', sakit.akibat);
+        html += `</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="ro-kondisi-box"><div class="ro-kondisi-title">Riwayat Kecelakaan: ${escapeHtml(kecelakaan.pernah === 'ya' ? 'Ya' : (kecelakaan.pernah === 'tidak' ? 'Tidak' : '-'))}</div>`;
+    if (kecelakaan.pernah === 'ya') {
+        html += `<div class="ro-grid">`;
+        html += roFieldSafe('Jenis Kecelakaan', kecelakaan.jenis);
+        html += roFieldSafe('Kapan', kecelakaan.kapan);
+        html += roFieldSafe('Akibat / Kondisi Sekarang', kecelakaan.akibat);
+        html += `</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="ro-kondisi-box"><div class="ro-kondisi-title">Pernah Tes Psikologi Sebelumnya: ${escapeHtml(psikotest.pernah === 'ya' ? 'Ya' : (psikotest.pernah === 'tidak' ? 'Tidak' : '-'))}</div>`;
+    if (psikotest.pernah === 'ya') {
+        html += `<div class="ro-grid">`;
+        html += roFieldSafe('Kapan', psikotest.kapan);
+        html += roFieldSafe('Tempat', psikotest.tempat);
+        html += roFieldSafe('Tujuan', psikotest.tujuan);
+        html += `</div>`;
+    }
+    html += `</div>`;
+
+    // ── KUESIONER ──
+    const kues = bio.kuesioner || {};
+    html += `<div class="ro-section-title">📋 Kuesioner</div>`;
+
+    const renderKuesionerBlok = (title, obj, labels) => {
+        let h = `<div class="ro-kondisi-box"><div class="ro-kondisi-title">${escapeHtml(title)}</div>`;
+        h += `<div class="ro-grid" style="grid-template-columns:1fr;">`;
+        labels.forEach(l => { h += roFieldSafe(l.label, obj[l.key]); });
+        h += `</div></div>`;
+        return h;
+    };
+
+    html += renderKuesionerBlok('1. Pengalaman Sukses', kues.sukses || {}, [
+        { key: 'a', label: 'a. Ceritakan Peristiwanya' },
+        { key: 'b', label: 'b. Bagaimana situasinya pada waktu itu? Apa penyebabnya?' },
+        { key: 'c', label: 'c. Siapa saja yang terlibat? Apa peranan mereka dalam peristiwa itu?' },
+        { key: 'd', label: 'd. Apa yang Anda pikirkan pada waktu itu?' },
+        { key: 'e', label: 'e. Apa yang Anda rasakan pada waktu itu?' },
+        { key: 'f', label: 'f. Jelaskan hal-hal yang Anda lakukan pada waktu itu?' },
+        { key: 'g', label: 'g. Bagaimana akhir peristiwa itu? Apa dampak/hasil dari tindakan Anda?' },
+    ]);
+
+    html += renderKuesionerBlok('2. Pengalaman Kurang Sesuai Harapan', kues.kurangSesuai || {}, [
+        { key: 'a', label: 'a. Ceritakan Peristiwanya' },
+        { key: 'b', label: 'b. Bagaimana situasinya pada waktu itu? Apa penyebabnya?' },
+        { key: 'c', label: 'c. Siapa saja yang terlibat? Apa peranan mereka dalam peristiwa itu?' },
+        { key: 'd', label: 'd. Apa yang Anda pikirkan pada waktu itu?' },
+        { key: 'e', label: 'e. Apa yang Anda rasakan pada waktu itu?' },
+        { key: 'f', label: 'f. Jelaskan hal-hal yang Anda lakukan pada waktu itu?' },
+        { key: 'h', label: 'h. Bagaimana akhir peristiwa itu? Apa dampak/hasil dari tindakan Anda?' },
+    ]);
+
+    html += renderKuesionerBlok('3. Situasi Perubahan yang Menantang', kues.perubahan || {}, [
+        { key: 'a', label: 'a. Ceritakan Peristiwanya' },
+        { key: 'b', label: 'b. Bagaimana situasinya pada waktu itu? Apa penyebabnya?' },
+        { key: 'c', label: 'c. Siapa saja yang terlibat? Apa peranan mereka dalam peristiwa itu?' },
+        { key: 'd', label: 'd. Apa yang Anda pikirkan pada waktu itu?' },
+        { key: 'e', label: 'e. Apa yang Anda rasakan pada waktu itu?' },
+        { key: 'f', label: 'f. Jelaskan hal-hal yang Anda lakukan pada waktu itu?' },
+        { key: 'i', label: 'i. Bagaimana akhir peristiwa itu? Apa dampak/hasil dari tindakan Anda?' },
+    ]);
+
+    html += renderKuesionerBlok('4. Kerja Sama dalam Kelompok', kues.kerjaTim || {}, [
+        { key: 'a', label: 'a. Ceritakan Peristiwanya' },
+        { key: 'b', label: 'b. Bagaimana situasinya pada waktu itu? Apa penyebabnya?' },
+        { key: 'c', label: 'c. Siapa saja yang terlibat? Apa peran Anda pribadi dan tim kerja Anda dalam peristiwa itu?' },
+        { key: 'd', label: 'd. Apa yang Anda pikirkan pada waktu itu?' },
+        { key: 'e', label: 'e. Apa yang Anda rasakan pada waktu itu?' },
+        { key: 'f', label: 'f. Jelaskan hal-hal yang Anda lakukan pada waktu itu?' },
+        { key: 'j', label: 'j. Bagaimana akhir peristiwa itu? Apa dampak/hasil dari tindakan Anda?' },
+    ]);
+
+    html += `<div class="ro-kondisi-box"><div class="ro-kondisi-title">5. Kekuatan &amp; Kelemahan</div>`;
+    html += `<div class="ro-grid" style="grid-template-columns:1fr;">`;
+    html += roFieldSafe('Jawaban', kues.kekuatanKelemahan);
+    html += `</div></div>`;
+
+    wrap.innerHTML = html;
 }
 
 // =========================================================
@@ -2085,9 +2819,7 @@ async function main() {
             document.getElementById('form-id-x-err').style.display = 'none';
             const params = new URLSearchParams({ id_x: idXVal, tabel: tabelVal });
             if (x01Val) params.set('x_01', x01Val);
-            // Buka di tab baru — form di halaman ini tetap terbuka,
-            // tinggal ganti ID untuk membuka laporan lain
-            window.open(`${window.location.pathname}?${params.toString()}`, '_blank');
+            window.location.href = `${window.location.pathname}?${params.toString()}`;
         };
         return;
     }
@@ -2096,9 +2828,7 @@ async function main() {
         const rawData = await fetchData(id_x);
 
         // Validasi x_01 jika ada di URL (opsional — untuk keamanan)
-        // Mode cepat: jika token diisi "xxx", validasi token DILEWATI (hanya id_x & tabel yg dicek)
-        const isQuickMode = x_01 && x_01.trim().toLowerCase() === 'xxx';
-        if (x_01 && !isQuickMode && String(rawData.x_01) !== String(x_01)) {
+        if (x_01 && String(rawData.x_01) !== String(x_01)) {
             throw new Error('Akses ditolak: parameter x_01 tidak valid.');
         }
 

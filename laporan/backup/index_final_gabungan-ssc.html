@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> -->
     <title>Profil Pemeriksaan Psikologis</title>
 
     <style>
@@ -82,7 +82,7 @@
         .container_a::before {
             content: ""; position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
-            background-image: url('https://psikogram.lidan.co.id/psikogram_db/gambar/logo1.png');
+            background-image: url('https://psikogram.lidan.co.id/psikogram_db/gambar/logo-ssc.png');
             background-size: 70%; background-position: center;
             background-repeat: no-repeat; opacity: 0.1; z-index: 0;
         }
@@ -95,11 +95,11 @@
             background-color: #5F4EDA; padding: 10px; border-radius: 8px;
         }
         .logo-container_a { margin-right: 10px; }
-        .logo { width: 130px; height: auto; }
+        .logo { width: 130px; height: auto; display: block; }
         .info-container_a {
             text-align: center; display: flex;
-            flex-direction: column; align-items: center; margin-left: -80px;
-            width: 95%;
+            flex-direction: column; align-items: center;
+            width: 100%;
         }
         .header-title  { font-size: 24px; font-weight: bold; color: white; margin: 2px 0; }
         .header-subtitle { font-size: 18px; font-style: italic; color: #e0f7fa; margin: 2px 0; }
@@ -402,7 +402,6 @@
     <button onclick="bukaPreview()">🔍 Preview PDF</button>
     <button id="downloadBtn2">📥 Download PDF</button>
     <button class="btn-edit" onclick="bukaModalEdit()">✏️ Edit Data</button>
-    <button id="btn-generate-laporan" onclick="bukaModalGenerate()" style="background:#17a2b8; color:white; display:none;">🤖 Generate Laporan</button>
     <span class="konsistensi-info" id="konsistensi-display">Konsistensi = -</span>
 </div>
 
@@ -476,18 +475,13 @@
         <!-- Header Institusi -->
         <div class="custom-header no-download">
             <div class="logo-container_a">
-                <img src="https://psikogram.lidan.co.id/psikogram_db/gambar/logo1.png" alt="Logo" class="logo"/>
+                <img src="https://psikogram.lidan.co.id/psikogram_db/gambar/logo-ssc1.png" alt="Logo" class="logo"/>
             </div>
             <div class="info-container_a">
-                <div class="header-title">PT. LIDAN INDAH ABADI</div>
-                <div class="header-subtitle">LIDAN PSIKOLOGI</div>
-                <div class="location">Regus Forum Nine, Lantai 9 CIMB NIAGA PLAZA</div>
-                <div class="address">Jalan Imam Bonjol No.9, Medan 20159, Sumatera Utara</div>
-                <div class="phone">Telepon: +62851-5960-1400</div>
-                <div class="website">
-                    Website: <a href="http://www.lidan.co.id">www.lidan.co.id</a>,
-                    Email: <a href="/cdn-cgi/l/email-protection#106063797b7f7c7f7779507c7974717e3e737f3e7974"><span class="__cf_email__" data-cfemail="611112080a0e0d0e0608210d0805000f4f020e4f0805">[email&#160;protected]</span></a>
-                </div>
+                <div class="header-title">BIRO KONSULTASI PSIKOLOGI DAN BIMBINGAN BELAJAR</div>
+                <div class="header-subtitle">SD-SMP-SMA/SMK-ALUMNI, PERSIAPAN SELEKSI PTN,KEDINASAN-TNI-POLRI DAN SMA UNGGULAN</div>
+                <div class="address">Jl. Asahan Komplek Megaland Blok A No. 16, Siopat Suhu Pematang Siantar, Lt2 G. 1B – R2 Jl. A.H.Nasution No.25b Simpang Pos Medan</div>
+                <div class="phone">Hp. 0822 9418 5814 (Dedy), 0877 4845 1289 (Dwi) Email: educationproxecla@gmail.com</div>
             </div>
         </div>
 
@@ -543,90 +537,133 @@
         </table>
         <br>
         *Keterangan : K = Kurang ; C = Cukup ; B = Baik ; BS = Baik Sekali
-
-        <!-- IQ ditampilkan di halaman 1 -->
-        <div style="margin-top:14px;">
-            <strong>Intelligence Quotient (IQ) :</strong>
-            <ul class="custom-list" style="margin-top:4px;">
-                <li>Intelligence Quotient / IQ = <span id="span-iq"></span></li>
-            </ul>
-        </div>
-
-        <!-- KETERANGAN NARASI OTOMATIS (x_12) -->
-        <div id="narasi-section" style="display:none; margin-top:16px; padding:14px 16px; background:#f0edff; border-left:4px solid #5F4EDA; border-radius:6px;">
-            <strong style="color:#5F4EDA; font-size:14px;">&#128221; Keterangan Psikologis:</strong>
-            <div id="narasi-text" style="margin:8px 0 0 0; text-align:justify; line-height:1.8; font-size:inherit; display:block; width:100%;"></div>
-        </div>
-
-        <!-- Tanda Tangan -->
-        <div class="signature" style="position:relative;margin-top:20px;">
-            <div id="qr-wrap" style="position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
-                <a id="qr-link" href="#" target="_blank" title="Buka laporan online">
-                    <div id="qr-code" style="display:inline-block;"></div>
-                </a>
-                <p style="font-size:10px; color:#888; margin:4px 0 0 0;">Scan untuk lihat laporan</p>
-            </div>
-            <p style="text-align:right;"><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
-            <p style="margin-top:-12px; text-align:right;">Psikolog,</p>
-            <div style="text-align:right;"><img src="https://psikogram.lidan.co.id/psikogram_db/gambar/ttd.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
-            <p style="margin-top:-5px; text-align:right;"><strong>Dr. Karina M. Brahmana, M.Psi, Psikolog</strong></p>
-            <p style="margin-top:-12px; text-align:right;">No SIPP: 20070136-2021-02-0799</p><br>
-            <div class="enter"></div>
-            <img class="no-download" src="https://psikogram.lidan.co.id/psikogram_db/gambar/medsos.png" alt="Media Sosial" style="max-width:20%; height:auto;"/>
-        </div>
-
         <div class="enter"></div>
     </div>
 </div>
 
-<!-- HALAMAN 2 DISEMBUNYIKAN (versi index_file_iq) -->
-<div id="downloadContent2" style="display:none;">
-    <!-- konten halaman 2 tidak ditampilkan di versi ini -->
-    <span id="list-kelebihan"></span>
-    <span id="list-kelemahan"></span>
-    <span id="list-rekomendasi"></span>
-    <span id="list-minat"></span>
-</div>
+<!-- ═══════════════════════════════════════
+     HALAMAN 2 — Narasi & Tanda Tangan
+     ═══════════════════════════════════════ -->
+<div class="batas-download" id="downloadContent2">
+    <div class="container_a">
+        <div class="strength-weakness">
 
-<button id="downloadBtn">Download PDF</button>
+            <div><strong>Intelligence Quotient (IQ) :</strong></div>
+            <ul class="custom-list">
+                <li>Intelligence Quotient / IQ = <span id="span-iq"></span></li>
+            </ul>
 
-<!-- ═══════════════════════════════════════════════════════
-     MODAL GENERATE LAPORAN
-     ═══════════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="modal-generate" onclick="tutupModalGenerateDiluar(event)">
-    <div class="modal-box" style="max-width:820px;">
-        <div class="modal-header">
-            <h2>&#129302; Generate Keterangan Psikologis</h2>
-            <button class="modal-close-btn" onclick="tutupModalGenerate()">&#10005;</button>
+            <div><strong>Strengths/Kelebihan:</strong></div>
+            <ul class="custom-list" id="list-kelebihan"></ul>
+
+            <div><strong>Weaknesses/Kelemahan:</strong></div>
+            <ul class="custom-list" id="list-kelemahan"></ul>
+
+            <div><strong>Recommendation/Rekomendasi:</strong></div>
+            <ul class="custom-list" id="list-rekomendasi"></ul>
+
+            <h4 style="text-decoration:underline;">Arah Minat Pendidikan / Pekerjaan</h4>
+            <ul class="custom-list" id="list-minat"></ul>
         </div>
-        <div class="modal-body">
-            <p style="font-size:13px; color:#666; margin:0 0 14px 0;">
-                Keterangan psikologis berikut dibuat secara otomatis berdasarkan skor hasil pemeriksaan.
-                Anda dapat mengedit teks sebelum menyimpan.
-            </p>
-            <div id="generate-loading" style="text-align:center; padding:30px; display:none;">
-                <div class="spinner" style="margin:0 auto 10px;"></div>
-                <p style="color:#5F4EDA;">Menyusun narasi...</p>
-            </div>
-            <div id="generate-content" style="display:none;">
-                <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:12px; margin-bottom:12px;">
-                    <label style="font-size:12px; font-weight:bold; color:#5F4EDA; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">&#128221; Keterangan Psikologis</label>
-                    <textarea id="gen-narasi-text" rows="10"
-                        style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:14px; font-family:Arial,sans-serif; line-height:1.8; resize:vertical;"
-                        placeholder="Narasi akan muncul di sini..."></textarea>
-                </div>
-                <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:6px; padding:10px 14px; font-size:12px; color:#856404;">
-                    &#9888; Anda dapat mengedit teks di atas sebelum menyimpan. Klik <strong>Regenerate</strong> untuk membuat ulang narasi dengan variasi kalimat yang berbeda.
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-modal" style="background:#17a2b8; color:white;" onclick="regenerateNarasi()">&#128260; Regenerate</button>
-            <button class="btn-modal btn-cancel" onclick="tutupModalGenerate()">Batal</button>
-            <button class="btn-modal btn-save" id="btn-simpan-narasi" onclick="simpanNarasi()">&#128190; Simpan & Tampilkan</button>
+
+        <!-- Tanda Tangan -->
+        <div class="signature" style="position:relative;">
+            <!-- QR Code absolute di tengah, tidak ganggu layout -->
+            <!-- <div id="qr-wrap" style="position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
+                <a id="qr-link" href="#" target="_blank" title="Buka laporan online">
+                    <div id="qr-code" style="display:inline-block;"></div>
+                </a>
+                <p style="font-size:10px; color:#888; margin:4px 0 0 0;">Scan untuk lihat laporan</p>
+            </div> -->
+            <p style="text-align:right;"><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
+            <p style="margin-top:-12px; text-align:right;">Psikolog,</p>
+            <div style="text-align:right;"><img src="https://psikogram.lidan.co.id/psikogram_db/gambar/ttd-ssc1.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
+            <p style="margin-top:-5px; text-align:right;"><strong>Dr. Karina M. Brahmana, M.Psi, Psikolog</strong></p>
+            <p style="margin-top:-12px; text-align:right;">No SIPP: 20070136-2021-02-0799</p><br>
+            <div class="enter"></div>
+            <!-- <img class="no-download" src="gambar/medsos.png" alt="Media Sosial" style="max-width:20%; height:auto;"/> -->
         </div>
     </div>
 </div>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 3 — Gaya Belajar VAK & Temperamen
+     ═══════════════════════════════════════ -->
+<div class="batas-download" id="downloadContent3">
+    <div class="container_a" id="section-vak-temp">
+        <div id="vak-temp-loading" style="text-align:center; padding:40px; color:#888;">
+            <div style="font-size:2em; margin-bottom:10px;">⏳</div>
+            <p>Memuat data gaya belajar &amp; temperamen...</p>
+        </div>
+        <div id="vak-temp-content" style="display:none;">
+
+            <!-- ── GAYA BELAJAR VAK ── -->
+            <div id="vak-section" style="margin-bottom:30px;">
+                <h3 style="text-align:center; background:#667eea; color:white; padding:8px; border-radius:6px; margin-bottom:16px;">📚 Hasil Tes Gaya Belajar VAK</h3>
+
+                <div id="vak-result-card" style="padding:20px; border-radius:10px; border-left:8px solid; background:#f8f9fa; margin-bottom:16px;">
+                    <h4 id="vak-dominan-label" style="font-size:1.4em; margin-bottom:8px;"></h4>
+                    <p id="vak-dominan-desc" style="color:#555; margin-bottom:14px;"></p>
+
+                    <!-- Bar Visual -->
+                    <div id="vak-bars"></div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div style="border:2px solid #e9ecef; border-radius:8px; padding:16px;">
+                        <strong style="color:#2c3e50;">🎯 Karakteristik</strong>
+                        <ul id="vak-karakteristik" style="list-style:none; padding:0; margin-top:8px;"></ul>
+                    </div>
+                    <div style="border:2px solid #e9ecef; border-radius:8px; padding:16px;">
+                        <strong style="color:#2c3e50;">💡 Tips Belajar Efektif</strong>
+                        <ul id="vak-tips" style="list-style:none; padding:0; margin-top:8px;"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TEMPERAMEN ── -->
+            <div id="temp-section">
+                <h3 style="text-align:center; background:#667eea; color:white; padding:8px; border-radius:6px; margin-bottom:16px;">🎭 Hasil Tes Temperamen</h3>
+
+                <div id="temp-result-card" style="padding:20px; border-radius:10px; border-left:8px solid; background:#f8f9fa; text-align:center; margin-bottom:16px;">
+                    <h4 id="temp-dominan-label" style="font-size:1.4em; margin-bottom:6px;"></h4>
+                    <p id="temp-dominan-tagline" style="font-weight:bold; color:#555; margin-bottom:6px;"></p>
+                    <p id="temp-dominan-desc" style="color:#555;"></p>
+                </div>
+
+                <!-- Skor 4 temperamen -->
+                <div id="temp-skor-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;"></div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                    <div style="background:#f8f9fa; border-radius:8px; padding:14px;">
+                        <strong style="color:#27ae60;">💪 Kekuatan</strong>
+                        <ul id="temp-kekuatan" style="list-style:none; padding:0; margin-top:8px;"></ul>
+                    </div>
+                    <div style="background:#f8f9fa; border-radius:8px; padding:14px;">
+                        <strong style="color:#e74c3c;">⚠️ Kelemahan</strong>
+                        <ul id="temp-kelemahan" style="list-style:none; padding:0; margin-top:8px;"></ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── SARAN PENGEMBANGAN DIRI (halaman terpisah) ── -->
+            <div id="temp-saran-section">
+                <h3 style="text-align:center; background:#667eea; color:white; padding:8px; border-radius:6px; margin-bottom:16px;">💡 Saran Pengembangan Diri</h3>
+                <div style="border:2px solid #e9ecef; border-radius:8px; padding:14px;">
+                    <ul id="temp-tips" style="list-style:none; padding:0; margin-top:8px;"></ul>
+                </div>
+            </div>
+
+        </div><!-- /vak-temp-content -->
+
+        <div id="vak-temp-error" style="display:none; text-align:center; padding:30px; color:#e74c3c;">
+            <p id="vak-temp-error-msg"></p>
+        </div>
+    </div>
+</div>
+
+<button id="downloadBtn">Download PDF</button>
 
 <!-- ═══════════════════════════════════════════════════════
      MODAL EDIT DATA
@@ -647,7 +684,10 @@
                 <button class="edit-tab"        onclick="switchEditTab('kepribadian')">💡 Kepribadian</button>
                 <button class="edit-tab"        onclick="switchEditTab('sikap')">⚙️ Sikap Kerja</button>
                 <button class="edit-tab"        onclick="switchEditTab('iq')">📊 IQ</button>
-                <button class="edit-tab"        onclick="switchEditTab('keterangan')">📝 Keterangan Psikologis</button>
+                <button class="edit-tab"        onclick="switchEditTab('kekuatan')">⭐ Kekuatan</button>
+                <button class="edit-tab"        onclick="switchEditTab('kelemahan')">⚠️ Kelemahan</button>
+                <button class="edit-tab"        onclick="switchEditTab('rekomendasi')">💬 Rekomendasi</button>
+                <button class="edit-tab"        onclick="switchEditTab('minat')">🎯 Arah Minat</button>
             </div>
 
             <!-- ── TAB BIODATA ── -->
@@ -721,126 +761,28 @@
                 </div>
             </div>
 
-            <!-- ── TAB KETERANGAN PSIKOLOGIS ── -->
-            <div class="edit-panel" id="epanel-keterangan">
-                <p style="font-size:12px; color:#888; margin-bottom:10px;">Edit teks keterangan psikologis yang ditampilkan di laporan.</p>
+            <!-- ── TAB KEKUATAN ── -->
+            <div class="edit-panel" id="epanel-kekuatan">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat kekuatan/kelebihan peserta.</p>
+                <div id="kekuatan-wrap"><!-- Diisi JS --></div>
+            </div>
 
-                <!-- Toggle Visual / Kode -->
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-                    <span style="font-size:12px; font-weight:bold; color:#444; text-transform:uppercase; letter-spacing:0.4px;">Mode:</span>
-                    <button id="btn-mode-visual" onclick="setEditorMode('visual')"
-                        style="padding:5px 14px; border:2px solid #5F4EDA; border-radius:16px; background:#5F4EDA; color:white; font-size:12px; font-weight:bold; cursor:pointer;">
-                        🖊️ Visual
-                    </button>
-                    <button id="btn-mode-kode" onclick="setEditorMode('kode')"
-                        style="padding:5px 14px; border:2px solid #ddd; border-radius:16px; background:white; color:#555; font-size:12px; font-weight:bold; cursor:pointer;">
-                        &lt;/&gt; HTML
-                    </button>
-                </div>
+            <!-- ── TAB KELEMAHAN ── -->
+            <div class="edit-panel" id="epanel-kelemahan">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat kelemahan peserta.</p>
+                <div id="kelemahan-wrap"><!-- Diisi JS --></div>
+            </div>
 
-                <!-- WYSIWYG Toolbar -->
-                <div id="wysiwyg-toolbar" style="
-                    display:flex; flex-wrap:wrap; gap:4px; padding:8px 10px;
-                    background:#f0edff; border:2px solid #5F4EDA; border-bottom:none;
-                    border-radius:8px 8px 0 0;">
+            <!-- ── TAB REKOMENDASI ── -->
+            <div class="edit-panel" id="epanel-rekomendasi">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat rekomendasi untuk peserta.</p>
+                <div id="rekomendasi-wrap"><!-- Diisi JS --></div>
+            </div>
 
-                    <!-- Format teks -->
-                    <button title="Bold" onclick="wysiCmd('bold')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-weight:bold;font-size:14px;">B</button>
-                    <button title="Italic" onclick="wysiCmd('italic')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-style:italic;font-size:14px;">I</button>
-                    <button title="Underline" onclick="wysiCmd('underline')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;text-decoration:underline;font-size:14px;">U</button>
-                    <button title="Strikethrough" onclick="wysiCmd('strikeThrough')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;text-decoration:line-through;font-size:13px;">S</button>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- Warna teks -->
-                    <label title="Warna Teks" style="position:relative;width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;">
-                        🖊️<input type="color" onchange="wysiCmd('foreColor',this.value)" style="position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;" title="Warna Teks">
-                    </label>
-                    <!-- Warna background teks -->
-                    <label title="Sorot Teks" style="position:relative;width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;">
-                        🖍️<input type="color" onchange="wysiCmd('hiliteColor',this.value)" style="position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;" title="Sorot Teks">
-                    </label>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- Ukuran font -->
-                    <select title="Ukuran Font" onchange="wysiCmd('fontSize',this.value); this.value=''" style="height:30px;border:1px solid #ccc;border-radius:4px;font-size:12px;padding:0 4px;">
-                        <option value="">Ukuran</option>
-                        <option value="1">Kecil</option>
-                        <option value="3">Normal</option>
-                        <option value="4">Besar</option>
-                        <option value="5">Lebih Besar</option>
-                        <option value="6">Sangat Besar</option>
-                    </select>
-
-                    <!-- Jenis font -->
-                    <select title="Jenis Font" onchange="wysiCmd('fontName',this.value); this.value=''" style="height:30px;border:1px solid #ccc;border-radius:4px;font-size:12px;padding:0 4px;">
-                        <option value="">Font</option>
-                        <option value="Arial">Arial</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Georgia">Georgia</option>
-                        <option value="Courier New">Courier New</option>
-                        <option value="Verdana">Verdana</option>
-                    </select>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- Alignment -->
-                    <button title="Rata Kiri" onclick="wysiCmd('justifyLeft')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">⬅</button>
-                    <button title="Tengah" onclick="wysiCmd('justifyCenter')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">☰</button>
-                    <button title="Rata Kanan" onclick="wysiCmd('justifyRight')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">➡</button>
-                    <button title="Justify" onclick="wysiCmd('justifyFull')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">▤</button>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- List -->
-                    <button title="Daftar Poin" onclick="wysiCmd('insertUnorderedList')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">•≡</button>
-                    <button title="Daftar Nomor" onclick="wysiCmd('insertOrderedList')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">1≡</button>
-                    <button title="Outdent" onclick="wysiCmd('outdent')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">⇤</button>
-                    <button title="Indent" onclick="wysiCmd('indent')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">⇥</button>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- Heading -->
-                    <select title="Heading / Paragraf" onchange="wysiCmd('formatBlock',this.value); this.value=''" style="height:30px;border:1px solid #ccc;border-radius:4px;font-size:12px;padding:0 4px;">
-                        <option value="">Heading</option>
-                        <option value="h1">Judul 1</option>
-                        <option value="h2">Judul 2</option>
-                        <option value="h3">Judul 3</option>
-                        <option value="h4">Judul 4</option>
-                        <option value="p">Paragraf</option>
-                    </select>
-
-                    <div style="width:1px;background:#ccc;margin:2px 4px;"></div>
-
-                    <!-- Hapus format -->
-                    <button title="Hapus Format" onclick="wysiCmd('removeFormat')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:13px;">✕A</button>
-                    <!-- Undo / Redo -->
-                    <button title="Undo" onclick="wysiCmd('undo')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:14px;">↩</button>
-                    <button title="Redo" onclick="wysiCmd('redo')" style="width:30px;height:30px;border:1px solid #ccc;border-radius:4px;background:white;cursor:pointer;font-size:14px;">↪</button>
-                </div>
-
-                <!-- WYSIWYG contenteditable area -->
-                <div id="ed-keterangan-wysiwyg" contenteditable="true"
-                    style="width:100%; min-height:220px; padding:12px; border:2px solid #5F4EDA;
-                           border-radius:0 0 8px 8px; font-size:13px; font-family:Arial,sans-serif;
-                           line-height:1.8; overflow-y:auto; background:white; outline:none;"
-                    placeholder="Tulis atau edit keterangan psikologis di sini...">
-                </div>
-
-                <!-- Mode HTML / Kode -->
-                <textarea id="ed-keterangan-kode" rows="12"
-                    style="display:none; width:100%; padding:12px; border:2px solid #5F4EDA;
-                           border-radius:0 0 8px 8px; font-size:12px; font-family:'Courier New',monospace;
-                           line-height:1.6; resize:vertical; outline:none;"
-                    placeholder="Edit HTML di sini..."></textarea>
-
-                <!-- Hidden input untuk simpan -->
-                <input type="hidden" id="ed-keterangan">
-
-                <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:6px; padding:10px 14px; font-size:12px; color:#856404; margin-top:10px;">
-                    &#9888; Teks ini akan ditampilkan langsung di bagian <strong>Keterangan Psikologis</strong> pada laporan. Klik <strong>Simpan &amp; Refresh</strong> untuk menyimpan.
-                </div>
+            <!-- ── TAB ARAH MINAT ── -->
+            <div class="edit-panel" id="epanel-minat">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 arah minat peserta (nama & keterangan).</p>
+                <div id="minat-wrap"><!-- Diisi JS --></div>
             </div>
 
         </div><!-- /modal-body -->
@@ -853,6 +795,7 @@
 </div>
 
 <!-- Library PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
@@ -869,6 +812,217 @@ const CONFIG = {
 // Data global yang dipakai modal edit
 let _globalData   = null;   // raw row dari rekap_nilai1
 let _globalIdX    = null;   // id_x rekap_nilai1
+
+// =========================================================
+// KONSTANTA GAYA BELAJAR VAK & TEMPERAMEN
+// =========================================================
+const LEARNING_STYLES = {
+    A: {
+        name: 'VISUAL', color: '#4a90e2', icon: '👁️',
+        description: 'Belajar paling efektif dengan melihat dan mengamati',
+        characteristicsPool: [
+            ['Lebih mudah mengingat apa yang dilihat','Suka diagram, grafik, dan gambar','Mengingat wajah lebih baik dari nama','Lebih suka membaca instruksi sendiri','Sering membuat catatan visual atau mind map'],
+            ['Ingatan visual lebih kuat dari ingatan suara','Nyaman belajar dengan tabel dan bagan','Wajah lebih mudah dikenali dari nama','Panduan tertulis lebih disukai dari penjelasan lisan','Catatan bergambar membantu pemahaman'],
+            ['Informasi visual lebih mudah diingat','Belajar efektif dengan skema dan ilustrasi','Lebih mudah ingat wajah daripada nama','Instruksi tertulis lebih jelas dari arahan lisan','Suka membuat sketsa atau catatan berwarna']
+        ],
+        tipsPool: [
+            ['Gunakan stabilo warna-warni saat membaca','Buat diagram, flowchart, atau mind map','Tonton video pembelajaran atau tutorial visual','Gunakan flashcard dengan gambar','Visualisasikan konsep dalam bentuk gambar mental'],
+            ['Tandai poin penting dengan warna berbeda','Ubah catatan menjadi diagram atau peta pikiran','Cari video atau animasi yang menjelaskan materi','Buat kartu belajar dengan ilustrasi pendukung','Gambarkan konsep yang sedang dipelajari'],
+            ['Pakai kode warna untuk membedakan topik','Sajikan materi dalam tabel perbandingan','Perkaya pemahaman dengan video edukasi','Buat kartu ringkasan bergambar yang praktis','Ciptakan gambaran mental saat belajar topik baru']
+        ]
+    },
+    B: {
+        name: 'AUDITORY', color: '#f39c12', icon: '👂',
+        description: 'Belajar paling efektif dengan mendengar dan berbicara',
+        characteristicsPool: [
+            ['Lebih mudah mengingat apa yang didengar','Suka berdiskusi dan menjelaskan kepada orang lain','Mengingat nama lebih baik dari wajah','Lebih suka mendengarkan penjelasan daripada membaca','Sering berbicara sendiri saat belajar'],
+            ['Informasi yang didengar lebih mudah diingat','Menyukai sesi diskusi untuk mempertegas pemahaman','Nama orang lebih mudah diingat dari wajahnya','Penjelasan lisan terasa lebih membantu dari teks','Mengulang materi dengan suara adalah cara belajar favorit'],
+            ['Memori lebih kuat melalui pendengaran','Belajar dalam kelompok meningkatkan pemahaman','Mengingat suara lebih mudah dari tampilan visual','Lebih suka mendengar rekaman dari membaca teks panjang','Melafalkan materi dengan lantang memperkuat ingatan']
+        ],
+        tipsPool: [
+            ['Rekam catatan dan dengarkan kembali','Diskusikan materi dengan teman atau guru','Belajar sambil mendengarkan musik instrumental','Bacakan materi dengan keras saat belajar','Ikuti diskusi kelompok secara aktif'],
+            ['Rekam ringkasan materi dan putar ulang','Jadikan diskusi dengan teman sebagai metode belajar','Pilih musik tanpa lirik saat mengerjakan tugas','Biasakan membaca nyaring saat mengulang pelajaran','Bergabung dalam kelompok belajar secara rutin'],
+            ['Simpan catatan dalam format rekaman suara','Ajak teman saling menjelaskan topik belajar','Dengarkan podcast atau audio edukasi yang relevan','Ulang materi dengan cara mengajarkan kembali','Aktif dalam forum atau diskusi online']
+        ]
+    },
+    C: {
+        name: 'KINESTETIK', color: '#2ecc71', icon: '🤸',
+        description: 'Belajar paling efektif dengan bergerak dan melakukan langsung',
+        characteristicsPool: [
+            ['Belajar lebih efektif dengan praktik langsung','Suka eksperimen dan mencoba sendiri','Susah diam dalam waktu lama','Mengingat apa yang dilakukan bukan yang dibaca','Ekspresif dengan gerakan tubuh'],
+            ['Pemahaman terbentuk lewat pengalaman langsung','Senang mencoba tanpa harus menunggu arahan','Duduk lama membuat konsentrasi buyar','Ingatan terkuat dari hal yang pernah dilakukan','Bahasa tubuh adalah ekspresi alami saat bicara'],
+            ['Praktik langsung jauh lebih efektif dari teori','Cepat ingin mencoba tanpa banyak menunggu','Perlu bergerak selama proses belajar','Materi lebih diingat saat dilakukan sambil bergerak','Isyarat fisik sering muncul saat berkomunikasi']
+        ],
+        tipsPool: [
+            ['Buat proyek atau model nyata dari materi','Ambil jeda singkat dan bergerak setelah belajar','Gunakan role play atau simulasi','Tulis atau gambar sambil mendengar penjelasan','Kunjungi langsung lokasi yang berkaitan dengan topik'],
+            ['Wujudkan materi dalam bentuk karya nyata','Sisipkan gerakan ringan setiap 30–45 menit belajar','Coba peran atau situasi nyata untuk memahami materi','Tuliskan poin penting sambil menyimak','Perkuat pemahaman dengan kunjungan ke tempat relevan'],
+            ['Jadikan materi sebagai bahan uji coba nyata','Manfaatkan jeda aktif untuk menjaga fokus belajar','Praktikkan konsep dalam permainan peran sederhana','Coret-coret atau gambar kasar sambil menyimak','Perkaya belajar dengan pengalaman di lapangan']
+        ]
+    }
+};
+
+const TEMPERAMENTS = {
+    A: {
+        name: 'SANGUINIS', color: '#f1c40f', icon: '😄',
+        tagline: 'Si Periang yang Populer',
+        description: 'Ekstrovert, antusias, dan sosial. Suka menjadi pusat perhatian dan membuat orang lain senang.',
+        characteristics: ['Ceria, optimis, dan penuh semangat','Mudah bergaul dan populer','Suka berbicara dan menghibur','Spontan dan kreatif','Tidak suka rutinitas yang membosankan','Emosional dan ekspresif'],
+        strengths: ['Komunikator yang baik','Memotivasi orang lain','Mudah beradaptasi','Antusiasme tinggi','Kreatif dan inovatif'],
+        weaknesses: ['Kurang disiplin','Mudah terdistraksi','Tidak detail-oriented','Terlalu banyak bicara','Sulit menepati janji'],
+        strengthsPool: [
+            ['Komunikator yang baik','Memotivasi orang lain','Mudah beradaptasi','Antusiasme tinggi','Kreatif dan inovatif'],
+            ['Pandai menyampaikan gagasan','Pembangkit semangat tim','Fleksibel di berbagai situasi','Penuh energi positif','Pemikiran segar dan inovatif'],
+            ['Berbicara dengan efektif','Piawai memotivasi orang lain','Cepat beradaptasi dengan perubahan','Antusias dan bersemangat','Kaya ide dan kreativitas']
+        ],
+        weaknessesPool: [
+            ['Kurang disiplin','Mudah terdistraksi','Tidak detail-oriented','Terlalu banyak bicara','Sulit menepati janji'],
+            ['Disiplin masih perlu ditingkatkan','Fokus mudah teralihkan','Kurang teliti pada detail','Cenderung mendominasi percakapan','Komitmen perlu lebih dijaga'],
+            ['Konsistensi diri masih lemah','Konsentrasi mudah buyar','Kurang perhatian pada hal kecil','Kurang memberi ruang bicara orang lain','Kurang tepat waktu']
+        ],
+        careers: ['Sales & Marketing','Public Relations','Event Organizer','Entertainer','Presenter','Teacher'],
+        tipsPool: [
+            ['Buatlah daftar prioritas harian agar energimu terarah dengan baik','Latih diri untuk mendengarkan lebih banyak sebelum berbicara','Selesaikan satu pekerjaan hingga tuntas sebelum memulai yang baru','Biasakan mencatat janji dan komitmen penting di agenda','Kelola waktu dengan lebih disiplin agar produktivitas meningkat'],
+            ['Gunakan to-do list setiap pagi untuk menjaga fokus sepanjang hari','Berlatih menjadi pendengar aktif dalam setiap percakapan','Tuntaskan satu tanggung jawab dulu sebelum beralih ke hal lain','Catat setiap janji agar kepercayaan orang lain tetap terjaga','Bangun rutinitas yang konsisten untuk mendukung kedisiplinan'],
+            ['Mulai hari dengan menetapkan tiga hal utama yang ingin dicapai','Latih kesabaran dalam berdiskusi dan beri ruang orang lain berbicara','Jangan berpindah tugas sebelum yang pertama selesai dengan baik','Manfaatkan pengingat digital untuk memantau komitmenmu','Disiplin waktu adalah kunci agar potensimu berkembang maksimal']
+        ]
+    },
+    B: {
+        name: 'KOLERIS', color: '#e67e22', icon: '💪',
+        tagline: 'Si Pemimpin yang Kuat',
+        description: 'Ekstrovert, tegas, dan berorientasi pada tujuan. Suka memimpin dan mengambil keputusan.',
+        characteristics: ['Tegas dan percaya diri','Berorientasi pada hasil','Suka tantangan dan kompetisi','Pengambil keputusan yang cepat','Produktif dan efisien','Tidak sabaran dengan ketidakefisienan'],
+        strengths: ['Kepemimpinan alami','Berani mengambil risiko','Orientasi tujuan yang kuat','Tegas dalam keputusan','Produktivitas tinggi'],
+        weaknesses: ['Terlalu bossy','Kurang sensitif','Tidak sabaran','Sulit menerima kritik','Workaholic'],
+        strengthsPool: [
+            ['Kepemimpinan alami','Berani mengambil risiko','Orientasi tujuan yang kuat','Tegas dalam keputusan','Produktivitas tinggi'],
+            ['Jiwa pemimpin yang menonjol','Tidak takut mengambil risiko','Fokus dan terarah pada target','Pengambil keputusan yang tegas','Konsisten menghasilkan hasil terbaik'],
+            ['Pemimpin yang dipercaya tim','Berani bertindak di bawah tekanan','Tidak mudah terpengaruh distraksi','Cepat dan jelas dalam memutuskan','Produktif dan selalu berenergi']
+        ],
+        weaknessesPool: [
+            ['Terlalu bossy','Kurang sensitif','Tidak sabaran','Sulit menerima kritik','Workaholic'],
+            ['Cenderung terlalu mengatur','Kurang peka terhadap perasaan orang','Toleransi rendah terhadap kelambatan','Sulit menerima masukan','Sulit membatasi jam kerja'],
+            ['Terlalu dominan dalam tim','Empati masih perlu dikembangkan','Mudah tidak sabar','Defensif terhadap kritik','Cenderung mengabaikan istirahat']
+        ],
+        careers: ['CEO/Manager','Entrepreneur','Politisi','Direktur','Pilot','Lawyer'],
+        tipsPool: [
+            ['Latih kemampuan empati dengan menempatkan diri pada posisi orang lain','Biasakan memberikan apresiasi tulus kepada rekan tim secara rutin','Kenali pemicu amarahmu dan beri jeda sebelum bereaksi','Percayakan tugas kepada tim tanpa mengatur setiap detailnya','Sisihkan waktu untuk istirahat dan kehidupan pribadi di luar pekerjaan'],
+            ['Pelajari cara mendengarkan dengan penuh perhatian tanpa menyela','Ungkapkan penghargaan kepada anggota tim atas kontribusi mereka','Latih diri untuk merespons dengan kepala dingin dalam tekanan','Delegasikan dengan jelas dan percayai kemampuan timmu','Jaga keseimbangan antara ambisi kerja dan kebutuhan pribadimu'],
+            ['Kembangkan kepekaan terhadap perasaan dan kebutuhan orang di sekitarmu','Jadikan apresiasi sebagai bagian dari gaya kepemimpinanmu sehari-hari','Ambil napas dalam-dalam sebelum merespons situasi yang memancing emosi','Beri tim ruang untuk berkembang tanpa pengawasan berlebihan','Tetapkan batas waktu kerja yang sehat agar energimu tetap terjaga']
+        ]
+    },
+    C: {
+        name: 'MELANKOLIS', color: '#9b59b6', icon: '🤔',
+        tagline: 'Si Pemikir yang Perfeksionis',
+        description: 'Introvert, analitis, dan detail-oriented. Suka kesempurnaan dan kedalaman.',
+        characteristics: ['Perfeksionis dan teliti','Berpikir mendalam dan analitis','Sensitif dan idealis','Loyal dan setia','Suka keteraturan dan struktur','Cenderung pesimistis'],
+        strengths: ['Perhatian pada detail','Analisis mendalam','Standar tinggi','Kreatif dan artistik','Dapat diandalkan'],
+        weaknesses: ['Terlalu kritis','Overthinking','Perfeksionisme berlebihan','Sulit puas','Mudah depresi'],
+        strengthsPool: [
+            ['Perhatian pada detail','Analisis mendalam','Standar kerja tinggi','Kreatif dan artistik','Dapat diandalkan'],
+            ['Teliti dan cermat','Berpikir secara mendalam','Berkomitmen pada kualitas','Jiwa seni yang kuat','Konsisten dan terpercaya'],
+            ['Tidak mudah melewatkan detail','Analitis dan kritis','Menghasilkan pekerjaan berkualitas','Kreativitas yang mendalam','Stabil dan bisa diandalkan']
+        ],
+        weaknessesPool: [
+            ['Terlalu kritis','Overthinking','Perfeksionisme berlebihan','Sulit merasa puas','Rentan terhadap tekanan emosi'],
+            ['Mudah mengkritik diri sendiri','Terlalu lama menganalisis','Standar terlalu tinggi','Kepuasan sulit dicapai','Sensitif terhadap tekanan'],
+            ['Kritis terhadap diri dan orang lain','Terjebak dalam analisis berlebih','Sulit menerima hasil yang tidak sempurna','Ekspektasi yang sulit terpenuhi','Emosi mudah terpengaruh situasi']
+        ],
+        careers: ['Scientist','Analyst','Artist','Writer','Programmer','Accountant'],
+        tipsPool: [
+            ['Terimalah bahwa hasil yang cukup baik jauh lebih berharga dari yang tidak selesai','Latih diri untuk segera mengambil tindakan tanpa menunggu kondisi sempurna','Rayakan setiap kemajuan kecil sebagai bagian dari perjalanan panjang','Pandanglah kritik sebagai masukan berharga yang membantu pertumbuhanmu','Tetapkan standar yang realistis agar kamu tidak mudah kelelahan'],
+            ['Ingat bahwa kesempurnaan adalah perjalanan, bukan tujuan akhir','Kurangi waktu analisis berlebih dan mulailah melangkah lebih cepat','Fokus pada proses dan pembelajaran, bukan hanya hasil akhir','Latih keterbukaan dalam menerima masukan dari orang-orang tepercaya','Kenali batasmu dan beri dirimu izin untuk tidak selalu sempurna'],
+            ['Bebaskan dirimu dari tekanan harus sempurna dalam setiap hal','Ambil keputusan dengan informasi yang cukup, bukan yang lengkap','Jadikan setiap langkah maju sebagai pencapaian yang layak disyukuri','Ubah cara pandang terhadap kritik menjadi bahan bakar perbaikan diri','Sesuaikan ekspektasi agar kamu dapat menikmati prosesnya']
+        ]
+    },
+    D: {
+        name: 'PHLEGMATIS', color: '#3498db', icon: '😌',
+        tagline: 'Si Pendamai yang Tenang',
+        description: 'Introvert, tenang, dan damai. Suka harmoni dan menghindari konflik.',
+        characteristics: ['Tenang dan sabar','Pendamai dan diplomatik','Pendengar yang baik','Stabil dan konsisten','Tidak suka konflik','Santai dan easy-going'],
+        strengths: ['Kemampuan diplomasi','Sabar dan tenang','Pendengar yang baik','Konsisten dan stabil','Mudah bergaul'],
+        weaknesses: ['Kurang inisiatif','Terlalu pasif','Sulit membuat keputusan','Menghindari konfrontasi','Kurang ambisi'],
+        strengthsPool: [
+            ['Kemampuan diplomasi yang baik','Sabar dan tenang','Pendengar yang baik','Konsisten dan stabil','Mudah bergaul'],
+            ['Pandai meredakan konflik','Tidak mudah terpancing emosi','Membuat orang nyaman bercerita','Kinerja yang stabil dan andal','Ramah di berbagai lingkungan'],
+            ['Pendekatan diplomatik yang elegan','Tenang dalam situasi tekanan','Pendengar aktif yang empatik','Dapat diandalkan jangka panjang','Mudah akrab dengan siapa saja']
+        ],
+        weaknessesPool: [
+            ['Kurang inisiatif','Terlalu pasif','Sulit membuat keputusan','Menghindari konfrontasi','Kurang ambisi'],
+            ['Jarang bertindak tanpa diminta','Cenderung menunggu situasi','Keputusan sering tertunda','Menghindari konflik yang perlu diselesaikan','Motivasi diri masih perlu diperkuat'],
+            ['Inisiatif kurang terlihat','Terlalu santai dalam situasi kritis','Lambat dalam mengambil keputusan','Mengorbankan solusi demi kenyamanan','Potensi belum dimaksimalkan']
+        ],
+        careers: ['Counselor','Mediator','HR','Customer Service','Nurse','Social Worker'],
+        tipsPool: [
+            ['Latih diri untuk mengambil inisiatif tanpa harus menunggu diminta','Hadapi konflik yang perlu diselesaikan dengan kepala dingin dan hati terbuka','Tetapkan tujuan jangka pendek yang spesifik agar mudah diukur dan dicapai','Latih kemampuan pengambilan keputusan dengan mulai dari pilihan-pilihan kecil','Coba hal-hal baru sesekali untuk memperluas wawasan dan kemampuanmu'],
+            ['Beranikan diri untuk memulai sesuatu tanpa menunggu momen yang tepat','Jangan biarkan ketidaknyamanan menghalangimu dari menyelesaikan masalah penting','Buat rencana dengan target yang jelas agar langkahmu lebih terarah','Biasakan membuat keputusan tepat waktu meskipun belum sempurna','Keluar dari rutinitas sesekali untuk menemukan potensi baru dalam dirimu'],
+            ['Jadilah orang yang pertama bertindak dalam situasi yang membutuhkan solusi','Selesaikan konflik yang ada sebelum berkembang menjadi masalah yang lebih besar','Tuliskan tujuanmu secara konkret agar lebih mudah diperjuangkan setiap hari','Percayai pertimbanganmu sendiri dan latih keberanian dalam memutuskan','Tantang dirimu dengan pengalaman baru yang dapat memperkaya perspektifmu']
+        ]
+    }
+};
+
+// Seeded shuffle deterministik berdasarkan token
+function seededRandom(seed) {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) {
+        h = Math.imul(31, h) + seed.charCodeAt(i) | 0;
+    }
+    return function() {
+        h ^= h << 13; h ^= h >> 17; h ^= h << 5;
+        return (h >>> 0) / 4294967296;
+    };
+}
+
+function getVariasiTips(temperamenKey, token) {
+    const pool  = TEMPERAMENTS[temperamenKey].tipsPool;
+    // Pilih variasi (0,1,2) berdasarkan token
+    let h = 0;
+    for (let i = 0; i < token.length; i++) h = Math.imul(31, h) + token.charCodeAt(i) | 0;
+    const varIdx = Math.abs(h) % pool.length;
+    const tips   = [...pool[varIdx]];
+    // Shuffle urutan berdasarkan token
+    const rng = seededRandom(token + temperamenKey);
+    for (let i = tips.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [tips[i], tips[j]] = [tips[j], tips[i]];
+    }
+    return tips;
+}
+
+function getVariasiVak(vakKey, type, token) {
+    // type: 'characteristics' atau 'tips'
+    const pool = LEARNING_STYLES[vakKey][type + 'Pool'];
+    if (!pool) return LEARNING_STYLES[vakKey][type === 'characteristics' ? 'characteristics' : 'tips'] || [];
+    // Pilih variasi (0,1,2) berdasarkan token + type agar berbeda antara char dan tips
+    const seed = token + vakKey + type;
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = Math.imul(31, h) + seed.charCodeAt(i) | 0;
+    const varIdx = Math.abs(h) % pool.length;
+    const items  = [...pool[varIdx]];
+    // Shuffle urutan berdasarkan token
+    const rng = seededRandom(seed);
+    for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+    }
+    return items;
+}
+
+function getVariasiTempAttr(tempKey, type, token) {
+    // type: 'strengths' atau 'weaknesses'
+    const pool = TEMPERAMENTS[tempKey][type + 'Pool'];
+    if (!pool) return TEMPERAMENTS[tempKey][type] || [];
+    const seed = token + tempKey + type;
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = Math.imul(31, h) + seed.charCodeAt(i) | 0;
+    const varIdx = Math.abs(h) % pool.length;
+    const items  = [...pool[varIdx]];
+    const rng = seededRandom(seed);
+    for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+    }
+    return items;
+}
 
 // Definisi aspek (sama dengan engine — dipakai untuk label skor)
 const ASPEK_KEMAMPUAN   = ['Kemampuan Umum','Daya Tangkap Visual','Kemampuan Berpikir Logis','Kemampuan Berpikir Abstrak','Penalaran Verbal','Penalaran Numerik'];
@@ -932,7 +1086,7 @@ function parseRekapData(row) {
     return {
         identitas: {
             nama       : biodata.nama       || '',
-            jk         : (biodata.jk || '').trim() || (biodata.jenis_kelamin || '').trim() || (biodata.kelamin || '').trim() || 'Laki-laki',
+            jk         : biodata.jk         || '',
             usia       : biodata.usia       || '',
             tanggal    : biodata.tanggal    || '',
             tanggalTTD : biodata.tanggal_ttd || biodata.tanggal || ''
@@ -952,7 +1106,7 @@ function parseRekapData(row) {
 function renderPage(parsed) {
     const { identitas, IQ, resultScores, kekuatan, kelemahan, rekomendasi, minat3Raw } = parsed;
 
-    // Aspek Psikologis — hanya KEMAMPUAN (versi IQ)
+    // Aspek Psikologis statis (sama persis dengan engine)
     const aspekPsikologis = [
         ['KEMAMPUAN',  'Kemampuan Umum',           'Mampu menemukan solusi untuk berbagai masalah dengan efektif.'],
         [null,         'Daya Tangkap Visual',       'Cepat mengenali pola dan perbedaan di lingkungan sekitar.'],
@@ -960,6 +1114,14 @@ function renderPage(parsed) {
         [null,         'Kemampuan Berpikir Abstrak','Mampu melihat hubungan antara berbagai hal dan memahami konsekuensi dari tindakan.'],
         [null,         'Penalaran Verbal',          'Mampu berkomunikasi dengan jelas dan efektif dalam interaksi.'],
         [null,         'Penalaran Numerik',         'Kemampuan memahami proses hitung dan berpikir teratur'],
+        ['KEPRIBADIAN','Hasrat Berprestasi',        'Keinginan untuk mencapai dan meningkatkan prestasi'],
+        [null,         'Daya Tahan Stress',         'Kemampuan mempertahankan kinerja'],
+        [null,         'Kepercayaan Diri',          'Adanya keyakinan terhadap kemampuan yang dimiliki'],
+        [null,         'Relasi Sosial',             'Kemampuan membina hubungan dengan orang lain'],
+        [null,         'Kerjasama',                 'Kemampuan bekerjasama individu atau berkelompok'],
+        ['SIKAP KERJA','Sistematika Kerja',         'Kemampuan membuat perencanaan & prioritas kerja'],
+        [null,         'Inisiatif',                 'Kemampuan mengambil tindakan yang diperlukan'],
+        [null,         'Kemandirian',               'Kemampuan mengambil sikap dan bekerja sendiri']
     ];
 
     // Identitas
@@ -1044,7 +1206,6 @@ let _previewFS2 = 11;
 let _previewDebounce = null;
 
 function bukaPreview() {
-    if (window.buatDocDef && typeof _imgCache !== "undefined") _imgCache = null;
     document.getElementById('modal-preview').style.display = 'flex';
     document.getElementById('label-fs1').textContent = _previewFS1 + 'pt';
     document.getElementById('label-fs2').textContent = _previewFS2 + 'pt';
@@ -1099,51 +1260,19 @@ function setupDownload() {
     const ABUABU = '#f2f2f2';
     const HIJAU  = '#d1e7dd';
 
-    // Ambil gambar sebagai base64 — ambil dari elemen DOM yg sudah di-load browser (paling reliable),
-    // lalu fallback ke fetch, lalu fallback ke Image+canvas
-    function imgElToBase64(imgEl) {
-        try {
-            if (!imgEl || !imgEl.complete || !imgEl.naturalWidth) return null;
-            const c = document.createElement('canvas');
-            c.width  = imgEl.naturalWidth;
-            c.height = imgEl.naturalHeight;
-            c.getContext('2d').drawImage(imgEl, 0, 0);
-            return c.toDataURL('image/png');
-        } catch(e) { return null; }
-    }
-
-    function toBase64(src, domSelector) {
+    // Ambil gambar sebagai base64
+    function toBase64(src) {
         return new Promise(resolve => {
-            // 1) Coba dari elemen DOM yang sudah dimuat browser (bypass CORS)
-            if (domSelector) {
-                const existing = document.querySelector(domSelector);
-                const b64 = imgElToBase64(existing);
-                if (b64 && b64.length > 100) { resolve(b64); return; }
-            }
-            // 2) Fetch blob lalu FileReader
-            fetch(src)
-                .then(r => r.blob())
-                .then(blob => {
-                    const fr = new FileReader();
-                    fr.onload  = () => resolve(fr.result);
-                    fr.onerror = () => resolve(null);
-                    fr.readAsDataURL(blob);
-                })
-                .catch(() => {
-                    // 3) Fallback Image + canvas
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous';
-                    img.onload = () => {
-                        try {
-                            const c = document.createElement('canvas');
-                            c.width = img.naturalWidth; c.height = img.naturalHeight;
-                            c.getContext('2d').drawImage(img, 0, 0);
-                            resolve(c.toDataURL('image/png'));
-                        } catch(e) { resolve(null); }
-                    };
-                    img.onerror = () => resolve(null);
-                    img.src = src + '?t=' + Date.now();
-                });
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                const c = document.createElement('canvas');
+                c.width = img.naturalWidth; c.height = img.naturalHeight;
+                c.getContext('2d').drawImage(img, 0, 0);
+                resolve(c.toDataURL('image/png'));
+            };
+            img.onerror = () => resolve(null);
+            img.src = src + '?t=' + Date.now();
         });
     }
 
@@ -1152,9 +1281,9 @@ function setupDownload() {
     async function getImages() {
         if (_imgCache) return _imgCache;
         const [logoB64, hdrB64, ttdB64] = await Promise.all([
-            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/logo1.png', 'img.logo'),
-            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/01d.jpg',   null),
-            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/ttd.png',   'img[alt="Tanda Tangan"]')
+            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/logo-ssc.png'),
+            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/kop-ssc.png'),
+            toBase64('https://psikogram.lidan.co.id/psikogram_db/gambar/ttd-ssc1.png')
         ]);
         _imgCache = { logoB64, hdrB64, ttdB64 };
         return _imgCache;
@@ -1255,21 +1384,13 @@ function setupDownload() {
             }
         });
 
-        // ── Konfigurasi margin PDF (ubah nilai di sini) ──
-        const PDF_MARGIN = {
-            kiri         : 30,   // margin kiri semua halaman (pt)
-            kanan        : 30,   // margin kanan semua halaman (pt)
-            atas_hal2plus: 50,   // margin atas halaman 2, 3, dst (pt)
-            bawah        : 30    // margin bawah semua halaman (pt)
-        };
-
-        // Header institusi — margin top negatif untuk kompensasi pageMargins atas_hal2plus
+        // Header institusi
         const headerInstitusi = () => {
             const content = [];
             if (hdrB64) {
-                content.push({ image: hdrB64, width: 595, margin: [-30, -PDF_MARGIN.atas_hal2plus, -30, 10] });
+                content.push({ image: hdrB64, width: 595, margin: [-30, 0, -30, 10] });
             } else {
-                content.push({ text:'PT. LIDAN INDAH ABADI', bold:true, fontSize:14, color:UNGU, alignment:'center', margin:[0,-PDF_MARGIN.atas_hal2plus,0,8] });
+                content.push({ text:'PT. LIDAN INDAH ABADI', bold:true, fontSize:14, color:UNGU, alignment:'center', margin:[0,0,0,8] });
             }
             return content;
         };
@@ -1323,11 +1444,48 @@ function setupDownload() {
             ]
         });
 
+        // ── Halaman 3 & 4: screenshot VAK dan Temperamen, masing-masing 1 halaman ──
+        const hal3Content = []; // VAK
+        const hal4Content = []; // Temperamen
+        const hal5Content = []; // Saran Pengembangan Diri
+
+        async function screenshotToImg(elId, pdfW) {
+            const el = document.getElementById(elId);
+            if (!el) return null;
+            const cvs = await html2canvas(el, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: true,
+                allowTaint: true,
+                windowWidth: 900
+            });
+            const ratio = cvs.height / cvs.width;
+            return { dataUrl: cvs.toDataURL('image/jpeg', 0.92), width: pdfW, height: Math.round(pdfW * ratio) };
+        }
+
+        const vakTempVisible = document.getElementById('vak-temp-content');
+        if (vakTempVisible && vakTempVisible.style.display !== 'none') {
+            try {
+                const pdfW = 535;
+
+                const vakImg = await screenshotToImg('vak-section', pdfW);
+                if (vakImg) hal3Content.push({ image: vakImg.dataUrl, width: vakImg.width, height: vakImg.height });
+
+                const tempImg = await screenshotToImg('temp-section', pdfW);
+                if (tempImg) hal4Content.push({ image: tempImg.dataUrl, width: tempImg.width, height: tempImg.height });
+
+                const saranImg = await screenshotToImg('temp-saran-section', pdfW);
+                if (saranImg) hal5Content.push({ image: saranImg.dataUrl, width: saranImg.width, height: saranImg.height });
+
+            } catch(e) {
+                console.error('html2canvas error:', e);
+            }
+        }
+
         return {
             pageSize: 'A4',
-            // pageMargins atas = PDF_MARGIN.atas_hal2plus berlaku untuk semua halaman.
-            // Halaman 1 dikompensasi: header gambar pakai margin top negatif agar menempel ke atas.
-            pageMargins: [PDF_MARGIN.kiri, PDF_MARGIN.atas_hal2plus, PDF_MARGIN.kanan, PDF_MARGIN.bawah],
+            pageMargins: [30, 0, 30, 20],
             content: [
                 ...headerInstitusi(),
                 { text:'PROFIL PEMERIKSAAN PSIKOLOGIS', bold:true, fontSize:FS1+4, alignment:'center', margin:[0,4,0,8] },
@@ -1351,234 +1509,35 @@ function setupDownload() {
                     layout:{ hLineWidth:()=>0.5, vLineWidth:()=>0.5, hLineColor:()=>'#000', vLineColor:()=>'#000' },
                     margin:[0,0,0,4]
                 },
-                { text:'*Keterangan : K = Kurang ; C = Cukup ; B = Baik ; BS = Baik Sekali', fontSize:FS1-1, margin:[0,2,0,8] },
+                { text:'*Keterangan : K = Kurang ; C = Cukup ; B = Baik ; BS = Baik Sekali', fontSize:FS1-1, margin:[0,2,0,0] },
 
-                // IQ di halaman 1
-                { text:'Intelligence Quotient (IQ) :', bold:true, fontSize:FS1, margin:[0,0,0,2] },
-                { text:`• Intelligence Quotient / IQ = ${iq}`, fontSize:FS1, margin:[8,0,0,10] },
+                // Halaman 2
+                { text:'', pageBreak:'before' },
+                ...headerInstitusi(),
+                { stack: hal2Content, margin:[20,0,20,0] },
 
-                // Keterangan Narasi (x_12) jika ada — render HTML → pdfMake
-                ...(() => {
-                    const narasiEl = document.getElementById('narasi-text');
-                    if (!narasiEl) return [];
-                    const htmlStr = (narasiEl.innerHTML || '').trim();
-                    const plain   = (narasiEl.textContent || narasiEl.innerText || '').trim();
-                    if (!plain) return [];
+                // Halaman 3 — Gaya Belajar VAK
+                ...(hal3Content.length > 0 ? [
+                    { text:'', pageBreak:'before' },
+                    ...headerInstitusi(),
+                    { stack: hal3Content, margin:[0,4,0,0] }
+                ] : []),
 
-                    // ── HTML → pdfMake content parser ──
-                    function hexToRgb(hex) {
-                        const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                        return r ? '#' + hex.replace('#','') : hex;
-                    }
-                    function styleToObj(styleStr) {
-                        const obj = {};
-                        if (!styleStr) return obj;
-                        styleStr.split(';').forEach(s => {
-                            const idx = s.indexOf(':');
-                            if (idx < 0) return;
-                            const k = s.substring(0, idx).trim().toLowerCase();
-                            const v = s.substring(idx + 1).trim();
-                            if (k && v) obj[k] = v;
-                        });
-                        return obj;
-                    }
-                    // Map font-size CSS ke pdfMake point
-                    function cssFontSizeToPt(val) {
-                        if (!val) return null;
-                        const num = parseFloat(val);
-                        if (val.includes('px')) return Math.round(num * 0.75);
-                        if (val.includes('pt')) return num;
-                        if (val.includes('em')) return Math.round(num * FS1);
-                        return null;
-                    }
-                    // Map execCommand fontSize (1-7) ke pt
-                    function execFontSizeToPt(sz) {
-                        const map = {1:8,2:10,3:12,4:14,5:18,6:24,7:36};
-                        return map[parseInt(sz)] || FS1;
-                    }
+                // Halaman 4 — Temperamen
+                ...(hal4Content.length > 0 ? [
+                    { text:'', pageBreak:'before' },
+                    ...headerInstitusi(),
+                    { stack: hal4Content, margin:[0,4,0,0] }
+                ] : []),
 
-                    // Konversi satu node DOM ke array inline pdfMake
-                    function nodeToInline(node, inherited) {
-                        const base = Object.assign({}, inherited);
-                        if (node.nodeType === Node.TEXT_NODE) {
-                            // Ganti \n dengan spasi agar pdfMake tidak memecah baris
-                            // (baris yang berakhir \n tidak di-justify oleh pdfMake)
-                            const t = node.textContent.replace(/\n/g, ' ').replace(/  +/g, ' ');
-                            if (!t.trim()) return [];
-                            return [Object.assign({ text: t }, base)];
-                        }
-                        if (node.nodeType !== Node.ELEMENT_NODE) return [];
-
-                        const tag = node.tagName.toLowerCase();
-                        const st  = styleToObj(node.getAttribute('style') || '');
-                        const cur = Object.assign({}, base);
-
-                        // Tag → style mapping
-                        if (tag === 'b' || tag === 'strong') cur.bold = true;
-                        if (tag === 'i' || tag === 'em')     cur.italics = true;
-                        if (tag === 'u')                     cur.decoration = 'underline';
-                        if (tag === 's' || tag === 'strike' || tag === 'del') cur.decoration = 'lineThrough';
-                        if (tag === 'sup') cur.sup = true;
-                        if (tag === 'sub') cur.sub = true;
-
-                        // inline font size dari <font size="N"> — size diabaikan agar konsisten dengan FS1
-                        if (tag === 'font') {
-                            // cur.fontSize dibiarkan dari inherited (FS1) agar tidak overflow margin PDF
-                            const clr = node.getAttribute('color');
-                            if (clr) cur.color = clr;
-                            const face = node.getAttribute('face');
-                            if (face) cur.font = face.split(',')[0].trim();
-                        }
-
-                        // CSS style override
-                        if (st['font-weight'] === 'bold' || st['font-weight'] >= 700) cur.bold = true;
-                        if (st['font-style'] === 'italic') cur.italics = true;
-                        if (st['text-decoration'] && st['text-decoration'].includes('underline')) cur.decoration = 'underline';
-                        if (st['text-decoration'] && st['text-decoration'].includes('line-through')) cur.decoration = 'lineThrough';
-                        if (st['color']) cur.color = hexToRgb(st['color']);
-                        if (st['background-color']) cur.background = hexToRgb(st['background-color']);
-                        const fsVal = cssFontSizeToPt(st['font-size']);
-                        if (fsVal) cur.fontSize = fsVal;
-                        if (st['font-family']) cur.font = st['font-family'].split(',')[0].replace(/['"]/g,'').trim();
-
-                        // Heading → font size & bold
-                        const headSizes = {h1:FS1+10, h2:FS1+7, h3:FS1+4, h4:FS1+2};
-                        if (headSizes[tag]) { cur.bold = true; cur.fontSize = headSizes[tag]; }
-
-                        // Rekursi children
-                        const children = [];
-                        node.childNodes.forEach(ch => {
-                            nodeToInline(ch, cur).forEach(x => children.push(x));
-                        });
-                        return children.length ? children : [];
-                    }
-
-                    // Konversi satu block-level node ke pdfMake block object
-                    function blockNode(node, defaultFS) {
-                        const tag = node.tagName ? node.tagName.toLowerCase() : '';
-                        const st  = styleToObj(node.getAttribute ? (node.getAttribute('style')||'') : '');
-
-                        // Tentukan alignment
-                        let align = 'justify';
-                        const ta = st['text-align'];
-                        if (ta === 'center') align = 'center';
-                        else if (ta === 'right') align = 'right';
-                        else if (ta === 'left') align = 'left';
-
-                        // Heading
-                        const headSizes = {h1:defaultFS+10, h2:defaultFS+7, h3:defaultFS+4, h4:defaultFS+2};
-
-                        if (tag === 'ul' || tag === 'ol') {
-                            const listBlocks = [];
-                            let counter = 1;
-                            node.querySelectorAll(':scope > li').forEach(li => {
-                                const inlines = [];
-                                li.childNodes.forEach(ch => {
-                                    // Skip whitespace-only text nodes (e.g. "\n" before/after SPAN)
-                                    if (ch.nodeType === Node.TEXT_NODE && !ch.textContent.trim()) return;
-                                    nodeToInline(ch, { fontSize: defaultFS }).forEach(x => inlines.push(x));
-                                });
-                                const prefix = tag === 'ol' ? `${counter++}. ` : '• ';
-                                listBlocks.push({
-                                    columns: [
-                                        { width: 'auto', text: prefix, fontSize: defaultFS, margin: [0,0,4,0] },
-                                        { width: '*', text: inlines.length ? inlines : [{ text: '' }], fontSize: defaultFS, alignment: 'justify' }
-                                    ],
-                                    columnGap: 0,
-                                    margin: [8, 0, 0, 2]
-                                });
-                            });
-                            if (!listBlocks.length) return null;
-                            return { stack: listBlocks, margin: [0, 0, 0, 4] };
-                        }
-
-                        // Paragraph / heading / div / br
-                        const inlines = [];
-                        node.childNodes.forEach(ch => {
-                            const base = { fontSize: headSizes[tag] || defaultFS };
-                            if (headSizes[tag]) base.bold = true;
-                            nodeToInline(ch, base).forEach(x => inlines.push(x));
-                        });
-
-                        if (!inlines.length) return { text:' ', fontSize:defaultFS, margin:[0,0,0,2] };
-                        return {
-                            text: inlines,
-                            alignment: align,
-                            lineHeight: 1.5,
-                            fontSize: headSizes[tag] || defaultFS,
-                            margin: [0,0,0,4]
-                        };
-                    }
-
-                    // Parsing root HTML ke array pdfMake blocks
-                    function htmlToPdfMake(htmlString, defaultFS) {
-                        // Jika tidak ada block tag, bungkus seluruh teks dalam <p> agar justify bekerja
-                        const hasBlockTag = /<(p|div|h[1-6]|ul|ol|blockquote|pre)[\s>]/i.test(htmlString);
-                        const processedHtml = hasBlockTag ? htmlString : `<p style="text-align:justify;">${htmlString}</p>`;
-
-                        const tmp = document.createElement('div');
-                        tmp.innerHTML = processedHtml;
-                        const blocks = [];
-
-                        function walk(node) {
-                            if (node.nodeType === Node.TEXT_NODE) {
-                                const t = node.textContent.trim();
-                                if (t) blocks.push({ text: t, fontSize: defaultFS, alignment:'justify', lineHeight:1.5, margin:[0,0,0,4] });
-                                return;
-                            }
-                            if (node.nodeType !== Node.ELEMENT_NODE) return;
-                            const tag = node.tagName.toLowerCase();
-                            const BLOCK_TAGS = ['p','div','h1','h2','h3','h4','h5','h6','ul','ol','blockquote','pre'];
-                            if (BLOCK_TAGS.includes(tag)) {
-                                if (tag === 'br') { blocks.push({ text:' ', fontSize:defaultFS, margin:[0,0,0,2] }); return; }
-                                const b = blockNode(node, defaultFS);
-                                if (b) blocks.push(b);
-                            } else if (tag === 'br') {
-                                blocks.push({ text:' ', fontSize:defaultFS, margin:[0,0,0,2] });
-                            } else {
-                                node.childNodes.forEach(walk);
-                            }
-                        }
-                        tmp.childNodes.forEach(walk);
-                        return blocks.length ? blocks : [{ text: plain, fontSize:defaultFS, alignment:'justify', lineHeight:1.5 }];
-                    }
-
-                    const pdfBlocks = htmlToPdfMake(htmlStr, FS1);
-                    return [
-                        { text:'Keterangan Psikologis:', bold:true, fontSize:FS1, margin:[0,0,0,4] },
-                        ...pdfBlocks,
-                        { text:'', margin:[0,0,0,6] }
-                    ];
-                })(),
-
-                // Tanda tangan di halaman 1
-                {
-                    columns: [
-                        { width:'*', text:'' },
-                        {
-                            width:'auto',
-                            stack: qrB64 ? [
-                                { image:qrB64, width:90, alignment:'center' },
-                                { text:'Scan untuk lihat laporan', fontSize:8, alignment:'center', color:'#888', margin:[0,2,0,0] }
-                            ] : [{ text:'' }]
-                        },
-                        { width:'*', text:'' },
-                        {
-                            width:'auto',
-                            alignment:'right',
-                            stack: [
-                                { text:`Medan, ${tglTTD}`, bold:true, fontSize:FS1 },
-                                { text:'Psikolog,', fontSize:FS1, margin:[0,2,0,2] },
-                                ttdB64 ? { image:ttdB64, width:90, margin:[0,2,0,2] } : { text:'', margin:[0,50,0,0] },
-                                { text:'Dr. Karina M. Brahmana, M.Psi, Psikolog', bold:true, fontSize:FS1, margin:[0,2,0,0] },
-                                { text:'No SIPP: 20070136-2021-02-0799', fontSize:FS1 }
-                            ]
-                        }
-                    ],
-                    margin:[0,8,0,0]
-                }
+                // Halaman 5 — Saran Pengembangan Diri
+                ...(hal5Content.length > 0 ? [
+                    { text:'', pageBreak:'before' },
+                    ...headerInstitusi(),
+                    { stack: hal5Content, margin:[0,4,0,0] }
+                ] : [])
             ],
-            defaultStyle: { font:'Roboto', alignment:'justify' }
+            defaultStyle: { font:'Roboto' }
         };
     };
 
@@ -1624,9 +1583,14 @@ function bukaModalEdit() {
     const kemampuan  = safeJSON(_globalData.x_03, {});
     const kepribadian= safeJSON(_globalData.x_04, {});
     const sikap      = safeJSON(_globalData.x_05, {});
+    const kekuatan   = safeJSON(_globalData.x_07, ['','','']);
+    const kelemahan  = safeJSON(_globalData.x_08, ['','','']);
+    const rekomendasi= safeJSON(_globalData.x_09, ['','','']);
+    const minat      = safeJSON(_globalData.x_10, [{},{},{}]);
+
     // ── Biodata ──
     document.getElementById('ed-nama').value        = biodata.nama        || '';
-    document.getElementById('ed-jk').value          = (biodata.jk || '').trim() || (biodata.jenis_kelamin || '').trim() || 'Laki-laki';
+    document.getElementById('ed-jk').value          = biodata.jk          || 'Laki-laki';
     document.getElementById('ed-usia').value        = biodata.usia        || '';
     document.getElementById('ed-tanggal').value     = biodata.tanggal     || '';
     document.getElementById('ed-tanggal-ttd').value = biodata.tanggal_ttd || biodata.tanggal || '';
@@ -1662,12 +1626,45 @@ function bukaModalEdit() {
         wrapSik.innerHTML += buatSkorInput('sik', key, nama, val);
     });
 
-    // ── Keterangan Psikologis (x_12) — load ke WYSIWYG ──
-    const isiKet = _globalData.x_12 || '';
-    document.getElementById('ed-keterangan-wysiwyg').innerHTML = isiKet;
-    document.getElementById('ed-keterangan-kode').value = isiKet;
-    document.getElementById('ed-keterangan').value = isiKet;
-    setEditorMode('visual');
+    // ── Kekuatan ──
+    const wrapKek = document.getElementById('kekuatan-wrap');
+    wrapKek.innerHTML = '';
+    [0,1,2].forEach(i => {
+        wrapKek.innerHTML += buatListInput('kekuatan', i, kekuatan[i] || '');
+    });
+
+    // ── Kelemahan ──
+    const wrapKel = document.getElementById('kelemahan-wrap');
+    wrapKel.innerHTML = '';
+    [0,1,2].forEach(i => {
+        wrapKel.innerHTML += buatListInput('kelemahan', i, kelemahan[i] || '');
+    });
+
+    // ── Rekomendasi ──
+    const wrapRek = document.getElementById('rekomendasi-wrap');
+    wrapRek.innerHTML = '';
+    [0,1,2].forEach(i => {
+        wrapRek.innerHTML += buatListInput('rekomendasi', i, rekomendasi[i] || '');
+    });
+
+    // ── Arah Minat ──
+    const wrapMin = document.getElementById('minat-wrap');
+    wrapMin.innerHTML = '';
+    [0,1,2].forEach(i => {
+        const m = minat[i] || {};
+        wrapMin.innerHTML += `
+        <div class="minat-edit-item">
+            <div class="minat-num">🎯 Minat ke-${i+1}</div>
+            <div class="edit-form-group">
+                <label>Nama Minat</label>
+                <input type="text" id="minat-nama-${i}" value="${escHtml(m.nama || m.singkatan || '')}" placeholder="Contoh: OUTDOOR">
+            </div>
+            <div class="edit-form-group">
+                <label>Keterangan</label>
+                <textarea id="minat-ket-${i}" rows="3" placeholder="Deskripsi arah minat...">${escHtml(m.keterangan || '')}</textarea>
+            </div>
+        </div>`;
+    });
 
     // Buka modal & reset ke tab pertama
     switchEditTab('biodata');
@@ -1733,7 +1730,7 @@ function escHtml(s) {
 // =========================================================
 function switchEditTab(tab) {
     document.querySelectorAll('.edit-tab').forEach((t, i) => {
-        const tabs = ['biodata','kemampuan','kepribadian','sikap','iq','keterangan'];
+        const tabs = ['biodata','kemampuan','kepribadian','sikap','iq','kekuatan','kelemahan','rekomendasi','minat'];
         t.classList.toggle('active', tabs[i] === tab);
     });
     document.querySelectorAll('.edit-panel').forEach(p => {
@@ -1797,9 +1794,21 @@ async function simpanEdit() {
         // ── IQ ──
         const iqBaru = document.getElementById('ed-iq').value.trim();
 
-        // ── Keterangan Psikologis — ambil dari WYSIWYG atau mode kode ──
-        syncEditorToHidden();
-        const keteranganBaru = document.getElementById('ed-keterangan').value.trim();
+        // ── Kekuatan ──
+        const kekuatanBaru = [0,1,2].map(i => document.getElementById(`kekuatan-${i}`).value.trim());
+
+        // ── Kelemahan ──
+        const kelemahanBaru = [0,1,2].map(i => document.getElementById(`kelemahan-${i}`).value.trim());
+
+        // ── Rekomendasi ──
+        const rekomendasiBaru = [0,1,2].map(i => document.getElementById(`rekomendasi-${i}`).value.trim());
+
+        // ── Arah Minat ──
+        const minatBaru = [0,1,2].map(i => ({
+            singkatan  : (document.getElementById(`minat-nama-${i}`).value.trim()).toUpperCase(),
+            nama       : document.getElementById(`minat-nama-${i}`).value.trim().toUpperCase(),
+            keterangan : document.getElementById(`minat-ket-${i}`).value.trim()
+        }));
 
         // ── Susun payload PUT ──
         const payload = {
@@ -1808,7 +1817,10 @@ async function simpanEdit() {
             x_04 : JSON.stringify(kepribadianBaru),
             x_05 : JSON.stringify(sikapBaru),
             x_06 : iqBaru,
-            x_12 : keteranganBaru
+            x_07 : JSON.stringify(kekuatanBaru),
+            x_08 : JSON.stringify(kelemahanBaru),
+            x_09 : JSON.stringify(rekomendasiBaru),
+            x_10 : JSON.stringify(minatBaru)
         };
 
         // ── Kirim PUT ke API ──
@@ -1849,6 +1861,163 @@ function tampilToast(msg, type = '') {
 }
 
 // =========================================================
+// FETCH & RENDER GAYA BELAJAR VAK + TEMPERAMEN
+// =========================================================
+async function fetchAndRenderVakTemp(token) {
+    const loading = document.getElementById('vak-temp-loading');
+    const content = document.getElementById('vak-temp-content');
+    const errDiv  = document.getElementById('vak-temp-error');
+    const errMsg  = document.getElementById('vak-temp-error-msg');
+
+    try {
+        const res = await fetch(
+            `https://lidan-co-id.pages.dev/api/contacts_filter_dinamis6?table=nilai1_json&x_01_eq=${encodeURIComponent(token)}`,
+            { headers: { 'X-Custom-Auth': 'admin' } }
+        );
+        const json = await res.json();
+
+        if (!json.success || json.count === 0) {
+            loading.style.display = 'none';
+            errDiv.style.display  = 'block';
+            errMsg.textContent    = 'Data tes gaya belajar & temperamen tidak ditemukan untuk token ini.';
+            return;
+        }
+
+        const data = json.data[0];
+        const x07  = JSON.parse(data.x_07 || '{}');
+
+        // ── Render Gaya Belajar VAK ──
+        const vakKey      = x07['tes-gaya-belajar-vak'] !== undefined ? 'tes-gaya-belajar-vak'
+                          : (x07['who_1'] !== undefined ? 'who_1' : null);
+        const vakStr      = vakKey ? x07[vakKey] : null;
+
+        if (vakStr) {
+            const vakArr  = vakStr.split(';').filter(v => v.trim() !== '');
+            const vakSkor = { A: 0, B: 0, C: 0 };
+            vakArr.forEach(v => { if (vakSkor[v] !== undefined) vakSkor[v]++; });
+            const total   = vakArr.length || 15;
+            const vakPct  = {
+                A: Math.round((vakSkor.A / total) * 100),
+                B: Math.round((vakSkor.B / total) * 100),
+                C: Math.round((vakSkor.C / total) * 100)
+            };
+            const vakDom  = Object.keys(vakSkor).reduce((a, b) => vakSkor[a] > vakSkor[b] ? a : b);
+            const vakS    = LEARNING_STYLES[vakDom];
+
+            document.getElementById('vak-dominan-label').innerHTML =
+                `<span style="color:${vakS.color}">${vakS.icon} ${vakS.name}</span>`;
+            document.getElementById('vak-dominan-desc').textContent = vakS.description;
+            document.getElementById('vak-result-card').style.borderColor = vakS.color;
+
+            // Bars
+            const barColors = { A: '#4a90e2', B: '#f39c12', C: '#2ecc71' };
+            const barLabels = { A: '👁️ Visual', B: '👂 Auditory', C: '🤸 Kinestetik' };
+            document.getElementById('vak-bars').innerHTML =
+                ['A','B','C'].map(k => `
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:bold;">
+                        <span>${barLabels[k]}</span><span>${vakPct[k]}%</span>
+                    </div>
+                    <div style="background:#e0e0e0; height:22px; border-radius:11px; overflow:hidden;">
+                        <div style="width:${vakPct[k]}%; height:100%; background:${barColors[k]};
+                            display:flex; align-items:center; padding-left:10px;
+                            color:white; font-weight:bold; font-size:12px;">
+                            ${vakSkor[k]}/${total}
+                        </div>
+                    </div>
+                </div>`).join('');
+
+            // Karakteristik & Tips (variasi deterministik per token)
+            const varChar = getVariasiVak(vakDom, 'characteristics', token);
+            const varTips = getVariasiVak(vakDom, 'tips', token);
+            document.getElementById('vak-karakteristik').innerHTML =
+                varChar.map(c =>
+                    `<li style="padding:5px 0; padding-left:22px; position:relative; color:#555; line-height:1.5;">
+                        <span style="position:absolute;left:0;color:#667eea;font-weight:bold;">✓</span>${c}</li>`
+                ).join('');
+            document.getElementById('vak-tips').innerHTML =
+                varTips.map(t =>
+                    `<li style="padding:5px 0; padding-left:22px; position:relative; color:#555; line-height:1.5;">
+                        <span style="position:absolute;left:0;color:#667eea;font-weight:bold;">✓</span>${t}</li>`
+                ).join('');
+
+            // Simpan ke global untuk PDF
+            window._vakResult = { dom: vakDom, skor: vakSkor, pct: vakPct, total };
+        } else {
+            document.getElementById('vak-section').innerHTML =
+                '<p style="color:#888; text-align:center; padding:20px;">Data Gaya Belajar VAK belum tersedia.</p>';
+            window._vakResult = null;
+        }
+
+        // ── Render Temperamen ──
+        const tempKey  = x07['input-tes-temperamen'] !== undefined ? 'input-tes-temperamen'
+                       : (x07['who_4'] !== undefined ? 'who_4' : null);
+        const tempStr  = tempKey ? x07[tempKey] : null;
+
+        if (tempStr) {
+            const tempArr  = tempStr.split(';').filter(v => v !== '');
+            const tempSkor = { A: 0, B: 0, C: 0, D: 0 };
+            tempArr.forEach(v => { if (tempSkor[v] !== undefined) tempSkor[v]++; });
+            const tempTotal = 26;
+            const tempDom   = Object.keys(tempSkor).reduce((a, b) => tempSkor[a] > tempSkor[b] ? a : b);
+            const tempS     = TEMPERAMENTS[tempDom];
+
+            document.getElementById('temp-dominan-label').innerHTML =
+                `<span style="color:${tempS.color}">${tempS.icon} ${tempS.name}</span>`;
+            document.getElementById('temp-dominan-tagline').textContent = tempS.tagline;
+            document.getElementById('temp-dominan-desc').textContent    = tempS.description;
+            document.getElementById('temp-result-card').style.borderColor = tempS.color;
+
+            // Skor 4 temperamen (sorted)
+            const sortedTemp = Object.entries(tempSkor).sort((a, b) => b[1] - a[1]);
+            document.getElementById('temp-skor-grid').innerHTML =
+                sortedTemp.map(([k, sc]) => {
+                    const t   = TEMPERAMENTS[k];
+                    const pct = Math.round((sc / tempTotal) * 100);
+                    const isDom = k === tempDom;
+                    return `<div style="background:white; border:3px solid ${t.color};
+                        border-radius:10px; text-align:center; padding:12px;
+                        ${isDom ? `box-shadow:0 6px 20px rgba(0,0,0,0.15); transform:scale(1.05);` : ''}">
+                        <div style="font-size:1.8em;">${t.icon}</div>
+                        <div style="font-weight:bold; color:${t.color}; font-size:0.95em; margin:4px 0;">${t.name}</div>
+                        <div style="font-size:1.6em; font-weight:bold; color:${t.color};">${pct}%</div>
+                    </div>`;
+                }).join('');
+
+            const varStrengths  = getVariasiTempAttr(tempDom, 'strengths', token);
+            const varWeaknesses = getVariasiTempAttr(tempDom, 'weaknesses', token);
+            document.getElementById('temp-kekuatan').innerHTML =
+                varStrengths.map(s =>
+                    `<li style="color:#27ae60; padding:4px 0;">✓ ${s}</li>`).join('');
+            document.getElementById('temp-kelemahan').innerHTML =
+                varWeaknesses.map(w =>
+                    `<li style="color:#e74c3c; padding:4px 0;">✗ ${w}</li>`).join('');
+            const variasiTips = getVariasiTips(tempDom, token);
+            document.getElementById('temp-tips').innerHTML =
+                variasiTips.map(t =>
+                    `<li style="padding:5px 0; padding-left:22px; position:relative; color:#555; line-height:1.5;">
+                        <span style="position:absolute;left:0;color:#667eea;font-weight:bold;">✓</span>${t}</li>`
+                ).join('');
+
+            // Simpan ke global untuk PDF
+            window._tempResult = { dom: tempDom, skor: tempSkor, total: tempTotal };
+        } else {
+            document.getElementById('temp-section').innerHTML =
+                '<p style="color:#888; text-align:center; padding:20px;">Data Temperamen belum tersedia.</p>';
+            window._tempResult = null;
+        }
+
+        loading.style.display = 'none';
+        content.style.display = 'block';
+
+    } catch (e) {
+        loading.style.display = 'none';
+        errDiv.style.display  = 'block';
+        errMsg.textContent    = 'Gagal memuat data: ' + e.message;
+    }
+}
+
+// =========================================================
 // MAIN
 // =========================================================
 async function main() {
@@ -1875,43 +2044,30 @@ async function main() {
                     <div style="color:white;font-size:20px;font-weight:700;margin-bottom:4px;">Parameter URL Tidak Lengkap</div>
                     <div style="color:rgba(255,255,255,0.7);font-size:13px;">Isi form di bawah untuk membuka laporan</div>
                 </div>
-
                 <div style="margin-bottom:16px;">
-                    <label style="display:block;color:rgba(255,255,255,0.85);font-size:13px;font-weight:600;margin-bottom:6px;">
-                        ID Data <span style="color:#ff6b6b;">*</span>
-                    </label>
+                    <label style="display:block;color:rgba(255,255,255,0.85);font-size:13px;font-weight:600;margin-bottom:6px;">ID Data <span style="color:#ff6b6b;">*</span></label>
                     <input id="form-id-x" type="number" min="1" placeholder="Contoh: 42"
                         style="width:100%;padding:10px 14px;border-radius:8px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:white;font-size:15px;outline:none;transition:border-color 0.2s;"
-                        onfocus="this.style.borderColor='#4fffb0'"
-                        onblur="this.style.borderColor='rgba(255,255,255,0.3)'"
+                        onfocus="this.style.borderColor='#4fffb0'" onblur="this.style.borderColor='rgba(255,255,255,0.3)'"
                         onkeydown="if(event.key==='Enter') submitParamForm()">
                     <div id="form-id-x-err" style="color:#ff6b6b;font-size:12px;margin-top:4px;display:none;">⚠️ ID wajib diisi</div>
                 </div>
-
                 <div style="margin-bottom:16px;">
-                    <label style="display:block;color:rgba(255,255,255,0.85);font-size:13px;font-weight:600;margin-bottom:6px;">
-                        Token / x_01 <span style="color:rgba(255,255,255,0.5);font-weight:400;">(opsional)</span>
-                    </label>
+                    <label style="display:block;color:rgba(255,255,255,0.85);font-size:13px;font-weight:600;margin-bottom:6px;">Token / x_01 <span style="color:rgba(255,255,255,0.5);font-weight:400;">(opsional)</span></label>
                     <input id="form-x01" type="text" placeholder="Kosongkan jika tidak ada" value="${existingX01}"
                         style="width:100%;padding:10px 14px;border-radius:8px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:white;font-size:15px;outline:none;transition:border-color 0.2s;"
-                        onfocus="this.style.borderColor='#4fffb0'"
-                        onblur="this.style.borderColor='rgba(255,255,255,0.3)'"
+                        onfocus="this.style.borderColor='#4fffb0'" onblur="this.style.borderColor='rgba(255,255,255,0.3)'"
                         onkeydown="if(event.key==='Enter') submitParamForm()">
                 </div>
-
                 <div style="margin-bottom:24px;">
-                    <label style="display:block;color:rgba(255,255,255,0.85);font-size:13px;font-weight:600;margin-bottom:6px;">
-                        Tabel <span style="color:rgba(255,255,255,0.5);font-weight:400;">(opsional)</span>
-                    </label>
+                    <label style="display:block;color:rgba(255,255,255,0.85);font-size:13px;font-weight:600;margin-bottom:6px;">Tabel <span style="color:rgba(255,255,255,0.5);font-weight:400;">(opsional)</span></label>
                     <input id="form-tabel" type="text" placeholder="rekap_nilai1" value="${existingTabel}"
                         style="width:100%;padding:10px 14px;border-radius:8px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:white;font-size:15px;outline:none;transition:border-color 0.2s;"
-                        onfocus="this.style.borderColor='#4fffb0'"
-                        onblur="this.style.borderColor='rgba(255,255,255,0.3)'"
+                        onfocus="this.style.borderColor='#4fffb0'" onblur="this.style.borderColor='rgba(255,255,255,0.3)'"
                         onkeydown="if(event.key==='Enter') submitParamForm()">
                 </div>
-
                 <button onclick="submitParamForm()"
-                    style="width:100%;padding:13px;border-radius:8px;border:none;background:linear-gradient(135deg,#4fffb0,#00c9ff);color:#0d1117;font-size:15px;font-weight:700;cursor:pointer;transition:opacity 0.2s;"
+                    style="width:100%;padding:13px;border-radius:8px;border:none;background:linear-gradient(135deg,#4fffb0,#00c9ff);color:#0d1117;font-size:15px;font-weight:700;cursor:pointer;"
                     onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
                     🚀 Buka Laporan
                 </button>
@@ -1929,9 +2085,7 @@ async function main() {
             document.getElementById('form-id-x-err').style.display = 'none';
             const params = new URLSearchParams({ id_x: idXVal, tabel: tabelVal });
             if (x01Val) params.set('x_01', x01Val);
-            // Buka di tab baru — form di halaman ini tetap terbuka,
-            // tinggal ganti ID untuk membuka laporan lain
-            window.open(`${window.location.pathname}?${params.toString()}`, '_blank');
+            window.location.href = `${window.location.pathname}?${params.toString()}`;
         };
         return;
     }
@@ -1940,9 +2094,7 @@ async function main() {
         const rawData = await fetchData(id_x);
 
         // Validasi x_01 jika ada di URL (opsional — untuk keamanan)
-        // Mode cepat: jika token diisi "xxx", validasi token DILEWATI (hanya id_x & tabel yg dicek)
-        const isQuickMode = x_01 && x_01.trim().toLowerCase() === 'xxx';
-        if (x_01 && !isQuickMode && String(rawData.x_01) !== String(x_01)) {
+        if (x_01 && String(rawData.x_01) !== String(x_01)) {
             throw new Error('Akses ditolak: parameter x_01 tidak valid.');
         }
 
@@ -1957,16 +2109,14 @@ async function main() {
         document.getElementById('loading-screen').classList.add('hidden');
         setupDownload();
 
-        // Tampilkan tombol generate laporan
-        document.getElementById('btn-generate-laporan').style.display = 'inline-block';
-
-        // Tampilkan narasi x_12 jika sudah ada
-        const narasiTersimpan = rawData.x_12 || '';
-        tampilkanNarasi(narasiTersimpan);
+        // Fetch data VAK + Temperamen (token = rawData.x_01)
+        if (rawData.x_01) {
+            fetchAndRenderVakTemp(rawData.x_01);
+        }
 
         // QR Code
         const { id_x: qrIdX, x_01: qrX01, tabel: qrTabel } = getParamsFromUrl();
-        const qrUrl = `https://laporan.lidan.co.id/iq/?id_x=${qrIdX}&x_01=${qrX01||''}&tabel=${qrTabel||'rekap_nilai1'}`;
+        const qrUrl = `https://laporan.lidan.co.id/?id_x=${qrIdX}&x_01=${qrX01||''}&tabel=${qrTabel||'rekap_nilai1'}`;
         document.getElementById('qr-link').href = qrUrl;
         new QRCode(document.getElementById('qr-code'), {
             text: qrUrl, width: 130, height: 130,
@@ -1984,312 +2134,6 @@ async function main() {
                     font-size:15px;font-weight:600;cursor:pointer;">↻ Coba Lagi</button>
             </div>`;
     }
-}
-
-// =========================================================
-// GENERATE LAPORAN — TEMPLATE KALIMAT
-// =========================================================
-
-// Fungsi acak pilih satu dari array
-function acak(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-// ── Template per aspek berdasarkan kategori ──
-const TEMPLATE_NARASI = {
-    kemampuan_umum: {
-        K:  ["Kemampuan umum yang dimiliki masih perlu ditingkatkan, terutama dalam memecahkan masalah sehari-hari secara efektif.",
-             "Kemampuan umum peserta masih berada pada taraf yang membutuhkan pengembangan lebih lanjut.",
-             "Secara umum, kemampuan kognitif dasar peserta masih memerlukan bimbingan dan latihan yang konsisten."],
-        C:  ["Kemampuan umum peserta cukup memadai untuk menangani tugas-tugas yang bersifat rutin.",
-             "Kemampuan umum yang dimiliki sudah cukup untuk bekerja dalam situasi yang terstruktur dengan baik.",
-             "Peserta memiliki kemampuan umum yang cukup, meski masih memerlukan arahan dalam situasi yang lebih kompleks."],
-        B:  ["Kemampuan umum peserta tergolong baik, mampu menemukan solusi untuk berbagai permasalahan dengan cukup efektif.",
-             "Peserta menunjukkan kemampuan umum yang baik dalam memahami dan menyelesaikan berbagai persoalan.",
-             "Kemampuan umum yang dimiliki peserta berada pada level baik, mendukung produktivitas kerja sehari-hari."],
-        BS: ["Kemampuan umum peserta sangat baik, mencerminkan kapasitas kognitif yang tinggi dalam memecahkan masalah secara efektif.",
-             "Peserta memiliki kemampuan umum yang sangat menonjol, mampu menghadapi tantangan intelektual dengan sangat baik.",
-             "Kemampuan umum yang dimiliki berada pada level sangat baik, menjadi fondasi kuat dalam berbagai situasi kerja."]
-    },
-    daya_tangkap_visual: {
-        K:  ["Daya tangkap visual peserta masih terbatas, membutuhkan waktu lebih lama untuk mengenali pola dan perbedaan visual.",
-             "Kemampuan menangkap informasi secara visual masih perlu dilatih dan dikembangkan.",
-             "Peserta masih memerlukan peningkatan dalam kemampuan memproses informasi yang bersifat visual."],
-        C:  ["Daya tangkap visual peserta cukup memadai untuk kebutuhan kerja yang tidak terlalu menuntut kecepatan persepsi.",
-             "Kemampuan visual peserta cukup dalam mengenali pola-pola dasar di lingkungan sekitarnya.",
-             "Peserta memiliki daya tangkap visual yang cukup, meskipun masih perlu berlatih untuk situasi yang lebih detail."],
-        B:  ["Daya tangkap visual peserta baik, mampu mengenali pola dan perbedaan di lingkungan secara cepat dan tepat.",
-             "Peserta memiliki kemampuan visual yang baik dalam mengidentifikasi detail dan perbedaan secara akurat.",
-             "Kemampuan persepsi visual peserta tergolong baik, mendukung pekerjaan yang memerlukan ketelitian visual."],
-        BS: ["Daya tangkap visual peserta sangat baik, dengan kecepatan dan ketepatan tinggi dalam mengenali pola kompleks.",
-             "Peserta unggul dalam kemampuan visual, mampu memproses informasi visual secara sangat cepat dan akurat.",
-             "Daya tangkap visual yang sangat baik menjadikan peserta sangat efektif dalam pekerjaan yang mengandalkan persepsi visual."]
-    },
-    kemampuan_berpikir_logis: {
-        K:  ["Kemampuan berpikir logis peserta masih perlu dikembangkan, terutama dalam menyusun alasan yang sistematis.",
-             "Peserta masih memerlukan peningkatan dalam membuat keputusan berdasarkan alur berpikir yang logis.",
-             "Kemampuan logika peserta masih terbatas dan membutuhkan latihan dalam penalaran sebab-akibat."],
-        C:  ["Kemampuan berpikir logis peserta cukup, mampu membuat keputusan sederhana berdasarkan alasan yang jelas.",
-             "Peserta memiliki kemampuan logis yang cukup untuk menyelesaikan masalah-masalah yang bersifat terstruktur.",
-             "Logika berpikir peserta cukup memadai dalam situasi kerja yang tidak terlalu kompleks."],
-        B:  ["Kemampuan berpikir logis peserta baik, mampu membuat keputusan berdasarkan alasan yang jelas dalam berbagai situasi.",
-             "Peserta menunjukkan kemampuan berpikir logis yang baik dalam menganalisis situasi dan menentukan tindakan yang tepat.",
-             "Daya pikir logis peserta tergolong baik, mendukung pengambilan keputusan yang rasional dan terarah."],
-        BS: ["Kemampuan berpikir logis peserta sangat baik, mencerminkan kualitas penalaran yang tajam dan sistematis.",
-             "Peserta memiliki kemampuan logika yang sangat tinggi, mampu mengurai masalah kompleks dengan terstruktur.",
-             "Berpikir logis adalah kekuatan utama peserta, dengan kemampuan analisis sebab-akibat yang sangat menonjol."]
-    },
-    kemampuan_berpikir_abstrak: {
-        K:  ["Kemampuan berpikir abstrak peserta masih perlu ditingkatkan, terutama dalam memahami konsep yang tidak tampak secara langsung.",
-             "Peserta memerlukan pengembangan dalam kemampuan melihat hubungan antar hal yang bersifat abstrak.",
-             "Kemampuan abstraksi peserta masih terbatas dan memerlukan dukungan dalam memahami konsep-konsep kompleks."],
-        C:  ["Kemampuan berpikir abstrak peserta cukup, mampu memahami konsep-konsep dasar meskipun kadang perlu penjelasan tambahan.",
-             "Peserta memiliki kemampuan abstrak yang cukup untuk mengikuti arahan yang bersifat konseptual.",
-             "Kemampuan abstraksi peserta cukup memadai dalam situasi kerja yang tidak terlalu menuntut pemikiran tingkat tinggi."],
-        B:  ["Kemampuan berpikir abstrak peserta baik, mampu melihat hubungan antar berbagai hal dan memahami konsekuensi tindakan.",
-             "Peserta menunjukkan kemampuan abstrak yang baik dalam memahami pola dan hubungan konseptual.",
-             "Daya abstraksi peserta tergolong baik, mendukung kemampuan berinovasi dan berpikir kreatif."],
-        BS: ["Kemampuan berpikir abstrak peserta sangat baik, mencerminkan kapasitas intelektual yang tinggi dalam penalaran konseptual.",
-             "Peserta sangat unggul dalam berpikir abstrak, mampu menghubungkan konsep-konsep kompleks dengan mudah.",
-             "Kemampuan abstraksi yang sangat baik menjadikan peserta sangat adaptif dalam lingkungan yang dinamis dan kompleks."]
-    },
-    penalaran_verbal: {
-        K:  ["Penalaran verbal peserta masih terbatas, memerlukan peningkatan dalam berkomunikasi dan memahami instruksi lisan maupun tulisan.",
-             "Kemampuan verbal peserta perlu dikembangkan agar dapat berkomunikasi dengan lebih efektif.",
-             "Peserta masih membutuhkan latihan dalam mengolah dan menyampaikan informasi secara verbal."],
-        C:  ["Penalaran verbal peserta cukup, mampu berkomunikasi dengan cukup jelas dalam interaksi sehari-hari.",
-             "Kemampuan verbal peserta cukup memadai untuk kebutuhan komunikasi di lingkungan kerja yang terstruktur.",
-             "Peserta memiliki penalaran verbal yang cukup dalam memahami dan menyampaikan informasi secara lisan."],
-        B:  ["Penalaran verbal peserta baik, mampu berkomunikasi dengan jelas dan efektif dalam berbagai interaksi.",
-             "Peserta menunjukkan kemampuan verbal yang baik dalam memahami dan menyampaikan pesan secara tepat.",
-             "Kemampuan penalaran verbal peserta tergolong baik, menjadi aset penting dalam komunikasi tim dan presentasi."],
-        BS: ["Penalaran verbal peserta sangat baik, mencerminkan kemampuan komunikasi yang fasih dan efektif.",
-             "Peserta sangat unggul dalam penalaran verbal, mampu menyampaikan ide kompleks dengan jelas dan terstruktur.",
-             "Kemampuan verbal yang sangat baik menjadikan peserta komunikator yang handal dalam lingkungan profesional."]
-    },
-    penalaran_numerik: {
-        K:  ["Penalaran numerik peserta masih perlu ditingkatkan, terutama dalam memahami proses hitung dan berpikir kuantitatif.",
-             "Kemampuan numerik peserta masih terbatas dan memerlukan latihan dalam pengolahan angka.",
-             "Peserta memerlukan pengembangan dalam kemampuan berhitung dan bernalar secara kuantitatif."],
-        C:  ["Penalaran numerik peserta cukup, mampu melakukan perhitungan dasar yang diperlukan dalam pekerjaan sehari-hari.",
-             "Kemampuan numerik peserta cukup memadai untuk tugas-tugas yang memerlukan kalkulasi sederhana.",
-             "Peserta memiliki penalaran numerik yang cukup untuk mengikuti instruksi yang bersifat angka dan data."],
-        B:  ["Penalaran numerik peserta baik, mampu memahami proses hitung dan berpikir secara teratur dan kuantitatif.",
-             "Peserta menunjukkan kemampuan numerik yang baik dalam mengolah data dan melakukan analisis angka.",
-             "Kemampuan numerik yang baik mendukung peserta dalam pekerjaan yang memerlukan akurasi perhitungan."],
-        BS: ["Penalaran numerik peserta sangat baik, mencerminkan kemampuan analisis kuantitatif yang tinggi.",
-             "Peserta sangat unggul dalam penalaran numerik, mampu mengolah data angka dengan cepat dan akurat.",
-             "Kemampuan numerik yang sangat baik menjadikan peserta sangat andal dalam pekerjaan yang menuntut presisi matematis."]
-    }
-};
-
-// Template pembuka berdasarkan jenis kelamin
-function kalimatPembuka(nama, jk) {
-    const ia = jk && jk.toLowerCase().includes('perempuan') ? 'Ia' : 'Ia';
-    const templates = [
-        `Berdasarkan hasil pemeriksaan psikologis yang telah dilakukan, ${nama} menunjukkan profil kemampuan kognitif sebagai berikut.`,
-        `Hasil pemeriksaan psikologis terhadap ${nama} mengungkapkan gambaran kemampuan kognitif yang dapat diuraikan sebagai berikut.`,
-        `Pemeriksaan psikologis yang dilakukan terhadap ${nama} memberikan gambaran mengenai kapasitas kognitif yang dimilikinya.`
-    ];
-    return acak(templates);
-}
-
-// Template penutup berdasarkan IQ
-function kalimatPenutup(iq, kategoriIQ) {
-    const templates = [
-        `Secara keseluruhan, taraf kecerdasan umum (IQ) ${nama_peserta_global} berada pada kategori ${kategoriIQ} dengan skor ${iq}, yang mencerminkan potensi intelektual yang ${iq >= 110 ? 'di atas rata-rata' : iq >= 90 ? 'cukup memadai' : 'perlu mendapat perhatian lebih lanjut'}.`,
-        `Dari sisi kecerdasan umum, skor IQ sebesar ${iq} menempatkan ${nama_peserta_global} pada kategori ${kategoriIQ}, mengindikasikan kapasitas intelektual yang ${iq >= 110 ? 'mumpuni' : iq >= 90 ? 'berada dalam rentang normal' : 'masih memerlukan pengembangan'}.`,
-        `Adapun taraf kecerdasan umum (IQ = ${iq}) berada pada kategori ${kategoriIQ}, yang ${iq >= 110 ? 'menunjukkan kemampuan intelektual yang unggul' : iq >= 90 ? 'menunjukkan kemampuan intelektual yang memadai' : 'menunjukkan perlunya dukungan khusus dalam pengembangan kognitif'}.`
-    ];
-    return acak(templates);
-}
-
-let nama_peserta_global = '';
-
-// Fungsi utama generate narasi
-function generateNarasi() {
-    const safeJSON = (str, fallback) => { try { return JSON.parse(str || '{}'); } catch { return fallback; } };
-    const kemampuan = safeJSON(_globalData.x_03, {});
-    const biodata   = safeJSON(_globalData.x_02, {});
-    const iq        = parseInt(_globalData.x_06) || 0;
-    const nama      = biodata.nama || 'Peserta';
-    const jk        = biodata.jk   || '';
-    nama_peserta_global = nama;
-
-    function getKatIQ(iq) {
-        if      (iq <= 69)  return 'Mental Defective';
-        else if (iq <= 79)  return 'Borderline';
-        else if (iq <= 89)  return 'Rata-rata Bawah';
-        else if (iq <= 109) return 'Rata-rata';
-        else if (iq <= 119) return 'Di Atas Rata-rata';
-        else if (iq <= 129) return 'Superior';
-        else if (iq <= 139) return 'Sangat Superior';
-        else                return 'Genius';
-    }
-
-    function getKatLabel(skor) {
-        if (skor >= 9) return 'BS';
-        if (skor >= 7) return 'B';
-        if (skor >= 5) return 'C';
-        return 'K';
-    }
-
-    // Bangun paragraf
-    let bagian = [];
-    bagian.push(kalimatPembuka(nama, jk));
-
-    ASPEK_KEY_KEMAMPUAN.forEach(key => {
-        const skor = parseInt(kemampuan[key]) || 1;
-        const kat  = getKatLabel(skor);
-        const pool = TEMPLATE_NARASI[key];
-        if (pool && pool[kat]) bagian.push(acak(pool[kat]));
-    });
-
-    if (iq > 0) bagian.push(kalimatPenutup(iq, getKatIQ(iq)));
-
-    return bagian.join(' ');
-}
-
-// ── Buka modal generate ──
-function bukaModalGenerate() {
-    if (!_globalData) return;
-    document.getElementById('modal-generate').classList.add('open');
-    document.getElementById('generate-loading').style.display = 'block';
-    document.getElementById('generate-content').style.display = 'none';
-
-    // Cek apakah sudah ada narasi tersimpan di x_12
-    const narasisimpan = _globalData.x_12 || '';
-    setTimeout(() => {
-        document.getElementById('generate-loading').style.display = 'none';
-        document.getElementById('generate-content').style.display = 'block';
-        // Tampilkan narasi tersimpan jika ada, kalau tidak generate baru
-        document.getElementById('gen-narasi-text').value = narasisimpan || generateNarasi();
-    }, 600);
-}
-
-// ── Regenerate (acak ulang) ──
-function regenerateNarasi() {
-    document.getElementById('gen-narasi-text').value = generateNarasi();
-}
-
-// ── Tutup modal generate ──
-function tutupModalGenerate() {
-    document.getElementById('modal-generate').classList.remove('open');
-}
-function tutupModalGenerateDiluar(e) {
-    if (e.target === document.getElementById('modal-generate')) tutupModalGenerate();
-}
-
-// ── Simpan narasi ke x_12 via PUT ──
-async function simpanNarasi() {
-    const teks = document.getElementById('gen-narasi-text').value.trim();
-    if (!teks) { tampilToast('⚠️ Narasi tidak boleh kosong.', 'error'); return; }
-
-    const btn = document.getElementById('btn-simpan-narasi');
-    btn.disabled = true;
-    btn.textContent = '⏳ Menyimpan...';
-
-    try {
-        const apiUrl = `${CONFIG.API_URL}?table=${CONFIG.TABLE_NAME}&id_x=${_globalIdX}`;
-        const res = await fetch(apiUrl, {
-            method : 'PUT',
-            headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': CONFIG.API_SECRET },
-            body   : JSON.stringify({ x_12: teks })
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const result = await res.json();
-        if (!result.success) throw new Error(result.message || 'Gagal menyimpan');
-
-        // Update global data & tampilkan di halaman
-        _globalData.x_12 = teks;
-        tampilkanNarasi(teks);
-        tutupModalGenerate();
-        tampilToast('✅ Keterangan berhasil disimpan!', 'success');
-    } catch (err) {
-        tampilToast(`❌ Gagal menyimpan: ${err.message}`, 'error');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = '💾 Simpan & Tampilkan';
-    }
-}
-
-// ── Tampilkan narasi di halaman ──
-function tampilkanNarasi(teks) {
-    if (teks && teks.trim()) {
-        const el = document.getElementById('narasi-text');
-        // Cek apakah konten mengandung HTML block tag
-        if (/<[a-z][\s\S]*>/i.test(teks)) {
-            el.innerHTML = teks;
-        } else {
-            // Plain text: bungkus dalam <p> agar text-align:justify bekerja dengan benar
-            el.innerHTML = '<p style="margin:0; text-align:justify;">' + teks.replace(/\n/g, '<br>') + '</p>';
-        }
-        document.getElementById('narasi-section').style.display = 'block';
-    } else {
-        document.getElementById('narasi-section').style.display = 'none';
-    }
-}
-
-// =========================================================
-// WYSIWYG EDITOR — FUNGSI
-// =========================================================
-let _editorMode = 'visual'; // 'visual' atau 'kode'
-
-function setEditorMode(mode) {
-    _editorMode = mode;
-    const wysiwyg = document.getElementById('ed-keterangan-wysiwyg');
-    const kode    = document.getElementById('ed-keterangan-kode');
-    const toolbar = document.getElementById('wysiwyg-toolbar');
-    const btnV    = document.getElementById('btn-mode-visual');
-    const btnK    = document.getElementById('btn-mode-kode');
-
-    if (mode === 'visual') {
-        // Sync dari kode ke visual sebelum switch
-        if (kode.style.display !== 'none') {
-            wysiwyg.innerHTML = kode.value;
-        }
-        wysiwyg.style.display = 'block';
-        kode.style.display    = 'none';
-        toolbar.style.display = 'flex';
-        wysiwyg.style.borderRadius = '0 0 8px 8px';
-        btnV.style.background  = '#5F4EDA';
-        btnV.style.color       = 'white';
-        btnV.style.borderColor = '#5F4EDA';
-        btnK.style.background  = 'white';
-        btnK.style.color       = '#555';
-        btnK.style.borderColor = '#ddd';
-    } else {
-        // Sync dari visual ke kode sebelum switch
-        if (wysiwyg.style.display !== 'none') {
-            kode.value = wysiwyg.innerHTML;
-        }
-        wysiwyg.style.display = 'none';
-        kode.style.display    = 'block';
-        toolbar.style.display = 'none';
-        kode.style.borderRadius = '8px';
-        kode.style.borderTop = '2px solid #5F4EDA';
-        btnK.style.background  = '#5F4EDA';
-        btnK.style.color       = 'white';
-        btnK.style.borderColor = '#5F4EDA';
-        btnV.style.background  = 'white';
-        btnV.style.color       = '#555';
-        btnV.style.borderColor = '#ddd';
-    }
-}
-
-function wysiCmd(cmd, value) {
-    document.getElementById('ed-keterangan-wysiwyg').focus();
-    document.execCommand(cmd, false, value || null);
-}
-
-function syncEditorToHidden() {
-    let html = '';
-    if (_editorMode === 'visual') {
-        html = document.getElementById('ed-keterangan-wysiwyg').innerHTML;
-    } else {
-        html = document.getElementById('ed-keterangan-kode').value;
-        // Sync balik ke wysiwyg juga
-        document.getElementById('ed-keterangan-wysiwyg').innerHTML = html;
-    }
-    document.getElementById('ed-keterangan').value = html;
 }
 
 main();
