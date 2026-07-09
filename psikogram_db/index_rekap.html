@@ -237,9 +237,261 @@
             animation: pulse 2s infinite;
         }
         .last-update { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+        .btn-edit-sm {
+            background: transparent; border: 1px solid #f0c070;
+            color: #f0c070; border-radius: 6px; padding: 4px 10px;
+            font-size: 11px; cursor: pointer; transition: background .15s;
+        }
+        .btn-edit-sm:hover { background: #f0c070; color: #0d0f14; }
+
+        .btn-secondary.filter-active {
+            background: var(--accent); color: #0d0f14; border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* =============================================
+           MODAL EDIT — TAMBAHAN (identik dgn index_final.html)
+           ============================================= */
+        .modal-overlay {
+            display: none;
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 10000;
+            align-items: flex-start;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 30px 16px;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 780px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+            overflow: hidden;
+            margin: auto;
+            color: #222;
+            font-family: Arial, sans-serif;
+        }
+        .modal-header {
+            background: #5F4EDA;
+            color: white;
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-header h2 { font-size: 17px; margin: 0; }
+        .modal-close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none; color: white;
+            width: 30px; height: 30px;
+            border-radius: 50%; font-size: 16px;
+            cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .modal-close-btn:hover { background: rgba(255,255,255,0.35); }
+
+        .modal-body { padding: 22px; }
+
+        /* Tab navigasi edit */
+        .edit-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        .edit-tab {
+            padding: 6px 14px;
+            border: 2px solid #ddd;
+            border-radius: 16px;
+            background: white;
+            color: #555;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .edit-tab.active { background: #5F4EDA; color: white; border-color: #5F4EDA; }
+        .edit-tab:hover:not(.active) { background: #f0edff; border-color: #5F4EDA; color: #5F4EDA; }
+
+        .edit-panel { display: none; }
+        .edit-panel.active { display: block; }
+
+        /* Form fields */
+        .edit-form-group {
+            margin-bottom: 14px;
+        }
+        .edit-form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .edit-form-group input[type="text"],
+        .edit-form-group input[type="number"],
+        .edit-form-group textarea,
+        .edit-form-group select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            transition: border-color .2s;
+            resize: vertical;
+            color: #222;
+            background: white;
+        }
+        .edit-form-group input:focus,
+        .edit-form-group textarea:focus,
+        .edit-form-group select:focus {
+            outline: none;
+            border-color: #5F4EDA;
+        }
+
+        /* Skor grid (1-10) */
+        .skor-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        .skor-grid label {
+            font-size: 13px;
+            color: #333;
+            font-weight: bold;
+        }
+        .skor-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .skor-input-wrap input[type="number"] {
+            width: 65px;
+            padding: 6px 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+            color: #222;
+            background: white;
+        }
+        .skor-input-wrap input:focus { outline: none; border-color: #5F4EDA; }
+        .skor-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        /* Daftar item (kekuatan/kelemahan/rekomendasi) */
+        .list-edit-item {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .list-edit-item span.item-num {
+            background: #5F4EDA;
+            color: white;
+            border-radius: 50%;
+            width: 24px; height: 24px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            margin-top: 10px;
+        }
+        .list-edit-item textarea {
+            flex: 1;
+            min-height: 60px;
+        }
+
+        /* Minat item */
+        .minat-edit-item {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #fafafa;
+        }
+        .minat-edit-item .minat-num {
+            font-weight: bold;
+            color: #5F4EDA;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        /* Modal footer */
+        .modal-footer {
+            padding: 16px 22px;
+            border-top: 2px solid #f0f0f0;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            background: #fafafa;
+        }
+        .btn-modal {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .btn-modal:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-save   { background: #28a745; color: white; }
+        .btn-save:hover:not(:disabled)   { background: #218838; }
+        .btn-cancel { background: #6c757d; color: white; }
+        .btn-cancel:hover { background: #545b62; }
+
+        /* Toast notifikasi */
+        #toast-msg {
+            display: none;
+            position: fixed;
+            bottom: 24px; right: 24px;
+            background: #333; color: white;
+            padding: 13px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 99999;
+            box-shadow: 0 4px 20px rgba(0,0,0,.3);
+            max-width: 360px;
+            line-height: 1.5;
+            font-family: Arial, sans-serif;
+        }
+        #toast-msg.success { background: #28a745; }
+        #toast-msg.error   { background: #dc3545; }
+
+        /* Skor warna */
+        .skor-k  { background: #f8d7da; color: #721c24; }  /* 1-4  Kurang */
+        .skor-c  { background: #fff3cd; color: #856404; }  /* 5-6  Cukup  */
+        .skor-b  { background: #cce5ff; color: #004085; }  /* 7-8  Baik   */
+        .skor-bs { background: #d4edda; color: #155724; }  /* 9-10 Baik Sekali */
     </style>
 </head>
 <body>
+
+<!-- Toast Notifikasi -->
+<div id="toast-msg"></div>
 
 <div style="max-width:1300px; margin:0 auto;">
 
@@ -278,6 +530,7 @@
     <div class="toolbar">
         <button class="btn btn-secondary" onclick="loadData()">↻ Refresh Manual</button>
         <button class="btn btn-secondary" id="btnGantiTabel" onclick="toggleTabelInput()">🗄 Ganti Tabel</button>
+        <button class="btn btn-secondary" id="btnFilterSkor" onclick="toggleFilterBox()">🔍 Filter Skor Rendah</button>
         <span style="font-size:12px; color:var(--muted); margin-left:auto;" id="recordCount"></span>
     </div>
     <!-- Input ganti tabel -->
@@ -295,6 +548,38 @@
         <div id="tabelList" style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;"></div>
     </div>
 
+    <!-- Filter skor rendah -->
+    <div id="filterSkorBox" style="display:none; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:16px;">
+        <div style="font-size:12px; color:var(--muted); margin-bottom:10px; font-family:'DM Mono',monospace;">FILTER: TAMPILKAN HANYA PESERTA DENGAN NILAI RENDAH</div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
+            <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
+                <input type="checkbox" id="filterSkorAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
+                Aktifkan Filter
+            </label>
+            <label style="display:flex; align-items:center; gap:7px; font-size:13px;">
+                IQ &lt;
+                <input type="number" id="filterAmbangIQ" value="90" min="1"
+                    style="width:70px; background:var(--bg); border:1px solid var(--border);
+                           color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
+                           font-size:13px; outline:none;"
+                    onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
+            </label>
+            <label style="display:flex; align-items:center; gap:7px; font-size:13px;">
+                Skor Kemampuan/Kepribadian/Sikap Kerja &lt;
+                <input type="number" id="filterAmbangSkor" value="5" min="1" max="10"
+                    style="width:70px; background:var(--bg); border:1px solid var(--border);
+                           color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
+                           font-size:13px; outline:none;"
+                    onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
+            </label>
+        </div>
+        <div style="font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+            Baris ditampilkan jika <strong style="color:var(--text)">IQ</strong> lebih kecil dari ambang IQ,
+            ATAU salah satu skor <strong style="color:var(--text)">Kemampuan / Kepribadian / Sikap Kerja</strong>
+            lebih kecil dari ambang skor aspek di atas.
+        </div>
+    </div>
+
     <!-- Table -->
     <div class="table-wrap">
         <div id="tableContainer">
@@ -305,6 +590,129 @@
         </div>
     </div>
 
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL EDIT DATA PSIKOGRAM (sama persis dgn index_final.html)
+     ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-edit" onclick="tutupModalDiluar(event)">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>✏️ Edit Data Psikogram</h2>
+            <button class="modal-close-btn" onclick="tutupModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+
+            <!-- Tab navigasi -->
+            <div class="edit-tabs">
+                <button class="edit-tab active" onclick="switchEditTab('biodata')">👤 Biodata</button>
+                <button class="edit-tab"        onclick="switchEditTab('kemampuan')">🧠 Kemampuan</button>
+                <button class="edit-tab"        onclick="switchEditTab('kepribadian')">💡 Kepribadian</button>
+                <button class="edit-tab"        onclick="switchEditTab('sikap')">⚙️ Sikap Kerja</button>
+                <button class="edit-tab"        onclick="switchEditTab('iq')">📊 IQ</button>
+                <button class="edit-tab"        onclick="switchEditTab('kekuatan')">⭐ Kekuatan</button>
+                <button class="edit-tab"        onclick="switchEditTab('kelemahan')">⚠️ Kelemahan</button>
+                <button class="edit-tab"        onclick="switchEditTab('rekomendasi')">💬 Rekomendasi</button>
+                <button class="edit-tab"        onclick="switchEditTab('minat')">🎯 Arah Minat</button>
+            </div>
+
+            <!-- ── TAB BIODATA ── -->
+            <div class="edit-panel active" id="epanel-biodata">
+                <div class="edit-form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="ed-nama" placeholder="Nama peserta">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div class="edit-form-group">
+                        <label>Jenis Kelamin</label>
+                        <select id="ed-jk">
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="edit-form-group">
+                        <label>Usia (Tahun)</label>
+                        <input type="text" id="ed-usia" placeholder="Contoh: 25">
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div class="edit-form-group">
+                        <label>Tanggal Pemeriksaan</label>
+                        <input type="text" id="ed-tanggal" placeholder="Contoh: 23 Februari 2026">
+                    </div>
+                    <div class="edit-form-group">
+                        <label>Tanggal Tanda Tangan</label>
+                        <input type="text" id="ed-tanggal-ttd" placeholder="Contoh: 23 Februari 2026">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TAB KEMAMPUAN ── -->
+            <div class="edit-panel" id="epanel-kemampuan">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Isi skor 1–10. K=1-4, C=5-6, B=7-8, BS=9-10</p>
+                <div id="skor-kemampuan-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB KEPRIBADIAN ── -->
+            <div class="edit-panel" id="epanel-kepribadian">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Isi skor 1–10. K=1-4, C=5-6, B=7-8, BS=9-10</p>
+                <div id="skor-kepribadian-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB SIKAP KERJA ── -->
+            <div class="edit-panel" id="epanel-sikap">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Isi skor 1–10. K=1-4, C=5-6, B=7-8, BS=9-10</p>
+                <div id="skor-sikap-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB IQ ── -->
+            <div class="edit-panel" id="epanel-iq">
+                <div class="edit-form-group">
+                    <label>Nilai IQ</label>
+                    <input type="number" id="ed-iq" placeholder="Contoh: 110" min="40" max="200"
+                        style="max-width:180px;" oninput="updateIqKategori()">
+                </div>
+                <div id="iq-kategori-info" style="margin-top:8px; font-size:14px; color:#555;"></div>
+                <div style="margin-top:16px; background:#f8f9fa; border-radius:8px; padding:14px; font-size:13px; color:#555; line-height:1.8;">
+                    <strong>Panduan Kategori IQ:</strong><br>
+                    ≤69 = Mental Defective &nbsp;|&nbsp; 70–79 = Borderline &nbsp;|&nbsp; 80–89 = Rata-rata Bawah<br>
+                    90–109 = Rata-rata &nbsp;|&nbsp; 110–119 = Di Atas Rata-rata<br>
+                    120–129 = Superior &nbsp;|&nbsp; 130–139 = Sangat Superior &nbsp;|&nbsp; ≥140 = Genius
+                </div>
+            </div>
+
+            <!-- ── TAB KEKUATAN ── -->
+            <div class="edit-panel" id="epanel-kekuatan">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat kekuatan/kelebihan peserta.</p>
+                <div id="kekuatan-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB KELEMAHAN ── -->
+            <div class="edit-panel" id="epanel-kelemahan">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat kelemahan peserta.</p>
+                <div id="kelemahan-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB REKOMENDASI ── -->
+            <div class="edit-panel" id="epanel-rekomendasi">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 kalimat rekomendasi untuk peserta.</p>
+                <div id="rekomendasi-wrap"><!-- Diisi JS --></div>
+            </div>
+
+            <!-- ── TAB ARAH MINAT ── -->
+            <div class="edit-panel" id="epanel-minat">
+                <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 arah minat peserta (nama & keterangan).</p>
+                <div id="minat-wrap"><!-- Diisi JS --></div>
+            </div>
+
+        </div><!-- /modal-body -->
+
+        <div class="modal-footer">
+            <button class="btn-modal btn-cancel" onclick="tutupModal()">Batal</button>
+            <button class="btn-modal btn-save" id="btn-simpan" onclick="simpanEdit()">💾 Simpan & Refresh</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -336,6 +744,20 @@
     let dataTable      = null;
     let refreshTimer   = null;
     let lastDataHash   = null;
+    let _lastRows      = [];   // cache baris terakhir, dipakai modal edit & filter
+    let _globalData     = null; // raw row yg sedang diedit
+    let _globalIdX       = null;
+    let _filterAktif      = false; // filter skor rendah: mati by default
+    let _filterAmbangIQ   = 90;
+    let _filterAmbangSkor = 5;
+
+    // Definisi aspek (sama dengan index_final.html — dipakai untuk label skor)
+    const ASPEK_KEMAMPUAN   = ['Kemampuan Umum','Daya Tangkap Visual','Kemampuan Berpikir Logis','Kemampuan Berpikir Abstrak','Penalaran Verbal','Penalaran Numerik'];
+    const ASPEK_KEPRIBADIAN = ['Hasrat Berprestasi','Daya Tahan Stress','Kepercayaan Diri','Relasi Sosial','Kerjasama'];
+    const ASPEK_SIKAP       = ['Sistematika Kerja','Inisiatif','Kemandirian'];
+    const ASPEK_KEY_KEMAMPUAN   = ['kemampuan_umum','daya_tangkap_visual','kemampuan_berpikir_logis','kemampuan_berpikir_abstrak','penalaran_verbal','penalaran_numerik'];
+    const ASPEK_KEY_KEPRIBADIAN = ['hasrat_berprestasi','daya_tahan_stress','kepercayaan_diri','relasi_sosial','kerjasama'];
+    const ASPEK_KEY_SIKAP       = ['sistematika_kerja','inisiatif','kemandirian'];
 
     // Toggle box ganti tabel
     function toggleTabelInput() {
@@ -396,6 +818,56 @@
         return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
     }
 
+    // =========================================================
+    // FILTER SKOR RENDAH (IQ / Kemampuan / Kepribadian / Sikap Kerja)
+    // =========================================================
+    function toggleFilterBox() {
+        const box = document.getElementById('filterSkorBox');
+        const isOpen = box.style.display !== 'none';
+        box.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+            document.getElementById('filterSkorAktif').checked = _filterAktif;
+            document.getElementById('filterAmbangIQ').value    = _filterAmbangIQ;
+            document.getElementById('filterAmbangSkor').value  = _filterAmbangSkor;
+        }
+    }
+
+    // Cek apakah satu baris memenuhi kriteria "nilai rendah"
+    function rowMatchesFilterRendah(row, ambangIQ, ambangSkor) {
+        const iq = parseInt(row.x_06);
+        if (!isNaN(iq) && iq < ambangIQ) return true;
+
+        const kemampuan   = safeJSON(row.x_03, {});
+        const kepribadian = safeJSON(row.x_04, {});
+        const sikap       = safeJSON(row.x_05, {});
+        const semuaSkor = [
+            ...ASPEK_KEY_KEMAMPUAN.map(k   => parseInt(kemampuan[k])),
+            ...ASPEK_KEY_KEPRIBADIAN.map(k => parseInt(kepribadian[k])),
+            ...ASPEK_KEY_SIKAP.map(k       => parseInt(sikap[k]))
+        ];
+        return semuaSkor.some(v => !isNaN(v) && v < ambangSkor);
+    }
+
+    function getFilteredRows(rows) {
+        if (!_filterAktif) return rows;
+        return rows.filter(r => rowMatchesFilterRendah(r, _filterAmbangIQ, _filterAmbangSkor));
+    }
+
+    // Dipanggil saat checkbox/input filter berubah — render ulang dari cache, tanpa fetch ulang
+    function applyFilterAndRender() {
+        _filterAktif      = document.getElementById('filterSkorAktif').checked;
+        _filterAmbangIQ   = parseInt(document.getElementById('filterAmbangIQ').value) || 1;
+        _filterAmbangSkor = parseInt(document.getElementById('filterAmbangSkor').value) || 1;
+
+        document.getElementById('btnFilterSkor').classList.toggle('filter-active', _filterAktif);
+
+        const filtered = getFilteredRows(_lastRows);
+        renderTable(filtered);
+        document.getElementById('recordCount').textContent = _filterAktif
+            ? `${filtered.length} dari ${_lastRows.length} records (filter aktif: IQ<${_filterAmbangIQ} atau skor<${_filterAmbangSkor})`
+            : `${_lastRows.length} records`;
+    }
+
     async function loadData() {
         try {
             const res = await fetch(`${API_URL}?table=${TABLE_NAME}`, {
@@ -409,9 +881,14 @@
             if (hash === lastDataHash) return; // tidak ada perubahan
             lastDataHash = hash;
 
-            renderTable(result.data);
+            _lastRows = result.data; // cache untuk modal edit & filter
+
+            const filtered = getFilteredRows(result.data);
+            renderTable(filtered);
             updateStats(result.data);
-            document.getElementById('recordCount').textContent = `${result.count} records`;
+            document.getElementById('recordCount').textContent = _filterAktif
+                ? `${filtered.length} dari ${result.count} records (filter aktif: IQ<${_filterAmbangIQ} atau skor<${_filterAmbangSkor})`
+                : `${result.count} records`;
             document.getElementById('lastUpdate').textContent = 'Update: ' + new Date().toLocaleTimeString('id-ID');
             document.getElementById('errorBox').style.display = 'none';
 
@@ -469,6 +946,7 @@
                                     <a href="${linkSert1}" target="_blank" class="sert-btn">1</a>
                                     <a href="${linkSert2}" target="_blank" class="sert-btn">2</a>
                                 </div>
+                                <button class="btn-edit-sm" onclick="bukaModalEdit(${row.id_x})">✏️ Edit</button>
                                 <button class="btn-danger-sm" onclick="hapusData(${row.id_x})">🗑</button>
                             </td>
                         </tr>`;
@@ -549,6 +1027,285 @@
         lastDataHash = null;
         loadData();
     });
+
+    // =========================================================
+    // MODAL EDIT DATA PSIKOGRAM (identik logikanya dgn index_final.html)
+    // =========================================================
+    function escHtml(s) {
+        return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function skorKelas(v) {
+        if (v <= 4) return 'skor-k';
+        if (v <= 6) return 'skor-c';
+        if (v <= 8) return 'skor-b';
+        return 'skor-bs';
+    }
+    function skorLabel(v) {
+        if (v <= 4) return 'K';
+        if (v <= 6) return 'C';
+        if (v <= 8) return 'B';
+        return 'BS';
+    }
+
+    function buatSkorInput(prefix, key, nama, val) {
+        const kls = skorKelas(val);
+        const lbl = skorLabel(val);
+        return `
+        <div class="skor-grid">
+            <div><label>${nama}</label></div>
+            <div class="skor-input-wrap">
+                <input type="number" id="${prefix}-${key}" value="${val}" min="1" max="10"
+                    oninput="updateSkorBadge('${prefix}-${key}', 'badge-${prefix}-${key}')">
+                <span class="skor-badge ${kls}" id="badge-${prefix}-${key}">${lbl}</span>
+            </div>
+        </div>`;
+    }
+
+    function buatListInput(prefix, idx, val) {
+        return `
+        <div class="list-edit-item">
+            <span class="item-num">${idx+1}</span>
+            <textarea id="${prefix}-${idx}" rows="3" placeholder="Isi teks...">${escHtml(val)}</textarea>
+        </div>`;
+    }
+
+    function updateSkorBadge(inputId, badgeId) {
+        const val = parseInt(document.getElementById(inputId).value) || 1;
+        const badge = document.getElementById(badgeId);
+        badge.className = `skor-badge ${skorKelas(val)}`;
+        badge.textContent = skorLabel(val);
+    }
+
+    function updateIqKategori() {
+        const iq = parseInt(document.getElementById('ed-iq').value) || 0;
+        const el = document.getElementById('iq-kategori-info');
+        let kat = '', warna = '';
+        if      (iq <= 69)  { kat='Mental Defective';    warna='#dc3545'; }
+        else if (iq <= 79)  { kat='Borderline';           warna='#e67e22'; }
+        else if (iq <= 89)  { kat='Rata-rata Bawah';      warna='#e6a817'; }
+        else if (iq <= 109) { kat='Rata-rata';            warna='#27ae60'; }
+        else if (iq <= 119) { kat='Di Atas Rata-rata';   warna='#2980b9'; }
+        else if (iq <= 129) { kat='Superior';             warna='#5F4EDA'; }
+        else if (iq <= 139) { kat='Sangat Superior';      warna='#5F4EDA'; }
+        else                { kat='Genius';               warna='#5F4EDA'; }
+        el.innerHTML = iq > 0
+            ? `Kategori: <strong style="color:${warna};">${kat}</strong> (IQ = ${iq})`
+            : '';
+    }
+
+    function switchEditTab(tab) {
+        document.querySelectorAll('.edit-tab').forEach((t, i) => {
+            const tabs = ['biodata','kemampuan','kepribadian','sikap','iq','kekuatan','kelemahan','rekomendasi','minat'];
+            t.classList.toggle('active', tabs[i] === tab);
+        });
+        document.querySelectorAll('.edit-panel').forEach(p => {
+            p.classList.toggle('active', p.id === `epanel-${tab}`);
+        });
+    }
+
+    function tutupModal() {
+        document.getElementById('modal-edit').classList.remove('open');
+    }
+    function tutupModalDiluar(e) {
+        if (e.target === document.getElementById('modal-edit')) tutupModal();
+    }
+
+    function tampilToast(msg, type = '') {
+        const t = document.getElementById('toast-msg');
+        t.textContent = msg;
+        t.className   = type;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 4000);
+    }
+
+    // Buka modal edit untuk baris dengan id_x tertentu (dicari dari cache _lastRows)
+    function bukaModalEdit(id_x) {
+        const row = _lastRows.find(r => String(r.id_x) === String(id_x));
+        if (!row) { tampilToast('❌ Data tidak ditemukan di cache, coba refresh dulu.', 'error'); return; }
+
+        _globalData = row;
+        _globalIdX  = row.id_x;
+
+        const biodata     = safeJSON(row.x_02, {});
+        const kemampuan   = safeJSON(row.x_03, {});
+        const kepribadian = safeJSON(row.x_04, {});
+        const sikap       = safeJSON(row.x_05, {});
+        const kekuatan    = safeJSON(row.x_07, ['','','']);
+        const kelemahan   = safeJSON(row.x_08, ['','','']);
+        const rekomendasi = safeJSON(row.x_09, ['','','']);
+        const minat       = safeJSON(row.x_10, [{},{},{}]);
+
+        // ── Biodata ──
+        document.getElementById('ed-nama').value        = biodata.nama        || '';
+        document.getElementById('ed-jk').value          = biodata.jk          || 'Laki-laki';
+        document.getElementById('ed-usia').value        = biodata.usia        || '';
+        document.getElementById('ed-tanggal').value     = biodata.tanggal     || '';
+        document.getElementById('ed-tanggal-ttd').value = biodata.tanggal_ttd || biodata.tanggal || '';
+
+        // ── IQ ──
+        document.getElementById('ed-iq').value = row.x_06 || '';
+        updateIqKategori();
+
+        // ── Skor Kemampuan ──
+        const wrapKem = document.getElementById('skor-kemampuan-wrap');
+        wrapKem.innerHTML = '';
+        ASPEK_KEMAMPUAN.forEach((nama, i) => {
+            const key = ASPEK_KEY_KEMAMPUAN[i];
+            const val = parseInt(kemampuan[key]) || 1;
+            wrapKem.innerHTML += buatSkorInput('kem', key, nama, val);
+        });
+
+        // ── Skor Kepribadian ──
+        const wrapKep = document.getElementById('skor-kepribadian-wrap');
+        wrapKep.innerHTML = '';
+        ASPEK_KEPRIBADIAN.forEach((nama, i) => {
+            const key = ASPEK_KEY_KEPRIBADIAN[i];
+            const val = parseInt(kepribadian[key]) || 1;
+            wrapKep.innerHTML += buatSkorInput('kep', key, nama, val);
+        });
+
+        // ── Skor Sikap Kerja ──
+        const wrapSik = document.getElementById('skor-sikap-wrap');
+        wrapSik.innerHTML = '';
+        ASPEK_SIKAP.forEach((nama, i) => {
+            const key = ASPEK_KEY_SIKAP[i];
+            const val = parseInt(sikap[key]) || 1;
+            wrapSik.innerHTML += buatSkorInput('sik', key, nama, val);
+        });
+
+        // ── Kekuatan ──
+        const wrapKek = document.getElementById('kekuatan-wrap');
+        wrapKek.innerHTML = '';
+        [0,1,2].forEach(i => { wrapKek.innerHTML += buatListInput('kekuatan', i, kekuatan[i] || ''); });
+
+        // ── Kelemahan ──
+        const wrapKel = document.getElementById('kelemahan-wrap');
+        wrapKel.innerHTML = '';
+        [0,1,2].forEach(i => { wrapKel.innerHTML += buatListInput('kelemahan', i, kelemahan[i] || ''); });
+
+        // ── Rekomendasi ──
+        const wrapRek = document.getElementById('rekomendasi-wrap');
+        wrapRek.innerHTML = '';
+        [0,1,2].forEach(i => { wrapRek.innerHTML += buatListInput('rekomendasi', i, rekomendasi[i] || ''); });
+
+        // ── Arah Minat ──
+        const wrapMin = document.getElementById('minat-wrap');
+        wrapMin.innerHTML = '';
+        [0,1,2].forEach(i => {
+            const m = minat[i] || {};
+            wrapMin.innerHTML += `
+            <div class="minat-edit-item">
+                <div class="minat-num">🎯 Minat ke-${i+1}</div>
+                <div class="edit-form-group">
+                    <label>Nama Minat</label>
+                    <input type="text" id="minat-nama-${i}" value="${escHtml(m.nama || m.singkatan || '')}" placeholder="Contoh: OUTDOOR">
+                </div>
+                <div class="edit-form-group">
+                    <label>Keterangan</label>
+                    <textarea id="minat-ket-${i}" rows="3" placeholder="Deskripsi arah minat...">${escHtml(m.keterangan || '')}</textarea>
+                </div>
+            </div>`;
+        });
+
+        // Buka modal & reset ke tab pertama
+        switchEditTab('biodata');
+        document.getElementById('modal-edit').classList.add('open');
+    }
+
+    // ── Simpan (PUT ke API) ──
+    async function simpanEdit() {
+        const btn = document.getElementById('btn-simpan');
+        btn.disabled = true;
+        btn.textContent = '⏳ Menyimpan...';
+
+        try {
+            // ── Biodata ──
+            const biodataLama = safeJSON(_globalData.x_02, {});
+            const biodataBaru = {
+                ...biodataLama,
+                nama         : document.getElementById('ed-nama').value.trim(),
+                jk           : document.getElementById('ed-jk').value,
+                usia         : document.getElementById('ed-usia').value.trim(),
+                tanggal      : document.getElementById('ed-tanggal').value.trim(),
+                tanggal_ttd  : document.getElementById('ed-tanggal-ttd').value.trim()
+            };
+
+            // ── Kemampuan ──
+            const kemampuanBaru = {};
+            ASPEK_KEY_KEMAMPUAN.forEach(key => {
+                kemampuanBaru[key] = parseInt(document.getElementById(`kem-${key}`).value) || 1;
+            });
+            const kemampuanLama = safeJSON(_globalData.x_03, {});
+            kemampuanBaru.skor_iq = kemampuanLama.skor_iq || 0;
+
+            // ── Kepribadian ──
+            const kepribadianBaru = {};
+            ASPEK_KEY_KEPRIBADIAN.forEach(key => {
+                kepribadianBaru[key] = parseInt(document.getElementById(`kep-${key}`).value) || 1;
+            });
+
+            // ── Sikap Kerja ──
+            const sikapBaru = {};
+            ASPEK_KEY_SIKAP.forEach(key => {
+                sikapBaru[key] = parseInt(document.getElementById(`sik-${key}`).value) || 1;
+            });
+
+            // ── IQ ──
+            const iqBaru = document.getElementById('ed-iq').value.trim();
+
+            // ── Kekuatan / Kelemahan / Rekomendasi ──
+            const kekuatanBaru    = [0,1,2].map(i => document.getElementById(`kekuatan-${i}`).value.trim());
+            const kelemahanBaru   = [0,1,2].map(i => document.getElementById(`kelemahan-${i}`).value.trim());
+            const rekomendasiBaru = [0,1,2].map(i => document.getElementById(`rekomendasi-${i}`).value.trim());
+
+            // ── Arah Minat ──
+            const minatBaru = [0,1,2].map(i => ({
+                singkatan  : (document.getElementById(`minat-nama-${i}`).value.trim()).toUpperCase(),
+                nama       : document.getElementById(`minat-nama-${i}`).value.trim().toUpperCase(),
+                keterangan : document.getElementById(`minat-ket-${i}`).value.trim()
+            }));
+
+            // ── Susun payload PUT ──
+            const payload = {
+                x_02 : JSON.stringify(biodataBaru),
+                x_03 : JSON.stringify(kemampuanBaru),
+                x_04 : JSON.stringify(kepribadianBaru),
+                x_05 : JSON.stringify(sikapBaru),
+                x_06 : iqBaru,
+                x_07 : JSON.stringify(kekuatanBaru),
+                x_08 : JSON.stringify(kelemahanBaru),
+                x_09 : JSON.stringify(rekomendasiBaru),
+                x_10 : JSON.stringify(minatBaru)
+            };
+
+            // ── Kirim PUT ke API ──
+            const apiUrl = `${API_URL}?table=${TABLE_NAME}&id_x=${_globalIdX}`;
+            const res = await fetch(apiUrl, {
+                method : 'PUT',
+                headers: {
+                    'Content-Type'  : 'application/json',
+                    'X-Custom-Auth' : SECRET
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const result = await res.json();
+            if (!result.success) throw new Error(result.message || 'Gagal menyimpan');
+
+            // ── Sukses: tutup modal, muat ulang tabel ──
+            tutupModal();
+            tampilToast('✅ Data berhasil disimpan!', 'success');
+            lastDataHash = null; // paksa reload
+            loadData();
+
+        } catch (err) {
+            tampilToast(`❌ Gagal menyimpan: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '💾 Simpan & Refresh';
+        }
+    }
 </script>
 </body>
 </html>
