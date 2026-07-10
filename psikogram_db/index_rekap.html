@@ -550,23 +550,50 @@
 
     <!-- Filter skor rendah -->
     <div id="filterSkorBox" style="display:none; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:16px;">
-        <div style="font-size:12px; color:var(--muted); margin-bottom:10px; font-family:'DM Mono',monospace;">FILTER: TAMPILKAN HANYA PESERTA DENGAN NILAI RENDAH</div>
-        <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
-            <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
-                <input type="checkbox" id="filterSkorAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
-                Aktifkan Filter
+        <div style="font-size:12px; color:var(--muted); margin-bottom:10px; font-family:'DM Mono',monospace;">FILTER: TAMPILKAN PESERTA SESUAI KRITERIA (BISA GABUNG BEBERAPA)</div>
+        <div style="display:flex; gap:18px; align-items:center; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--border);">
+            <span style="font-size:12px; color:var(--muted); font-family:'DM Mono',monospace;">MODE GABUNGAN:</span>
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                <input type="radio" name="filterMode" id="filterModeOr" value="or" checked onchange="applyFilterAndRender()" style="cursor:pointer;">
+                OR — salah satu terpenuhi
             </label>
-            <label style="display:flex; align-items:center; gap:7px; font-size:13px;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                <input type="radio" name="filterMode" id="filterModeAnd" value="and" onchange="applyFilterAndRender()" style="cursor:pointer;">
+                AND — semua terpenuhi
+            </label>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
+                <input type="checkbox" id="filterIQKurangAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
                 IQ &lt;
-                <input type="number" id="filterAmbangIQ" value="90" min="1"
+                <input type="number" id="filterAmbangIQKurang" value="90" min="1"
                     style="width:70px; background:var(--bg); border:1px solid var(--border);
                            color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
                            font-size:13px; outline:none;"
                     onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
             </label>
-            <label style="display:flex; align-items:center; gap:7px; font-size:13px;">
+            <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
+                <input type="checkbox" id="filterIQLebihAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
+                IQ &gt;
+                <input type="number" id="filterAmbangIQLebih" value="110" min="1"
+                    style="width:70px; background:var(--bg); border:1px solid var(--border);
+                           color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
+                           font-size:13px; outline:none;"
+                    onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
+            </label>
+            <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
+                <input type="checkbox" id="filterSkorKurangAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
                 Skor Kemampuan/Kepribadian/Sikap Kerja &lt;
-                <input type="number" id="filterAmbangSkor" value="5" min="1" max="10"
+                <input type="number" id="filterAmbangSkorKurang" value="5" min="1" max="10"
+                    style="width:70px; background:var(--bg); border:1px solid var(--border);
+                           color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
+                           font-size:13px; outline:none;"
+                    onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
+            </label>
+            <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
+                <input type="checkbox" id="filterSkorLebihAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
+                Skor Kemampuan/Kepribadian/Sikap Kerja &gt;
+                <input type="number" id="filterAmbangSkorLebih" value="8" min="1" max="10"
                     style="width:70px; background:var(--bg); border:1px solid var(--border);
                            color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
                            font-size:13px; outline:none;"
@@ -574,9 +601,9 @@
             </label>
         </div>
         <div style="font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
-            Baris ditampilkan jika <strong style="color:var(--text)">IQ</strong> lebih kecil dari ambang IQ,
-            ATAU salah satu skor <strong style="color:var(--text)">Kemampuan / Kepribadian / Sikap Kerja</strong>
-            lebih kecil dari ambang skor aspek di atas.
+            Centang satu atau beberapa filter di atas, lalu pilih mode <strong style="color:var(--text)">OR</strong> (tampil jika salah satu terpenuhi)
+            atau <strong style="color:var(--text)">AND</strong> (tampil hanya jika semua filter yang dicentang terpenuhi).
+            Untuk filter skor (Kemampuan/Kepribadian/Sikap Kerja), cukup <strong style="color:var(--text)">salah satu aspek</strong> yang memenuhi ambang.
         </div>
     </div>
 
@@ -747,9 +774,15 @@
     let _lastRows      = [];   // cache baris terakhir, dipakai modal edit & filter
     let _globalData     = null; // raw row yg sedang diedit
     let _globalIdX       = null;
-    let _filterAktif      = false; // filter skor rendah: mati by default
-    let _filterAmbangIQ   = 90;
-    let _filterAmbangSkor = 5;
+    let _filterMode            = 'or'; // 'or' | 'and'
+    let _filterIQKurangAktif   = false;
+    let _filterAmbangIQKurang  = 90;
+    let _filterIQLebihAktif    = false;
+    let _filterAmbangIQLebih   = 110;
+    let _filterSkorKurangAktif = false;
+    let _filterAmbangSkorKurang = 5;
+    let _filterSkorLebihAktif  = false;
+    let _filterAmbangSkorLebih = 8;
 
     // Definisi aspek (sama dengan index_final.html — dipakai untuk label skor)
     const ASPEK_KEMAMPUAN   = ['Kemampuan Umum','Daya Tangkap Visual','Kemampuan Berpikir Logis','Kemampuan Berpikir Abstrak','Penalaran Verbal','Penalaran Numerik'];
@@ -826,45 +859,89 @@
         const isOpen = box.style.display !== 'none';
         box.style.display = isOpen ? 'none' : 'block';
         if (!isOpen) {
-            document.getElementById('filterSkorAktif').checked = _filterAktif;
-            document.getElementById('filterAmbangIQ').value    = _filterAmbangIQ;
-            document.getElementById('filterAmbangSkor').value  = _filterAmbangSkor;
+            document.getElementById('filterModeOr').checked         = (_filterMode === 'or');
+            document.getElementById('filterModeAnd').checked        = (_filterMode === 'and');
+            document.getElementById('filterIQKurangAktif').checked   = _filterIQKurangAktif;
+            document.getElementById('filterAmbangIQKurang').value    = _filterAmbangIQKurang;
+            document.getElementById('filterIQLebihAktif').checked    = _filterIQLebihAktif;
+            document.getElementById('filterAmbangIQLebih').value     = _filterAmbangIQLebih;
+            document.getElementById('filterSkorKurangAktif').checked = _filterSkorKurangAktif;
+            document.getElementById('filterAmbangSkorKurang').value  = _filterAmbangSkorKurang;
+            document.getElementById('filterSkorLebihAktif').checked  = _filterSkorLebihAktif;
+            document.getElementById('filterAmbangSkorLebih').value   = _filterAmbangSkorLebih;
         }
     }
 
-    // Cek apakah satu baris memenuhi kriteria "nilai rendah"
-    function rowMatchesFilterRendah(row, ambangIQ, ambangSkor) {
-        const iq = parseInt(row.x_06);
-        if (!isNaN(iq) && iq < ambangIQ) return true;
-
+    // Kumpulkan semua nilai skor aspek (Kemampuan/Kepribadian/Sikap) dari satu baris
+    function ambilSemuaSkorAspek(row) {
         const kemampuan   = safeJSON(row.x_03, {});
         const kepribadian = safeJSON(row.x_04, {});
         const sikap       = safeJSON(row.x_05, {});
-        const semuaSkor = [
+        return [
             ...ASPEK_KEY_KEMAMPUAN.map(k   => parseInt(kemampuan[k])),
             ...ASPEK_KEY_KEPRIBADIAN.map(k => parseInt(kepribadian[k])),
             ...ASPEK_KEY_SIKAP.map(k       => parseInt(sikap[k]))
         ];
-        return semuaSkor.some(v => !isNaN(v) && v < ambangSkor);
+    }
+
+    // Cek apakah satu baris memenuhi filter yang aktif, sesuai mode OR/AND
+    function rowMatchesFilterRendah(row) {
+        const iq = parseInt(row.x_06);
+        let semuaSkor = null; // lazy, hanya dihitung kalau perlu
+
+        const hasil = []; // hasil boolean tiap filter yang AKTIF saja
+
+        if (_filterIQKurangAktif) hasil.push(!isNaN(iq) && iq < _filterAmbangIQKurang);
+        if (_filterIQLebihAktif)  hasil.push(!isNaN(iq) && iq > _filterAmbangIQLebih);
+
+        if (_filterSkorKurangAktif || _filterSkorLebihAktif) {
+            semuaSkor = ambilSemuaSkorAspek(row);
+        }
+        if (_filterSkorKurangAktif) hasil.push(semuaSkor.some(v => !isNaN(v) && v < _filterAmbangSkorKurang));
+        if (_filterSkorLebihAktif)  hasil.push(semuaSkor.some(v => !isNaN(v) && v > _filterAmbangSkorLebih));
+
+        if (hasil.length === 0) return false;
+        return _filterMode === 'and' ? hasil.every(v => v) : hasil.some(v => v);
+    }
+
+    function adaFilterAktif() {
+        return _filterIQKurangAktif || _filterIQLebihAktif || _filterSkorKurangAktif || _filterSkorLebihAktif;
     }
 
     function getFilteredRows(rows) {
-        if (!_filterAktif) return rows;
-        return rows.filter(r => rowMatchesFilterRendah(r, _filterAmbangIQ, _filterAmbangSkor));
+        if (!adaFilterAktif()) return rows;
+        return rows.filter(r => rowMatchesFilterRendah(r));
+    }
+
+    function labelFilterAktif() {
+        const bagian = [];
+        if (_filterIQKurangAktif)   bagian.push(`IQ<${_filterAmbangIQKurang}`);
+        if (_filterIQLebihAktif)    bagian.push(`IQ>${_filterAmbangIQLebih}`);
+        if (_filterSkorKurangAktif) bagian.push(`skor<${_filterAmbangSkorKurang}`);
+        if (_filterSkorLebihAktif)  bagian.push(`skor>${_filterAmbangSkorLebih}`);
+        const pemisah = _filterMode === 'and' ? ' DAN ' : ' atau ';
+        return bagian.join(pemisah);
     }
 
     // Dipanggil saat checkbox/input filter berubah — render ulang dari cache, tanpa fetch ulang
     function applyFilterAndRender() {
-        _filterAktif      = document.getElementById('filterSkorAktif').checked;
-        _filterAmbangIQ   = parseInt(document.getElementById('filterAmbangIQ').value) || 1;
-        _filterAmbangSkor = parseInt(document.getElementById('filterAmbangSkor').value) || 1;
+        _filterMode              = document.getElementById('filterModeAnd').checked ? 'and' : 'or';
+        _filterIQKurangAktif    = document.getElementById('filterIQKurangAktif').checked;
+        _filterAmbangIQKurang   = parseInt(document.getElementById('filterAmbangIQKurang').value) || 1;
+        _filterIQLebihAktif     = document.getElementById('filterIQLebihAktif').checked;
+        _filterAmbangIQLebih    = parseInt(document.getElementById('filterAmbangIQLebih').value) || 1;
+        _filterSkorKurangAktif  = document.getElementById('filterSkorKurangAktif').checked;
+        _filterAmbangSkorKurang = parseInt(document.getElementById('filterAmbangSkorKurang').value) || 1;
+        _filterSkorLebihAktif   = document.getElementById('filterSkorLebihAktif').checked;
+        _filterAmbangSkorLebih  = parseInt(document.getElementById('filterAmbangSkorLebih').value) || 1;
 
-        document.getElementById('btnFilterSkor').classList.toggle('filter-active', _filterAktif);
+        const aktif = adaFilterAktif();
+        document.getElementById('btnFilterSkor').classList.toggle('filter-active', aktif);
 
         const filtered = getFilteredRows(_lastRows);
         renderTable(filtered);
-        document.getElementById('recordCount').textContent = _filterAktif
-            ? `${filtered.length} dari ${_lastRows.length} records (filter aktif: IQ<${_filterAmbangIQ} atau skor<${_filterAmbangSkor})`
+        document.getElementById('recordCount').textContent = aktif
+            ? `${filtered.length} dari ${_lastRows.length} records (filter aktif: ${labelFilterAktif()})`
             : `${_lastRows.length} records`;
     }
 
@@ -886,8 +963,8 @@
             const filtered = getFilteredRows(result.data);
             renderTable(filtered);
             updateStats(result.data);
-            document.getElementById('recordCount').textContent = _filterAktif
-                ? `${filtered.length} dari ${result.count} records (filter aktif: IQ<${_filterAmbangIQ} atau skor<${_filterAmbangSkor})`
+            document.getElementById('recordCount').textContent = adaFilterAktif()
+                ? `${filtered.length} dari ${result.count} records (filter aktif: ${labelFilterAktif()})`
                 : `${result.count} records`;
             document.getElementById('lastUpdate').textContent = 'Update: ' + new Date().toLocaleTimeString('id-ID');
             document.getElementById('errorBox').style.display = 'none';
@@ -907,6 +984,7 @@
             <table id="adminTable" class="display" style="width:100%">
                 <thead>
                     <tr>
+                        <th style="text-align:center;">OK</th>
                         <th>ID</th>
                         <th>Kode</th>
                         <th>Nama</th>
@@ -929,7 +1007,14 @@
                         const linkSsc = `https://psikogram.lidan.co.id/psikogram_db/index_final_gabungan-ssc?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkSert1 = `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkSert2 = `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq1?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
+                        const statusFinal = safeJSON(row.x_19, {});
+                        const isChecked   = statusFinal.status === 'final' ? 'checked' : '';
                         return `<tr>
+                            <td style="text-align:center;">
+                                <input type="checkbox" class="chk-status-final" ${isChecked}
+                                    title="Tandai sudah final/OK"
+                                    onchange="toggleStatusFinal(${row.id_x}, this)">
+                            </td>
                             <td style="color:var(--muted); font-family:'DM Mono',monospace; font-size:12px;">${row.id_x}</td>
                             <td><span class="kode-badge">${kode}</span></td>
                             <td><span class="nama-text">${nama}</span></td>
@@ -958,7 +1043,7 @@
 
         dataTable = $('#adminTable').DataTable({
             pageLength: 25,
-            order: [[0, 'desc']],
+            order: [[1, 'desc']],
             language: {
                 search: 'Cari:',
                 lengthMenu: 'Tampilkan _MENU_ data',
@@ -967,7 +1052,7 @@
                 emptyTable: 'Tidak ada data',
                 zeroRecords: 'Data tidak ditemukan'
             },
-            columnDefs: [{ orderable: false, targets: 5 }]
+            columnDefs: [{ orderable: false, targets: [0, 6] }]
         });
     }
 
@@ -986,6 +1071,45 @@
             return new Date(r.x_11).toDateString() === today;
         }).length;
         document.getElementById('statToday').textContent = todayCount;
+    }
+
+    // ── Toggle status Final/OK per baris (disimpan sebagai JSON di x_19, tanpa kolom baru) ──
+    async function toggleStatusFinal(id_x, checkboxEl) {
+        const dicentang = checkboxEl.checked;
+        checkboxEl.disabled = true;
+
+        // Ambil status lama dari cache biar field lain (kalau ada) tidak hilang
+        const rowCache   = _lastRows.find(r => r.id_x === id_x);
+        const statusLama = rowCache ? safeJSON(rowCache.x_19, {}) : {};
+
+        const statusBaru = dicentang
+            ? { ...statusLama, status: 'final', waktu: new Date().toISOString() }
+            : { ...statusLama, status: 'draft', waktu: new Date().toISOString() };
+
+        try {
+            const apiUrl = `${API_URL}?table=${TABLE_NAME}&id_x=${id_x}`;
+            const res = await fetch(apiUrl, {
+                method : 'PUT',
+                headers: {
+                    'Content-Type'  : 'application/json',
+                    'X-Custom-Auth' : SECRET
+                },
+                body: JSON.stringify({ x_19: JSON.stringify(statusBaru) })
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const result = await res.json();
+            if (!result.success) throw new Error(result.message || 'Gagal menyimpan status');
+
+            // Update cache lokal supaya konsisten tanpa perlu reload penuh
+            if (rowCache) rowCache.x_19 = JSON.stringify(statusBaru);
+
+            tampilToast(dicentang ? '✅ Ditandai final/OK' : '↩️ Tanda final dibatalkan', 'success');
+        } catch (err) {
+            checkboxEl.checked = !dicentang; // rollback tampilan kalau gagal
+            tampilToast(`❌ Gagal menyimpan status: ${err.message}`, 'error');
+        } finally {
+            checkboxEl.disabled = false;
+        }
     }
 
     async function hapusData(id_x) {
