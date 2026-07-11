@@ -1130,17 +1130,6 @@ async function fetchData(id_x) {
     return Array.isArray(data) ? data[0] : data;
 }
 
-// Normalisasi berbagai variasi penulisan jenis kelamin dari data lama
-// (P, L, Pria, Wanita, perempuan, laki2, dsb) supaya tampil rapi & konsisten.
-function normalisasiJK(nilai) {
-    const v = String(nilai || '').trim().toLowerCase();
-    const kodePerempuan = ['p', 'pr', 'perempuan', 'wanita', 'w', 'female', 'f'];
-    const kodeLaki      = ['l', 'lk', 'laki-laki', 'laki2', 'laki', 'pria', 'm', 'male'];
-    if (kodePerempuan.includes(v)) return 'Perempuan';
-    if (kodeLaki.includes(v))      return 'Laki-laki';
-    return nilai || ''; // tidak dikenali/kosong -> tampilkan apa adanya
-}
-
 // =========================================================
 // PARSE DATA DARI rekap_nilai1 (JSON per kolom)
 // =========================================================
@@ -1169,7 +1158,7 @@ function parseRekapData(row) {
     return {
         identitas: {
             nama       : biodata.nama       || '',
-            jk         : normalisasiJK(biodata.jk),
+            jk         : biodata.jk         || '',
             usia       : biodata.usia       || '',
             tanggal    : biodata.tanggal    || '',
             tanggalTTD : biodata.tanggal_ttd || biodata.tanggal || ''
@@ -1673,7 +1662,7 @@ function bukaModalEdit() {
 
     // ── Biodata ──
     document.getElementById('ed-nama').value        = biodata.nama        || '';
-    document.getElementById('ed-jk').value          = normalisasiJK(biodata.jk) || 'Laki-laki';
+    document.getElementById('ed-jk').value          = biodata.jk          || 'Laki-laki';
     document.getElementById('ed-usia').value        = biodata.usia        || '';
     document.getElementById('ed-tanggal').value     = biodata.tanggal     || '';
     document.getElementById('ed-tanggal-ttd').value = biodata.tanggal_ttd || biodata.tanggal || '';
