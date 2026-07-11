@@ -632,12 +632,43 @@
             <div class="lbl">Total Peserta</div>
         </div>
         <div class="stat-card">
-            <div class="num" id="statSelesai" style="color:#2ecc71;">—</div>
-            <div class="lbl">Selesai (OK)</div>
+            <div style="display:flex; align-items:center; gap:14px;">
+                <div>
+                    <div class="num" id="statSelesai1" style="color:#2ecc71; font-size:22px;">—</div>
+                    <div class="lbl">Selesai (OK1)</div>
+                </div>
+                <div style="width:1px; align-self:stretch; background:var(--border);"></div>
+                <div>
+                    <div class="num" id="statBelumSelesai1" style="color:#e74c3c; font-size:22px;">—</div>
+                    <div class="lbl">Belum (OK1)</div>
+                </div>
+            </div>
         </div>
         <div class="stat-card">
-            <div class="num" id="statBelumSelesai" style="color:#e74c3c;">—</div>
-            <div class="lbl">Belum Selesai</div>
+            <div style="display:flex; align-items:center; gap:14px;">
+                <div>
+                    <div class="num" id="statSelesai2" style="color:#2ecc71; font-size:22px;">—</div>
+                    <div class="lbl">Selesai (OK2)</div>
+                </div>
+                <div style="width:1px; align-self:stretch; background:var(--border);"></div>
+                <div>
+                    <div class="num" id="statBelumSelesai2" style="color:#e74c3c; font-size:22px;">—</div>
+                    <div class="lbl">Belum (OK2)</div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <div>
+                    <div class="num" id="statSelesai3" style="color:#2ecc71; font-size:22px;">—</div>
+                    <div class="lbl">Selesai (OK3)</div>
+                </div>
+                <div style="width:1px; align-self:stretch; background:var(--border);"></div>
+                <div>
+                    <div class="num" id="statBelumSelesai3" style="color:#e74c3c; font-size:22px;">—</div>
+                    <div class="lbl">Belum (OK3)</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -648,7 +679,7 @@
     <div class="toolbar">
         <button class="btn btn-secondary" onclick="loadData()">↻ Refresh Manual</button>
         <button class="btn btn-secondary" id="btnGantiTabel" onclick="toggleTabelInput()">🗄 Ganti Tabel</button>
-        <button class="btn btn-secondary" id="btnFilterSkor" onclick="toggleFilterBox()">🔍 Filter Skor Rendah</button>
+        <button class="btn btn-secondary" id="btnFilterSkor" onclick="toggleFilterBox()">🔍 Filter</button>
         <button class="btn btn-secondary" id="btnParafraseMassal" onclick="bukaModalParafraseMassal()"
                 style="background:var(--accent2); color:#fff; border:none;">🔄 Parafrase Massal</button>
         <button class="btn btn-secondary" id="btnUploadHasilParafrase" onclick="bukaModalParafraseUpload()"
@@ -670,62 +701,108 @@
         <div id="tabelList" style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;"></div>
     </div>
 
-    <!-- Filter skor rendah -->
+    <!-- Filter (Filter 1: Skor Rendah / Filter 2: IQ & Arah Minat — hanya salah satu aktif) -->
     <div id="filterSkorBox" style="display:none; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:16px;">
-        <div style="font-size:12px; color:var(--muted); margin-bottom:10px; font-family:'DM Mono',monospace;">FILTER: TAMPILKAN PESERTA SESUAI KRITERIA (BISA GABUNG BEBERAPA)</div>
-        <div style="display:flex; gap:18px; align-items:center; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--border);">
-            <span style="font-size:12px; color:var(--muted); font-family:'DM Mono',monospace;">MODE GABUNGAN:</span>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:10px; font-family:'DM Mono',monospace;">MODE FILTER (HANYA SATU YANG BISA AKTIF)</div>
+        <div style="display:flex; gap:18px; align-items:center; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--border); flex-wrap:wrap;">
             <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
-                <input type="radio" name="filterMode" id="filterModeOr" value="or" checked onchange="applyFilterAndRender()" style="cursor:pointer;">
-                OR — salah satu terpenuhi
+                <input type="radio" name="filterAktifMode" id="filterAktifNone" value="none" onchange="ubahModeFilterAktif()" style="cursor:pointer;">
+                Tidak ada filter
             </label>
             <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
-                <input type="radio" name="filterMode" id="filterModeAnd" value="and" onchange="applyFilterAndRender()" style="cursor:pointer;">
-                AND — semua terpenuhi
+                <input type="radio" name="filterAktifMode" id="filterAktifSatu" value="1" onchange="ubahModeFilterAktif()" style="cursor:pointer;">
+                Filter 1 — Skor Rendah
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                <input type="radio" name="filterAktifMode" id="filterAktifDua" value="2" onchange="ubahModeFilterAktif()" style="cursor:pointer;">
+                Filter 2 — IQ &amp; Arah Minat
             </label>
         </div>
-        <div style="display:flex; flex-direction:column; gap:10px;">
-            <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
-                <input type="checkbox" id="filterIQKurangAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
+
+        <!-- ══ Panel Filter 1: Skor Rendah ══ -->
+        <div id="panelFilter1" style="display:none;">
+            <div style="display:flex; gap:18px; align-items:center; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--border);">
+                <span style="font-size:12px; color:var(--muted); font-family:'DM Mono',monospace;">MODE GABUNGAN:</span>
+                <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                    <input type="radio" name="filterMode" id="filterModeOr" value="or" checked onchange="applyFilterAndRender()" style="cursor:pointer;">
+                    OR — salah satu terpenuhi
+                </label>
+                <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                    <input type="radio" name="filterMode" id="filterModeAnd" value="and" onchange="applyFilterAndRender()" style="cursor:pointer;">
+                    AND — semua terpenuhi
+                </label>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" id="filterIQKurangAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
+                    IQ &lt;
+                    <input type="number" id="filterAmbangIQKurang" value="90" min="1"
+                        style="width:70px; background:var(--bg); border:1px solid var(--border);
+                               color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
+                               font-size:13px; outline:none;"
+                        onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
+                </label>
+                <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" id="filterIQLebihAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
+                    IQ &gt;
+                    <input type="number" id="filterAmbangIQLebih" value="110" min="1"
+                        style="width:70px; background:var(--bg); border:1px solid var(--border);
+                               color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
+                               font-size:13px; outline:none;"
+                        onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
+                </label>
+                <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" id="filterSkorKurangAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
+                    Skor Kemampuan/Kepribadian/Sikap Kerja &lt;
+                    <input type="number" id="filterAmbangSkorKurang" value="5" min="1" max="10"
+                        style="width:70px; background:var(--bg); border:1px solid var(--border);
+                               color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
+                               font-size:13px; outline:none;"
+                        onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
+                </label>
+                <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" id="filterSkorLebihAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
+                    Skor Kemampuan/Kepribadian/Sikap Kerja &gt;
+                    <input type="number" id="filterAmbangSkorLebih" value="8" min="1" max="10"
+                        style="width:70px; background:var(--bg); border:1px solid var(--border);
+                               color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
+                               font-size:13px; outline:none;"
+                        onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
+                </label>
+            </div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+                Centang satu atau beberapa filter di atas, lalu pilih mode <strong style="color:var(--text)">OR</strong> (tampil jika salah satu terpenuhi)
+                atau <strong style="color:var(--text)">AND</strong> (tampil hanya jika semua filter yang dicentang terpenuhi).
+                Untuk filter skor (Kemampuan/Kepribadian/Sikap Kerja), cukup <strong style="color:var(--text)">salah satu aspek</strong> yang memenuhi ambang.
+            </div>
+        </div>
+
+        <!-- ══ Panel Filter 2: IQ & Arah Minat ══ -->
+        <div id="panelFilter2" style="display:none;">
+            <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:14px;">
                 IQ &lt;
-                <input type="number" id="filterAmbangIQKurang" value="90" min="1"
+                <input type="number" id="f2IqThreshold" value="90" min="1"
                     style="width:70px; background:var(--bg); border:1px solid var(--border);
                            color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
                            font-size:13px; outline:none;"
-                    onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
+                    onchange="ubahF2IqThreshold()" oninput="ubahF2IqThreshold()">
             </label>
-            <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
-                <input type="checkbox" id="filterIQLebihAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
-                IQ &gt;
-                <input type="number" id="filterAmbangIQLebih" value="110" min="1"
-                    style="width:70px; background:var(--bg); border:1px solid var(--border);
-                           color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
-                           font-size:13px; outline:none;"
-                    onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
-            </label>
-            <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
-                <input type="checkbox" id="filterSkorKurangAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
-                Skor Kemampuan/Kepribadian/Sikap Kerja &lt;
-                <input type="number" id="filterAmbangSkorKurang" value="5" min="1" max="10"
-                    style="width:70px; background:var(--bg); border:1px solid var(--border);
-                           color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
-                           font-size:13px; outline:none;"
-                    onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
-            </label>
-            <label style="display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;">
-                <input type="checkbox" id="filterSkorLebihAktif" onchange="applyFilterAndRender()" style="width:16px; height:16px; cursor:pointer;">
-                Skor Kemampuan/Kepribadian/Sikap Kerja &gt;
-                <input type="number" id="filterAmbangSkorLebih" value="8" min="1" max="10"
-                    style="width:70px; background:var(--bg); border:1px solid var(--border);
-                           color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
-                           font-size:13px; outline:none;"
-                    onchange="applyFilterAndRender()" oninput="applyFilterAndRender()">
-            </label>
+            <div style="font-size:12px; color:var(--muted); margin-bottom:8px; font-family:'DM Mono',monospace;">
+                ARAH MINAT (centang satu atau lebih — cukup salah satu yang cocok dengan minat peserta)
+            </div>
+            <div id="f2MinatChecklist" style="display:flex; flex-wrap:wrap; gap:8px;">
+                <span style="font-size:12px; color:var(--muted);">Memuat daftar arah minat dari data…</span>
+            </div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:12px; line-height:1.6;">
+                Peserta tampil jika <strong style="color:var(--text)">IQ di bawah ambang</strong> DAN
+                salah satu arah minatnya <strong style="color:var(--text)">cocok dengan yang dicentang</strong> di atas.
+                Jika tidak ada arah minat yang dicentang, hanya syarat IQ yang berlaku.
+            </div>
         </div>
-        <div style="font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
-            Centang satu atau beberapa filter di atas, lalu pilih mode <strong style="color:var(--text)">OR</strong> (tampil jika salah satu terpenuhi)
-            atau <strong style="color:var(--text)">AND</strong> (tampil hanya jika semua filter yang dicentang terpenuhi).
-            Untuk filter skor (Kemampuan/Kepribadian/Sikap Kerja), cukup <strong style="color:var(--text)">salah satu aspek</strong> yang memenuhi ambang.
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border);">
+            <button class="btn btn-secondary" onclick="hapusFilterAktif()">🗑️ Hapus Filter</button>
+            <button class="btn btn-secondary" onclick="tutupFilterBox()" style="background:var(--accent); color:#0d0f14; border:none;">✕ Tutup</button>
         </div>
     </div>
 
@@ -1091,7 +1168,7 @@
     let _lastRows      = [];   // cache baris terakhir, dipakai modal edit & filter
     let _globalData     = null; // raw row yg sedang diedit
     let _globalIdX       = null;
-    let _filterMode            = 'or'; // 'or' | 'and'
+    let _filterMode            = 'or'; // 'or' | 'and' (khusus dalam Filter 1)
     let _filterIQKurangAktif   = false;
     let _filterAmbangIQKurang  = 90;
     let _filterIQLebihAktif    = false;
@@ -1100,6 +1177,12 @@
     let _filterAmbangSkorKurang = 5;
     let _filterSkorLebihAktif  = false;
     let _filterAmbangSkorLebih = 8;
+
+    // ── Filter (mode aktif keseluruhan) & Filter 2 (IQ & Arah Minat) ──
+    const FILTER_STORAGE_KEY = 'rekap_filter_state_v1';
+    let _filterAktifMode  = 'none'; // 'none' | '1' | '2'
+    let _f2IqThreshold    = 90;
+    let _f2SelectedMinat  = [];     // array nama minat (uppercase) yang dicentang
 
     // Definisi aspek (sama dengan index_final.html — dipakai untuk label skor)
     const ASPEK_KEMAMPUAN   = ['Kemampuan Umum','Daya Tangkap Visual','Kemampuan Berpikir Logis','Kemampuan Berpikir Abstrak','Penalaran Verbal','Penalaran Numerik'];
@@ -1171,22 +1254,157 @@
     // =========================================================
     // FILTER SKOR RENDAH (IQ / Kemampuan / Kepribadian / Sikap Kerja)
     // =========================================================
+    // ── Simpan/muat state filter ke localStorage supaya bertahan sampai di-clear/diganti ──
+    function simpanFilterStateKeStorage() {
+        try {
+            localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify({
+                filterAktifMode      : _filterAktifMode,
+                filterMode           : _filterMode,
+                filterIQKurangAktif  : _filterIQKurangAktif,
+                filterAmbangIQKurang : _filterAmbangIQKurang,
+                filterIQLebihAktif   : _filterIQLebihAktif,
+                filterAmbangIQLebih  : _filterAmbangIQLebih,
+                filterSkorKurangAktif : _filterSkorKurangAktif,
+                filterAmbangSkorKurang: _filterAmbangSkorKurang,
+                filterSkorLebihAktif  : _filterSkorLebihAktif,
+                filterAmbangSkorLebih : _filterAmbangSkorLebih,
+                f2IqThreshold        : _f2IqThreshold,
+                f2SelectedMinat      : _f2SelectedMinat
+            }));
+        } catch (e) { /* localStorage penuh/diblokir — abaikan, filter tetap jalan di memori */ }
+    }
+
+    function muatFilterStateDariStorage() {
+        try {
+            const raw = localStorage.getItem(FILTER_STORAGE_KEY);
+            if (!raw) return;
+            const s = JSON.parse(raw);
+            _filterAktifMode        = s.filterAktifMode        ?? 'none';
+            _filterMode              = s.filterMode              ?? 'or';
+            _filterIQKurangAktif    = s.filterIQKurangAktif    ?? false;
+            _filterAmbangIQKurang   = s.filterAmbangIQKurang   ?? 90;
+            _filterIQLebihAktif     = s.filterIQLebihAktif     ?? false;
+            _filterAmbangIQLebih    = s.filterAmbangIQLebih    ?? 110;
+            _filterSkorKurangAktif  = s.filterSkorKurangAktif  ?? false;
+            _filterAmbangSkorKurang = s.filterAmbangSkorKurang ?? 5;
+            _filterSkorLebihAktif   = s.filterSkorLebihAktif   ?? false;
+            _filterAmbangSkorLebih  = s.filterAmbangSkorLebih  ?? 8;
+            _f2IqThreshold          = s.f2IqThreshold          ?? 90;
+            _f2SelectedMinat        = Array.isArray(s.f2SelectedMinat) ? s.f2SelectedMinat : [];
+        } catch (e) { /* data storage rusak — pakai default */ }
+    }
+
+    // Isi semua kontrol form dari state saat ini (dipanggil saat popup dibuka)
+    function isiFormFilterDariState() {
+        document.getElementById('filterAktifNone').checked = (_filterAktifMode === 'none');
+        document.getElementById('filterAktifSatu').checked = (_filterAktifMode === '1');
+        document.getElementById('filterAktifDua').checked  = (_filterAktifMode === '2');
+        document.getElementById('panelFilter1').style.display = (_filterAktifMode === '1') ? 'block' : 'none';
+        document.getElementById('panelFilter2').style.display = (_filterAktifMode === '2') ? 'block' : 'none';
+
+        document.getElementById('filterModeOr').checked          = (_filterMode === 'or');
+        document.getElementById('filterModeAnd').checked         = (_filterMode === 'and');
+        document.getElementById('filterIQKurangAktif').checked   = _filterIQKurangAktif;
+        document.getElementById('filterAmbangIQKurang').value    = _filterAmbangIQKurang;
+        document.getElementById('filterIQLebihAktif').checked    = _filterIQLebihAktif;
+        document.getElementById('filterAmbangIQLebih').value     = _filterAmbangIQLebih;
+        document.getElementById('filterSkorKurangAktif').checked = _filterSkorKurangAktif;
+        document.getElementById('filterAmbangSkorKurang').value  = _filterAmbangSkorKurang;
+        document.getElementById('filterSkorLebihAktif').checked  = _filterSkorLebihAktif;
+        document.getElementById('filterAmbangSkorLebih').value   = _filterAmbangSkorLebih;
+
+        document.getElementById('f2IqThreshold').value = _f2IqThreshold;
+        renderF2MinatChecklist();
+    }
+
     function toggleFilterBox() {
         const box = document.getElementById('filterSkorBox');
         const isOpen = box.style.display !== 'none';
         box.style.display = isOpen ? 'none' : 'block';
-        if (!isOpen) {
-            document.getElementById('filterModeOr').checked         = (_filterMode === 'or');
-            document.getElementById('filterModeAnd').checked        = (_filterMode === 'and');
-            document.getElementById('filterIQKurangAktif').checked   = _filterIQKurangAktif;
-            document.getElementById('filterAmbangIQKurang').value    = _filterAmbangIQKurang;
-            document.getElementById('filterIQLebihAktif').checked    = _filterIQLebihAktif;
-            document.getElementById('filterAmbangIQLebih').value     = _filterAmbangIQLebih;
-            document.getElementById('filterSkorKurangAktif').checked = _filterSkorKurangAktif;
-            document.getElementById('filterAmbangSkorKurang').value  = _filterAmbangSkorKurang;
-            document.getElementById('filterSkorLebihAktif').checked  = _filterSkorLebihAktif;
-            document.getElementById('filterAmbangSkorLebih').value   = _filterAmbangSkorLebih;
+        if (!isOpen) isiFormFilterDariState();
+    }
+
+    // Tutup popup TANPA mengubah/menghapus filter yang sedang aktif
+    function tutupFilterBox() {
+        document.getElementById('filterSkorBox').style.display = 'none';
+    }
+
+    // Hapus filter aktif (kembali ke 'Tidak ada filter') dan simpan
+    function hapusFilterAktif() {
+        _filterAktifMode = 'none';
+        isiFormFilterDariState();
+        simpanFilterStateKeStorage();
+        applyFilterAndRender();
+    }
+
+    // Ganti mode filter aktif: none / 1 / 2 — hanya satu yang bisa aktif (radio)
+    function ubahModeFilterAktif() {
+        const dipilih = document.querySelector('input[name="filterAktifMode"]:checked');
+        _filterAktifMode = dipilih ? dipilih.value : 'none';
+        document.getElementById('panelFilter1').style.display = (_filterAktifMode === '1') ? 'block' : 'none';
+        document.getElementById('panelFilter2').style.display = (_filterAktifMode === '2') ? 'block' : 'none';
+        applyFilterAndRender();
+    }
+
+    function ubahF2IqThreshold() {
+        _f2IqThreshold = parseInt(document.getElementById('f2IqThreshold').value) || 1;
+        applyFilterAndRender();
+    }
+
+    // Ambil daftar nama arah minat unik dari seluruh data yang sedang dimuat (x_10, teks bebas)
+    function ambilDaftarMinatUnik(rows) {
+        const set = new Set();
+        rows.forEach(row => {
+            ambilMinatRow(row).forEach(nama => { if (nama) set.add(nama); });
+        });
+        return Array.from(set).sort();
+    }
+
+    function ambilMinatRow(row) {
+        const minat = safeJSON(row.x_10, [{}, {}, {}]);
+        return minat
+            .map(m => ((m && (m.nama || m.singkatan)) || '').toString().trim().toUpperCase())
+            .filter(Boolean);
+    }
+
+    // Render checklist arah minat di panel Filter 2, berdasarkan data yang sedang dimuat
+    function renderF2MinatChecklist() {
+        const wrap = document.getElementById('f2MinatChecklist');
+        const daftarMinat = ambilDaftarMinatUnik(_lastRows);
+        if (daftarMinat.length === 0) {
+            wrap.innerHTML = '<span style="font-size:12px; color:var(--muted);">Belum ada data arah minat pada tabel ini.</span>';
+            return;
         }
+        wrap.innerHTML = daftarMinat.map(nama => {
+            const checked = _f2SelectedMinat.includes(nama) ? 'checked' : '';
+            const idAman = nama.replace(/[^a-zA-Z0-9]/g, '_');
+            return `
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;
+                          background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:5px 10px;">
+                <input type="checkbox" id="f2-minat-${idAman}" value="${escHtml(nama)}"
+                    ${checked} onchange="toggleF2Minat('${nama.replace(/'/g, "\\'")}', this.checked)"
+                    style="width:15px; height:15px; cursor:pointer;">
+                ${escHtml(nama)}
+            </label>`;
+        }).join('');
+    }
+
+    function toggleF2Minat(nama, dicentang) {
+        if (dicentang) {
+            if (!_f2SelectedMinat.includes(nama)) _f2SelectedMinat.push(nama);
+        } else {
+            _f2SelectedMinat = _f2SelectedMinat.filter(n => n !== nama);
+        }
+        applyFilterAndRender();
+    }
+
+    // Cek apakah satu baris memenuhi Filter 2: IQ < ambang DAN (salah satu minat dicentang cocok, atau tidak ada minat dicentang)
+    function rowMatchesFilter2(row) {
+        const iq = parseInt(row.x_06);
+        if (isNaN(iq) || iq >= _f2IqThreshold) return false;
+        if (_f2SelectedMinat.length === 0) return true;
+        const minatRow = ambilMinatRow(row);
+        return minatRow.some(m => _f2SelectedMinat.includes(m));
     }
 
     // Kumpulkan semua nilai skor aspek (Kemampuan/Kepribadian/Sikap) dari satu baris
@@ -1222,22 +1440,37 @@
     }
 
     function adaFilterAktif() {
-        return _filterIQKurangAktif || _filterIQLebihAktif || _filterSkorKurangAktif || _filterSkorLebihAktif;
+        if (_filterAktifMode === '1') return _filterIQKurangAktif || _filterIQLebihAktif || _filterSkorKurangAktif || _filterSkorLebihAktif;
+        if (_filterAktifMode === '2') return true; // Filter 2 selalu punya syarat IQ, jadi selalu dianggap aktif
+        return false;
     }
 
     function getFilteredRows(rows) {
-        if (!adaFilterAktif()) return rows;
-        return rows.filter(r => rowMatchesFilterRendah(r));
+        if (_filterAktifMode === '1') {
+            if (!adaFilterAktif()) return rows;
+            return rows.filter(r => rowMatchesFilterRendah(r));
+        }
+        if (_filterAktifMode === '2') {
+            return rows.filter(r => rowMatchesFilter2(r));
+        }
+        return rows;
     }
 
     function labelFilterAktif() {
-        const bagian = [];
-        if (_filterIQKurangAktif)   bagian.push(`IQ<${_filterAmbangIQKurang}`);
-        if (_filterIQLebihAktif)    bagian.push(`IQ>${_filterAmbangIQLebih}`);
-        if (_filterSkorKurangAktif) bagian.push(`skor<${_filterAmbangSkorKurang}`);
-        if (_filterSkorLebihAktif)  bagian.push(`skor>${_filterAmbangSkorLebih}`);
-        const pemisah = _filterMode === 'and' ? ' DAN ' : ' atau ';
-        return bagian.join(pemisah);
+        if (_filterAktifMode === '1') {
+            const bagian = [];
+            if (_filterIQKurangAktif)   bagian.push(`IQ<${_filterAmbangIQKurang}`);
+            if (_filterIQLebihAktif)    bagian.push(`IQ>${_filterAmbangIQLebih}`);
+            if (_filterSkorKurangAktif) bagian.push(`skor<${_filterAmbangSkorKurang}`);
+            if (_filterSkorLebihAktif)  bagian.push(`skor>${_filterAmbangSkorLebih}`);
+            const pemisah = _filterMode === 'and' ? ' DAN ' : ' atau ';
+            return 'Filter 1: ' + bagian.join(pemisah);
+        }
+        if (_filterAktifMode === '2') {
+            const minatTxt = _f2SelectedMinat.length > 0 ? ` & minat: ${_f2SelectedMinat.join('/')}` : '';
+            return `Filter 2: IQ<${_f2IqThreshold}${minatTxt}`;
+        }
+        return '';
     }
 
     // Dipanggil saat checkbox/input filter berubah — render ulang dari cache, tanpa fetch ulang
@@ -1252,7 +1485,9 @@
         _filterSkorLebihAktif   = document.getElementById('filterSkorLebihAktif').checked;
         _filterAmbangSkorLebih  = parseInt(document.getElementById('filterAmbangSkorLebih').value) || 1;
 
-        const aktif = adaFilterAktif();
+        simpanFilterStateKeStorage();
+
+        const aktif = _filterAktifMode !== 'none' && adaFilterAktif();
         document.getElementById('btnFilterSkor').classList.toggle('filter-active', aktif);
 
         const filtered = getFilteredRows(_lastRows);
@@ -1280,6 +1515,7 @@
             const filtered = getFilteredRows(result.data);
             renderTable(filtered);
             updateStats(result.data);
+            document.getElementById('btnFilterSkor').classList.toggle('filter-active', adaFilterAktif());
             document.getElementById('recordCount').textContent = adaFilterAktif()
                 ? `${filtered.length} dari ${result.count} records (filter aktif: ${labelFilterAktif()})`
                 : `${result.count} records`;
@@ -1310,7 +1546,9 @@
             <table id="adminTable" class="display" style="width:100%">
                 <thead>
                     <tr>
-                        <th style="text-align:center;">OK</th>
+                        <th style="text-align:center;">OK1</th>
+                        <th style="text-align:center;">OK2</th>
+                        <th style="text-align:center;">OK3</th>
                         <th>ID</th>
                         <th>Kode</th>
                         <th>Nama</th>
@@ -1333,13 +1571,24 @@
                         const linkSsc = `https://psikogram.lidan.co.id/psikogram_db/index_final_gabungan-ssc?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkSert1 = `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const linkSert2 = `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq1?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
-                        const statusFinal = safeJSON(row.x_19, {});
-                        const isChecked   = statusFinal.status === 'final' ? 'checked' : '';
+                        const isChecked1  = cekStatusOk(row, 1) ? 'checked' : '';
+                        const isChecked2  = cekStatusOk(row, 2) ? 'checked' : '';
+                        const isChecked3  = cekStatusOk(row, 3) ? 'checked' : '';
                         return `<tr>
                             <td style="text-align:center;">
-                                <input type="checkbox" class="chk-status-final" ${isChecked}
-                                    title="Tandai sudah final/OK"
-                                    onchange="toggleStatusFinal(${row.id_x}, this)">
+                                <input type="checkbox" class="chk-status-final" ${isChecked1}
+                                    title="Tandai sudah final/OK — Checklist 1"
+                                    onchange="toggleStatusFinal(${row.id_x}, this, 1)">
+                            </td>
+                            <td style="text-align:center;">
+                                <input type="checkbox" class="chk-status-final" ${isChecked2}
+                                    title="Tandai sudah final/OK — Checklist 2"
+                                    onchange="toggleStatusFinal(${row.id_x}, this, 2)">
+                            </td>
+                            <td style="text-align:center;">
+                                <input type="checkbox" class="chk-status-final" ${isChecked3}
+                                    title="Tandai sudah final/OK — Checklist 3"
+                                    onchange="toggleStatusFinal(${row.id_x}, this, 3)">
                             </td>
                             <td style="color:var(--muted); font-family:'DM Mono',monospace; font-size:12px;">${row.id_x}</td>
                             <td><span class="kode-badge">${kode}</span></td>
@@ -1371,7 +1620,7 @@
 
         dataTable = $('#adminTable').DataTable({
             pageLength: panjangHalamanTersimpan,
-            order: [[1, 'desc']],
+            order: [[3, 'desc']],
             language: {
                 search: 'Cari:',
                 lengthMenu: 'Tampilkan _MENU_ data',
@@ -1380,7 +1629,7 @@
                 emptyTable: 'Tidak ada data',
                 zeroRecords: 'Data tidak ditemukan'
             },
-            columnDefs: [{ orderable: false, targets: [0, 6] }]
+            columnDefs: [{ orderable: false, targets: [0, 1, 2, 8] }]
         });
 
         // Kembalikan ke halaman aktif sebelumnya (kalau masih valid setelah data berubah)
@@ -1391,32 +1640,51 @@
         }
     }
 
+    // ── Cek status checklist ke-n (1/2/3) untuk 1 baris ──
+    // Format baru x_19: { ok1: {status,waktu}, ok2: {status,waktu}, ok3: {status,waktu} }
+    // Migrasi: format lama x_19: { status:'final'/'draft', waktu } dianggap sebagai OK1
+    // supaya data yang sudah ditandai selesai sebelumnya tidak hilang.
+    function cekStatusOk(row, n) {
+        const s = safeJSON(row.x_19, {});
+        const key = `ok${n}`;
+        if (s[key] && typeof s[key] === 'object') return s[key].status === 'final';
+        if (n === 1 && s.status === 'final') return true; // fallback format lama → OK1
+        return false;
+    }
+
     function updateStats(rows) {
         document.getElementById('statTotal').textContent = rows.length;
 
-        // Selesai / Belum Selesai (berdasarkan status final di x_19, sinkron dengan checkbox kolom OK)
-        const selesaiCount = rows.filter(r => {
-            const statusFinal = safeJSON(r.x_19, {});
-            return statusFinal.status === 'final';
-        }).length;
-        const belumSelesaiCount = rows.length - selesaiCount;
-
-        document.getElementById('statSelesai').textContent = selesaiCount;
-        document.getElementById('statBelumSelesai').textContent = belumSelesaiCount;
+        [1, 2, 3].forEach(n => {
+            const selesaiCount = rows.filter(r => cekStatusOk(r, n)).length;
+            const belumSelesaiCount = rows.length - selesaiCount;
+            document.getElementById(`statSelesai${n}`).textContent = selesaiCount;
+            document.getElementById(`statBelumSelesai${n}`).textContent = belumSelesaiCount;
+        });
     }
 
-    // ── Toggle status Final/OK per baris (disimpan sebagai JSON di x_19, tanpa kolom baru) ──
-    async function toggleStatusFinal(id_x, checkboxEl) {
+    // ── Toggle status Final/OK per baris per checklist (1/2/3), disimpan sebagai JSON di x_19 ──
+    async function toggleStatusFinal(id_x, checkboxEl, checklistNum) {
         const dicentang = checkboxEl.checked;
         checkboxEl.disabled = true;
 
-        // Ambil status lama dari cache biar field lain (kalau ada) tidak hilang
+        // Ambil status lama dari cache biar checklist lain (punya orang lain) tidak tertimpa
         const rowCache   = _lastRows.find(r => r.id_x === id_x);
         const statusLama = rowCache ? safeJSON(rowCache.x_19, {}) : {};
 
-        const statusBaru = dicentang
-            ? { ...statusLama, status: 'final', waktu: new Date().toISOString() }
-            : { ...statusLama, status: 'draft', waktu: new Date().toISOString() };
+        // Migrasi format lama ({status,waktu} di top-level) → jadi ok1, sekali saja
+        const statusBaru = { ...statusLama };
+        if (statusBaru.status !== undefined && !statusBaru.ok1) {
+            statusBaru.ok1 = { status: statusBaru.status, waktu: statusBaru.waktu || new Date().toISOString() };
+        }
+        delete statusBaru.status;
+        delete statusBaru.waktu;
+
+        const key = `ok${checklistNum}`;
+        statusBaru[key] = {
+            status: dicentang ? 'final' : 'draft',
+            waktu : new Date().toISOString()
+        };
 
         try {
             const apiUrl = `${API_URL}?table=${TABLE_NAME}&id_x=${id_x}`;
@@ -1438,7 +1706,7 @@
             // Refresh angka Selesai/Belum Selesai langsung tanpa reload penuh
             updateStats(_lastRows);
 
-            tampilToast(dicentang ? '✅ Ditandai final/OK' : '↩️ Tanda final dibatalkan', 'success');
+            tampilToast(dicentang ? `✅ Ditandai final/OK (Checklist ${checklistNum})` : `↩️ Tanda final dibatalkan (Checklist ${checklistNum})`, 'success');
         } catch (err) {
             checkboxEl.checked = !dicentang; // rollback tampilan kalau gagal
             tampilToast(`❌ Gagal menyimpan status: ${err.message}`, 'error');
@@ -1477,6 +1745,7 @@
     TABLE_NAME = getTabelFromUrl();
     document.getElementById('namaTableHeader').textContent = TABLE_NAME;
     document.title = `Admin Psikotes — ${TABLE_NAME}`;
+    muatFilterStateDariStorage();
     loadData();
     startPolling();
 
