@@ -295,6 +295,45 @@
         .pf-progress-list .ok   { color: #1b8a3b; }
         .pf-progress-list .fail { color: #c0392b; }
 
+        .pf-upload-drop {
+            border: 2px dashed #b9c2d0; border-radius: 10px; padding: 22px;
+            text-align: center; background: #f7f8fa; cursor: pointer;
+            transition: background .15s, border-color .15s;
+        }
+        .pf-upload-drop:hover, .pf-upload-drop.dragover { background: #eef1ff; border-color: var(--accent2); }
+        .pf-upload-drop .icon { font-size: 26px; margin-bottom: 6px; }
+        .pf-upload-drop .sub  { font-size: 11px; color: #888; margin-top: 4px; }
+
+        .pf-upload-toolbar {
+            display: flex; align-items: center; gap: 10px; margin: 14px 0 8px;
+            flex-wrap: wrap;
+        }
+        .pf-upload-toolbar .info { font-size: 12px; color: #555; margin-left: auto; }
+
+        .pf-upload-list {
+            max-height: 340px; overflow-y: auto; border: 1px solid #e2e5ea;
+            border-radius: 8px; background: #fff;
+        }
+        .pf-upload-item {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 10px 12px; border-bottom: 1px solid #eef0f3; font-size: 12.5px;
+        }
+        .pf-upload-item:last-child { border-bottom: none; }
+        .pf-upload-item.invalid { background: #fff6f6; }
+        .pf-upload-item input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; }
+        .pf-upload-item .body { flex: 1; min-width: 0; }
+        .pf-upload-item .head { display:flex; align-items:center; gap:8px; margin-bottom:3px; flex-wrap:wrap; }
+        .pf-upload-item .head strong { font-size: 12.5px; }
+        .pf-upload-item .badge {
+            font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600;
+        }
+        .pf-upload-item .badge.ok   { background:#e6f7ec; color:#1b8a3b; }
+        .pf-upload-item .badge.warn { background:#fdecea; color:#c0392b; }
+        .pf-upload-item .preview {
+            color: #666; font-family:'DM Mono',monospace; font-size: 11px;
+            line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+        }
+
         .btn-secondary.filter-active {
             background: var(--accent); color: #0d0f14; border-color: var(--accent);
             font-weight: 600;
@@ -583,6 +622,8 @@
         <button class="btn btn-secondary" id="btnFilterSkor" onclick="toggleFilterBox()">🔍 Filter Skor Rendah</button>
         <button class="btn btn-secondary" id="btnParafraseMassal" onclick="bukaModalParafraseMassal()"
                 style="background:var(--accent2); color:#fff; border:none;">🔄 Parafrase Massal</button>
+        <button class="btn btn-secondary" id="btnUploadHasilParafrase" onclick="bukaModalParafraseUpload()"
+                style="background:#16a085; color:#fff; border:none;">📤 Upload Hasil Parafrase</button>
         <span style="font-size:12px; color:var(--muted); margin-left:auto;" id="recordCount"></span>
     </div>
     <!-- Input ganti tabel -->
@@ -889,6 +930,54 @@
         <div class="modal-footer">
             <button class="btn-modal btn-cancel" onclick="tutupModalParafraseMassal()">Batal</button>
             <button class="btn-modal btn-save" id="btn-terapkan-parafrase-massal" onclick="terapkanParafraseMassal()">✅ Terapkan & Simpan Semua</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL UPLOAD HASIL PARAFRASE (dari file)
+     ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-parafrase-upload" onclick="tutupModalParafraseUploadDiluar(event)">
+    <div class="modal-box" style="max-width:680px;">
+        <div class="modal-header">
+            <h2>📤 Upload Hasil Parafrase (dari File)</h2>
+            <button class="modal-close-btn" onclick="tutupModalParafraseUpload()">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="parafrase-hint">
+                Untuk data yang hasil parafrasenya sudah pernah disimpan sebagai file (mis. hasil balasan AI di-save
+                sebagai <code>.json</code>). Upload file di sini → sistem akan cocokkan tiap <code>id_x</code> dengan
+                data yang sedang dimuat, lalu tampilkan daftar untuk dipilih mana yang mau diupdate.<br>
+                Format file harus JSON array, sama seperti hasil "Parafrase Massal" (setiap item punya <code>id_x</code>,
+                <code>kekuatan</code>, <code>kelemahan</code>, <code>rekomendasi</code>, <code>vak</code>, <code>temperamen</code>).
+            </div>
+
+            <div class="pf-upload-drop" id="pfu-drop" onclick="document.getElementById('pfu-file-input').click()">
+                <div class="icon">📁</div>
+                <div><strong>Klik untuk pilih file</strong> atau tarik &amp; lepas file JSON di sini</div>
+                <div class="sub">Hanya file .json / .txt berisi JSON array</div>
+                <input type="file" id="pfu-file-input" accept=".json,.txt,application/json" style="display:none;" onchange="handleUploadParafraseFile(event)">
+            </div>
+            <div id="pfu-file-error" style="color:#c0392b; font-size:12px; margin-top:8px; display:none;"></div>
+
+            <div id="pfu-result-wrap" style="display:none;">
+                <div class="pf-upload-toolbar">
+                    <label style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+                        <input type="checkbox" id="pfu-pilih-semua" checked onchange="toggleSemuaUpload(this.checked)">
+                        Pilih Semua
+                    </label>
+                    <button class="btn-copy-sm" onclick="document.getElementById('pfu-file-input').click()">📁 Ganti File</button>
+                    <span class="info" id="pfu-info"></span>
+                </div>
+                <div class="pf-upload-list" id="pfu-list"></div>
+                <div class="pf-progress-list" id="pfu-progress"></div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-modal btn-cancel" onclick="tutupModalParafraseUpload()">Batal</button>
+            <button class="btn-modal btn-save" id="btn-terapkan-parafrase-upload" onclick="terapkanParafraseUpload()" disabled>✅ Terapkan yang Dicentang</button>
         </div>
     </div>
 </div>
@@ -1678,6 +1767,236 @@
 
         btn.disabled = false;
         btn.textContent = '✅ Terapkan & Simpan Semua';
+
+        tampilToast(`Selesai: ${sukses} berhasil, ${gagal} gagal.`, gagal > 0 ? 'error' : 'success');
+        lastDataHash = null;
+        loadData();
+    }
+
+    // =========================================================
+    // MODAL UPLOAD HASIL PARAFRASE (dari file .json)
+    // =========================================================
+    let _pfuItems = []; // [{ id_x, hasil, rowAsli, valid, rowFound, preview }]
+
+    function bukaModalParafraseUpload() {
+        document.getElementById('pfu-file-input').value = '';
+        document.getElementById('pfu-file-error').style.display = 'none';
+        document.getElementById('pfu-result-wrap').style.display = 'none';
+        document.getElementById('pfu-list').innerHTML = '';
+        document.getElementById('pfu-info').textContent = '';
+        document.getElementById('pfu-progress').style.display = 'none';
+        document.getElementById('pfu-progress').innerHTML = '';
+        document.getElementById('pfu-pilih-semua').checked = true;
+        document.getElementById('btn-terapkan-parafrase-upload').disabled = true;
+        _pfuItems = [];
+        document.getElementById('modal-parafrase-upload').classList.add('open');
+    }
+
+    function tutupModalParafraseUpload() {
+        document.getElementById('modal-parafrase-upload').classList.remove('open');
+    }
+    function tutupModalParafraseUploadDiluar(e) {
+        if (e.target === document.getElementById('modal-parafrase-upload')) tutupModalParafraseUpload();
+    }
+
+    // ── Drag & drop ke area upload ──
+    (function setupPfuDragDrop() {
+        const drop = document.getElementById('pfu-drop');
+        if (!drop) return;
+        ['dragenter', 'dragover'].forEach(evt => {
+            drop.addEventListener(evt, e => {
+                e.preventDefault(); e.stopPropagation();
+                drop.classList.add('dragover');
+            });
+        });
+        ['dragleave', 'drop'].forEach(evt => {
+            drop.addEventListener(evt, e => {
+                e.preventDefault(); e.stopPropagation();
+                drop.classList.remove('dragover');
+            });
+        });
+        drop.addEventListener('drop', e => {
+            const file = e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) bacaFileParafraseUpload(file);
+        });
+    })();
+
+    function handleUploadParafraseFile(event) {
+        const file = event.target.files && event.target.files[0];
+        if (file) bacaFileParafraseUpload(file);
+    }
+
+    function bacaFileParafraseUpload(file) {
+        const errBox = document.getElementById('pfu-file-error');
+        errBox.style.display = 'none';
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            let parsed;
+            try {
+                parsed = JSON.parse(reader.result);
+            } catch (e) {
+                errBox.textContent = '❌ File bukan JSON valid. Pastikan isi file adalah JSON array hasil parafrase.';
+                errBox.style.display = 'block';
+                document.getElementById('pfu-result-wrap').style.display = 'none';
+                return;
+            }
+
+            // Terima array langsung, atau 1 objek tunggal (dibungkus jadi array)
+            let arr;
+            if (Array.isArray(parsed)) arr = parsed;
+            else if (parsed && typeof parsed === 'object') arr = [parsed];
+            else arr = [];
+
+            if (arr.length === 0) {
+                errBox.textContent = '❌ File tidak berisi data (array kosong).';
+                errBox.style.display = 'block';
+                document.getElementById('pfu-result-wrap').style.display = 'none';
+                return;
+            }
+
+            prosesDataUploadParafrase(arr);
+        };
+        reader.onerror = () => {
+            errBox.textContent = '❌ Gagal membaca file.';
+            errBox.style.display = 'block';
+        };
+        reader.readAsText(file);
+    }
+
+    function ringkasPreviewUpload(hasil) {
+        if (!hasil) return '';
+        const baris = [];
+
+        // Teks umum
+        const jmlKek = Array.isArray(hasil.kekuatan) ? hasil.kekuatan.length : 0;
+        const jmlKel = Array.isArray(hasil.kelemahan) ? hasil.kelemahan.length : 0;
+        const jmlRek = Array.isArray(hasil.rekomendasi) ? hasil.rekomendasi.length : 0;
+        baris.push(`📝 Kekuatan (${jmlKek}) · Kelemahan (${jmlKel}) · Rekomendasi (${jmlRek})`);
+
+        // VAK — ditegaskan agar terlihat ikut diupdate
+        if (hasil.vak) {
+            const jmlKar = Array.isArray(hasil.vak.karakteristik) ? hasil.vak.karakteristik.length : 0;
+            const jmlTipsVak = Array.isArray(hasil.vak.tips) ? hasil.vak.tips.length : 0;
+            baris.push(`👁️ VAK akan diupdate — deskripsi: ${hasil.vak.deskripsi ? '✓' : '–'}, karakteristik (${jmlKar}), tips (${jmlTipsVak})`);
+        } else {
+            baris.push('👁️ VAK: tidak ada di file → nilai lama dipertahankan');
+        }
+
+        // Temperamen — ditegaskan agar terlihat ikut diupdate
+        if (hasil.temperamen) {
+            const jmlKekT  = Array.isArray(hasil.temperamen.kekuatan)  ? hasil.temperamen.kekuatan.length  : 0;
+            const jmlKelT  = Array.isArray(hasil.temperamen.kelemahan) ? hasil.temperamen.kelemahan.length : 0;
+            const jmlTipsT = Array.isArray(hasil.temperamen.tips)      ? hasil.temperamen.tips.length      : 0;
+            baris.push(`🤔 Temperamen akan diupdate — tagline: ${hasil.temperamen.tagline ? '✓' : '–'}, deskripsi: ${hasil.temperamen.deskripsi ? '✓' : '–'}, kekuatan (${jmlKekT}), kelemahan (${jmlKelT}), tips (${jmlTipsT})`);
+        } else {
+            baris.push('🤔 Temperamen: tidak ada di file → nilai lama dipertahankan');
+        }
+
+        return baris.join('\n');
+    }
+
+    function prosesDataUploadParafrase(arr) {
+        _pfuItems = arr.map(hasil => {
+            const idX      = hasil && hasil.id_x !== undefined ? hasil.id_x : null;
+            const rowAsli  = idX !== null ? _lastRows.find(r => String(r.id_x) === String(idX)) : null;
+            const strukturOk = validasiHasilParafrase(hasil);
+            return {
+                id_x     : idX,
+                hasil    : hasil,
+                rowAsli  : rowAsli || null,
+                valid    : strukturOk,
+                rowFound : !!rowAsli,
+                preview  : ringkasPreviewUpload(hasil),
+                terpilih : strukturOk && !!rowAsli
+            };
+        });
+
+        renderPfuList();
+        document.getElementById('pfu-result-wrap').style.display = 'block';
+    }
+
+    function renderPfuList() {
+        const listBox = document.getElementById('pfu-list');
+        const infoBox = document.getElementById('pfu-info');
+
+        listBox.innerHTML = _pfuItems.map((it, idx) => {
+            const idLabel = it.id_x !== null ? it.id_x : '(tanpa id_x)';
+            let badge;
+            if (!it.valid)          badge = `<span class="badge warn">⚠️ Struktur tidak lengkap</span>`;
+            else if (!it.rowFound)  badge = `<span class="badge warn">⚠️ ID tidak ditemukan di data saat ini</span>`;
+            else                    badge = `<span class="badge ok">✅ Cocok, siap diterapkan</span>`;
+
+            const namaBiodata = it.rowFound ? safeJSON(it.rowAsli.x_02, {}).nama : '';
+
+            return `
+            <div class="pf-upload-item ${(!it.valid || !it.rowFound) ? 'invalid' : ''}">
+                <input type="checkbox" id="pfu-chk-${idx}" ${it.terpilih ? 'checked' : ''}
+                    ${(!it.valid || !it.rowFound) ? 'disabled' : ''}
+                    onchange="_pfuItems[${idx}].terpilih = this.checked; updateJumlahTerpilihUpload();">
+                <div class="body">
+                    <div class="head">
+                        <strong>ID ${idLabel}${namaBiodata ? ' — ' + escHtml(namaBiodata) : ''}</strong>
+                        ${badge}
+                    </div>
+                    <div class="preview">${escHtml(it.preview || '(tidak ada preview teks)')}</div>
+                </div>
+            </div>`;
+        }).join('');
+
+        updateJumlahTerpilihUpload();
+    }
+
+    function toggleSemuaUpload(checked) {
+        _pfuItems.forEach((it, idx) => {
+            if (!it.valid || !it.rowFound) return; // item invalid tetap tidak bisa dicentang
+            it.terpilih = checked;
+            const chk = document.getElementById(`pfu-chk-${idx}`);
+            if (chk) chk.checked = checked;
+        });
+        updateJumlahTerpilihUpload();
+    }
+
+    function updateJumlahTerpilihUpload() {
+        const total    = _pfuItems.length;
+        const bisaPakai = _pfuItems.filter(it => it.valid && it.rowFound).length;
+        const terpilih = _pfuItems.filter(it => it.terpilih).length;
+        document.getElementById('pfu-info').textContent =
+            `${terpilih} dari ${bisaPakai} data valid dipilih (${total} total baris di file)`;
+        document.getElementById('btn-terapkan-parafrase-upload').disabled = terpilih === 0;
+    }
+
+    async function terapkanParafraseUpload() {
+        const progBox = document.getElementById('pfu-progress');
+        progBox.style.display = 'block';
+        progBox.innerHTML = '';
+
+        const terpilih = _pfuItems.filter(it => it.terpilih && it.valid && it.rowFound);
+        if (terpilih.length === 0) {
+            tampilToast('❌ Tidak ada data tercentang untuk diterapkan.', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('btn-terapkan-parafrase-upload');
+        btn.disabled = true;
+
+        let sukses = 0, gagal = 0;
+
+        for (const it of terpilih) {
+            try {
+                btn.textContent = `⏳ Menyimpan ID ${it.id_x}...`;
+                await simpanHasilParafrase(it.rowAsli.id_x, safeJSON(it.rowAsli.x_18, {}), it.hasil);
+                progBox.innerHTML += `<div class="ok">✅ ID ${it.id_x}: berhasil disimpan.</div>`;
+                sukses++;
+            } catch (err) {
+                progBox.innerHTML += `<div class="fail">❌ ID ${it.id_x}: gagal — ${err.message}</div>`;
+                gagal++;
+            }
+            progBox.scrollTop = progBox.scrollHeight;
+        }
+
+        btn.disabled = false;
+        btn.textContent = '✅ Terapkan yang Dicentang';
 
         tampilToast(`Selesai: ${sukses} berhasil, ${gagal} gagal.`, gagal > 0 ? 'error' : 'success');
         lastDataHash = null;
