@@ -683,7 +683,6 @@
                 <button class="edit-tab"        onclick="switchEditTab('kelemahan')">⚠️ Kelemahan</button>
                 <button class="edit-tab"        onclick="switchEditTab('rekomendasi')">💬 Rekomendasi</button>
                 <button class="edit-tab"        onclick="switchEditTab('minat')">🎯 Arah Minat</button>
-                <button class="edit-tab"        onclick="switchEditTab('vaktemp')">🧭 Gaya Belajar & Temperamen</button>
             </div>
 
             <!-- ── TAB BIODATA ── -->
@@ -779,82 +778,6 @@
             <div class="edit-panel" id="epanel-minat">
                 <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 arah minat peserta (nama & keterangan).</p>
                 <div id="minat-wrap"><!-- Diisi JS --></div>
-            </div>
-
-            <!-- ── TAB GAYA BELAJAR VAK & TEMPERAMEN (x_18) ── -->
-            <div class="edit-panel" id="epanel-vaktemp">
-                <p style="font-size:12px; color:#888; margin-bottom:14px;">
-                    Edit hasil tes Gaya Belajar (VAK) &amp; Temperamen. Data ini disimpan di kolom <code>x_18</code>.
-                    Dominan otomatis dihitung dari skor tertinggi.
-                </p>
-
-                <!-- VAK -->
-                <h4 style="margin:0 0 8px; color:#4a90e2;">👁️ Gaya Belajar VAK</h4>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:8px;">
-                    <div class="edit-form-group">
-                        <label>Skor Visual (A)</label>
-                        <input type="number" id="ed-vak-skor-A" min="0" max="15" value="0" oninput="updateVakPreview()">
-                    </div>
-                    <div class="edit-form-group">
-                        <label>Skor Auditory (B)</label>
-                        <input type="number" id="ed-vak-skor-B" min="0" max="15" value="0" oninput="updateVakPreview()">
-                    </div>
-                    <div class="edit-form-group">
-                        <label>Skor Kinestetik (C)</label>
-                        <input type="number" id="ed-vak-skor-C" min="0" max="15" value="0" oninput="updateVakPreview()">
-                    </div>
-                </div>
-                <div id="vak-dominan-preview" style="margin-bottom:14px; font-size:14px; color:#555;"></div>
-
-                <div class="edit-form-group">
-                    <label>Karakteristik (5 poin)</label>
-                    <div id="vak-karakteristik-edit-wrap"><!-- Diisi JS --></div>
-                </div>
-                <div class="edit-form-group">
-                    <label>Tips (5 poin)</label>
-                    <div id="vak-tips-edit-wrap"><!-- Diisi JS --></div>
-                </div>
-                <button type="button" class="btn-modal" style="margin:6px 0 22px; background:#eef1ff; color:#4a55c9;"
-                    onclick="isiTemplateVak()">🔄 Isi otomatis dari template (sesuai dominan)</button>
-
-                <hr style="border:none; border-top:1px solid #eee; margin:10px 0 20px;">
-
-                <!-- TEMPERAMEN -->
-                <h4 style="margin:0 0 8px; color:#9b59b6;">🤔 Temperamen</h4>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; margin-bottom:8px;">
-                    <div class="edit-form-group">
-                        <label>Sanguinis (A)</label>
-                        <input type="number" id="ed-temp-skor-A" min="0" max="26" value="0" oninput="updateTempPreview()">
-                    </div>
-                    <div class="edit-form-group">
-                        <label>Koleris (B)</label>
-                        <input type="number" id="ed-temp-skor-B" min="0" max="26" value="0" oninput="updateTempPreview()">
-                    </div>
-                    <div class="edit-form-group">
-                        <label>Melankolis (C)</label>
-                        <input type="number" id="ed-temp-skor-C" min="0" max="26" value="0" oninput="updateTempPreview()">
-                    </div>
-                    <div class="edit-form-group">
-                        <label>Phlegmatis (D)</label>
-                        <input type="number" id="ed-temp-skor-D" min="0" max="26" value="0" oninput="updateTempPreview()">
-                    </div>
-                </div>
-                <div id="temp-dominan-preview" style="margin-bottom:14px; font-size:14px; color:#555;"></div>
-
-                <div class="edit-form-group">
-                    <label>Kekuatan (5 poin)</label>
-                    <div id="temp-kekuatan-edit-wrap"><!-- Diisi JS --></div>
-                </div>
-                <div class="edit-form-group">
-                    <label>Kelemahan (5 poin)</label>
-                    <div id="temp-kelemahan-edit-wrap"><!-- Diisi JS --></div>
-                </div>
-                <div class="edit-form-group">
-                    <label>Tips (5 poin)</label>
-                    <div id="temp-tips-edit-wrap"><!-- Diisi JS --></div>
-                </div>
-                <button type="button" class="btn-modal" style="margin:6px 0 6px; background:#f5eefc; color:#8e44ad;"
-                    onclick="isiTemplateTemp()">🔄 Isi otomatis dari template (sesuai dominan)</button>
             </div>
 
         </div><!-- /modal-body -->
@@ -1738,128 +1661,9 @@ function bukaModalEdit() {
         </div>`;
     });
 
-    // ── Gaya Belajar VAK & Temperamen (x_18) ──
-    const x18      = safeJSON(_globalData.x_18, {});
-    const vakData  = x18.vak || {};
-    const tempData = x18.temperamen || {};
-
-    document.getElementById('ed-vak-skor-A').value = (vakData.skor && vakData.skor.A) || 0;
-    document.getElementById('ed-vak-skor-B').value = (vakData.skor && vakData.skor.B) || 0;
-    document.getElementById('ed-vak-skor-C').value = (vakData.skor && vakData.skor.C) || 0;
-
-    const wrapVakKar = document.getElementById('vak-karakteristik-edit-wrap');
-    wrapVakKar.innerHTML = '';
-    const vakKarArr = (vakData.karakteristik && vakData.karakteristik.length) ? vakData.karakteristik : ['','','','',''];
-    [0,1,2,3,4].forEach(i => { wrapVakKar.innerHTML += buatListInput('vak-karakteristik-edit', i, vakKarArr[i] || ''); });
-
-    const wrapVakTips = document.getElementById('vak-tips-edit-wrap');
-    wrapVakTips.innerHTML = '';
-    const vakTipsArr = (vakData.tips && vakData.tips.length) ? vakData.tips : ['','','','',''];
-    [0,1,2,3,4].forEach(i => { wrapVakTips.innerHTML += buatListInput('vak-tips-edit', i, vakTipsArr[i] || ''); });
-
-    document.getElementById('ed-temp-skor-A').value = (tempData.skor && tempData.skor.A) || 0;
-    document.getElementById('ed-temp-skor-B').value = (tempData.skor && tempData.skor.B) || 0;
-    document.getElementById('ed-temp-skor-C').value = (tempData.skor && tempData.skor.C) || 0;
-    document.getElementById('ed-temp-skor-D').value = (tempData.skor && tempData.skor.D) || 0;
-
-    const wrapTempKek = document.getElementById('temp-kekuatan-edit-wrap');
-    wrapTempKek.innerHTML = '';
-    const tempKekArr = (tempData.kekuatan && tempData.kekuatan.length) ? tempData.kekuatan : ['','','','',''];
-    [0,1,2,3,4].forEach(i => { wrapTempKek.innerHTML += buatListInput('temp-kekuatan-edit', i, tempKekArr[i] || ''); });
-
-    const wrapTempKel = document.getElementById('temp-kelemahan-edit-wrap');
-    wrapTempKel.innerHTML = '';
-    const tempKelArr = (tempData.kelemahan && tempData.kelemahan.length) ? tempData.kelemahan : ['','','','',''];
-    [0,1,2,3,4].forEach(i => { wrapTempKel.innerHTML += buatListInput('temp-kelemahan-edit', i, tempKelArr[i] || ''); });
-
-    const wrapTempTips = document.getElementById('temp-tips-edit-wrap');
-    wrapTempTips.innerHTML = '';
-    const tempTipsArr = (tempData.tips && tempData.tips.length) ? tempData.tips : ['','','','',''];
-    [0,1,2,3,4].forEach(i => { wrapTempTips.innerHTML += buatListInput('temp-tips-edit', i, tempTipsArr[i] || ''); });
-
-    updateVakPreview();
-    updateTempPreview();
-
     // Buka modal & reset ke tab pertama
     switchEditTab('biodata');
     document.getElementById('modal-edit').classList.add('open');
-}
-
-// ── Preview dominan VAK real-time saat skor diubah ──
-function updateVakPreview() {
-    const skor = {
-        A: parseInt(document.getElementById('ed-vak-skor-A').value) || 0,
-        B: parseInt(document.getElementById('ed-vak-skor-B').value) || 0,
-        C: parseInt(document.getElementById('ed-vak-skor-C').value) || 0
-    };
-    const total = skor.A + skor.B + skor.C;
-    const dom   = Object.keys(skor).reduce((a, b) => skor[a] >= skor[b] ? a : b);
-    const s     = LEARNING_STYLES[dom];
-    const pct   = total > 0 ? Math.round((skor[dom] / total) * 100) : 0;
-    document.getElementById('vak-dominan-preview').innerHTML = total > 0
-        ? `Dominan: <strong style="color:${s.color}">${s.icon} ${s.name}</strong> (${pct}% dari total ${total})`
-        : '<span style="color:#aaa;">Isi skor untuk melihat dominan</span>';
-}
-
-// ── Preview dominan Temperamen real-time saat skor diubah ──
-function updateTempPreview() {
-    const skor = {
-        A: parseInt(document.getElementById('ed-temp-skor-A').value) || 0,
-        B: parseInt(document.getElementById('ed-temp-skor-B').value) || 0,
-        C: parseInt(document.getElementById('ed-temp-skor-C').value) || 0,
-        D: parseInt(document.getElementById('ed-temp-skor-D').value) || 0
-    };
-    const total = skor.A + skor.B + skor.C + skor.D;
-    const dom   = Object.keys(skor).reduce((a, b) => skor[a] >= skor[b] ? a : b);
-    const t     = TEMPERAMENTS[dom];
-    const pct   = total > 0 ? Math.round((skor[dom] / total) * 100) : 0;
-    document.getElementById('temp-dominan-preview').innerHTML = total > 0
-        ? `Dominan: <strong style="color:${t.color}">${t.icon} ${t.name}</strong> — ${t.tagline} (${pct}% dari total ${total})`
-        : '<span style="color:#aaa;">Isi skor untuk melihat dominan</span>';
-}
-
-// ── Isi otomatis karakteristik & tips VAK sesuai dominan saat ini ──
-function isiTemplateVak() {
-    const skor = {
-        A: parseInt(document.getElementById('ed-vak-skor-A').value) || 0,
-        B: parseInt(document.getElementById('ed-vak-skor-B').value) || 0,
-        C: parseInt(document.getElementById('ed-vak-skor-C').value) || 0
-    };
-    const dom  = Object.keys(skor).reduce((a, b) => skor[a] >= skor[b] ? a : b);
-    const s    = LEARNING_STYLES[dom];
-    const kar  = (s.characteristicsPool && s.characteristicsPool[0]) || [];
-    const tips = (s.tipsPool && s.tipsPool[0]) || [];
-    [0,1,2,3,4].forEach(i => {
-        const elK = document.getElementById(`vak-karakteristik-edit-${i}`);
-        const elT = document.getElementById(`vak-tips-edit-${i}`);
-        if (elK) elK.value = kar[i] || '';
-        if (elT) elT.value = tips[i] || '';
-    });
-    tampilToast('Template karakteristik & tips VAK diisi sesuai dominan.', 'success');
-}
-
-// ── Isi otomatis kekuatan/kelemahan/tips Temperamen sesuai dominan saat ini ──
-function isiTemplateTemp() {
-    const skor = {
-        A: parseInt(document.getElementById('ed-temp-skor-A').value) || 0,
-        B: parseInt(document.getElementById('ed-temp-skor-B').value) || 0,
-        C: parseInt(document.getElementById('ed-temp-skor-C').value) || 0,
-        D: parseInt(document.getElementById('ed-temp-skor-D').value) || 0
-    };
-    const dom  = Object.keys(skor).reduce((a, b) => skor[a] >= skor[b] ? a : b);
-    const t    = TEMPERAMENTS[dom];
-    const kek  = (t.strengthsPool && t.strengthsPool[0]) || t.strengths || [];
-    const kel  = (t.weaknessesPool && t.weaknessesPool[0]) || t.weaknesses || [];
-    const tips = (t.tipsPool && t.tipsPool[0]) || [];
-    [0,1,2,3,4].forEach(i => {
-        const elKek = document.getElementById(`temp-kekuatan-edit-${i}`);
-        const elKel = document.getElementById(`temp-kelemahan-edit-${i}`);
-        const elTip = document.getElementById(`temp-tips-edit-${i}`);
-        if (elKek) elKek.value = kek[i] || '';
-        if (elKel) elKel.value = kel[i] || '';
-        if (elTip) elTip.value = tips[i] || '';
-    });
-    tampilToast('Template kekuatan/kelemahan/tips Temperamen diisi sesuai dominan.', 'success');
 }
 
 // ── Helper buat input skor ──
@@ -1921,7 +1725,7 @@ function escHtml(s) {
 // =========================================================
 function switchEditTab(tab) {
     document.querySelectorAll('.edit-tab').forEach((t, i) => {
-        const tabs = ['biodata','kemampuan','kepribadian','sikap','iq','kekuatan','kelemahan','rekomendasi','minat','vaktemp'];
+        const tabs = ['biodata','kemampuan','kepribadian','sikap','iq','kekuatan','kelemahan','rekomendasi','minat'];
         t.classList.toggle('active', tabs[i] === tab);
     });
     document.querySelectorAll('.edit-panel').forEach(p => {
@@ -2001,83 +1805,6 @@ async function simpanEdit() {
             keterangan : document.getElementById(`minat-ket-${i}`).value.trim()
         }));
 
-        // ── Gaya Belajar VAK & Temperamen (x_18) ──
-        const vakSkorBaru = {
-            A: parseInt(document.getElementById('ed-vak-skor-A').value) || 0,
-            B: parseInt(document.getElementById('ed-vak-skor-B').value) || 0,
-            C: parseInt(document.getElementById('ed-vak-skor-C').value) || 0
-        };
-        const vakTotalBaru = vakSkorBaru.A + vakSkorBaru.B + vakSkorBaru.C;
-        const vakDomBaru   = Object.keys(vakSkorBaru).reduce((a, b) => vakSkorBaru[a] >= vakSkorBaru[b] ? a : b);
-        const vakSBaru     = LEARNING_STYLES[vakDomBaru];
-        const vakPersenBaru = {};
-        ['A','B','C'].forEach(k => {
-            vakPersenBaru[k] = vakTotalBaru > 0 ? Math.round((vakSkorBaru[k] / vakTotalBaru) * 100) : 0;
-        });
-        const vakKarakteristikBaru = [0,1,2,3,4]
-            .map(i => document.getElementById(`vak-karakteristik-edit-${i}`).value.trim())
-            .filter(v => v !== '');
-        const vakTipsBaru = [0,1,2,3,4]
-            .map(i => document.getElementById(`vak-tips-edit-${i}`).value.trim())
-            .filter(v => v !== '');
-
-        const vakBaru = {
-            dominan       : vakDomBaru,
-            nama          : vakSBaru.name,
-            deskripsi     : vakSBaru.description,
-            skor          : vakSkorBaru,
-            persentase    : vakPersenBaru,
-            total         : vakTotalBaru,
-            karakteristik : vakKarakteristikBaru,
-            tips          : vakTipsBaru
-        };
-
-        const tempSkorBaru = {
-            A: parseInt(document.getElementById('ed-temp-skor-A').value) || 0,
-            B: parseInt(document.getElementById('ed-temp-skor-B').value) || 0,
-            C: parseInt(document.getElementById('ed-temp-skor-C').value) || 0,
-            D: parseInt(document.getElementById('ed-temp-skor-D').value) || 0
-        };
-        const tempTotalBaru = tempSkorBaru.A + tempSkorBaru.B + tempSkorBaru.C + tempSkorBaru.D;
-        const tempDomBaru   = Object.keys(tempSkorBaru).reduce((a, b) => tempSkorBaru[a] >= tempSkorBaru[b] ? a : b);
-        const tempSBaru     = TEMPERAMENTS[tempDomBaru];
-        const tempPersenBaru = {};
-        ['A','B','C','D'].forEach(k => {
-            tempPersenBaru[k] = tempTotalBaru > 0 ? Math.round((tempSkorBaru[k] / tempTotalBaru) * 100) : 0;
-        });
-        const tempKekuatanBaru = [0,1,2,3,4]
-            .map(i => document.getElementById(`temp-kekuatan-edit-${i}`).value.trim())
-            .filter(v => v !== '');
-        const tempKelemahanBaru = [0,1,2,3,4]
-            .map(i => document.getElementById(`temp-kelemahan-edit-${i}`).value.trim())
-            .filter(v => v !== '');
-        const tempTipsBaru = [0,1,2,3,4]
-            .map(i => document.getElementById(`temp-tips-edit-${i}`).value.trim())
-            .filter(v => v !== '');
-
-        const temperamenBaru = {
-            dominan    : tempDomBaru,
-            nama       : tempSBaru.name,
-            tagline    : tempSBaru.tagline,
-            deskripsi  : tempSBaru.description,
-            skor       : tempSkorBaru,
-            persentase : tempPersenBaru,
-            total      : tempTotalBaru,
-            kekuatan   : tempKekuatanBaru,
-            kelemahan  : tempKelemahanBaru,
-            tips       : tempTipsBaru
-        };
-
-        // Jaga-jaga: kalau tab VAK/Temperamen tidak diisi sama sekali (semua 0 & kosong),
-        // pertahankan data x_18 lama supaya tidak tertimpa kosong secara tidak sengaja.
-        const x18Lama    = safeJSON(_globalData.x_18, {});
-        const isVakKosong  = vakTotalBaru === 0 && vakKarakteristikBaru.length === 0 && vakTipsBaru.length === 0;
-        const isTempKosong = tempTotalBaru === 0 && tempKekuatanBaru.length === 0 && tempKelemahanBaru.length === 0 && tempTipsBaru.length === 0;
-        const x18Baru = {
-            vak        : isVakKosong  ? (x18Lama.vak || null)        : vakBaru,
-            temperamen : isTempKosong ? (x18Lama.temperamen || null) : temperamenBaru
-        };
-
         // ── Susun payload PUT ──
         const payload = {
             x_02 : JSON.stringify(biodataBaru),
@@ -2088,8 +1815,7 @@ async function simpanEdit() {
             x_07 : JSON.stringify(kekuatanBaru),
             x_08 : JSON.stringify(kelemahanBaru),
             x_09 : JSON.stringify(rekomendasiBaru),
-            x_10 : JSON.stringify(minatBaru),
-            x_18 : JSON.stringify(x18Baru)
+            x_10 : JSON.stringify(minatBaru)
         };
 
         // ── Kirim PUT ke API ──
@@ -2130,146 +1856,7 @@ function tampilToast(msg, type = '') {
 }
 
 // =========================================================
-// RENDER GAYA BELAJAR VAK + TEMPERAMEN DARI x_18 (db_psikogram1)
-// =========================================================
-function renderVakTempFromX18(rawData) {
-    const loading = document.getElementById('vak-temp-loading');
-    const content = document.getElementById('vak-temp-content');
-    const errDiv  = document.getElementById('vak-temp-error');
-    const errMsg  = document.getElementById('vak-temp-error-msg');
-
-    try {
-        const x18 = typeof rawData.x_18 === 'string' ? JSON.parse(rawData.x_18 || '{}') : (rawData.x_18 || {});
-
-        if (!x18 || (!x18.vak && !x18.temperamen)) {
-            loading.style.display = 'none';
-            errDiv.style.display  = 'block';
-            errMsg.textContent    = 'Data tes gaya belajar & temperamen tidak ditemukan (x_18 kosong).';
-            return;
-        }
-
-        // ── Render Gaya Belajar VAK ──
-        const vak = x18.vak;
-        if (vak && vak.dominan) {
-            const vakDom  = vak.dominan;
-            const vakSkor = vak.skor || {};
-            const vakPct  = vak.persentase || {};
-            const total   = vak.total || Object.values(vakSkor).reduce((a, b) => a + b, 0) || 15;
-            const vakS    = LEARNING_STYLES[vakDom] || {};
-
-            document.getElementById('vak-dominan-label').innerHTML =
-                `<span style="color:${vakS.color || '#4a90e2'}">${vakS.icon || ''} ${vak.nama || vakS.name || ''}</span>`;
-            document.getElementById('vak-dominan-desc').textContent = vak.deskripsi || vakS.description || '';
-            document.getElementById('vak-result-card').style.borderColor = vakS.color || '#4a90e2';
-
-            // Bars
-            const barColors = { A: '#4a90e2', B: '#f39c12', C: '#2ecc71' };
-            const barLabels = { A: '👁️ Visual', B: '👂 Auditory', C: '🤸 Kinestetik' };
-            document.getElementById('vak-bars').innerHTML =
-                ['A','B','C'].map(k => `
-                <div style="margin-bottom:12px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:bold;">
-                        <span>${barLabels[k]}</span><span>${vakPct[k] ?? 0}%</span>
-                    </div>
-                    <div style="background:#e0e0e0; height:22px; border-radius:11px; overflow:hidden;">
-                        <div style="width:${vakPct[k] ?? 0}%; height:100%; background:${barColors[k]};
-                            display:flex; align-items:center; padding-left:10px;
-                            color:white; font-weight:bold; font-size:12px;">
-                            ${vakSkor[k] ?? 0}/${total}
-                        </div>
-                    </div>
-                </div>`).join('');
-
-            // Karakteristik & Tips langsung dari x_18 (sudah final, tanpa perlu variasi ulang)
-            const karakteristik = vak.karakteristik || [];
-            const tips          = vak.tips || [];
-            document.getElementById('vak-karakteristik').innerHTML =
-                karakteristik.map(c =>
-                    `<li style="padding:5px 0; padding-left:22px; position:relative; color:#555; line-height:1.5;">
-                        <span style="position:absolute;left:0;color:#667eea;font-weight:bold;">✓</span>${c}</li>`
-                ).join('');
-            document.getElementById('vak-tips').innerHTML =
-                tips.map(t =>
-                    `<li style="padding:5px 0; padding-left:22px; position:relative; color:#555; line-height:1.5;">
-                        <span style="position:absolute;left:0;color:#667eea;font-weight:bold;">✓</span>${t}</li>`
-                ).join('');
-
-            // Simpan ke global untuk PDF
-            window._vakResult = { dom: vakDom, skor: vakSkor, pct: vakPct, total };
-        } else {
-            document.getElementById('vak-section').innerHTML =
-                '<p style="color:#888; text-align:center; padding:20px;">Data Gaya Belajar VAK belum tersedia.</p>';
-            window._vakResult = null;
-        }
-
-        // ── Render Temperamen ──
-        const temperamen = x18.temperamen;
-        if (temperamen && temperamen.dominan) {
-            const tempDom    = temperamen.dominan;
-            const tempSkor   = temperamen.skor || {};
-            const tempPct    = temperamen.persentase || {};
-            const tempTotal  = temperamen.total || Object.values(tempSkor).reduce((a, b) => a + b, 0) || 26;
-            const tempS      = TEMPERAMENTS[tempDom] || {};
-
-            document.getElementById('temp-dominan-label').innerHTML =
-                `<span style="color:${tempS.color || '#9b59b6'}">${tempS.icon || ''} ${temperamen.nama || tempS.name || ''}</span>`;
-            document.getElementById('temp-dominan-tagline').textContent = temperamen.tagline || tempS.tagline || '';
-            document.getElementById('temp-dominan-desc').textContent    = temperamen.deskripsi || tempS.description || '';
-            document.getElementById('temp-result-card').style.borderColor = tempS.color || '#9b59b6';
-
-            // Skor 4 temperamen (sorted)
-            const sortedTemp = Object.entries(tempSkor).sort((a, b) => b[1] - a[1]);
-            document.getElementById('temp-skor-grid').innerHTML =
-                sortedTemp.map(([k, sc]) => {
-                    const t     = TEMPERAMENTS[k] || {};
-                    const pct   = tempPct[k] !== undefined ? tempPct[k] : Math.round((sc / tempTotal) * 100);
-                    const isDom = k === tempDom;
-                    return `<div style="background:white; border:3px solid ${t.color || '#ccc'};
-                        border-radius:10px; text-align:center; padding:12px;
-                        ${isDom ? `box-shadow:0 6px 20px rgba(0,0,0,0.15); transform:scale(1.05);` : ''}">
-                        <div style="font-size:1.8em;">${t.icon || ''}</div>
-                        <div style="font-weight:bold; color:${t.color || '#333'}; font-size:0.95em; margin:4px 0;">${t.name || k}</div>
-                        <div style="font-size:1.6em; font-weight:bold; color:${t.color || '#333'};">${pct}%</div>
-                    </div>`;
-                }).join('');
-
-            // Kekuatan, kelemahan, tips langsung dari x_18
-            const kekuatan  = temperamen.kekuatan  || [];
-            const kelemahan = temperamen.kelemahan || [];
-            const tempTips  = temperamen.tips      || [];
-            document.getElementById('temp-kekuatan').innerHTML =
-                kekuatan.map(s =>
-                    `<li style="color:#27ae60; padding:4px 0;">✓ ${s}</li>`).join('');
-            document.getElementById('temp-kelemahan').innerHTML =
-                kelemahan.map(w =>
-                    `<li style="color:#e74c3c; padding:4px 0;">✗ ${w}</li>`).join('');
-            document.getElementById('temp-tips').innerHTML =
-                tempTips.map(t =>
-                    `<li style="padding:5px 0; padding-left:22px; position:relative; color:#555; line-height:1.5;">
-                        <span style="position:absolute;left:0;color:#667eea;font-weight:bold;">✓</span>${t}</li>`
-                ).join('');
-
-            // Simpan ke global untuk PDF
-            window._tempResult = { dom: tempDom, skor: tempSkor, total: tempTotal };
-        } else {
-            document.getElementById('temp-section').innerHTML =
-                '<p style="color:#888; text-align:center; padding:20px;">Data Temperamen belum tersedia.</p>';
-            window._tempResult = null;
-        }
-
-        loading.style.display = 'none';
-        content.style.display = 'block';
-
-    } catch (e) {
-        loading.style.display = 'none';
-        errDiv.style.display  = 'block';
-        errMsg.textContent    = 'Gagal memuat data x_18: ' + e.message;
-    }
-}
-
-// =========================================================
-// FETCH & RENDER GAYA BELAJAR VAK + TEMPERAMEN (FALLBACK LAMA,
-// dipakai hanya jika x_18 kosong/tidak ada)
+// FETCH & RENDER GAYA BELAJAR VAK + TEMPERAMEN
 // =========================================================
 async function fetchAndRenderVakTemp(token) {
     const loading = document.getElementById('vak-temp-loading');
@@ -2460,16 +2047,9 @@ async function main() {
         document.getElementById('loading-screen').classList.add('hidden');
         setupDownload();
 
-        // Render data VAK + Temperamen — prioritas dari x_18 (sudah tersimpan di db_psikogram1).
-        // Jika x_18 kosong/tidak ada, fallback ke fetch API lama (token = rawData.x_01).
-        if (rawData.x_18 && rawData.x_18 !== '{}' && rawData.x_18 !== '') {
-            renderVakTempFromX18(rawData);
-        } else if (rawData.x_01) {
+        // Fetch data VAK + Temperamen (token = rawData.x_01)
+        if (rawData.x_01) {
             fetchAndRenderVakTemp(rawData.x_01);
-        } else {
-            document.getElementById('vak-temp-loading').style.display = 'none';
-            document.getElementById('vak-temp-error').style.display  = 'block';
-            document.getElementById('vak-temp-error-msg').textContent = 'Data tes gaya belajar & temperamen tidak ditemukan.';
         }
 
         // QR Code
