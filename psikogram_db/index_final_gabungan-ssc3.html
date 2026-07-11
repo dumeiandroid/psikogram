@@ -439,24 +439,6 @@
             <button onclick="ubahFont(2,+0.5)" style="width:28px;height:28px;border-radius:50%;border:1px solid #5F4EDA;background:white;color:#5F4EDA;font-size:16px;cursor:pointer;font-weight:bold;">+</button>
         </div>
 
-        <!-- Zoom Halaman 3 — Gaya Belajar -->
-        <div style="display:flex; align-items:center; gap:8px; background:#f0edff; padding:8px 12px; border-radius:8px;">
-            <span style="font-size:13px; font-weight:bold; color:#5F4EDA;">Hal. 3 (Gaya Belajar):</span>
-            <button onclick="ubahFont(3,-5)" style="width:28px;height:28px;border-radius:50%;border:1px solid #5F4EDA;background:white;color:#5F4EDA;font-size:16px;cursor:pointer;font-weight:bold;">−</button>
-            <span id="label-fs3" style="min-width:36px;text-align:center;font-weight:bold;font-size:13px;color:#333;"></span>
-            <button onclick="ubahFont(3,+5)" style="width:28px;height:28px;border-radius:50%;border:1px solid #5F4EDA;background:white;color:#5F4EDA;font-size:16px;cursor:pointer;font-weight:bold;">+</button>
-        </div>
-
-        <!-- Zoom Halaman 4 — Temperamen -->
-        <div style="display:flex; align-items:center; gap:8px; background:#f0edff; padding:8px 12px; border-radius:8px;">
-            <span style="font-size:13px; font-weight:bold; color:#5F4EDA;">Hal. 4 (Temperamen):</span>
-            <button onclick="ubahFont(4,-5)" style="width:28px;height:28px;border-radius:50%;border:1px solid #5F4EDA;background:white;color:#5F4EDA;font-size:16px;cursor:pointer;font-weight:bold;">−</button>
-            <span id="label-fs4" style="min-width:36px;text-align:center;font-weight:bold;font-size:13px;color:#333;"></span>
-            <button onclick="ubahFont(4,+5)" style="width:28px;height:28px;border-radius:50%;border:1px solid #5F4EDA;background:white;color:#5F4EDA;font-size:16px;cursor:pointer;font-weight:bold;">+</button>
-        </div>
-
-        <div id="auto-shrink-warning" style="display:none; flex:0 0 100%; font-size:12px; color:#c0392b; background:#fdecea; border-radius:6px; padding:6px 10px;"></div>
-
         <div style="margin-left:auto; display:flex; gap:8px;">
             <button id="btn-download-preview" style="
                 background:#28a745; color:white; border:none; padding:8px 20px;
@@ -1304,16 +1286,12 @@ function renderPage(parsed) {
 // =========================================================
 let _previewFS1 = 9.5;
 let _previewFS2 = 11;
-let _previewFS3 = 100; // % skala konten Gaya Belajar (screenshot)
-let _previewFS4 = 100; // % skala konten Temperamen (screenshot)
 let _previewDebounce = null;
 
 function bukaPreview() {
     document.getElementById('modal-preview').style.display = 'flex';
     document.getElementById('label-fs1').textContent = _previewFS1 + 'pt';
     document.getElementById('label-fs2').textContent = _previewFS2 + 'pt';
-    document.getElementById('label-fs3').textContent = _previewFS3 + '%';
-    document.getElementById('label-fs4').textContent = _previewFS4 + '%';
     renderPreview();
 }
 
@@ -1327,15 +1305,9 @@ function ubahFont(hal, delta) {
     if (hal === 1) {
         _previewFS1 = Math.max(6, Math.min(16, Math.round((_previewFS1 + delta) * 10) / 10));
         document.getElementById('label-fs1').textContent = _previewFS1 + 'pt';
-    } else if (hal === 2) {
+    } else {
         _previewFS2 = Math.max(6, Math.min(18, Math.round((_previewFS2 + delta) * 10) / 10));
         document.getElementById('label-fs2').textContent = _previewFS2 + 'pt';
-    } else if (hal === 3) {
-        _previewFS3 = Math.max(60, Math.min(120, Math.round(_previewFS3 + delta)));
-        document.getElementById('label-fs3').textContent = _previewFS3 + '%';
-    } else if (hal === 4) {
-        _previewFS4 = Math.max(60, Math.min(120, Math.round(_previewFS4 + delta)));
-        document.getElementById('label-fs4').textContent = _previewFS4 + '%';
     }
     // Debounce agar tidak render terlalu sering
     clearTimeout(_previewDebounce);
@@ -1345,25 +1317,14 @@ function ubahFont(hal, delta) {
 function renderPreview() {
     const loading = document.getElementById('preview-loading');
     const iframe  = document.getElementById('preview-iframe');
-    const warnBox = document.getElementById('auto-shrink-warning');
     loading.style.display = 'block';
-    buatDocDef(_previewFS1, _previewFS2, _previewFS3, _previewFS4).then(({ docDef, autoShrinkNotes }) => {
+    buatDocDef(_previewFS1, _previewFS2).then(docDef => {
         pdfMake.createPdf(docDef).getBlob(blob => {
             const oldUrl = iframe.src;
             const newUrl = URL.createObjectURL(blob);
             iframe.src = newUrl;
             if (oldUrl && oldUrl.startsWith('blob:')) URL.revokeObjectURL(oldUrl);
             loading.style.display = 'none';
-
-            if (warnBox) {
-                if (autoShrinkNotes && autoShrinkNotes.length > 0) {
-                    warnBox.style.display = 'block';
-                    warnBox.textContent = '⚠️ Otomatis diperkecil supaya muat 1 halaman: ' + autoShrinkNotes.join(', ');
-                } else {
-                    warnBox.style.display = 'none';
-                    warnBox.textContent = '';
-                }
-            }
         });
     }).catch(e => {
         console.error('render error:', e);
@@ -1411,24 +1372,8 @@ function setupDownload() {
         return _imgCache;
     }
 
-    // Ukur rasio tinggi/lebar sebuah gambar base64 (dipakai untuk hitung tinggi kop di PDF)
-    let _hdrRatioCache = null;
-    function getImgRatio(b64) {
-        return new Promise(resolve => {
-            if (!b64) return resolve(0);
-            const img = new Image();
-            img.onload  = () => resolve(img.naturalWidth ? img.naturalHeight / img.naturalWidth : 0);
-            img.onerror = () => resolve(0);
-            img.src = b64;
-        });
-    }
-
-    // == FUNGSI UTAMA: buat docDef dengan FS1, FS2 (pt tabel/narasi) & FS3, FS4 (% skala Gaya Belajar/Temperamen) ==
-    // Mengembalikan { docDef, autoShrinkNotes } — autoShrinkNotes berisi keterangan halaman mana yang diperkecil otomatis.
-    window.buatDocDef = async function(FS1, FS2, FS3, FS4) {
-        FS3 = FS3 || 100;
-        FS4 = FS4 || 100;
-        const autoShrinkNotes = [];
+    // == FUNGSI UTAMA: buat docDef dengan FS1 dan FS2 ==
+    window.buatDocDef = async function(FS1, FS2) {
 
         const { logoB64, hdrB64, ttdB64 } = await getImages();
 
@@ -1587,45 +1532,19 @@ function setupDownload() {
         const hal4Content = []; // Temperamen
         const hal5Content = []; // Saran Pengembangan Diri
 
-        // scalePercent: skala font-size elemen sebelum discreenshot (100 = normal)
-        // maxHeight: batas tinggi (pt) supaya gambar dijamin muat di sisa halaman setelah kop.
-        //            Kalau hasil screenshot masih lebih tinggi dari maxHeight, gambar
-        //            diperkecil proporsional (lebar & tinggi) agar tetap 1 halaman.
-        async function screenshotToImg(elId, pdfW, scalePercent, maxHeight) {
+        async function screenshotToImg(elId, pdfW) {
             const el = document.getElementById(elId);
             if (!el) return null;
-
-            const originalFontSize = el.style.fontSize;
-            if (scalePercent && scalePercent !== 100) {
-                el.style.fontSize = scalePercent + '%';
-            }
-
-            let cvs;
-            try {
-                cvs = await html2canvas(el, {
-                    scale: 2,
-                    backgroundColor: '#ffffff',
-                    logging: false,
-                    useCORS: true,
-                    allowTaint: true,
-                    windowWidth: 900
-                });
-            } finally {
-                el.style.fontSize = originalFontSize; // jangan sampai tampilan on-screen ikut berubah
-            }
-
+            const cvs = await html2canvas(el, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: true,
+                allowTaint: true,
+                windowWidth: 900
+            });
             const ratio = cvs.height / cvs.width;
-            let width  = pdfW;
-            let height = Math.round(pdfW * ratio);
-            let shrunk = false;
-
-            if (maxHeight && height > maxHeight) {
-                height = Math.floor(maxHeight);
-                width  = Math.round(height / ratio);
-                shrunk = true;
-            }
-
-            return { dataUrl: cvs.toDataURL('image/jpeg', 0.92), width, height, shrunk };
+            return { dataUrl: cvs.toDataURL('image/jpeg', 0.92), width: pdfW, height: Math.round(pdfW * ratio) };
         }
 
         const vakTempVisible = document.getElementById('vak-temp-content');
@@ -1633,39 +1552,21 @@ function setupDownload() {
             try {
                 const pdfW = 535;
 
-                // Hitung sisa ruang halaman setelah kop, supaya gambar dijamin muat 1 halaman.
-                const hdrRatio    = hdrB64 ? await getImgRatio(hdrB64) : 0;
-                const hdrHeightPt = hdrB64 ? 595 * hdrRatio : 0;
-                const pageUsableHeight = 841.89 - 0 - 20; // A4 (pt) dikurangi pageMargins atas/bawah
-                const kopMarginBottom  = 10;              // margin bawah gambar kop
-                const stackMarginTop   = 4;                // margin atas { stack: halXContent }
-                const safetyBuffer     = 2;
-                const maxContentHeight = pageUsableHeight - hdrHeightPt - kopMarginBottom - stackMarginTop - safetyBuffer;
+                const vakImg = await screenshotToImg('vak-section', pdfW);
+                if (vakImg) hal3Content.push({ image: vakImg.dataUrl, width: vakImg.width, height: vakImg.height });
 
-                const vakImg = await screenshotToImg('vak-section', pdfW, FS3, maxContentHeight);
-                if (vakImg) {
-                    hal3Content.push({ image: vakImg.dataUrl, width: vakImg.width, height: vakImg.height });
-                    if (vakImg.shrunk) autoShrinkNotes.push('Gaya Belajar');
-                }
+                const tempImg = await screenshotToImg('temp-section', pdfW);
+                if (tempImg) hal4Content.push({ image: tempImg.dataUrl, width: tempImg.width, height: tempImg.height });
 
-                const tempImg = await screenshotToImg('temp-section', pdfW, FS4, maxContentHeight);
-                if (tempImg) {
-                    hal4Content.push({ image: tempImg.dataUrl, width: tempImg.width, height: tempImg.height });
-                    if (tempImg.shrunk) autoShrinkNotes.push('Temperamen');
-                }
-
-                const saranImg = await screenshotToImg('temp-saran-section', pdfW, 100, maxContentHeight);
-                if (saranImg) {
-                    hal5Content.push({ image: saranImg.dataUrl, width: saranImg.width, height: saranImg.height });
-                    if (saranImg.shrunk) autoShrinkNotes.push('Saran Pengembangan Diri');
-                }
+                const saranImg = await screenshotToImg('temp-saran-section', pdfW);
+                if (saranImg) hal5Content.push({ image: saranImg.dataUrl, width: saranImg.width, height: saranImg.height });
 
             } catch(e) {
                 console.error('html2canvas error:', e);
             }
         }
 
-        const docDef = {
+        return {
             pageSize: 'A4',
             pageMargins: [30, 0, 30, 20],
             content: [
@@ -1721,8 +1622,6 @@ function setupDownload() {
             ],
             defaultStyle: { font:'Roboto' }
         };
-
-        return { docDef, autoShrinkNotes };
     };
 
     async function downloadPDF() {
@@ -1730,7 +1629,7 @@ function setupDownload() {
         const btn2 = document.getElementById('downloadBtn2');
         [btn, btn2].forEach(b => { if(b){ b.textContent='⏳ Membuat PDF...'; b.disabled=true; } });
         const nama = document.getElementById('td-nama')?.textContent?.trim() || 'psikogram';
-        const { docDef } = await buatDocDef(_previewFS1, _previewFS2, _previewFS3, _previewFS4);
+        const docDef = await buatDocDef(_previewFS1, _previewFS2);
         pdfMake.createPdf(docDef).download(`${nama}.pdf`);
         [btn, btn2].forEach(b => { if(b){ b.textContent= b.id==='downloadBtn' ? 'Download PDF' : '📥 Download PDF'; b.disabled=false; } });
     }
