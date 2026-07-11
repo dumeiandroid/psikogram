@@ -69,6 +69,9 @@
             background: var(--surface); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 14px 20px; flex: 1; min-width: 130px;
         }
+        .stat-card-clickable { cursor: pointer; transition: border-color .15s, transform .1s; }
+        .stat-card-clickable:hover { border-color: var(--accent2); }
+        .stat-card-clickable.active { border-color: var(--accent2); box-shadow: 0 0 0 1px var(--accent2); }
         .stat-card .num {
             font-family: 'Syne', sans-serif; font-size: 28px;
             font-weight: 700; color: var(--accent); line-height: 1;
@@ -251,35 +254,6 @@
             font-size: 11px; cursor: pointer; transition: background .15s;
         }
         .btn-parafrase-sm:hover { background: var(--accent2); color: white; }
-
-        .btn-asli-sm {
-            background: transparent; border: 1px solid #a78bfa;
-            color: #a78bfa; border-radius: 6px; padding: 4px 10px;
-            font-size: 11px; cursor: pointer; transition: background .15s;
-        }
-        .btn-asli-sm:hover { background: #a78bfa; color: #0d0f14; }
-        .btn-asli-sm.ada-data { border-color: #a78bfa; color: #a78bfa; }
-        .btn-asli-sm.kosong { border-color: #444; color: #666; }
-
-        .asli-item {
-            display: flex; gap: 10px; align-items: flex-start;
-            padding: 12px 0; border-bottom: 1px solid #eee;
-        }
-        .asli-item:last-child { border-bottom: none; }
-        .asli-item input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; cursor:pointer; }
-        .asli-item .body { flex: 1; min-width: 0; }
-        .asli-item .head { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 4px; }
-        .asli-item .cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; }
-        .asli-item .cmp .col-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: #999; margin-bottom: 2px; }
-        .asli-item .cmp .col-asli, .asli-item .cmp .col-skrg { color: #333; }
-        .asli-item .cmp .diff-mark {
-            color: #b45309; font-weight: 700; background: #fff3cd;
-            padding: 0 3px; border-radius: 3px;
-        }
-        .asli-toolbar {
-            display: flex; align-items: center; gap: 12px; justify-content: space-between;
-            padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid #ddd; flex-wrap: wrap;
-        }
 
         .parafrase-box textarea {
             width: 100%; min-height: 220px; resize: vertical;
@@ -631,14 +605,18 @@
             <div class="num" id="statTotal">—</div>
             <div class="lbl">Total Peserta</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-card-clickable" id="cardSelesai" onclick="setFilterStatus('final')" title="Klik untuk tampilkan hanya yang sudah selesai">
             <div class="num" id="statSelesai" style="color:#2ecc71;">—</div>
-            <div class="lbl">Selesai (OK)</div>
+            <div class="lbl">✅ Sudah Selesai</div>
         </div>
-        <div class="stat-card">
-            <div class="num" id="statBelumSelesai" style="color:#e74c3c;">—</div>
-            <div class="lbl">Belum Selesai</div>
+        <div class="stat-card stat-card-clickable" id="cardBelumSelesai" onclick="setFilterStatus('draft')" title="Klik untuk tampilkan hanya yang belum selesai">
+            <div class="num" id="statBelumSelesai" style="color:#e67e22;">—</div>
+            <div class="lbl">⏳ Belum Selesai</div>
         </div>
+    </div>
+    <div id="statusFilterInfo" style="display:none; font-size:12px; color:var(--muted); margin:-10px 0 14px;">
+        Menampilkan: <strong id="statusFilterLabel"></strong>
+        <button class="btn-copy-sm" style="margin-left:8px;" onclick="setFilterStatus(null)">✕ Reset filter</button>
     </div>
 
     <!-- Error -->
@@ -1011,45 +989,6 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     MODAL DATA ASLI (dari x_20) — lihat & kembalikan per bagian
-     ═══════════════════════════════════════ -->
-<div class="modal-overlay" id="modal-asli" onclick="tutupModalAsliDiluar(event)">
-    <div class="modal-box" style="max-width:680px;">
-        <div class="modal-header">
-            <h2>🕰️ Data Asli <span id="asli-nama-header" style="font-weight:400; color:#999; font-size:14px;"></span></h2>
-            <button class="modal-close-btn" onclick="tutupModalAsli()">✕</button>
-        </div>
-
-        <div class="modal-body">
-            <div id="asli-kosong-info" style="display:none; font-size:13px; color:#888; padding:20px 0; text-align:center;">
-                Belum ada data asli tersimpan untuk peserta ini — artinya data belum pernah diedit/diparafrase sejak dibuat.
-            </div>
-
-            <div id="asli-isi-wrap" style="display:none;">
-                <p style="font-size:12px; color:#888; margin-bottom:10px;">
-                    Ini adalah data <strong>versi pertama</strong> (sebelum diedit/diparafrase pertama kali). Perubahan kedua/ketiga dst tidak menimpa data asli ini.
-                    Centang bagian yang ingin dikembalikan ke versi asli, lalu klik "Kembalikan yang Dicentang".
-                </p>
-                <div class="asli-toolbar">
-                    <label style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
-                        <input type="checkbox" id="asli-pilih-semua" onchange="toggleSemuaAsli(this.checked)">
-                        Pilih Semua
-                    </label>
-                    <span class="info" id="asli-info" style="font-size:12px; color:#888;"></span>
-                </div>
-                <div id="asli-list"></div>
-                <div id="asli-progress" class="pf-progress-list" style="display:none;"></div>
-            </div>
-        </div>
-
-        <div class="modal-footer">
-            <button class="btn-modal btn-cancel" onclick="tutupModalAsli()">Tutup</button>
-            <button class="btn-modal btn-save" id="btn-kembalikan-asli" onclick="kembalikanDataAsli()" disabled>↩️ Kembalikan yang Dicentang</button>
-        </div>
-    </div>
-</div>
-
 <script>
     const API_URL    = 'https://lidan-co-id.pages.dev/api/db_psikogram1';
     const SECRET     = 'admin';
@@ -1091,6 +1030,7 @@
     let _filterAmbangSkorKurang = 5;
     let _filterSkorLebihAktif  = false;
     let _filterAmbangSkorLebih = 8;
+    let _filterStatus = null; // null | 'final' | 'draft' — filter dari kartu Sudah/Belum Selesai
 
     // Definisi aspek (sama dengan index_final.html — dipakai untuk label skor)
     const ASPEK_KEMAMPUAN   = ['Kemampuan Umum','Daya Tangkap Visual','Kemampuan Berpikir Logis','Kemampuan Berpikir Abstrak','Penalaran Verbal','Penalaran Numerik'];
@@ -1217,8 +1157,11 @@
     }
 
     function getFilteredRows(rows) {
-        if (!adaFilterAktif()) return rows;
-        return rows.filter(r => rowMatchesFilterRendah(r));
+        let hasil = rows;
+        if (adaFilterAktif()) hasil = hasil.filter(r => rowMatchesFilterRendah(r));
+        if (_filterStatus === 'final') hasil = hasil.filter(r => safeJSON(r.x_19, {}).status === 'final');
+        else if (_filterStatus === 'draft') hasil = hasil.filter(r => safeJSON(r.x_19, {}).status !== 'final');
+        return hasil;
     }
 
     function labelFilterAktif() {
@@ -1229,6 +1172,42 @@
         if (_filterSkorLebihAktif)  bagian.push(`skor>${_filterAmbangSkorLebih}`);
         const pemisah = _filterMode === 'and' ? ' DAN ' : ' atau ';
         return bagian.join(pemisah);
+    }
+
+    // Render ulang tabel dari cache (_lastRows) dengan filter skor + filter status yang aktif
+    function renderFilteredFromCache() {
+        const aktifSkor = adaFilterAktif();
+        document.getElementById('btnFilterSkor').classList.toggle('filter-active', aktifSkor);
+
+        const filtered = getFilteredRows(_lastRows);
+        renderTable(filtered);
+
+        const labelBagian = [];
+        if (aktifSkor)      labelBagian.push(labelFilterAktif());
+        if (_filterStatus)  labelBagian.push(_filterStatus === 'final' ? 'Sudah Selesai' : 'Belum Selesai');
+
+        document.getElementById('recordCount').textContent = (aktifSkor || _filterStatus)
+            ? `${filtered.length} dari ${_lastRows.length} records (filter aktif: ${labelBagian.join(' + ')})`
+            : `${_lastRows.length} records`;
+    }
+
+    // Klik kartu "Sudah Selesai" / "Belum Selesai" — toggle filter, klik lagi utk reset
+    function setFilterStatus(status) {
+        _filterStatus = (_filterStatus === status) ? null : status;
+
+        document.getElementById('cardSelesai').classList.toggle('active', _filterStatus === 'final');
+        document.getElementById('cardBelumSelesai').classList.toggle('active', _filterStatus === 'draft');
+
+        const infoBox = document.getElementById('statusFilterInfo');
+        if (_filterStatus) {
+            infoBox.style.display = 'block';
+            document.getElementById('statusFilterLabel').textContent =
+                _filterStatus === 'final' ? '✅ Sudah Selesai' : '⏳ Belum Selesai';
+        } else {
+            infoBox.style.display = 'none';
+        }
+
+        renderFilteredFromCache();
     }
 
     // Dipanggil saat checkbox/input filter berubah — render ulang dari cache, tanpa fetch ulang
@@ -1243,14 +1222,7 @@
         _filterSkorLebihAktif   = document.getElementById('filterSkorLebihAktif').checked;
         _filterAmbangSkorLebih  = parseInt(document.getElementById('filterAmbangSkorLebih').value) || 1;
 
-        const aktif = adaFilterAktif();
-        document.getElementById('btnFilterSkor').classList.toggle('filter-active', aktif);
-
-        const filtered = getFilteredRows(_lastRows);
-        renderTable(filtered);
-        document.getElementById('recordCount').textContent = aktif
-            ? `${filtered.length} dari ${_lastRows.length} records (filter aktif: ${labelFilterAktif()})`
-            : `${_lastRows.length} records`;
+        renderFilteredFromCache();
     }
 
     async function loadData() {
@@ -1341,7 +1313,6 @@
                                 </div>
                                 <button class="btn-edit-sm" onclick="bukaModalEdit(${row.id_x})">✏️ Edit</button>
                                 <button class="btn-parafrase-sm" onclick="bukaModalParafrase(${row.id_x})">🔄 Parafrase</button>
-                                ${adaPerubahanDariAsli(row) ? `<button class="btn-asli-sm" onclick="bukaModalAsli(${row.id_x})" title="Lihat & kembalikan data asli">🕰️ Asli</button>` : ''}
                                 <button class="btn-danger-sm" onclick="hapusData(${row.id_x})">🗑</button>
                             </td>
                         </tr>`;
@@ -1369,15 +1340,18 @@
     function updateStats(rows) {
         document.getElementById('statTotal').textContent = rows.length;
 
-        // Selesai / Belum Selesai (berdasarkan status final di x_19, sinkron dengan checkbox kolom OK)
-        const selesaiCount = rows.filter(r => {
-            const statusFinal = safeJSON(r.x_19, {});
-            return statusFinal.status === 'final';
-        }).length;
-        const belumSelesaiCount = rows.length - selesaiCount;
+        // Rata-rata IQ
+        const iqs = rows.map(r => parseInt(r.x_06)).filter(v => !isNaN(v));
+        const avg = iqs.length ? Math.round(iqs.reduce((a,b) => a+b, 0) / iqs.length) : '—';
+        document.getElementById('statIqAvg').textContent = avg;
 
-        document.getElementById('statSelesai').textContent = selesaiCount;
-        document.getElementById('statBelumSelesai').textContent = belumSelesaiCount;
+        // Hari ini
+        const today = new Date().toDateString();
+        const todayCount = rows.filter(r => {
+            if (!r.x_11) return false;
+            return new Date(r.x_11).toDateString() === today;
+        }).length;
+        document.getElementById('statToday').textContent = todayCount;
     }
 
     // ── Toggle status Final/OK per baris (disimpan sebagai JSON di x_19, tanpa kolom baru) ──
@@ -1409,9 +1383,6 @@
 
             // Update cache lokal supaya konsisten tanpa perlu reload penuh
             if (rowCache) rowCache.x_19 = JSON.stringify(statusBaru);
-
-            // Refresh angka Selesai/Belum Selesai langsung tanpa reload penuh
-            updateStats(_lastRows);
 
             tampilToast(dicentang ? '✅ Ditandai final/OK' : '↩️ Tanda final dibatalkan', 'success');
         } catch (err) {
@@ -1554,31 +1525,10 @@
     }
 
     // =========================================================
-    // SNAPSHOT DATA ASLI (x_20) — dibuat sekali saja, saat pertama
-    // kali data diedit (via modal Edit ataupun Parafrase). Perubahan
-    // kedua/ketiga dst TIDAK menimpa snapshot ini.
-    // =========================================================
-    const KOLOM_SNAPSHOT_ASLI = ['x_02','x_03','x_04','x_05','x_06','x_07','x_08','x_09','x_10','x_18'];
-
-    // Kembalikan string JSON snapshot (utk dimasukkan ke payload PUT sbg x_20),
-    // ATAU null kalau snapshot sudah pernah ada sebelumnya (tidak boleh ditimpa).
-    function siapkanSnapshotAsli(rowSaatIni) {
-        if (rowSaatIni && rowSaatIni.x_20 && String(rowSaatIni.x_20).trim() !== '' && rowSaatIni.x_20 !== '{}') {
-            return null; // sudah ada snapshot asli, jangan ditimpa
-        }
-        const snapshot = { _disimpan_pada: new Date().toISOString() };
-        KOLOM_SNAPSHOT_ASLI.forEach(k => {
-            snapshot[k] = (rowSaatIni && rowSaatIni[k] !== undefined) ? rowSaatIni[k] : null;
-        });
-        return JSON.stringify(snapshot);
-    }
-
-    // =========================================================
     // MODAL PARAFRASE (x_07, x_08, x_09, x_18)
     // =========================================================
     let _pfIdX     = null;
     let _pfRowAsli = null; // simpan x_18 asli utuh, agar skor/angka tidak berubah saat digabung ulang
-    let _pfRowFull = null; // simpan row utuh (dipakai utk snapshot data asli x_20)
 
     // Bangun "paket teks" dari 1 row: hanya bagian layak-parafrase, skor/angka/dominan/nama dikecualikan
     function buatPaketParafrase(row) {
@@ -1632,9 +1582,7 @@
     }
 
     // Kirim PUT ke API untuk 1 row (dipakai single & massal)
-    // rowAsli = row LENGKAP (bukan cuma x_18) — dipakai jg utk snapshot data asli (x_20)
-    async function simpanHasilParafrase(rowAsli, hasil) {
-        const rowAsliX18 = safeJSON(rowAsli.x_18, {});
+    async function simpanHasilParafrase(id_x, rowAsliX18, hasil) {
         const x18Baru = gabungkanX18Baru(rowAsliX18, hasil);
         const payload = {
             x_07 : JSON.stringify(hasil.kekuatan),
@@ -1642,10 +1590,7 @@
             x_09 : JSON.stringify(hasil.rekomendasi),
             x_18 : JSON.stringify(x18Baru)
         };
-        const snapshotAsli = siapkanSnapshotAsli(rowAsli);
-        if (snapshotAsli) payload.x_20 = snapshotAsli;
-
-        const apiUrl = `${API_URL}?table=${TABLE_NAME}&id_x=${rowAsli.id_x}`;
+        const apiUrl = `${API_URL}?table=${TABLE_NAME}&id_x=${id_x}`;
         const res = await fetch(apiUrl, {
             method : 'PUT',
             headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': SECRET },
@@ -1654,7 +1599,6 @@
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const result = await res.json();
         if (!result.success) throw new Error(result.message || 'Gagal menyimpan');
-        if (snapshotAsli) rowAsli.x_20 = snapshotAsli; // update cache lokal
     }
 
     function bukaModalParafrase(id_x) {
@@ -1663,7 +1607,6 @@
 
         _pfIdX     = row.id_x;
         _pfRowAsli = safeJSON(row.x_18, {});
-        _pfRowFull = row;
 
         const paket = buatPaketParafrase(row);
 
@@ -1714,7 +1657,7 @@
         btn.textContent = '⏳ Menyimpan...';
 
         try {
-            await simpanHasilParafrase(_pfRowFull, hasil);
+            await simpanHasilParafrase(_pfIdX, _pfRowAsli, hasil);
 
             tutupModalParafrase();
             tampilToast('✅ Hasil parafrase berhasil disimpan!', 'success');
@@ -1852,7 +1795,7 @@
 
             try {
                 btn.textContent = `⏳ Menyimpan ID ${idLog}...`;
-                await simpanHasilParafrase(rowAsli, hasil);
+                await simpanHasilParafrase(rowAsli.id_x, safeJSON(rowAsli.x_18, {}), hasil);
                 progBox.innerHTML += `<div class="ok">✅ ID ${idLog}: berhasil disimpan.</div>`;
                 sukses++;
             } catch (err) {
@@ -2082,7 +2025,7 @@
         for (const it of terpilih) {
             try {
                 btn.textContent = `⏳ Menyimpan ID ${it.id_x}...`;
-                await simpanHasilParafrase(it.rowAsli, it.hasil);
+                await simpanHasilParafrase(it.rowAsli.id_x, safeJSON(it.rowAsli.x_18, {}), it.hasil);
                 progBox.innerHTML += `<div class="ok">✅ ID ${it.id_x}: berhasil disimpan.</div>`;
                 sukses++;
             } catch (err) {
@@ -2101,17 +2044,6 @@
     }
 
 
-
-    // Normalisasi berbagai variasi penulisan jenis kelamin dari data lama
-    // (P, L, Pria, Wanita, perempuan, laki2, dsb) supaya cocok dengan opsi dropdown.
-    function normalisasiJK(nilai) {
-        const v = String(nilai || '').trim().toLowerCase();
-        const kodePerempuan = ['p', 'pr', 'perempuan', 'wanita', 'w', 'female', 'f'];
-        const kodeLaki      = ['l', 'lk', 'laki-laki', 'laki2', 'laki', 'pria', 'm', 'male'];
-        if (kodePerempuan.includes(v)) return 'Perempuan';
-        if (kodeLaki.includes(v))      return 'Laki-laki';
-        return 'Laki-laki'; // fallback default kalau nilainya tidak dikenali/kosong
-    }
 
     // Buka modal edit untuk baris dengan id_x tertentu (dicari dari cache _lastRows)
     function bukaModalEdit(id_x) {
@@ -2132,7 +2064,7 @@
 
         // ── Biodata ──
         document.getElementById('ed-nama').value        = biodata.nama        || '';
-        document.getElementById('ed-jk').value          = normalisasiJK(biodata.jk);
+        document.getElementById('ed-jk').value          = biodata.jk          || 'Laki-laki';
         document.getElementById('ed-usia').value        = biodata.usia        || '';
         document.getElementById('ed-tanggal').value     = biodata.tanggal     || '';
         document.getElementById('ed-tanggal-ttd').value = biodata.tanggal_ttd || biodata.tanggal || '';
@@ -2273,10 +2205,6 @@
                 x_10 : JSON.stringify(minatBaru)
             };
 
-            // ── Simpan data asli (x_20) hanya kalau ini perubahan PERTAMA kali ──
-            const snapshotAsli = siapkanSnapshotAsli(_globalData);
-            if (snapshotAsli) payload.x_20 = snapshotAsli;
-
             // ── Kirim PUT ke API ──
             const apiUrl = `${API_URL}?table=${TABLE_NAME}&id_x=${_globalIdX}`;
             const res = await fetch(apiUrl, {
@@ -2302,306 +2230,6 @@
         } finally {
             btn.disabled = false;
             btn.textContent = '💾 Simpan & Refresh';
-        }
-    }
-
-    // =========================================================
-    // MODAL DATA ASLI (dari x_20) — lihat & kembalikan per bagian
-    // =========================================================
-    const LABEL_KOLOM_ASLI = {
-        x_02: 'Biodata',
-        x_03: 'Skor Kemampuan',
-        x_04: 'Skor Kepribadian',
-        x_05: 'Skor Sikap Kerja',
-        x_06: 'Nilai IQ',
-        x_07: 'Kekuatan',
-        x_08: 'Kelemahan',
-        x_09: 'Rekomendasi',
-        x_10: 'Arah Minat',
-        x_18: 'VAK & Temperamen'
-    };
-
-    let _asliIdX        = null;
-    let _asliSnapshot    = null; // object hasil parse x_20 (data asli)
-    let _asliRowSaatIni  = null; // row saat ini (utk perbandingan)
-
-    // Ringkasan pembanding 1 kolom: hanya bagian yang BERBEDA yang diberi warna (diff-mark),
-    // sisanya pakai warna teks normal & sama di kedua sisi (Asli / Saat Ini).
-    // Return: { berubah: bool, htmlAsli: string, htmlSkrg: string }
-    function potongTeks(s, n) {
-        s = s || '';
-        return s.length > n ? s.slice(0, n) + '…' : s;
-    }
-
-    function bandingSkalar(kolom, aRaw, bRaw) {
-        const a = aRaw ?? '', b = bRaw ?? '';
-        const sama = String(a) === String(b);
-        const cls  = sama ? '' : 'diff-mark';
-        const pfx  = kolom === 'x_06' ? 'IQ: ' : '';
-        return {
-            berubah  : !sama,
-            htmlAsli : `${pfx}<span class="${cls}">${escHtml(a || '—')}</span>`,
-            htmlSkrg : `${pfx}<span class="${cls}">${escHtml(b || '—')}</span>`
-        };
-    }
-
-    function bandingBiodata(aRaw, bRaw) {
-        const a = safeJSON(aRaw, {});
-        const b = safeJSON(bRaw, {});
-        const fields = [
-            { k: 'nama',    suf: '' },
-            { k: 'jk',      suf: '' },
-            { k: 'usia',    suf: ' th' },
-            { k: 'tanggal', suf: '' }
-        ];
-        let berubah = false;
-        const partsA = [], partsB = [];
-        fields.forEach(f => {
-            const va = a[f.k] || '—', vb = b[f.k] || '—';
-            const sama = va === vb;
-            if (!sama) berubah = true;
-            const cls = sama ? '' : 'diff-mark';
-            partsA.push(`<span class="${cls}">${escHtml(va)}${f.suf}</span>`);
-            partsB.push(`<span class="${cls}">${escHtml(vb)}${f.suf}</span>`);
-        });
-        return { berubah, htmlAsli: partsA.join(' · '), htmlSkrg: partsB.join(' · ') };
-    }
-
-    function bandingSkor(aRaw, bRaw) {
-        const a = safeJSON(aRaw, {});
-        const b = safeJSON(bRaw, {});
-        const keys = Array.from(new Set([...Object.keys(a), ...Object.keys(b)])).filter(k => k !== 'skor_iq');
-        let berubah = false;
-        const partsA = [], partsB = [];
-        keys.forEach(k => {
-            const va = a[k], vb = b[k];
-            if (String(va) !== String(vb)) {
-                berubah = true;
-                partsA.push(`<span class="diff-mark">${escHtml(k)}:${va ?? '—'}</span>`);
-                partsB.push(`<span class="diff-mark">${escHtml(k)}:${vb ?? '—'}</span>`);
-            }
-        });
-        return { berubah, htmlAsli: partsA.join(', ') || '—', htmlSkrg: partsB.join(', ') || '—' };
-    }
-
-    function bandingList(aRaw, bRaw) {
-        const a = safeJSON(aRaw, ['', '', '']);
-        const b = safeJSON(bRaw, ['', '', '']);
-        let berubah = false;
-        const partsA = [], partsB = [];
-        const panjang = Math.max(a.length, b.length);
-        for (let i = 0; i < panjang; i++) {
-            const va = a[i] || '', vb = b[i] || '';
-            const sama = va === vb;
-            if (!sama) berubah = true;
-            const cls = sama ? '' : 'diff-mark';
-            partsA.push(`<span class="${cls}">${escHtml(potongTeks(va, 60) || '—')}</span>`);
-            partsB.push(`<span class="${cls}">${escHtml(potongTeks(vb, 60) || '—')}</span>`);
-        }
-        return { berubah, htmlAsli: partsA.join(' | '), htmlSkrg: partsB.join(' | ') };
-    }
-
-    function bandingMinat(aRaw, bRaw) {
-        const a = safeJSON(aRaw, [{}, {}, {}]);
-        const b = safeJSON(bRaw, [{}, {}, {}]);
-        let berubah = false;
-        const partsA = [], partsB = [];
-        for (let i = 0; i < 3; i++) {
-            const ma = a[i] || {}, mb = b[i] || {};
-            const va = ma.nama || ma.singkatan || '—';
-            const vb = mb.nama || mb.singkatan || '—';
-            const sama = va === vb && (ma.keterangan || '') === (mb.keterangan || '');
-            if (!sama) berubah = true;
-            const cls = sama ? '' : 'diff-mark';
-            partsA.push(`<span class="${cls}">${escHtml(va)}</span>`);
-            partsB.push(`<span class="${cls}">${escHtml(vb)}</span>`);
-        }
-        return { berubah, htmlAsli: partsA.join(', '), htmlSkrg: partsB.join(', ') };
-    }
-
-    function bandingVakTemperamen(aRaw, bRaw) {
-        const a = safeJSON(aRaw, {});
-        const b = safeJSON(bRaw, {});
-        const av = (a.vak && a.vak.deskripsi) || '—';
-        const bv = (b.vak && b.vak.deskripsi) || '—';
-        const at = (a.temperamen && a.temperamen.tagline) || '—';
-        const bt = (b.temperamen && b.temperamen.tagline) || '—';
-        const samaVak  = av === bv;
-        const samaTemp = at === bt;
-        const berubah  = !samaVak || !samaTemp;
-        const clsVak  = samaVak  ? '' : 'diff-mark';
-        const clsTemp = samaTemp ? '' : 'diff-mark';
-        const htmlAsli = `VAK: <span class="${clsVak}">${escHtml(potongTeks(av, 50))}</span> | Temperamen: <span class="${clsTemp}">${escHtml(at)}</span>`;
-        const htmlSkrg = `VAK: <span class="${clsVak}">${escHtml(potongTeks(bv, 50))}</span> | Temperamen: <span class="${clsTemp}">${escHtml(bt)}</span>`;
-        return { berubah, htmlAsli, htmlSkrg };
-    }
-
-    function bandingKolom(kolom, aRaw, bRaw) {
-        switch (kolom) {
-            case 'x_02': return bandingBiodata(aRaw, bRaw);
-            case 'x_03': case 'x_04': case 'x_05': return bandingSkor(aRaw, bRaw);
-            case 'x_06': return bandingSkalar(kolom, aRaw, bRaw);
-            case 'x_07': case 'x_08': case 'x_09': return bandingList(aRaw, bRaw);
-            case 'x_10': return bandingMinat(aRaw, bRaw);
-            case 'x_18': return bandingVakTemperamen(aRaw, bRaw);
-            default: return { berubah: false, htmlAsli: '—', htmlSkrg: '—' };
-        }
-    }
-
-    // Cek cepat: apakah row ini punya snapshot asli DAN datanya saat ini beda dari snapshot itu.
-    // Dipakai utk tampil/sembunyikan tombol "🕰️ Asli" di tabel.
-    function adaPerubahanDariAsli(row) {
-        if (!row.x_20 || String(row.x_20).trim() === '' || row.x_20 === '{}') return false;
-        const snap = safeJSON(row.x_20, {});
-        return KOLOM_SNAPSHOT_ASLI.some(kolom => bandingKolom(kolom, snap[kolom], row[kolom]).berubah);
-    }
-
-    function bukaModalAsli(id_x) {
-        const row = _lastRows.find(r => String(r.id_x) === String(id_x));
-        if (!row) { tampilToast('❌ Data tidak ditemukan di cache, coba refresh dulu.', 'error'); return; }
-
-        const belumAdaSnapshot = !row.x_20 || String(row.x_20).trim() === '' || row.x_20 === '{}';
-
-        document.getElementById('asli-nama-header').textContent = '';
-        document.getElementById('modal-asli').classList.add('open');
-
-        if (belumAdaSnapshot) {
-            _asliIdX = null; _asliSnapshot = null; _asliRowSaatIni = null;
-            document.getElementById('asli-kosong-info').textContent =
-                'Belum ada data asli tersimpan untuk peserta ini — artinya data belum pernah diedit/diparafrase sejak dibuat.';
-            document.getElementById('asli-kosong-info').style.display = 'block';
-            document.getElementById('asli-isi-wrap').style.display    = 'none';
-            return;
-        }
-
-        _asliIdX       = row.id_x;
-        _asliRowSaatIni = row;
-        _asliSnapshot   = safeJSON(row.x_20, {});
-
-        const biodata = safeJSON(row.x_02, {});
-        document.getElementById('asli-nama-header').textContent = biodata.nama ? `— ${biodata.nama}` : '';
-
-        // Hitung perbandingan tiap kolom, lalu hanya simpan yang benar-benar berubah
-        const semuaKolom = KOLOM_SNAPSHOT_ASLI
-            .map(kolom => ({ kolom, ...bandingKolom(kolom, _asliSnapshot[kolom], row[kolom]) }));
-
-        // ── DEBUG: tampilkan perbandingan mentah di console (F12) utk verifikasi manual ──
-        console.group(`🕰️ Debug Data Asli — id_x=${row.id_x}`);
-        console.table(semuaKolom.map(item => ({
-            kolom   : item.kolom,
-            label   : LABEL_KOLOM_ASLI[item.kolom] || item.kolom,
-            berubah : item.berubah,
-            asli_raw : String(_asliSnapshot[item.kolom] ?? '').slice(0, 200),
-            skrg_raw : String(row[item.kolom] ?? '').slice(0, 200),
-            sama_persis_byte : String(_asliSnapshot[item.kolom] ?? '') === String(row[item.kolom] ?? '')
-        })));
-        console.groupEnd();
-
-        const kolomBerubah = semuaKolom.filter(item => item.berubah);
-
-        if (kolomBerubah.length === 0) {
-            document.getElementById('asli-kosong-info').textContent =
-                'Data saat ini masih sama persis dengan data asli — belum ada perubahan.';
-            document.getElementById('asli-kosong-info').style.display = 'block';
-            document.getElementById('asli-isi-wrap').style.display    = 'none';
-            return;
-        }
-
-        document.getElementById('asli-kosong-info').style.display = 'none';
-        document.getElementById('asli-isi-wrap').style.display    = 'block';
-
-        const list = document.getElementById('asli-list');
-        list.innerHTML = kolomBerubah.map(item => {
-            const label = LABEL_KOLOM_ASLI[item.kolom] || item.kolom;
-            return `
-            <div class="asli-item">
-                <input type="checkbox" id="asli-chk-${item.kolom}" onchange="updateJumlahTerpilihAsli()">
-                <div class="body">
-                    <div class="head">${label}</div>
-                    <div class="cmp">
-                        <div>
-                            <div class="col-lbl">Asli</div>
-                            <div class="col-asli">${item.htmlAsli}</div>
-                        </div>
-                        <div>
-                            <div class="col-lbl">Saat Ini</div>
-                            <div class="col-skrg">${item.htmlSkrg}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-
-        document.getElementById('asli-pilih-semua').checked = false;
-        updateJumlahTerpilihAsli();
-    }
-
-    function tutupModalAsli() {
-        document.getElementById('modal-asli').classList.remove('open');
-    }
-    function tutupModalAsliDiluar(e) {
-        if (e.target === document.getElementById('modal-asli')) tutupModalAsli();
-    }
-
-    function toggleSemuaAsli(checked) {
-        KOLOM_SNAPSHOT_ASLI.forEach(kolom => {
-            const chk = document.getElementById(`asli-chk-${kolom}`);
-            if (chk) chk.checked = checked;
-        });
-        updateJumlahTerpilihAsli();
-    }
-
-    function updateJumlahTerpilihAsli() {
-        const terpilih = KOLOM_SNAPSHOT_ASLI.filter(kolom => {
-            const chk = document.getElementById(`asli-chk-${kolom}`);
-            return chk && chk.checked;
-        });
-        const infoEl = document.getElementById('asli-info');
-        if (infoEl) infoEl.textContent = `${terpilih.length} dari ${KOLOM_SNAPSHOT_ASLI.length} bagian dicentang`;
-        const btn = document.getElementById('btn-kembalikan-asli');
-        if (btn) btn.disabled = terpilih.length === 0;
-    }
-
-    async function kembalikanDataAsli() {
-        if (!_asliIdX || !_asliSnapshot) return;
-
-        const terpilih = KOLOM_SNAPSHOT_ASLI.filter(kolom => {
-            const chk = document.getElementById(`asli-chk-${kolom}`);
-            return chk && chk.checked;
-        });
-        if (terpilih.length === 0) return;
-
-        const labelTerpilih = terpilih.map(k => LABEL_KOLOM_ASLI[k] || k).join(', ');
-        if (!confirm(`Kembalikan bagian berikut ke data asli?\n\n${labelTerpilih}\n\nPerubahan yang sudah dibuat pada bagian ini akan hilang (data asli sendiri tidak berubah).`)) return;
-
-        const btn = document.getElementById('btn-kembalikan-asli');
-        btn.disabled = true;
-        btn.textContent = '⏳ Mengembalikan...';
-
-        try {
-            const payload = {};
-            terpilih.forEach(kolom => { payload[kolom] = _asliSnapshot[kolom]; });
-
-            const apiUrl = `${API_URL}?table=${TABLE_NAME}&id_x=${_asliIdX}`;
-            const res = await fetch(apiUrl, {
-                method : 'PUT',
-                headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': SECRET },
-                body: JSON.stringify(payload)
-            });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const result = await res.json();
-            if (!result.success) throw new Error(result.message || 'Gagal mengembalikan data');
-
-            tutupModalAsli();
-            tampilToast('✅ Data asli berhasil dikembalikan!', 'success');
-            lastDataHash = null; // paksa reload
-            loadData();
-
-        } catch (err) {
-            tampilToast(`❌ Gagal mengembalikan: ${err.message}`, 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = '↩️ Kembalikan yang Dicentang';
         }
     }
 </script>
