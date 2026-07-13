@@ -283,10 +283,12 @@
     // FUNGSI UTAMA: hitung semua skor dari raw data API
     // =========================================================
 
-    function hitungPsikogram(data, id_x) {
+    function hitungPsikogram(data, id_x, randOverride) {
         // Buat seeded random berdasarkan id kandidat
         // Setiap kandidat mendapat versi kalimat yang konsisten (tidak berubah saat refresh)
-        const rand = makeSeededRand(seedFromId(id_x));
+        // randOverride: opsional, dipakai transfer_akun_syntax.html untuk toggle mode
+        // konsisten (seeded, default) vs acak murni (Math.random tiap generate).
+        const rand = randOverride || makeSeededRand(seedFromId(id_x));
 
         const x02 = data['x_02'] || '';
         const x05 = data['x_05'] || '';
