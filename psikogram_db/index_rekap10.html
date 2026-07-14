@@ -715,11 +715,7 @@
             </label>
             <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
                 <input type="radio" name="filterAktifMode" id="filterAktifDua" value="2" onchange="ubahModeFilterAktif()" style="cursor:pointer;">
-                Filter 2 — Kemampuan Numerik &amp; Arah Minat
-            </label>
-            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
-                <input type="radio" name="filterAktifMode" id="filterAktifTiga" value="3" onchange="ubahModeFilterAktif()" style="cursor:pointer;">
-                Filter 3 — Kemampuan Verbal &amp; Arah Minat
+                Filter 2 — IQ &amp; Arah Minat
             </label>
         </div>
 
@@ -781,75 +777,26 @@
             </div>
         </div>
 
-        <!-- ══ Panel Filter 2: Kemampuan Numerik & Arah Minat ══ -->
+        <!-- ══ Panel Filter 2: IQ & Arah Minat ══ -->
         <div id="panelFilter2" style="display:none;">
             <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:14px;">
-                Kemampuan Numerik &lt;
-                <input type="number" id="f2NumerikThreshold" value="5" min="1" max="10"
+                IQ &lt;
+                <input type="number" id="f2IqThreshold" value="90" min="1"
                     style="width:70px; background:var(--bg); border:1px solid var(--border);
                            color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
                            font-size:13px; outline:none;"
-                    onchange="ubahF2Threshold()" oninput="ubahF2Threshold()">
+                    onchange="ubahF2IqThreshold()" oninput="ubahF2IqThreshold()">
             </label>
             <div style="font-size:12px; color:var(--muted); margin-bottom:8px; font-family:'DM Mono',monospace;">
                 ARAH MINAT (centang satu atau lebih — cukup salah satu yang cocok dengan minat peserta)
             </div>
-            <div id="f2MinatChecklist" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+            <div id="f2MinatChecklist" style="display:flex; flex-wrap:wrap; gap:8px;">
+                <span style="font-size:12px; color:var(--muted);">Memuat daftar arah minat dari data…</span>
+            </div>
             <div style="font-size:11.5px; color:var(--muted); margin-top:12px; line-height:1.6;">
-                Peserta tampil jika <strong style="color:var(--text)">skor Kemampuan Numerik di bawah ambang</strong> DAN
+                Peserta tampil jika <strong style="color:var(--text)">IQ di bawah ambang</strong> DAN
                 salah satu arah minatnya <strong style="color:var(--text)">cocok dengan yang dicentang</strong> di atas.
-                Jika tidak ada arah minat yang dicentang, hanya syarat Kemampuan Numerik yang berlaku.
-            </div>
-
-            <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border);">
-                <div style="font-size:12px; color:var(--muted); margin-bottom:8px; font-family:'DM Mono',monospace;">
-                    KALIMAT REKOMENDASI PENGEMBANGAN (akan ditambahkan ke Rekomendasi peserta terpilih)
-                </div>
-                <textarea id="f2Template" rows="4"
-                    style="width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text);
-                           border-radius:7px; padding:8px 10px; font-family:inherit; font-size:13px; outline:none; resize:vertical;">Disarankan untuk {secara konsisten|secara rutin|dengan tekun|secara bertahap|secara disiplin} berlatih dan mengasah kemampuan numerik yang saat ini masih tergolong rendah, agar potensi di bidang minat tersebut dapat {berkembang lebih optimal|tergali lebih maksimal|terasah dengan baik|meningkat signifikan|terwujud secara nyata}, sehingga peserta dapat {lebih siap menghadapi tantangan ke depan|semakin percaya diri di bidang tersebut|memaksimalkan potensi dirinya|mencapai hasil yang lebih baik|berkontribusi secara maksimal}.</textarea>
-                <div style="font-size:10.5px; color:var(--muted); margin-top:5px; line-height:1.5;">
-                    💡 Bisa pakai <strong>spintax</strong>: tulis pilihan kata di dalam kurung kurawal dipisah <code>|</code>, contoh
-                    <code>{cepat|lambat|sedang}</code> — sistem otomatis memilih satu variasi acak (tapi konsisten per peserta) agar kalimat lebih natural dan tidak seragam.
-                </div>
-                <button class="btn btn-secondary" style="margin-top:10px; background:var(--accent); color:#0d0f14; border:none;"
-                    onclick="bukaPopupTerapkanRekomendasi(2)">📤 Submit ke Peserta Terfilter</button>
-            </div>
-        </div>
-
-        <!-- ══ Panel Filter 3: Kemampuan Verbal & Arah Minat ══ -->
-        <div id="panelFilter3" style="display:none;">
-            <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:14px;">
-                Kemampuan Verbal &lt;
-                <input type="number" id="f3VerbalThreshold" value="5" min="1" max="10"
-                    style="width:70px; background:var(--bg); border:1px solid var(--border);
-                           color:var(--text); border-radius:7px; padding:6px 10px; font-family:'DM Mono',monospace;
-                           font-size:13px; outline:none;"
-                    onchange="ubahF3Threshold()" oninput="ubahF3Threshold()">
-            </label>
-            <div style="font-size:12px; color:var(--muted); margin-bottom:8px; font-family:'DM Mono',monospace;">
-                ARAH MINAT (centang satu atau lebih — cukup salah satu yang cocok dengan minat peserta)
-            </div>
-            <div id="f3MinatChecklist" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:12px; line-height:1.6;">
-                Peserta tampil jika <strong style="color:var(--text)">skor Kemampuan Verbal di bawah ambang</strong> DAN
-                salah satu arah minatnya <strong style="color:var(--text)">cocok dengan yang dicentang</strong> di atas.
-                Jika tidak ada arah minat yang dicentang, hanya syarat Kemampuan Verbal yang berlaku.
-            </div>
-
-            <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border);">
-                <div style="font-size:12px; color:var(--muted); margin-bottom:8px; font-family:'DM Mono',monospace;">
-                    KALIMAT REKOMENDASI PENGEMBANGAN (akan ditambahkan ke Rekomendasi peserta terpilih)
-                </div>
-                <textarea id="f3Template" rows="4"
-                    style="width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text);
-                           border-radius:7px; padding:8px 10px; font-family:inherit; font-size:13px; outline:none; resize:vertical;">Disarankan untuk {secara konsisten|secara rutin|dengan tekun|secara bertahap|secara disiplin} berlatih dan mengasah kemampuan verbal yang saat ini masih tergolong rendah, agar potensi di bidang minat tersebut dapat {berkembang lebih optimal|tergali lebih maksimal|terasah dengan baik|meningkat signifikan|terwujud secara nyata}, sehingga peserta dapat {lebih siap menghadapi tantangan ke depan|semakin percaya diri di bidang tersebut|memaksimalkan potensi dirinya|mencapai hasil yang lebih baik|berkontribusi secara maksimal}.</textarea>
-                <div style="font-size:10.5px; color:var(--muted); margin-top:5px; line-height:1.5;">
-                    💡 Bisa pakai <strong>spintax</strong>: tulis pilihan kata di dalam kurung kurawal dipisah <code>|</code>, contoh
-                    <code>{cepat|lambat|sedang}</code> — sistem otomatis memilih satu variasi acak (tapi konsisten per peserta) agar kalimat lebih natural dan tidak seragam.
-                </div>
-                <button class="btn btn-secondary" style="margin-top:10px; background:var(--accent); color:#0d0f14; border:none;"
-                    onclick="bukaPopupTerapkanRekomendasi(3)">📤 Submit ke Peserta Terfilter</button>
+                Jika tidak ada arah minat yang dicentang, hanya syarat IQ yang berlaku.
             </div>
         </div>
 
@@ -894,7 +841,6 @@
                 <button class="edit-tab"        onclick="switchEditTab('kelemahan')">⚠️ Kelemahan</button>
                 <button class="edit-tab"        onclick="switchEditTab('rekomendasi')">💬 Rekomendasi</button>
                 <button class="edit-tab"        onclick="switchEditTab('minat')">🎯 Arah Minat</button>
-                <button class="edit-tab"        onclick="switchEditTab('vaktemp')">🧭 Gaya Belajar & Temperamen</button>
             </div>
 
             <!-- ── TAB BIODATA ── -->
@@ -984,82 +930,6 @@
             <div class="edit-panel" id="epanel-minat">
                 <p style="font-size:12px; color:#888; margin-bottom:14px;">Edit 3 arah minat peserta (nama & keterangan).</p>
                 <div id="minat-wrap"><!-- Diisi JS --></div>
-            </div>
-
-            <!-- ── TAB GAYA BELAJAR VAK & TEMPERAMEN (x_18) ── -->
-            <div class="edit-panel" id="epanel-vaktemp">
-                <p style="font-size:12px; color:#888; margin-bottom:14px;">
-                    Edit hasil tes Gaya Belajar (VAK) &amp; Temperamen. Data ini disimpan di kolom <code>x_18</code>.
-                    Dominan otomatis dihitung dari skor tertinggi.
-                </p>
-
-                <!-- VAK -->
-                <h4 style="margin:0 0 8px; color:#4a90e2;">👁️ Gaya Belajar VAK</h4>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:8px;">
-                    <div class="edit-form-group">
-                        <label>Skor Visual (A)</label>
-                        <input type="number" id="ed-vak-skor-A" min="0" max="15" value="0" oninput="updateVakPreview()">
-                    </div>
-                    <div class="edit-form-group">
-                        <label>Skor Auditory (B)</label>
-                        <input type="number" id="ed-vak-skor-B" min="0" max="15" value="0" oninput="updateVakPreview()">
-                    </div>
-                    <div class="edit-form-group">
-                        <label>Skor Kinestetik (C)</label>
-                        <input type="number" id="ed-vak-skor-C" min="0" max="15" value="0" oninput="updateVakPreview()">
-                    </div>
-                </div>
-                <div id="vak-dominan-preview" style="margin-bottom:14px; font-size:14px; color:#555;"></div>
-
-                <div class="edit-form-group">
-                    <label>Karakteristik (5 poin)</label>
-                    <div id="vak-karakteristik-edit-wrap"><!-- Diisi JS --></div>
-                </div>
-                <div class="edit-form-group">
-                    <label>Tips (5 poin)</label>
-                    <div id="vak-tips-edit-wrap"><!-- Diisi JS --></div>
-                </div>
-                <button type="button" class="btn-modal" style="margin:6px 0 22px; background:#eef1ff; color:#4a55c9;"
-                    onclick="isiTemplateVak()">🔄 Isi otomatis dari template (sesuai dominan)</button>
-
-                <hr style="border:none; border-top:1px solid #eee; margin:10px 0 20px;">
-
-                <!-- TEMPERAMEN -->
-                <h4 style="margin:0 0 8px; color:#9b59b6;">🤔 Temperamen</h4>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; margin-bottom:8px;">
-                    <div class="edit-form-group">
-                        <label>Sanguinis (A)</label>
-                        <input type="number" id="ed-temp-skor-A" min="0" max="26" value="0" oninput="updateTempPreview()">
-                    </div>
-                    <div class="edit-form-group">
-                        <label>Koleris (B)</label>
-                        <input type="number" id="ed-temp-skor-B" min="0" max="26" value="0" oninput="updateTempPreview()">
-                    </div>
-                    <div class="edit-form-group">
-                        <label>Melankolis (C)</label>
-                        <input type="number" id="ed-temp-skor-C" min="0" max="26" value="0" oninput="updateTempPreview()">
-                    </div>
-                    <div class="edit-form-group">
-                        <label>Phlegmatis (D)</label>
-                        <input type="number" id="ed-temp-skor-D" min="0" max="26" value="0" oninput="updateTempPreview()">
-                    </div>
-                </div>
-                <div id="temp-dominan-preview" style="margin-bottom:14px; font-size:14px; color:#555;"></div>
-
-                <div class="edit-form-group">
-                    <label>Kekuatan (5 poin)</label>
-                    <div id="temp-kekuatan-edit-wrap"><!-- Diisi JS --></div>
-                </div>
-                <div class="edit-form-group">
-                    <label>Kelemahan (5 poin)</label>
-                    <div id="temp-kelemahan-edit-wrap"><!-- Diisi JS --></div>
-                </div>
-                <div class="edit-form-group">
-                    <label>Tips (5 poin)</label>
-                    <div id="temp-tips-edit-wrap"><!-- Diisi JS --></div>
-                </div>
-                <button type="button" class="btn-modal" style="margin:6px 0 6px; background:#f5eefc; color:#8e44ad;"
-                    onclick="isiTemplateTemp()">🔄 Isi otomatis dari template (sesuai dominan)</button>
             </div>
 
         </div><!-- /modal-body -->
@@ -1166,32 +1036,6 @@
         <div class="modal-footer">
             <button class="btn-modal btn-cancel" onclick="tutupModalParafraseMassal()">Batal</button>
             <button class="btn-modal btn-save" id="btn-terapkan-parafrase-massal" onclick="terapkanParafraseMassal()">✅ Terapkan & Simpan Semua</button>
-        </div>
-    </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     MODAL TERAPKAN REKOMENDASI PENGEMBANGAN (Filter 2 & 3)
-     ═══════════════════════════════════════ -->
-<div class="modal-overlay" id="modal-terapkan-rekom" onclick="tutupPopupTerapkanRekomendasiDiluar(event)">
-    <div class="modal-box" style="max-width:640px;">
-        <div class="modal-header">
-            <h2 id="trk-judul">📤 Terapkan Rekomendasi</h2>
-            <button class="modal-close-btn" onclick="tutupPopupTerapkanRekomendasi()">✕</button>
-        </div>
-
-        <div class="modal-body">
-            <div style="font-size:12.5px; color:var(--muted); margin-bottom:14px; line-height:1.6;" id="trk-info"></div>
-            <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:12px; cursor:pointer;">
-                <input type="checkbox" id="trk-pilih-semua" checked onchange="toggleSemuaTerapkanRekomendasi(this.checked)" style="width:16px; height:16px; cursor:pointer;">
-                Pilih semua
-            </label>
-            <div id="trk-list" style="display:flex; flex-direction:column; gap:10px; max-height:50vh; overflow-y:auto;"></div>
-        </div>
-
-        <div class="modal-footer">
-            <button class="btn-modal btn-cancel" onclick="tutupPopupTerapkanRekomendasi()">Batal</button>
-            <button class="btn-modal btn-save" id="btn-konfirmasi-terapkan-rekom" onclick="konfirmasiTerapkanRekomendasi()">✅ Tambahkan ke Peserta Terpilih</button>
         </div>
     </div>
 </div>
@@ -1336,15 +1180,9 @@
 
     // ── Filter (mode aktif keseluruhan) & Filter 2 (IQ & Arah Minat) ──
     const FILTER_STORAGE_KEY = 'rekap_filter_state_v1';
-    let _filterAktifMode  = 'none'; // 'none' | '1' | '2' | '3'
-    let _f2NumerikThreshold = 5;
-    let _f2SelectedMinat  = [];     // array nama minat (uppercase) yang dicentang — Filter 2 (Kemampuan Numerik)
-    let _f3VerbalThreshold  = 5;
-    let _f3SelectedMinat  = [];     // array nama minat (uppercase) yang dicentang — Filter 3 (Kemampuan Verbal)
-
-    // Daftar arah minat tetap untuk masing-masing filter (bukan diambil dinamis dari data)
-    const F2_MINAT_TETAP = ['COMPUTATIONAL', 'PRACTICAL', 'SCIENTIFIC', 'MEDICAL'];
-    const F3_MINAT_TETAP = ['LITERATURE'];
+    let _filterAktifMode  = 'none'; // 'none' | '1' | '2'
+    let _f2IqThreshold    = 90;
+    let _f2SelectedMinat  = [];     // array nama minat (uppercase) yang dicentang
 
     // Definisi aspek (sama dengan index_final.html — dipakai untuk label skor)
     const ASPEK_KEMAMPUAN   = ['Kemampuan Umum','Daya Tangkap Visual','Kemampuan Berpikir Logis','Kemampuan Berpikir Abstrak','Penalaran Verbal','Penalaran Numerik'];
@@ -1353,230 +1191,6 @@
     const ASPEK_KEY_KEMAMPUAN   = ['kemampuan_umum','daya_tangkap_visual','kemampuan_berpikir_logis','kemampuan_berpikir_abstrak','penalaran_verbal','penalaran_numerik'];
     const ASPEK_KEY_KEPRIBADIAN = ['hasrat_berprestasi','daya_tahan_stress','kepercayaan_diri','relasi_sosial','kerjasama'];
     const ASPEK_KEY_SIKAP       = ['sistematika_kerja','inisiatif','kemandirian'];
-
-    // =========================================================
-    // KONSTANTA GAYA BELAJAR VAK & TEMPERAMEN (x_18) — sama dengan index_final_gabungan-ssc.html
-    // =========================================================
-    const LEARNING_STYLES = {
-        A: {
-            name: 'VISUAL', color: '#4a90e2', icon: '👁️',
-            description: 'Belajar paling efektif dengan melihat dan mengamati',
-            characteristicsPool: [
-                ['Lebih mudah mengingat apa yang dilihat','Suka diagram, grafik, dan gambar','Mengingat wajah lebih baik dari nama','Lebih suka membaca instruksi sendiri','Sering membuat catatan visual atau mind map'],
-                ['Ingatan visual lebih kuat dari ingatan suara','Nyaman belajar dengan tabel dan bagan','Wajah lebih mudah dikenali dari nama','Panduan tertulis lebih disukai dari penjelasan lisan','Catatan bergambar membantu pemahaman'],
-                ['Informasi visual lebih mudah diingat','Belajar efektif dengan skema dan ilustrasi','Lebih mudah ingat wajah daripada nama','Instruksi tertulis lebih jelas dari arahan lisan','Suka membuat sketsa atau catatan berwarna']
-            ],
-            tipsPool: [
-                ['Gunakan stabilo warna-warni saat membaca','Buat diagram, flowchart, atau mind map','Tonton video pembelajaran atau tutorial visual','Gunakan flashcard dengan gambar','Visualisasikan konsep dalam bentuk gambar mental'],
-                ['Tandai poin penting dengan warna berbeda','Ubah catatan menjadi diagram atau peta pikiran','Cari video atau animasi yang menjelaskan materi','Buat kartu belajar dengan ilustrasi pendukung','Gambarkan konsep yang sedang dipelajari'],
-                ['Pakai kode warna untuk membedakan topik','Sajikan materi dalam tabel perbandingan','Perkaya pemahaman dengan video edukasi','Buat kartu ringkasan bergambar yang praktis','Ciptakan gambaran mental saat belajar topik baru']
-            ]
-        },
-        B: {
-            name: 'AUDITORY', color: '#f39c12', icon: '👂',
-            description: 'Belajar paling efektif dengan mendengar dan berbicara',
-            characteristicsPool: [
-                ['Lebih mudah mengingat apa yang didengar','Suka berdiskusi dan menjelaskan kepada orang lain','Mengingat nama lebih baik dari wajah','Lebih suka mendengarkan penjelasan daripada membaca','Sering berbicara sendiri saat belajar'],
-                ['Informasi yang didengar lebih mudah diingat','Menyukai sesi diskusi untuk mempertegas pemahaman','Nama orang lebih mudah diingat dari wajahnya','Penjelasan lisan terasa lebih membantu dari teks','Mengulang materi dengan suara adalah cara belajar favorit'],
-                ['Memori lebih kuat melalui pendengaran','Belajar dalam kelompok meningkatkan pemahaman','Mengingat suara lebih mudah dari tampilan visual','Lebih suka mendengar rekaman dari membaca teks panjang','Melafalkan materi dengan lantang memperkuat ingatan']
-            ],
-            tipsPool: [
-                ['Rekam catatan dan dengarkan kembali','Diskusikan materi dengan teman atau guru','Belajar sambil mendengarkan musik instrumental','Bacakan materi dengan keras saat belajar','Ikuti diskusi kelompok secara aktif'],
-                ['Rekam ringkasan materi dan putar ulang','Jadikan diskusi dengan teman sebagai metode belajar','Pilih musik tanpa lirik saat mengerjakan tugas','Biasakan membaca nyaring saat mengulang pelajaran','Bergabung dalam kelompok belajar secara rutin'],
-                ['Simpan catatan dalam format rekaman suara','Ajak teman saling menjelaskan topik belajar','Dengarkan podcast atau audio edukasi yang relevan','Ulang materi dengan cara mengajarkan kembali','Aktif dalam forum atau diskusi online']
-            ]
-        },
-        C: {
-            name: 'KINESTETIK', color: '#2ecc71', icon: '🤸',
-            description: 'Belajar paling efektif dengan bergerak dan melakukan langsung',
-            characteristicsPool: [
-                ['Belajar lebih efektif dengan praktik langsung','Suka eksperimen dan mencoba sendiri','Susah diam dalam waktu lama','Mengingat apa yang dilakukan bukan yang dibaca','Ekspresif dengan gerakan tubuh'],
-                ['Pemahaman terbentuk lewat pengalaman langsung','Senang mencoba tanpa harus menunggu arahan','Duduk lama membuat konsentrasi buyar','Ingatan terkuat dari hal yang pernah dilakukan','Bahasa tubuh adalah ekspresi alami saat bicara'],
-                ['Praktik langsung jauh lebih efektif dari teori','Cepat ingin mencoba tanpa banyak menunggu','Perlu bergerak selama proses belajar','Materi lebih diingat saat dilakukan sambil bergerak','Isyarat fisik sering muncul saat berkomunikasi']
-            ],
-            tipsPool: [
-                ['Buat proyek atau model nyata dari materi','Ambil jeda singkat dan bergerak setelah belajar','Gunakan role play atau simulasi','Tulis atau gambar sambil mendengar penjelasan','Kunjungi langsung lokasi yang berkaitan dengan topik'],
-                ['Wujudkan materi dalam bentuk karya nyata','Sisipkan gerakan ringan setiap 30–45 menit belajar','Coba peran atau situasi nyata untuk memahami materi','Tuliskan poin penting sambil menyimak','Perkuat pemahaman dengan kunjungan ke tempat relevan'],
-                ['Jadikan materi sebagai bahan uji coba nyata','Manfaatkan jeda aktif untuk menjaga fokus belajar','Praktikkan konsep dalam permainan peran sederhana','Coret-coret atau gambar kasar sambil menyimak','Perkaya belajar dengan pengalaman di lapangan']
-            ]
-        }
-    };
-
-    const TEMPERAMENTS = {
-        A: {
-            name: 'SANGUINIS', color: '#f1c40f', icon: '😄',
-            tagline: 'Si Periang yang Populer',
-            description: 'Ekstrovert, antusias, dan sosial. Suka menjadi pusat perhatian dan membuat orang lain senang.',
-            characteristics: ['Ceria, optimis, dan penuh semangat','Mudah bergaul dan populer','Suka berbicara dan menghibur','Spontan dan kreatif','Tidak suka rutinitas yang membosankan','Emosional dan ekspresif'],
-            strengths: ['Komunikator yang baik','Memotivasi orang lain','Mudah beradaptasi','Antusiasme tinggi','Kreatif dan inovatif'],
-            weaknesses: ['Kurang disiplin','Mudah terdistraksi','Tidak detail-oriented','Terlalu banyak bicara','Sulit menepati janji'],
-            strengthsPool: [
-                ['Komunikator yang baik','Memotivasi orang lain','Mudah beradaptasi','Antusiasme tinggi','Kreatif dan inovatif'],
-                ['Pandai menyampaikan gagasan','Pembangkit semangat tim','Fleksibel di berbagai situasi','Penuh energi positif','Pemikiran segar dan inovatif'],
-                ['Berbicara dengan efektif','Piawai memotivasi orang lain','Cepat beradaptasi dengan perubahan','Antusias dan bersemangat','Kaya ide dan kreativitas']
-            ],
-            weaknessesPool: [
-                ['Kurang disiplin','Mudah terdistraksi','Tidak detail-oriented','Terlalu banyak bicara','Sulit menepati janji'],
-                ['Disiplin masih perlu ditingkatkan','Fokus mudah teralihkan','Kurang teliti pada detail','Cenderung mendominasi percakapan','Komitmen perlu lebih dijaga'],
-                ['Konsistensi diri masih lemah','Konsentrasi mudah buyar','Kurang perhatian pada hal kecil','Kurang memberi ruang bicara orang lain','Kurang tepat waktu']
-            ],
-            careers: ['Sales & Marketing','Public Relations','Event Organizer','Entertainer','Presenter','Teacher'],
-            tipsPool: [
-                ['Buatlah daftar prioritas harian agar energimu terarah dengan baik','Latih diri untuk mendengarkan lebih banyak sebelum berbicara','Selesaikan satu pekerjaan hingga tuntas sebelum memulai yang baru','Biasakan mencatat janji dan komitmen penting di agenda','Kelola waktu dengan lebih disiplin agar produktivitas meningkat'],
-                ['Gunakan to-do list setiap pagi untuk menjaga fokus sepanjang hari','Berlatih menjadi pendengar aktif dalam setiap percakapan','Tuntaskan satu tanggung jawab dulu sebelum beralih ke hal lain','Catat setiap janji agar kepercayaan orang lain tetap terjaga','Bangun rutinitas yang konsisten untuk mendukung kedisiplinan'],
-                ['Mulai hari dengan menetapkan tiga hal utama yang ingin dicapai','Latih kesabaran dalam berdiskusi dan beri ruang orang lain berbicara','Jangan berpindah tugas sebelum yang pertama selesai dengan baik','Manfaatkan pengingat digital untuk memantau komitmenmu','Disiplin waktu adalah kunci agar potensimu berkembang maksimal']
-            ]
-        },
-        B: {
-            name: 'KOLERIS', color: '#e67e22', icon: '💪',
-            tagline: 'Si Pemimpin yang Kuat',
-            description: 'Ekstrovert, tegas, dan berorientasi pada tujuan. Suka memimpin dan mengambil keputusan.',
-            characteristics: ['Tegas dan percaya diri','Berorientasi pada hasil','Suka tantangan dan kompetisi','Pengambil keputusan yang cepat','Produktif dan efisien','Tidak sabaran dengan ketidakefisienan'],
-            strengths: ['Kepemimpinan alami','Berani mengambil risiko','Orientasi tujuan yang kuat','Tegas dalam keputusan','Produktivitas tinggi'],
-            weaknesses: ['Terlalu bossy','Kurang sensitif','Tidak sabaran','Sulit menerima kritik','Workaholic'],
-            strengthsPool: [
-                ['Kepemimpinan alami','Berani mengambil risiko','Orientasi tujuan yang kuat','Tegas dalam keputusan','Produktivitas tinggi'],
-                ['Jiwa pemimpin yang menonjol','Tidak takut mengambil risiko','Fokus dan terarah pada target','Pengambil keputusan yang tegas','Konsisten menghasilkan hasil terbaik'],
-                ['Pemimpin yang dipercaya tim','Berani bertindak di bawah tekanan','Tidak mudah terpengaruh distraksi','Cepat dan jelas dalam memutuskan','Produktif dan selalu berenergi']
-            ],
-            weaknessesPool: [
-                ['Terlalu bossy','Kurang sensitif','Tidak sabaran','Sulit menerima kritik','Workaholic'],
-                ['Cenderung terlalu mengatur','Kurang peka terhadap perasaan orang','Toleransi rendah terhadap kelambatan','Sulit menerima masukan','Sulit membatasi jam kerja'],
-                ['Terlalu dominan dalam tim','Empati masih perlu dikembangkan','Mudah tidak sabar','Defensif terhadap kritik','Cenderung mengabaikan istirahat']
-            ],
-            careers: ['CEO/Manager','Entrepreneur','Politisi','Direktur','Pilot','Lawyer'],
-            tipsPool: [
-                ['Latih kemampuan empati dengan menempatkan diri pada posisi orang lain','Biasakan memberikan apresiasi tulus kepada rekan tim secara rutin','Kenali pemicu amarahmu dan beri jeda sebelum bereaksi','Percayakan tugas kepada tim tanpa mengatur setiap detailnya','Sisihkan waktu untuk istirahat dan kehidupan pribadi di luar pekerjaan'],
-                ['Pelajari cara mendengarkan dengan penuh perhatian tanpa menyela','Ungkapkan penghargaan kepada anggota tim atas kontribusi mereka','Latih diri untuk merespons dengan kepala dingin dalam tekanan','Delegasikan dengan jelas dan percayai kemampuan timmu','Jaga keseimbangan antara ambisi kerja dan kebutuhan pribadimu'],
-                ['Kembangkan kepekaan terhadap perasaan dan kebutuhan orang di sekitarmu','Jadikan apresiasi sebagai bagian dari gaya kepemimpinanmu sehari-hari','Ambil napas dalam-dalam sebelum merespons situasi yang memancing emosi','Beri tim ruang untuk berkembang tanpa pengawasan berlebihan','Tetapkan batas waktu kerja yang sehat agar energimu tetap terjaga']
-            ]
-        },
-        C: {
-            name: 'MELANKOLIS', color: '#9b59b6', icon: '🤔',
-            tagline: 'Si Pemikir yang Perfeksionis',
-            description: 'Introvert, analitis, dan detail-oriented. Suka kesempurnaan dan kedalaman.',
-            characteristics: ['Perfeksionis dan teliti','Berpikir mendalam dan analitis','Sensitif dan idealis','Loyal dan setia','Suka keteraturan dan struktur','Cenderung pesimistis'],
-            strengths: ['Perhatian pada detail','Analisis mendalam','Standar tinggi','Kreatif dan artistik','Dapat diandalkan'],
-            weaknesses: ['Terlalu kritis','Overthinking','Perfeksionisme berlebihan','Sulit puas','Mudah depresi'],
-            strengthsPool: [
-                ['Perhatian pada detail','Analisis mendalam','Standar kerja tinggi','Kreatif dan artistik','Dapat diandalkan'],
-                ['Teliti dan cermat','Berpikir secara mendalam','Berkomitmen pada kualitas','Jiwa seni yang kuat','Konsisten dan terpercaya'],
-                ['Tidak mudah melewatkan detail','Analitis dan kritis','Menghasilkan pekerjaan berkualitas','Kreativitas yang mendalam','Stabil dan bisa diandalkan']
-            ],
-            weaknessesPool: [
-                ['Terlalu kritis','Overthinking','Perfeksionisme berlebihan','Sulit merasa puas','Rentan terhadap tekanan emosi'],
-                ['Mudah mengkritik diri sendiri','Terlalu lama menganalisis','Standar terlalu tinggi','Kepuasan sulit dicapai','Sensitif terhadap tekanan'],
-                ['Kritis terhadap diri dan orang lain','Terjebak dalam analisis berlebih','Sulit menerima hasil yang tidak sempurna','Ekspektasi yang sulit terpenuhi','Emosi mudah terpengaruh situasi']
-            ],
-            careers: ['Scientist','Analyst','Artist','Writer','Programmer','Accountant'],
-            tipsPool: [
-                ['Terimalah bahwa hasil yang cukup baik jauh lebih berharga dari yang tidak selesai','Latih diri untuk segera mengambil tindakan tanpa menunggu kondisi sempurna','Rayakan setiap kemajuan kecil sebagai bagian dari perjalanan panjang','Pandanglah kritik sebagai masukan berharga yang membantu pertumbuhanmu','Tetapkan standar yang realistis agar kamu tidak mudah kelelahan'],
-                ['Ingat bahwa kesempurnaan adalah perjalanan, bukan tujuan akhir','Kurangi waktu analisis berlebih dan mulailah melangkah lebih cepat','Fokus pada proses dan pembelajaran, bukan hanya hasil akhir','Latih keterbukaan dalam menerima masukan dari orang-orang tepercaya','Kenali batasmu dan beri dirimu izin untuk tidak selalu sempurna'],
-                ['Bebaskan dirimu dari tekanan harus sempurna dalam setiap hal','Ambil keputusan dengan informasi yang cukup, bukan yang lengkap','Jadikan setiap langkah maju sebagai pencapaian yang layak disyukuri','Ubah cara pandang terhadap kritik menjadi bahan bakar perbaikan diri','Sesuaikan ekspektasi agar kamu dapat menikmati prosesnya']
-            ]
-        },
-        D: {
-            name: 'PHLEGMATIS', color: '#3498db', icon: '😌',
-            tagline: 'Si Pendamai yang Tenang',
-            description: 'Introvert, tenang, dan damai. Suka harmoni dan menghindari konflik.',
-            characteristics: ['Tenang dan sabar','Pendamai dan diplomatik','Pendengar yang baik','Stabil dan konsisten','Tidak suka konflik','Santai dan easy-going'],
-            strengths: ['Kemampuan diplomasi','Sabar dan tenang','Pendengar yang baik','Konsisten dan stabil','Mudah bergaul'],
-            weaknesses: ['Kurang inisiatif','Terlalu pasif','Sulit membuat keputusan','Menghindari konfrontasi','Kurang ambisi'],
-            strengthsPool: [
-                ['Kemampuan diplomasi yang baik','Sabar dan tenang','Pendengar yang baik','Konsisten dan stabil','Mudah bergaul'],
-                ['Pandai meredakan konflik','Tidak mudah terpancing emosi','Membuat orang nyaman bercerita','Kinerja yang stabil dan andal','Ramah di berbagai lingkungan'],
-                ['Pendekatan diplomatik yang elegan','Tenang dalam situasi tekanan','Pendengar aktif yang empatik','Dapat diandalkan jangka panjang','Mudah akrab dengan siapa saja']
-            ],
-            weaknessesPool: [
-                ['Kurang inisiatif','Terlalu pasif','Sulit membuat keputusan','Menghindari konfrontasi','Kurang ambisi'],
-                ['Jarang bertindak tanpa diminta','Cenderung menunggu situasi','Keputusan sering tertunda','Menghindari konflik yang perlu diselesaikan','Motivasi diri masih perlu diperkuat'],
-                ['Inisiatif kurang terlihat','Terlalu santai dalam situasi kritis','Lambat dalam mengambil keputusan','Mengorbankan solusi demi kenyamanan','Potensi belum dimaksimalkan']
-            ],
-            careers: ['Counselor','Mediator','HR','Customer Service','Nurse','Social Worker'],
-            tipsPool: [
-                ['Latih diri untuk mengambil inisiatif tanpa harus menunggu diminta','Hadapi konflik yang perlu diselesaikan dengan kepala dingin dan hati terbuka','Tetapkan tujuan jangka pendek yang spesifik agar mudah diukur dan dicapai','Latih kemampuan pengambilan keputusan dengan mulai dari pilihan-pilihan kecil','Coba hal-hal baru sesekali untuk memperluas wawasan dan kemampuanmu'],
-                ['Beranikan diri untuk memulai sesuatu tanpa menunggu momen yang tepat','Jangan biarkan ketidaknyamanan menghalangimu dari menyelesaikan masalah penting','Buat rencana dengan target yang jelas agar langkahmu lebih terarah','Biasakan membuat keputusan tepat waktu meskipun belum sempurna','Keluar dari rutinitas sesekali untuk menemukan potensi baru dalam dirimu'],
-                ['Jadilah orang yang pertama bertindak dalam situasi yang membutuhkan solusi','Selesaikan konflik yang ada sebelum berkembang menjadi masalah yang lebih besar','Tuliskan tujuanmu secara konkret agar lebih mudah diperjuangkan setiap hari','Percayai pertimbanganmu sendiri dan latih keberanian dalam memutuskan','Tantang dirimu dengan pengalaman baru yang dapat memperkaya perspektifmu']
-            ]
-        }
-    };
-
-    // ── Preview dominan VAK real-time saat skor diubah ──
-    function updateVakPreview() {
-        const skor = {
-            A: parseInt(document.getElementById('ed-vak-skor-A').value) || 0,
-            B: parseInt(document.getElementById('ed-vak-skor-B').value) || 0,
-            C: parseInt(document.getElementById('ed-vak-skor-C').value) || 0
-        };
-        const total = skor.A + skor.B + skor.C;
-        const dom   = Object.keys(skor).reduce((a, b) => skor[a] >= skor[b] ? a : b);
-        const s     = LEARNING_STYLES[dom];
-        const pct   = total > 0 ? Math.round((skor[dom] / total) * 100) : 0;
-        document.getElementById('vak-dominan-preview').innerHTML = total > 0
-            ? `Dominan: <strong style="color:${s.color}">${s.icon} ${s.name}</strong> (${pct}% dari total ${total})`
-            : '<span style="color:#aaa;">Isi skor untuk melihat dominan</span>';
-    }
-
-    // ── Preview dominan Temperamen real-time saat skor diubah ──
-    function updateTempPreview() {
-        const skor = {
-            A: parseInt(document.getElementById('ed-temp-skor-A').value) || 0,
-            B: parseInt(document.getElementById('ed-temp-skor-B').value) || 0,
-            C: parseInt(document.getElementById('ed-temp-skor-C').value) || 0,
-            D: parseInt(document.getElementById('ed-temp-skor-D').value) || 0
-        };
-        const total = skor.A + skor.B + skor.C + skor.D;
-        const dom   = Object.keys(skor).reduce((a, b) => skor[a] >= skor[b] ? a : b);
-        const t     = TEMPERAMENTS[dom];
-        const pct   = total > 0 ? Math.round((skor[dom] / total) * 100) : 0;
-        document.getElementById('temp-dominan-preview').innerHTML = total > 0
-            ? `Dominan: <strong style="color:${t.color}">${t.icon} ${t.name}</strong> — ${t.tagline} (${pct}% dari total ${total})`
-            : '<span style="color:#aaa;">Isi skor untuk melihat dominan</span>';
-    }
-
-    // ── Isi otomatis karakteristik & tips VAK sesuai dominan saat ini ──
-    function isiTemplateVak() {
-        const skor = {
-            A: parseInt(document.getElementById('ed-vak-skor-A').value) || 0,
-            B: parseInt(document.getElementById('ed-vak-skor-B').value) || 0,
-            C: parseInt(document.getElementById('ed-vak-skor-C').value) || 0
-        };
-        const dom  = Object.keys(skor).reduce((a, b) => skor[a] >= skor[b] ? a : b);
-        const s    = LEARNING_STYLES[dom];
-        const kar  = (s.characteristicsPool && s.characteristicsPool[0]) || [];
-        const tips = (s.tipsPool && s.tipsPool[0]) || [];
-        [0,1,2,3,4].forEach(i => {
-            const elK = document.getElementById(`vak-karakteristik-edit-${i}`);
-            const elT = document.getElementById(`vak-tips-edit-${i}`);
-            if (elK) elK.value = kar[i] || '';
-            if (elT) elT.value = tips[i] || '';
-        });
-        tampilToast('Template karakteristik & tips VAK diisi sesuai dominan.', 'success');
-    }
-
-    // ── Isi otomatis kekuatan/kelemahan/tips Temperamen sesuai dominan saat ini ──
-    function isiTemplateTemp() {
-        const skor = {
-            A: parseInt(document.getElementById('ed-temp-skor-A').value) || 0,
-            B: parseInt(document.getElementById('ed-temp-skor-B').value) || 0,
-            C: parseInt(document.getElementById('ed-temp-skor-C').value) || 0,
-            D: parseInt(document.getElementById('ed-temp-skor-D').value) || 0
-        };
-        const dom  = Object.keys(skor).reduce((a, b) => skor[a] >= skor[b] ? a : b);
-        const t    = TEMPERAMENTS[dom];
-        const kek  = (t.strengthsPool && t.strengthsPool[0]) || t.strengths || [];
-        const kel  = (t.weaknessesPool && t.weaknessesPool[0]) || t.weaknesses || [];
-        const tips = (t.tipsPool && t.tipsPool[0]) || [];
-        [0,1,2,3,4].forEach(i => {
-            const elKek = document.getElementById(`temp-kekuatan-edit-${i}`);
-            const elKel = document.getElementById(`temp-kelemahan-edit-${i}`);
-            const elTip = document.getElementById(`temp-tips-edit-${i}`);
-            if (elKek) elKek.value = kek[i] || '';
-            if (elKel) elKel.value = kel[i] || '';
-            if (elTip) elTip.value = tips[i] || '';
-        });
-        tampilToast('Template kekuatan/kelemahan/tips Temperamen diisi sesuai dominan.', 'success');
-    }
 
     // Toggle box ganti tabel
     function toggleTabelInput() {
@@ -1654,10 +1268,8 @@
                 filterAmbangSkorKurang: _filterAmbangSkorKurang,
                 filterSkorLebihAktif  : _filterSkorLebihAktif,
                 filterAmbangSkorLebih : _filterAmbangSkorLebih,
-                f2NumerikThreshold   : _f2NumerikThreshold,
-                f2SelectedMinat      : _f2SelectedMinat,
-                f3VerbalThreshold    : _f3VerbalThreshold,
-                f3SelectedMinat      : _f3SelectedMinat
+                f2IqThreshold        : _f2IqThreshold,
+                f2SelectedMinat      : _f2SelectedMinat
             }));
         } catch (e) { /* localStorage penuh/diblokir — abaikan, filter tetap jalan di memori */ }
     }
@@ -1677,10 +1289,8 @@
             _filterAmbangSkorKurang = s.filterAmbangSkorKurang ?? 5;
             _filterSkorLebihAktif   = s.filterSkorLebihAktif   ?? false;
             _filterAmbangSkorLebih  = s.filterAmbangSkorLebih  ?? 8;
-            _f2NumerikThreshold     = s.f2NumerikThreshold     ?? 5;
+            _f2IqThreshold          = s.f2IqThreshold          ?? 90;
             _f2SelectedMinat        = Array.isArray(s.f2SelectedMinat) ? s.f2SelectedMinat : [];
-            _f3VerbalThreshold      = s.f3VerbalThreshold      ?? 5;
-            _f3SelectedMinat        = Array.isArray(s.f3SelectedMinat) ? s.f3SelectedMinat : [];
         } catch (e) { /* data storage rusak — pakai default */ }
     }
 
@@ -1689,10 +1299,8 @@
         document.getElementById('filterAktifNone').checked = (_filterAktifMode === 'none');
         document.getElementById('filterAktifSatu').checked = (_filterAktifMode === '1');
         document.getElementById('filterAktifDua').checked  = (_filterAktifMode === '2');
-        document.getElementById('filterAktifTiga').checked = (_filterAktifMode === '3');
         document.getElementById('panelFilter1').style.display = (_filterAktifMode === '1') ? 'block' : 'none';
         document.getElementById('panelFilter2').style.display = (_filterAktifMode === '2') ? 'block' : 'none';
-        document.getElementById('panelFilter3').style.display = (_filterAktifMode === '3') ? 'block' : 'none';
 
         document.getElementById('filterModeOr').checked          = (_filterMode === 'or');
         document.getElementById('filterModeAnd').checked         = (_filterMode === 'and');
@@ -1705,10 +1313,8 @@
         document.getElementById('filterSkorLebihAktif').checked  = _filterSkorLebihAktif;
         document.getElementById('filterAmbangSkorLebih').value   = _filterAmbangSkorLebih;
 
-        document.getElementById('f2NumerikThreshold').value = _f2NumerikThreshold;
-        document.getElementById('f3VerbalThreshold').value  = _f3VerbalThreshold;
+        document.getElementById('f2IqThreshold').value = _f2IqThreshold;
         renderF2MinatChecklist();
-        renderF3MinatChecklist();
     }
 
     function toggleFilterBox() {
@@ -1731,24 +1337,27 @@
         applyFilterAndRender();
     }
 
-    // Ganti mode filter aktif: none / 1 / 2 / 3 — hanya satu yang bisa aktif (radio)
+    // Ganti mode filter aktif: none / 1 / 2 — hanya satu yang bisa aktif (radio)
     function ubahModeFilterAktif() {
         const dipilih = document.querySelector('input[name="filterAktifMode"]:checked');
         _filterAktifMode = dipilih ? dipilih.value : 'none';
         document.getElementById('panelFilter1').style.display = (_filterAktifMode === '1') ? 'block' : 'none';
         document.getElementById('panelFilter2').style.display = (_filterAktifMode === '2') ? 'block' : 'none';
-        document.getElementById('panelFilter3').style.display = (_filterAktifMode === '3') ? 'block' : 'none';
         applyFilterAndRender();
     }
 
-    function ubahF2Threshold() {
-        _f2NumerikThreshold = parseInt(document.getElementById('f2NumerikThreshold').value) || 1;
+    function ubahF2IqThreshold() {
+        _f2IqThreshold = parseInt(document.getElementById('f2IqThreshold').value) || 1;
         applyFilterAndRender();
     }
 
-    function ubahF3Threshold() {
-        _f3VerbalThreshold = parseInt(document.getElementById('f3VerbalThreshold').value) || 1;
-        applyFilterAndRender();
+    // Ambil daftar nama arah minat unik dari seluruh data yang sedang dimuat (x_10, teks bebas)
+    function ambilDaftarMinatUnik(rows) {
+        const set = new Set();
+        rows.forEach(row => {
+            ambilMinatRow(row).forEach(nama => { if (nama) set.add(nama); });
+        });
+        return Array.from(set).sort();
     }
 
     function ambilMinatRow(row) {
@@ -1758,10 +1367,15 @@
             .filter(Boolean);
     }
 
-    // Render checklist arah minat tetap di panel Filter 2 (Kemampuan Numerik)
+    // Render checklist arah minat di panel Filter 2, berdasarkan data yang sedang dimuat
     function renderF2MinatChecklist() {
         const wrap = document.getElementById('f2MinatChecklist');
-        wrap.innerHTML = F2_MINAT_TETAP.map(nama => {
+        const daftarMinat = ambilDaftarMinatUnik(_lastRows);
+        if (daftarMinat.length === 0) {
+            wrap.innerHTML = '<span style="font-size:12px; color:var(--muted);">Belum ada data arah minat pada tabel ini.</span>';
+            return;
+        }
+        wrap.innerHTML = daftarMinat.map(nama => {
             const checked = _f2SelectedMinat.includes(nama) ? 'checked' : '';
             const idAman = nama.replace(/[^a-zA-Z0-9]/g, '_');
             return `
@@ -1769,23 +1383,6 @@
                           background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:5px 10px;">
                 <input type="checkbox" id="f2-minat-${idAman}" value="${escHtml(nama)}"
                     ${checked} onchange="toggleF2Minat('${nama.replace(/'/g, "\\'")}', this.checked)"
-                    style="width:15px; height:15px; cursor:pointer;">
-                ${escHtml(nama)}
-            </label>`;
-        }).join('');
-    }
-
-    // Render checklist arah minat tetap di panel Filter 3 (Kemampuan Verbal)
-    function renderF3MinatChecklist() {
-        const wrap = document.getElementById('f3MinatChecklist');
-        wrap.innerHTML = F3_MINAT_TETAP.map(nama => {
-            const checked = _f3SelectedMinat.includes(nama) ? 'checked' : '';
-            const idAman = nama.replace(/[^a-zA-Z0-9]/g, '_');
-            return `
-            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;
-                          background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:5px 10px;">
-                <input type="checkbox" id="f3-minat-${idAman}" value="${escHtml(nama)}"
-                    ${checked} onchange="toggleF3Minat('${nama.replace(/'/g, "\\'")}', this.checked)"
                     style="width:15px; height:15px; cursor:pointer;">
                 ${escHtml(nama)}
             </label>`;
@@ -1801,199 +1398,13 @@
         applyFilterAndRender();
     }
 
-    function toggleF3Minat(nama, dicentang) {
-        if (dicentang) {
-            if (!_f3SelectedMinat.includes(nama)) _f3SelectedMinat.push(nama);
-        } else {
-            _f3SelectedMinat = _f3SelectedMinat.filter(n => n !== nama);
-        }
-        applyFilterAndRender();
-    }
-
-    // Cek apakah satu baris memenuhi Filter 2: Kemampuan Numerik < ambang DAN (salah satu minat dicentang cocok, atau tidak ada minat dicentang)
+    // Cek apakah satu baris memenuhi Filter 2: IQ < ambang DAN (salah satu minat dicentang cocok, atau tidak ada minat dicentang)
     function rowMatchesFilter2(row) {
-        const kemampuan = safeJSON(row.x_03, {});
-        const numerik   = parseInt(kemampuan.penalaran_numerik);
-        if (isNaN(numerik) || numerik >= _f2NumerikThreshold) return false;
+        const iq = parseInt(row.x_06);
+        if (isNaN(iq) || iq >= _f2IqThreshold) return false;
         if (_f2SelectedMinat.length === 0) return true;
         const minatRow = ambilMinatRow(row);
         return minatRow.some(m => _f2SelectedMinat.includes(m));
-    }
-
-    // Cek apakah satu baris memenuhi Filter 3: Kemampuan Verbal < ambang DAN (salah satu minat dicentang cocok, atau tidak ada minat dicentang)
-    function rowMatchesFilter3(row) {
-        const kemampuan = safeJSON(row.x_03, {});
-        const verbal    = parseInt(kemampuan.penalaran_verbal);
-        if (isNaN(verbal) || verbal >= _f3VerbalThreshold) return false;
-        if (_f3SelectedMinat.length === 0) return true;
-        const minatRow = ambilMinatRow(row);
-        return minatRow.some(m => _f3SelectedMinat.includes(m));
-    }
-
-    // =========================================================
-    // TERAPKAN REKOMENDASI PENGEMBANGAN KE PESERTA TERFILTER (Filter 2 & 3)
-    // =========================================================
-    let _trkFilterNum = 2;   // 2 atau 3 — sumber filter yang sedang diproses
-    let _trkItems     = [];  // daftar peserta yang ditampilkan di popup (belum punya kalimat identik)
-
-    // Hash string sederhana → angka positif (dipakai sebagai basis seed acak deterministik)
-    function _hashSeed(str) {
-        let h = 0;
-        for (let i = 0; i < str.length; i++) {
-            h = (h * 31 + str.charCodeAt(i)) >>> 0;
-        }
-        return h;
-    }
-
-    // Pilih 1 opsi dari grup spintax secara acak tapi konsisten untuk seed (peserta) yang sama
-    function _pilihSpintax(seed, groupIdx, jumlahOpsi) {
-        return _hashSeed(`${seed}::${groupIdx}`) % jumlahOpsi;
-    }
-
-    // Resolve spintax {opsi1|opsi2|opsi3} → salah satu opsi, deterministik berdasarkan seed (id_x peserta)
-    // Sehingga kalau di-generate ulang untuk peserta yang sama, hasilnya selalu sama (deteksi duplikat tetap akurat).
-    function resolveSpintax(template, seed) {
-        let groupIdx = 0;
-        return template.replace(/\{([^{}]+)\}/g, (match, isi) => {
-            const opsi = isi.split('|').map(s => s.trim()).filter(s => s.length > 0);
-            if (opsi.length === 0) return '';
-            const idx = _pilihSpintax(seed, groupIdx, opsi.length);
-            groupIdx++;
-            return opsi[idx];
-        });
-    }
-
-    // Gabungkan minat yang cocok + kalimat template (dengan spintax di-resolve per peserta) jadi satu kalimat rekomendasi utuh
-    function buatKalimatRekomendasi(minatCocok, template, seed) {
-        const label      = (minatCocok && minatCocok.length > 0) ? minatCocok.join(', ') : '';
-        const templateFix = resolveSpintax(template, seed);
-        return label ? `Minat ${label}: ${templateFix}` : templateFix;
-    }
-
-    function bukaPopupTerapkanRekomendasi(nomorFilter) {
-        const template = document.getElementById(`f${nomorFilter}Template`).value.trim();
-        if (!template) { tampilToast('❌ Isi dulu kalimat rekomendasinya.', 'error'); return; }
-
-        _trkFilterNum = nomorFilter;
-        const selectedMinat = nomorFilter === 2 ? _f2SelectedMinat : _f3SelectedMinat;
-        const rowsMatch = nomorFilter === 2
-            ? _lastRows.filter(r => rowMatchesFilter2(r))
-            : _lastRows.filter(r => rowMatchesFilter3(r));
-
-        const semuaCocok = [];
-        rowsMatch.forEach(row => {
-            const biodata    = safeJSON(row.x_02, {});
-            const nama       = biodata.nama || `(ID ${row.id_x})`;
-            const minatRow   = ambilMinatRow(row);
-            const cocok      = selectedMinat.length > 0 ? minatRow.filter(m => selectedMinat.includes(m)) : minatRow;
-            const kalimat    = buatKalimatRekomendasi(cocok, template, row.id_x);
-            const rekomLama  = safeJSON(row.x_09, []);
-            const rekomArr   = Array.isArray(rekomLama) ? rekomLama : [];
-            // Kalimat rekomendasi terakhir yang sudah ada sebelumnya (kalau ada) — akan disambung, bukan jadi entri baru
-            const teksSebelumnya = rekomArr.length > 0 ? rekomArr[rekomArr.length - 1] : '';
-            // Kalimat final yang akan disimpan: kalimat lama disambung kalimat baru jadi satu string utuh
-            const kalimatGabungan = teksSebelumnya ? `${teksSebelumnya} ${kalimat}` : kalimat;
-            const sudahAda   = teksSebelumnya.length > 0 && teksSebelumnya.endsWith(kalimat); // kalimat baru ini sudah pernah disambung sebelumnya
-            semuaCocok.push({ id_x: row.id_x, nama, kalimat, teksSebelumnya, kalimatGabungan, sudahAda, row });
-        });
-
-        // Sembunyikan peserta yang sudah pernah punya kalimat identik ini — tidak ditampilkan lagi (supaya tidak dobel)
-        _trkItems = semuaCocok.filter(it => !it.sudahAda);
-        const jumlahSudahAda = semuaCocok.length - _trkItems.length;
-
-        const labelFilter = nomorFilter === 2 ? 'Kemampuan Numerik' : 'Kemampuan Verbal';
-        document.getElementById('trk-judul').textContent = `📤 Terapkan Rekomendasi — Filter ${nomorFilter} (${labelFilter})`;
-
-        const info = document.getElementById('trk-info');
-        const list = document.getElementById('trk-list');
-        const btnKonfirmasi = document.getElementById('btn-konfirmasi-terapkan-rekom');
-
-        if (semuaCocok.length === 0) {
-            info.innerHTML = 'Tidak ada peserta yang cocok dengan filter saat ini.';
-            list.innerHTML = '';
-            btnKonfirmasi.disabled = true;
-        } else if (_trkItems.length === 0) {
-            info.innerHTML = `Total <strong style="color:var(--text)">${semuaCocok.length}</strong> peserta cocok dengan filter — `
-                + `semuanya (<strong style="color:#e07a5f">${jumlahSudahAda}</strong>) sudah pernah disambung kalimat rekomendasi identik ini sebelumnya, `
-                + `jadi tidak ada yang perlu/boleh ditambahkan lagi (mencegah dobel).`;
-            list.innerHTML = '';
-            btnKonfirmasi.disabled = true;
-        } else {
-            info.innerHTML = `Total <strong style="color:var(--text)">${semuaCocok.length}</strong> peserta cocok dengan filter — `
-                + `<strong style="color:#e07a5f">${jumlahSudahAda} sudah pernah disambung</strong> (otomatis disembunyikan, tidak akan dobel) · `
-                + `<strong style="color:#7fb069">${_trkItems.length} belum pernah</strong>, ditampilkan di bawah dan siap disambungkan. `
-                + `Centang satu per satu atau gunakan "Pilih semua".`;
-            list.innerHTML = _trkItems.map((it, idx) => `
-                <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px; cursor:pointer;
-                              background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 12px;">
-                    <input type="checkbox" class="trk-item-check" data-idx="${idx}" checked style="width:16px; height:16px; margin-top:2px; cursor:pointer;">
-                    <span>
-                        <strong>${escHtml(it.nama)}</strong><br>
-                        ${it.teksSebelumnya ? `<span style="color:var(--muted); font-style:italic;">${escHtml(it.teksSebelumnya)}</span> ` : ''}<span style="color:var(--text);">${escHtml(it.kalimat)}</span>
-                    </span>
-                </label>`).join('');
-            btnKonfirmasi.disabled = false;
-        }
-
-        document.getElementById('trk-pilih-semua').checked = true;
-        document.getElementById('modal-terapkan-rekom').classList.add('open');
-    }
-
-    function toggleSemuaTerapkanRekomendasi(checked) {
-        document.querySelectorAll('.trk-item-check').forEach(c => { c.checked = checked; });
-    }
-
-    function tutupPopupTerapkanRekomendasi() {
-        document.getElementById('modal-terapkan-rekom').classList.remove('open');
-    }
-
-    function tutupPopupTerapkanRekomendasiDiluar(e) {
-        if (e.target === document.getElementById('modal-terapkan-rekom')) tutupPopupTerapkanRekomendasi();
-    }
-
-    async function konfirmasiTerapkanRekomendasi() {
-        const checks = document.querySelectorAll('.trk-item-check');
-        const terpilih = [];
-        checks.forEach(c => { if (c.checked) terpilih.push(_trkItems[parseInt(c.dataset.idx)]); });
-        if (terpilih.length === 0) { tampilToast('❌ Pilih minimal satu peserta.', 'error'); return; }
-
-        const btn = document.getElementById('btn-konfirmasi-terapkan-rekom');
-        btn.disabled = true;
-        let sukses = 0, gagal = 0;
-
-        for (const it of terpilih) {
-            try {
-                btn.textContent = `⏳ Menyimpan ${it.nama}...`;
-                const rekomLama = safeJSON(it.row.x_09, []);
-                const rekomArr  = Array.isArray(rekomLama) ? [...rekomLama] : [];
-                if (rekomArr.length > 0) {
-                    rekomArr[rekomArr.length - 1] = it.kalimatGabungan; // sambung ke kalimat terakhir (bukan entri baru)
-                } else {
-                    rekomArr.push(it.kalimatGabungan);
-                }
-
-                const apiUrl = `${API_URL}?table=${TABLE_NAME}&id_x=${it.id_x}`;
-                const res = await fetch(apiUrl, {
-                    method : 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': SECRET },
-                    body   : JSON.stringify({ x_09: JSON.stringify(rekomArr) })
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const result = await res.json();
-                if (!result.success) throw new Error(result.message || 'Gagal menyimpan');
-                sukses++;
-            } catch (err) {
-                gagal++;
-            }
-        }
-
-        btn.disabled = false;
-        btn.textContent = '✅ Tambahkan ke Peserta Terpilih';
-
-        tutupPopupTerapkanRekomendasi();
-        tampilToast(`Selesai: ${sukses} berhasil ditambahkan, ${gagal} gagal.`, gagal > 0 ? 'error' : 'success');
-        lastDataHash = null; // paksa reload
-        loadData();
     }
 
     // Kumpulkan semua nilai skor aspek (Kemampuan/Kepribadian/Sikap) dari satu baris
@@ -2030,8 +1441,7 @@
 
     function adaFilterAktif() {
         if (_filterAktifMode === '1') return _filterIQKurangAktif || _filterIQLebihAktif || _filterSkorKurangAktif || _filterSkorLebihAktif;
-        if (_filterAktifMode === '2') return true; // Filter 2 selalu punya syarat Kemampuan Numerik, jadi selalu dianggap aktif
-        if (_filterAktifMode === '3') return true; // Filter 3 selalu punya syarat Kemampuan Verbal, jadi selalu dianggap aktif
+        if (_filterAktifMode === '2') return true; // Filter 2 selalu punya syarat IQ, jadi selalu dianggap aktif
         return false;
     }
 
@@ -2042,9 +1452,6 @@
         }
         if (_filterAktifMode === '2') {
             return rows.filter(r => rowMatchesFilter2(r));
-        }
-        if (_filterAktifMode === '3') {
-            return rows.filter(r => rowMatchesFilter3(r));
         }
         return rows;
     }
@@ -2061,11 +1468,7 @@
         }
         if (_filterAktifMode === '2') {
             const minatTxt = _f2SelectedMinat.length > 0 ? ` & minat: ${_f2SelectedMinat.join('/')}` : '';
-            return `Filter 2: Numerik<${_f2NumerikThreshold}${minatTxt}`;
-        }
-        if (_filterAktifMode === '3') {
-            const minatTxt = _f3SelectedMinat.length > 0 ? ` & minat: ${_f3SelectedMinat.join('/')}` : '';
-            return `Filter 3: Verbal<${_f3VerbalThreshold}${minatTxt}`;
+            return `Filter 2: IQ<${_f2IqThreshold}${minatTxt}`;
         }
         return '';
     }
@@ -3095,48 +2498,6 @@
             </div>`;
         });
 
-        // ── Gaya Belajar VAK & Temperamen (x_18) ──
-        const x18      = safeJSON(row.x_18, {});
-        const vakData  = x18.vak || {};
-        const tempData = x18.temperamen || {};
-
-        document.getElementById('ed-vak-skor-A').value = (vakData.skor && vakData.skor.A) || 0;
-        document.getElementById('ed-vak-skor-B').value = (vakData.skor && vakData.skor.B) || 0;
-        document.getElementById('ed-vak-skor-C').value = (vakData.skor && vakData.skor.C) || 0;
-
-        const wrapVakKar = document.getElementById('vak-karakteristik-edit-wrap');
-        wrapVakKar.innerHTML = '';
-        const vakKarArr = (vakData.karakteristik && vakData.karakteristik.length) ? vakData.karakteristik : ['','','','',''];
-        [0,1,2,3,4].forEach(i => { wrapVakKar.innerHTML += buatListInput('vak-karakteristik-edit', i, vakKarArr[i] || ''); });
-
-        const wrapVakTips = document.getElementById('vak-tips-edit-wrap');
-        wrapVakTips.innerHTML = '';
-        const vakTipsArr = (vakData.tips && vakData.tips.length) ? vakData.tips : ['','','','',''];
-        [0,1,2,3,4].forEach(i => { wrapVakTips.innerHTML += buatListInput('vak-tips-edit', i, vakTipsArr[i] || ''); });
-
-        document.getElementById('ed-temp-skor-A').value = (tempData.skor && tempData.skor.A) || 0;
-        document.getElementById('ed-temp-skor-B').value = (tempData.skor && tempData.skor.B) || 0;
-        document.getElementById('ed-temp-skor-C').value = (tempData.skor && tempData.skor.C) || 0;
-        document.getElementById('ed-temp-skor-D').value = (tempData.skor && tempData.skor.D) || 0;
-
-        const wrapTempKek = document.getElementById('temp-kekuatan-edit-wrap');
-        wrapTempKek.innerHTML = '';
-        const tempKekArr = (tempData.kekuatan && tempData.kekuatan.length) ? tempData.kekuatan : ['','','','',''];
-        [0,1,2,3,4].forEach(i => { wrapTempKek.innerHTML += buatListInput('temp-kekuatan-edit', i, tempKekArr[i] || ''); });
-
-        const wrapTempKel = document.getElementById('temp-kelemahan-edit-wrap');
-        wrapTempKel.innerHTML = '';
-        const tempKelArr = (tempData.kelemahan && tempData.kelemahan.length) ? tempData.kelemahan : ['','','','',''];
-        [0,1,2,3,4].forEach(i => { wrapTempKel.innerHTML += buatListInput('temp-kelemahan-edit', i, tempKelArr[i] || ''); });
-
-        const wrapTempTips = document.getElementById('temp-tips-edit-wrap');
-        wrapTempTips.innerHTML = '';
-        const tempTipsArr = (tempData.tips && tempData.tips.length) ? tempData.tips : ['','','','',''];
-        [0,1,2,3,4].forEach(i => { wrapTempTips.innerHTML += buatListInput('temp-tips-edit', i, tempTipsArr[i] || ''); });
-
-        updateVakPreview();
-        updateTempPreview();
-
         // Buka modal & reset ke tab pertama
         switchEditTab('biodata');
         document.getElementById('modal-edit').classList.add('open');
@@ -3195,83 +2556,6 @@
                 keterangan : document.getElementById(`minat-ket-${i}`).value.trim()
             }));
 
-            // ── Gaya Belajar VAK & Temperamen (x_18) ──
-            const vakSkorBaru = {
-                A: parseInt(document.getElementById('ed-vak-skor-A').value) || 0,
-                B: parseInt(document.getElementById('ed-vak-skor-B').value) || 0,
-                C: parseInt(document.getElementById('ed-vak-skor-C').value) || 0
-            };
-            const vakTotalBaru = vakSkorBaru.A + vakSkorBaru.B + vakSkorBaru.C;
-            const vakDomBaru   = Object.keys(vakSkorBaru).reduce((a, b) => vakSkorBaru[a] >= vakSkorBaru[b] ? a : b);
-            const vakSBaru     = LEARNING_STYLES[vakDomBaru];
-            const vakPersenBaru = {};
-            ['A','B','C'].forEach(k => {
-                vakPersenBaru[k] = vakTotalBaru > 0 ? Math.round((vakSkorBaru[k] / vakTotalBaru) * 100) : 0;
-            });
-            const vakKarakteristikBaru = [0,1,2,3,4]
-                .map(i => document.getElementById(`vak-karakteristik-edit-${i}`).value.trim())
-                .filter(v => v !== '');
-            const vakTipsBaru = [0,1,2,3,4]
-                .map(i => document.getElementById(`vak-tips-edit-${i}`).value.trim())
-                .filter(v => v !== '');
-
-            const vakBaru = {
-                dominan       : vakDomBaru,
-                nama          : vakSBaru.name,
-                deskripsi     : vakSBaru.description,
-                skor          : vakSkorBaru,
-                persentase    : vakPersenBaru,
-                total         : vakTotalBaru,
-                karakteristik : vakKarakteristikBaru,
-                tips          : vakTipsBaru
-            };
-
-            const tempSkorBaru = {
-                A: parseInt(document.getElementById('ed-temp-skor-A').value) || 0,
-                B: parseInt(document.getElementById('ed-temp-skor-B').value) || 0,
-                C: parseInt(document.getElementById('ed-temp-skor-C').value) || 0,
-                D: parseInt(document.getElementById('ed-temp-skor-D').value) || 0
-            };
-            const tempTotalBaru = tempSkorBaru.A + tempSkorBaru.B + tempSkorBaru.C + tempSkorBaru.D;
-            const tempDomBaru   = Object.keys(tempSkorBaru).reduce((a, b) => tempSkorBaru[a] >= tempSkorBaru[b] ? a : b);
-            const tempSBaru     = TEMPERAMENTS[tempDomBaru];
-            const tempPersenBaru = {};
-            ['A','B','C','D'].forEach(k => {
-                tempPersenBaru[k] = tempTotalBaru > 0 ? Math.round((tempSkorBaru[k] / tempTotalBaru) * 100) : 0;
-            });
-            const tempKekuatanBaru = [0,1,2,3,4]
-                .map(i => document.getElementById(`temp-kekuatan-edit-${i}`).value.trim())
-                .filter(v => v !== '');
-            const tempKelemahanBaru = [0,1,2,3,4]
-                .map(i => document.getElementById(`temp-kelemahan-edit-${i}`).value.trim())
-                .filter(v => v !== '');
-            const tempTipsBaru = [0,1,2,3,4]
-                .map(i => document.getElementById(`temp-tips-edit-${i}`).value.trim())
-                .filter(v => v !== '');
-
-            const temperamenBaru = {
-                dominan    : tempDomBaru,
-                nama       : tempSBaru.name,
-                tagline    : tempSBaru.tagline,
-                deskripsi  : tempSBaru.description,
-                skor       : tempSkorBaru,
-                persentase : tempPersenBaru,
-                total      : tempTotalBaru,
-                kekuatan   : tempKekuatanBaru,
-                kelemahan  : tempKelemahanBaru,
-                tips       : tempTipsBaru
-            };
-
-            // Jaga-jaga: kalau tab VAK/Temperamen tidak diisi sama sekali (semua 0 & kosong),
-            // pertahankan data x_18 lama supaya tidak tertimpa kosong secara tidak sengaja.
-            const x18Lama       = safeJSON(_globalData.x_18, {});
-            const isVakKosong   = vakTotalBaru === 0 && vakKarakteristikBaru.length === 0 && vakTipsBaru.length === 0;
-            const isTempKosong  = tempTotalBaru === 0 && tempKekuatanBaru.length === 0 && tempKelemahanBaru.length === 0 && tempTipsBaru.length === 0;
-            const x18Baru = {
-                vak        : isVakKosong  ? (x18Lama.vak || null)        : vakBaru,
-                temperamen : isTempKosong ? (x18Lama.temperamen || null) : temperamenBaru
-            };
-
             // ── Susun payload PUT ──
             const payload = {
                 x_02 : JSON.stringify(biodataBaru),
@@ -3282,8 +2566,7 @@
                 x_07 : JSON.stringify(kekuatanBaru),
                 x_08 : JSON.stringify(kelemahanBaru),
                 x_09 : JSON.stringify(rekomendasiBaru),
-                x_10 : JSON.stringify(minatBaru),
-                x_18 : JSON.stringify(x18Baru)
+                x_10 : JSON.stringify(minatBaru)
             };
 
             // ── Simpan data asli (x_20) hanya kalau ini perubahan PERTAMA kali ──
