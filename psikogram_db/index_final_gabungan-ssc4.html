@@ -1648,21 +1648,15 @@ function setupDownload() {
                     if (vakImg.shrunk) autoShrinkNotes.push('Gaya Belajar');
                 }
 
-                // Temperamen & Saran digabung 1 halaman -> masing-masing dijatah setengah tinggi halaman
-                const gapTempSaran   = 8; // jarak antara gambar Temperamen & Saran (pt)
-                const maxHalfHeight  = (maxContentHeight - gapTempSaran) / 2;
-
-                const tempImg = await screenshotToImg('temp-section', pdfW, FS4, maxHalfHeight);
+                const tempImg = await screenshotToImg('temp-section', pdfW, FS4, maxContentHeight);
                 if (tempImg) {
-                    // Tetap pakai lebar penuh (pdfW) walau tingginya sudah dipangkas,
-                    // supaya tidak ada sisa ruang putih kiri-kanan.
-                    hal4Content.push({ image: tempImg.dataUrl, width: pdfW, height: tempImg.height });
+                    hal4Content.push({ image: tempImg.dataUrl, width: tempImg.width, height: tempImg.height });
                     if (tempImg.shrunk) autoShrinkNotes.push('Temperamen');
                 }
 
-                const saranImg = await screenshotToImg('temp-saran-section', pdfW, 100, maxHalfHeight);
+                const saranImg = await screenshotToImg('temp-saran-section', pdfW, 100, maxContentHeight);
                 if (saranImg) {
-                    hal5Content.push({ image: saranImg.dataUrl, width: pdfW, height: saranImg.height, margin:[0,gapTempSaran,0,0] });
+                    hal5Content.push({ image: saranImg.dataUrl, width: saranImg.width, height: saranImg.height });
                     if (saranImg.shrunk) autoShrinkNotes.push('Saran Pengembangan Diri');
                 }
 
@@ -1711,11 +1705,18 @@ function setupDownload() {
                     { stack: hal3Content, margin:[0,4,0,0] }
                 ] : []),
 
-                // Halaman 4 — Temperamen & Saran Pengembangan Diri (digabung 1 halaman)
-                ...(hal4Content.length > 0 || hal5Content.length > 0 ? [
+                // Halaman 4 — Temperamen
+                ...(hal4Content.length > 0 ? [
                     { text:'', pageBreak:'before' },
                     ...headerInstitusi(),
-                    { stack: [...hal4Content, ...hal5Content], margin:[0,4,0,0] }
+                    { stack: hal4Content, margin:[0,4,0,0] }
+                ] : []),
+
+                // Halaman 5 — Saran Pengembangan Diri
+                ...(hal5Content.length > 0 ? [
+                    { text:'', pageBreak:'before' },
+                    ...headerInstitusi(),
+                    { stack: hal5Content, margin:[0,4,0,0] }
                 ] : [])
             ],
             defaultStyle: { font:'Roboto' }
