@@ -1182,23 +1182,15 @@
 
         <div class="modal-body">
             <div style="font-size:12.5px; color:var(--muted); margin-bottom:14px; line-height:1.6;" id="trk-info"></div>
-            <label id="trk-pilih-semua-wrap" style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:12px; cursor:pointer;">
+            <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:12px; cursor:pointer;">
                 <input type="checkbox" id="trk-pilih-semua" checked onchange="toggleSemuaTerapkanRekomendasi(this.checked)" style="width:16px; height:16px; cursor:pointer;">
                 Pilih semua
             </label>
             <div id="trk-list" style="display:flex; flex-direction:column; gap:10px; max-height:50vh; overflow-y:auto;"></div>
-
-            <div id="trk-progress-wrap" style="display:none; margin-top:6px;">
-                <div style="font-size:13px; margin-bottom:8px; color:var(--text);" id="trk-progress-label">Menyimpan...</div>
-                <div style="background:var(--bg); border:1px solid var(--border); border-radius:8px; height:10px; overflow:hidden;">
-                    <div id="trk-progress-bar" style="background:var(--accent); height:100%; width:0%; transition:width .15s;"></div>
-                </div>
-                <div style="font-size:12px; color:var(--muted); margin-top:6px;" id="trk-progress-count">0 / 0</div>
-            </div>
         </div>
 
         <div class="modal-footer">
-            <button class="btn-modal btn-cancel" id="btn-batal-terapkan-rekom" onclick="tutupPopupTerapkanRekomendasi()">Batal</button>
+            <button class="btn-modal btn-cancel" onclick="tutupPopupTerapkanRekomendasi()">Batal</button>
             <button class="btn-modal btn-save" id="btn-konfirmasi-terapkan-rekom" onclick="konfirmasiTerapkanRekomendasi()">✅ Tambahkan ke Peserta Terpilih</button>
         </div>
     </div>
@@ -1895,18 +1887,14 @@
             const minatRow   = ambilMinatRow(row);
             const cocok      = selectedMinat.length > 0 ? minatRow.filter(m => selectedMinat.includes(m)) : minatRow;
             const kalimat    = buatKalimatRekomendasi(cocok, template, row.id_x);
-
-            // Ambil struktur Arah Minat (3 slot tetap) — target penambahan ada di keterangan Minat ke-3 (index 2)
-            const minatLama  = safeJSON(row.x_10, [{}, {}, {}]);
-            const minatArr   = Array.isArray(minatLama) ? [...minatLama] : [{}, {}, {}];
-            while (minatArr.length < 3) minatArr.push({});
-            const minatKe3        = minatArr[2] || {};
-            // Kalimat rekomendasi yang sudah ada sebelumnya di keterangan Minat ke-3 (kalau ada) — akan disambung, bukan menimpa
-            const teksSebelumnya  = (minatKe3.keterangan || '').toString();
+            const rekomLama  = safeJSON(row.x_09, []);
+            const rekomArr   = Array.isArray(rekomLama) ? rekomLama : [];
+            // Kalimat rekomendasi terakhir yang sudah ada sebelumnya (kalau ada) — akan disambung, bukan jadi entri baru
+            const teksSebelumnya = rekomArr.length > 0 ? rekomArr[rekomArr.length - 1] : '';
             // Kalimat final yang akan disimpan: kalimat lama disambung kalimat baru jadi satu string utuh
-            const kalimatGabungan = teksSebelumnya ? `${teksSebelumnya}<br><br>${kalimat}` : kalimat;
-            const sudahAda        = teksSebelumnya.length > 0 && teksSebelumnya.endsWith(kalimat); // kalimat baru ini sudah pernah disambung sebelumnya
-            semuaCocok.push({ id_x: row.id_x, nama, kalimat, teksSebelumnya, kalimatGabungan, sudahAda, row, minatArr });
+            const kalimatGabungan = teksSebelumnya ? `${teksSebelumnya} ${kalimat}` : kalimat;
+            const sudahAda   = teksSebelumnya.length > 0 && teksSebelumnya.endsWith(kalimat); // kalimat baru ini sudah pernah disambung sebelumnya
+            semuaCocok.push({ id_x: row.id_x, nama, kalimat, teksSebelumnya, kalimatGabungan, sudahAda, row });
         });
 
         // Sembunyikan peserta yang sudah pernah punya kalimat identik ini — tidak ditampilkan lagi (supaya tidak dobel)
@@ -1926,15 +1914,14 @@
             btnKonfirmasi.disabled = true;
         } else if (_trkItems.length === 0) {
             info.innerHTML = `Total <strong style="color:var(--text)">${semuaCocok.length}</strong> peserta cocok dengan filter — `
-                + `semuanya (<strong style="color:#e07a5f">${jumlahSudahAda}</strong>) sudah pernah disambung kalimat rekomendasi identik ini sebelumnya `
-                + `di keterangan Arah Minat ke-3, jadi tidak ada yang perlu/boleh ditambahkan lagi (mencegah dobel).`;
+                + `semuanya (<strong style="color:#e07a5f">${jumlahSudahAda}</strong>) sudah pernah disambung kalimat rekomendasi identik ini sebelumnya, `
+                + `jadi tidak ada yang perlu/boleh ditambahkan lagi (mencegah dobel).`;
             list.innerHTML = '';
             btnKonfirmasi.disabled = true;
         } else {
             info.innerHTML = `Total <strong style="color:var(--text)">${semuaCocok.length}</strong> peserta cocok dengan filter — `
                 + `<strong style="color:#e07a5f">${jumlahSudahAda} sudah pernah disambung</strong> (otomatis disembunyikan, tidak akan dobel) · `
-                + `<strong style="color:#7fb069">${_trkItems.length} belum pernah</strong>, ditampilkan di bawah dan siap disambungkan `
-                + `ke belakang <strong style="color:var(--text)">keterangan Arah Minat ke-3</strong>. `
+                + `<strong style="color:#7fb069">${_trkItems.length} belum pernah</strong>, ditampilkan di bawah dan siap disambungkan. `
                 + `Centang satu per satu atau gunakan "Pilih semua".`;
             list.innerHTML = _trkItems.map((it, idx) => `
                 <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px; cursor:pointer;
@@ -1942,20 +1929,13 @@
                     <input type="checkbox" class="trk-item-check" data-idx="${idx}" checked style="width:16px; height:16px; margin-top:2px; cursor:pointer;">
                     <span>
                         <strong>${escHtml(it.nama)}</strong><br>
-                        ${it.teksSebelumnya ? `<span style="color:var(--muted); font-style:italic;">${escHtml(it.teksSebelumnya).replace(/&lt;br&gt;/g, '<br>')}</span><br><br>` : ''}<span style="color:var(--text);">${escHtml(it.kalimat)}</span>
+                        ${it.teksSebelumnya ? `<span style="color:var(--muted); font-style:italic;">${escHtml(it.teksSebelumnya)}</span> ` : ''}<span style="color:var(--text);">${escHtml(it.kalimat)}</span>
                     </span>
                 </label>`).join('');
             btnKonfirmasi.disabled = false;
         }
 
         document.getElementById('trk-pilih-semua').checked = true;
-        document.getElementById('trk-list').style.display = '';
-        document.getElementById('trk-pilih-semua-wrap').style.display = '';
-        document.getElementById('trk-progress-wrap').style.display = 'none';
-        document.getElementById('trk-progress-bar').style.width = '0%';
-        document.getElementById('trk-progress-count').textContent = '0 / 0';
-        document.getElementById('btn-konfirmasi-terapkan-rekom').disabled = false;
-        document.getElementById('btn-batal-terapkan-rekom').disabled = false;
         document.getElementById('modal-terapkan-rekom').classList.add('open');
     }
 
@@ -1977,44 +1957,26 @@
         checks.forEach(c => { if (c.checked) terpilih.push(_trkItems[parseInt(c.dataset.idx)]); });
         if (terpilih.length === 0) { tampilToast('❌ Pilih minimal satu peserta.', 'error'); return; }
 
-        const btn        = document.getElementById('btn-konfirmasi-terapkan-rekom');
-        const btnBatal    = document.getElementById('btn-batal-terapkan-rekom');
-        const listEl      = document.getElementById('trk-list');
-        const pilihWrap    = document.getElementById('trk-pilih-semua-wrap');
-        const progressWrap = document.getElementById('trk-progress-wrap');
-        const progressLbl  = document.getElementById('trk-progress-label');
-        const progressBar  = document.getElementById('trk-progress-bar');
-        const progressCnt  = document.getElementById('trk-progress-count');
-        const total = terpilih.length;
-
+        const btn = document.getElementById('btn-konfirmasi-terapkan-rekom');
         btn.disabled = true;
-        btnBatal.disabled = true;
-        if (listEl) listEl.style.display = 'none';
-        if (pilihWrap) pilihWrap.style.display = 'none';
-        if (progressWrap) progressWrap.style.display = 'block';
-
         let sukses = 0, gagal = 0;
 
-        for (let i = 0; i < total; i++) {
-            const it = terpilih[i];
+        for (const it of terpilih) {
             try {
-                if (progressLbl) progressLbl.textContent = `Menyimpan: ${it.nama}...`;
-                btn.textContent = `⏳ Menyimpan ${i + 1}/${total}...`;
-
-                // Susun ulang array Arah Minat (3 slot), hanya keterangan Minat ke-3 (index 2) yang diubah
-                const minatArr = it.minatArr.map((m, idx) => idx === 2 ? { ...m, keterangan: it.kalimatGabungan } : m);
-
-                const payload = { x_10: JSON.stringify(minatArr) };
-
-                // ── Simpan data asli (x_20) hanya kalau ini perubahan PERTAMA kali untuk peserta ini ──
-                const snapshotAsli = siapkanSnapshotAsli(it.row);
-                if (snapshotAsli) payload.x_20 = snapshotAsli;
+                btn.textContent = `⏳ Menyimpan ${it.nama}...`;
+                const rekomLama = safeJSON(it.row.x_09, []);
+                const rekomArr  = Array.isArray(rekomLama) ? [...rekomLama] : [];
+                if (rekomArr.length > 0) {
+                    rekomArr[rekomArr.length - 1] = it.kalimatGabungan; // sambung ke kalimat terakhir (bukan entri baru)
+                } else {
+                    rekomArr.push(it.kalimatGabungan);
+                }
 
                 const apiUrl = `${API_URL}?table=${TABLE_NAME}&id_x=${it.id_x}`;
                 const res = await fetch(apiUrl, {
                     method : 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': SECRET },
-                    body   : JSON.stringify(payload)
+                    body   : JSON.stringify({ x_09: JSON.stringify(rekomArr) })
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const result = await res.json();
@@ -2023,19 +1985,10 @@
             } catch (err) {
                 gagal++;
             }
-
-            const done = i + 1;
-            const pct  = total > 0 ? Math.round((done / total) * 100) : 0;
-            if (progressBar) progressBar.style.width = pct + '%';
-            if (progressCnt) progressCnt.textContent = `${done} / ${total} (✅ ${sukses} berhasil${gagal > 0 ? `, ❌ ${gagal} gagal` : ''})`;
         }
 
         btn.disabled = false;
-        btnBatal.disabled = false;
         btn.textContent = '✅ Tambahkan ke Peserta Terpilih';
-        if (listEl) listEl.style.display = '';
-        if (pilihWrap) pilihWrap.style.display = '';
-        if (progressWrap) progressWrap.style.display = 'none';
 
         tutupPopupTerapkanRekomendasi();
         tampilToast(`Selesai: ${sukses} berhasil ditambahkan, ${gagal} gagal.`, gagal > 0 ? 'error' : 'success');
