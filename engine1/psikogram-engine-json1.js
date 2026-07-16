@@ -579,8 +579,8 @@
                 "{Disarankan|Dianjurkan|Direkomendasikan} untuk melatih kemampuan pemecahan masalah dengan mengikuti simulasi kasus kompleks {dan|serta} berpartisipasi dalam diskusi kelompok, {sehingga dapat|agar bisa|supaya mampu} meningkatkan ketahanan dalam menghadapi tantangan yang lebih besar.",
                 "{Sangat dianjurkan|Sangat disarankan|Amat dianjurkan} untuk aktif mengikuti pelatihan studi kasus {dan|serta} forum diskusi lintas bidang, {agar|supaya} wawasan dalam memecahkan masalah kompleks semakin berkembang.",
                 "{Sebaiknya|Ada baiknya|Alangkah baiknya} membiasakan diri membaca kasus nyata dari berbagai bidang {dan|serta} menganalisisnya {secara mandiri|tanpa bergantung pihak lain|secara independen}, {guna melatih|untuk melatih|demi mengasah} fleksibilitas berpikir ketika menghadapi situasi yang lebih rumit.",
-                "{Direkomendasikan|Disarankan|Dianjurkan} untuk mencari {pembimbing|penasihat|sosok berpengalaman} yang berpengalaman {dan|serta} secara rutin mendiskusikan tantangan pekerjaan, {sehingga|hingga|sampai} kemampuan memecahkan masalah kompleks dapat terasah secara bertahap.",
-                "{Penting untuk|Krusial untuk|Esensial untuk} berlatih menggunakan kerangka berpikir terstruktur seperti {analisis akar masalah|analisis sebab-akibat mendalam|pendekatan akar permasalahan} dalam pekerjaan sehari-hari, {agar|supaya} kemampuan menangani masalah berlapis semakin terasah."
+                "{Direkomendasikan|Disarankan|Dianjurkan} untuk mencari mentor yang berpengalaman {dan|serta} secara rutin mendiskusikan tantangan pekerjaan, {sehingga|hingga|sampai} kemampuan memecahkan masalah kompleks dapat terasah secara bertahap.",
+                "{Penting untuk|Krusial untuk|Esensial untuk} berlatih menggunakan kerangka berpikir terstruktur seperti root-cause analysis dalam pekerjaan sehari-hari, {agar|supaya} kemampuan menangani masalah berlapis semakin terasah."
             ]
         },
         {
@@ -600,11 +600,11 @@
                 "{Kadang|Terkadang|Sesekali} kurang cermat dalam memeriksa kembali detail visual, {sehingga|hingga|sampai} berpotensi menimbulkan kesalahan kecil."
             ],
             teks5: [
-                "{Sangat dianjurkan|Sangat disarankan|Amat dianjurkan} untuk mempraktikkan {latihan kesadaran penuh|teknik kesadaran penuh|latihan fokus mendalam} yang dapat membantu meningkatkan fokus terhadap detail kecil, {sehingga|hingga|sampai} hasil kerja dapat lebih maksimal {dan|serta} akurat.",
+                "{Sangat dianjurkan|Sangat disarankan|Amat dianjurkan} untuk mempraktikkan teknik mindfulness yang dapat membantu meningkatkan fokus terhadap detail kecil, {sehingga|hingga|sampai} hasil kerja dapat lebih maksimal {dan|serta} akurat.",
                 "{Direkomendasikan|Disarankan|Dianjurkan} untuk membiasakan diri melakukan pengecekan ulang secara terstruktur pada setiap hasil pekerjaan, {agar|supaya} detail-detail penting tidak terlewatkan.",
-                "{Sebaiknya|Ada baiknya|Alangkah baiknya} berlatih menggunakan {daftar periksa|daftar cek|catatan periksa} dalam setiap tahapan pekerjaan, {sehingga|hingga|sampai} perhatian terhadap detail kecil dapat terjaga secara konsisten.",
+                "{Sebaiknya|Ada baiknya|Alangkah baiknya} berlatih menggunakan checklist dalam setiap tahapan pekerjaan, {sehingga|hingga|sampai} perhatian terhadap detail kecil dapat terjaga secara konsisten.",
                 "{Disarankan|Dianjurkan|Direkomendasikan} untuk melatih konsentrasi dengan latihan visual seperti puzzle atau aktivitas yang memerlukan ketelitian tinggi, {agar|supaya} sensitivitas terhadap detail semakin meningkat.",
-                "{Penting untuk|Krusial untuk|Esensial untuk} mengalokasikan waktu khusus untuk {peninjauan|pemeriksaan kembali|evaluasi} hasil pekerjaan sebelum diselesaikan, guna memastikan tidak ada detail penting yang terlewat."
+                "{Penting untuk|Krusial untuk|Esensial untuk} mengalokasikan waktu khusus untuk review hasil pekerjaan sebelum diselesaikan, guna memastikan tidak ada detail penting yang terlewat."
             ]
         },
         {
@@ -626,7 +626,7 @@
             teks5: [
                 "{Sebaiknya|Ada baiknya|Alangkah baiknya} mengikuti pelatihan khusus yang dirancang untuk pengambilan keputusan di bawah tekanan, {agar dapat|supaya bisa|agar bisa} meningkatkan kecepatan {dan|serta} ketepatan dalam mengambil keputusan ketika situasi mendesak.",
                 "{Disarankan|Dianjurkan|Direkomendasikan} untuk berlatih skenario pengambilan keputusan cepat melalui simulasi atau permainan strategi, {sehingga|hingga|sampai} respons dalam kondisi tekanan dapat semakin terasah.",
-                "{Sangat dianjurkan|Sangat disarankan|Amat dianjurkan} untuk mempelajari teknik keputusan berbasis prioritas seperti {Matriks Eisenhower|metode Matriks Eisenhower|teknik penentuan prioritas Eisenhower}, {agar|supaya} dalam situasi mendesak tetap dapat memilih tindakan yang paling tepat.",
+                "{Sangat dianjurkan|Sangat disarankan|Amat dianjurkan} untuk mempelajari teknik keputusan berbasis prioritas seperti metode Eisenhower Matrix, {agar|supaya} dalam situasi mendesak tetap dapat memilih tindakan yang paling tepat.",
                 "{Penting untuk|Krusial untuk|Esensial untuk} membangun kebiasaan membuat kerangka keputusan sederhana yang bisa digunakan secara cepat, {sehingga|hingga|sampai} proses berpikir tidak terhambat ketika waktu sangat terbatas.",
                 "{Direkomendasikan|Disarankan|Dianjurkan} untuk secara rutin berlatih dalam situasi yang mensimulasikan tekanan waktu, {agar|supaya} rasa percaya diri {dan|serta} kecepatan dalam memutuskan dapat terus berkembang."
             ]
@@ -651,7 +651,7 @@
                 "{Disarankan|Dianjurkan|Direkomendasikan} untuk melakukan proyek kecil yang akan membantu menerapkan ide-ide abstrak ke dalam praktik nyata, {sehingga dapat|agar bisa|supaya mampu} belajar dari pengalaman {dan|serta} meningkatkan kemampuan penerapan ide.",
                 "{Sangat bermanfaat|Amat bermanfaat|Sangat berguna} untuk membiasakan diri membuat rencana aksi dari setiap ide yang muncul, {agar|supaya} gagasan tidak hanya berhenti pada tataran konsep.",
                 "{Direkomendasikan|Disarankan|Dianjurkan} untuk berkolaborasi dengan rekan yang memiliki kekuatan eksekusi, {sehingga|hingga|sampai} ide-ide abstrak dapat lebih mudah diwujudkan menjadi hasil yang nyata.",
-                "{Sebaiknya|Ada baiknya|Alangkah baiknya} belajar menggunakan alat bantu seperti {peta pikiran|pemetaan gagasan|diagram pemetaan ide} atau {model kanvas|kerangka kanvas|kanvas perencanaan} untuk menstrukturkan ide ke dalam bentuk yang lebih operasional.",
+                "{Sebaiknya|Ada baiknya|Alangkah baiknya} belajar menggunakan alat bantu seperti mind-mapping atau canvas model untuk menstrukturkan ide ke dalam bentuk yang lebih operasional.",
                 "{Penting untuk|Krusial untuk|Esensial untuk} melatih diri membuat prototipe atau uji coba kecil dari setiap ide, {agar|supaya} kemampuan mengeksekusi konsep abstrak secara bertahap semakin meningkat."
             ]
         },
@@ -672,7 +672,7 @@
                 "{Kadang|Terkadang|Sesekali} terburu-buru merespons {sehingga|hingga|sampai} tidak sepenuhnya memahami maksud yang ingin disampaikan orang lain."
             ],
             teks5: [
-                "{Sangat bermanfaat|Amat bermanfaat|Sangat berguna} untuk melatih keterampilan mendengarkan aktif melalui kegiatan {bermain peran|simulasi peran|latihan peran}, yang dapat meningkatkan kemampuan untuk menghargai pandangan orang lain {dan|serta} memperbaiki komunikasi.",
+                "{Sangat bermanfaat|Amat bermanfaat|Sangat berguna} untuk melatih keterampilan mendengarkan aktif melalui kegiatan role-playing, yang dapat meningkatkan kemampuan untuk menghargai pandangan orang lain {dan|serta} memperbaiki komunikasi.",
                 "{Disarankan|Dianjurkan|Direkomendasikan} untuk berlatih teknik parafrase dalam setiap percakapan, yaitu mengulang kembali apa yang disampaikan lawan bicara sebelum merespons, {agar|supaya} komunikasi menjadi lebih efektif.",
                 "{Penting untuk|Krusial untuk|Esensial untuk} membiasakan diri menahan respons sejenak {dan|serta} memastikan pemahaman yang tepat sebelum menjawab, guna menciptakan komunikasi yang lebih saling menghargai.",
                 "{Direkomendasikan|Disarankan|Dianjurkan} untuk mengikuti pelatihan komunikasi atau bergabung dalam forum diskusi terstruktur, {sehingga|hingga|sampai} kemampuan mendengarkan {dan|serta} merespons secara seimbang dapat terus berkembang.",
@@ -697,7 +697,7 @@
             ],
             teks5: [
                 "{Disarankan|Dianjurkan|Direkomendasikan} untuk berlatih secara rutin dengan soal-soal matematika yang lebih kompleks, {agar dapat|supaya bisa|agar bisa} meningkatkan kecepatan {dan|serta} pemahaman dalam konsep yang rumit.",
-                "{Sangat dianjurkan|Sangat disarankan|Amat dianjurkan} untuk memanfaatkan aplikasi atau {sarana|wadah|media} latihan numerik setiap hari, {sehingga|hingga|sampai} kemampuan berhitung semakin terasah secara konsisten.",
+                "{Sangat dianjurkan|Sangat disarankan|Amat dianjurkan} untuk memanfaatkan aplikasi atau platform latihan numerik setiap hari, {sehingga|hingga|sampai} kemampuan berhitung semakin terasah secara konsisten.",
                 "{Sebaiknya|Ada baiknya|Alangkah baiknya} memulai dari pemahaman konsep dasar yang kuat sebelum beralih ke topik yang lebih kompleks, {agar|supaya} fondasi berpikir numerik semakin kokoh.",
                 "{Direkomendasikan|Disarankan|Dianjurkan} untuk bergabung dalam kelompok belajar yang fokus pada matematika terapan, {agar dapat|supaya bisa|agar bisa} saling bertukar strategi penyelesaian soal yang efektif.",
                 "{Penting untuk|Krusial untuk|Esensial untuk} membiasakan diri mengerjakan soal-soal bertingkat secara berkala, dimulai dari yang sederhana hingga yang paling kompleks, guna membangun kepercayaan diri secara bertahap."
@@ -721,7 +721,7 @@
             ],
             teks5: [
                 "{Sangat penting|Amat penting|Sangat krusial} untuk menetapkan tujuan yang realistis {dan|serta} melakukan evaluasi berkala, {agar dapat|supaya bisa|agar bisa} menjaga motivasi dan fokus pada pencapaian yang lebih terukur.",
-                "{Disarankan|Dianjurkan|Direkomendasikan} untuk menerapkan pendekatan {pola pikir bertumbuh|cara pandang berkembang|pola pikir berkembang}, yaitu memandang setiap kesalahan sebagai bagian dari proses belajar, {sehingga|hingga|sampai} tekanan terhadap kesempurnaan dapat berkurang.",
+                "{Disarankan|Dianjurkan|Direkomendasikan} untuk menerapkan pendekatan growth mindset, yaitu memandang setiap kesalahan sebagai bagian dari proses belajar, {sehingga|hingga|sampai} tekanan terhadap kesempurnaan dapat berkurang.",
                 "{Sebaiknya|Ada baiknya|Alangkah baiknya} membagi tujuan besar menjadi pencapaian-pencapaian kecil yang bisa dinikmati prosesnya, {agar|supaya} semangat berprestasi tetap terjaga tanpa menimbulkan stres berlebihan.",
                 "{Direkomendasikan|Disarankan|Dianjurkan} untuk secara rutin merayakan keberhasilan kecil sebagai bentuk apresiasi diri, {agar|supaya} motivasi tetap positif {dan|serta} tidak terkuras oleh ekspektasi yang terlalu tinggi.",
                 "{Penting untuk|Krusial untuk|Esensial untuk} belajar menetapkan batas yang sehat antara usaha maksimal {dan|serta} penerimaan terhadap hasil, {sehingga|hingga|sampai} semangat berprestasi menjadi pendorong yang sehat dan berkelanjutan."
@@ -746,8 +746,8 @@
             teks5: [
                 "{Sebaiknya|Ada baiknya|Alangkah baiknya} mempraktikkan teknik relaksasi {dan|serta} manajemen waktu yang efektif, {sehingga dapat|agar bisa|supaya mampu} mengurangi stres dan meningkatkan performa dalam menghadapi tekanan.",
                 "{Sangat dianjurkan|Sangat disarankan|Amat dianjurkan} untuk membangun rutinitas pemulihan harian seperti olahraga ringan atau meditasi, {agar|supaya} kapasitas dalam menghadapi tekanan jangka panjang semakin meningkat.",
-                "{Disarankan|Dianjurkan|Direkomendasikan} untuk belajar mengenali tanda-tanda awal kelelahan emosional {dan|serta} segera mengambil langkah pemulihan, {sehingga|hingga|sampai} {kelelahan kerja berkepanjangan|kejenuhan kerja kronis|kelelahan kerja mendalam} dapat dicegah sebelum berdampak pada kinerja.",
-                "{Penting untuk|Krusial untuk|Esensial untuk} membangun {sistem dukungan|jejaring dukungan|sistem penyokong} yang kuat di lingkungan kerja, {agar|supaya} ada tempat berbagi beban ketika tekanan terasa terlalu berat untuk ditanggung sendiri.",
+                "{Disarankan|Dianjurkan|Direkomendasikan} untuk belajar mengenali tanda-tanda awal kelelahan emosional {dan|serta} segera mengambil langkah pemulihan, {sehingga|hingga|sampai} burnout dapat dicegah sebelum berdampak pada kinerja.",
+                "{Penting untuk|Krusial untuk|Esensial untuk} membangun support system yang kuat di lingkungan kerja, {agar|supaya} ada tempat berbagi beban ketika tekanan terasa terlalu berat untuk ditanggung sendiri.",
                 "{Direkomendasikan|Disarankan|Dianjurkan} untuk secara rutin menjadwalkan waktu istirahat di sela-sela pekerjaan padat, guna menjaga stamina mental {agar|supaya} tetap optimal dalam jangka panjang."
             ]
         },
@@ -757,7 +757,7 @@
                 "Adanya keyakinan terhadap kemampuan yang dimiliki.",
                 "Menampilkan sikap yang percaya diri dalam menyampaikan pendapat {dan|serta} mengambil tindakan.",
                 "{Mampu|Sanggup|Bisa} tampil tenang {dan|serta} meyakinkan dalam situasi yang membutuhkan keberanian untuk maju.",
-                "{Memiliki|Mempunyai} {harga diri|rasa harga diri|kepercayaan diri internal} yang cukup kuat {sehingga|hingga|sampai} tidak mudah goyah oleh penilaian negatif dari luar.",
+                "{Memiliki|Mempunyai} self-esteem yang cukup kuat {sehingga|hingga|sampai} tidak mudah goyah oleh penilaian negatif dari luar.",
                 "{Dikenal|Dikenali} sebagai pribadi yang berani mengekspresikan diri {dan|serta} tidak ragu mengambil peran aktif."
             ],
             teks3: [
@@ -771,7 +771,7 @@
                 "{Disarankan|Dianjurkan|Direkomendasikan} untuk secara rutin meminta umpan balik dari orang lain, {sehingga dapat|agar bisa|supaya mampu} membangun kepercayaan diri yang lebih solid {dan|serta} meningkatkan kemampuan untuk menerima kritik.",
                 "{Sangat bermanfaat|Amat bermanfaat|Sangat berguna} untuk melatih diri memisahkan antara kritik terhadap pekerjaan {dan|serta} penilaian terhadap diri sendiri, {agar|supaya} masukan dapat diterima secara lebih objektif.",
                 "{Penting untuk|Krusial untuk|Esensial untuk} membangun perspektif bahwa kritik konstruktif adalah alat bantu pertumbuhan, bukan serangan personal, {sehingga|hingga|sampai} respons terhadapnya menjadi lebih terbuka.",
-                "{Direkomendasikan|Disarankan|Dianjurkan} untuk mencari {pembimbing|penasihat|sosok berpengalaman} atau rekan yang dipercaya {dan|serta} secara aktif mendiskusikan area pengembangan diri, {agar|supaya} proses menerima masukan menjadi lebih terbiasa dan nyaman.",
+                "{Direkomendasikan|Disarankan|Dianjurkan} untuk mencari mentor atau rekan yang dipercaya {dan|serta} secara aktif mendiskusikan area pengembangan diri, {agar|supaya} proses menerima masukan menjadi lebih terbiasa dan nyaman.",
                 "{Sebaiknya|Ada baiknya|Alangkah baiknya} membiasakan diri untuk melakukan refleksi diri secara teratur, {sehingga|hingga|sampai} penerimaan terhadap kekurangan menjadi lebih lapang {dan|serta} terbuka untuk perbaikan."
             ]
         },
@@ -813,14 +813,14 @@
                 "{Terkadang|Kadang|Kadang-kadang} kurang fleksibel ketika harus menyesuaikan gaya kerja dengan anggota tim yang memiliki karakter berbeda.",
                 "{Cenderung|Umumnya|Kerap} merasa tidak nyaman dalam kelompok yang memiliki cara kerja atau nilai yang berbeda dari kebiasaannya.",
                 "{Perlu peningkatan|Butuh peningkatan|Memerlukan peningkatan} dalam kemampuan memahami {dan|serta} menghargai perbedaan gaya kerja antar anggota tim.",
-                "{Kadang|Terkadang|Sesekali} kesulitan membangun {keakraban|kedekatan|kecocokan} {yang baik|yang mumpuni|yang solid} dengan kelompok baru dalam waktu singkat."
+                "{Kadang|Terkadang|Sesekali} kesulitan membangun chemistry {yang baik|yang mumpuni|yang solid} dengan kelompok baru dalam waktu singkat."
             ],
             teks5: [
                 "{Disarankan|Dianjurkan|Direkomendasikan} untuk terlibat dalam berbagai aktivitas kelompok yang memerlukan kolaborasi, {agar dapat|supaya bisa|agar bisa} meningkatkan kemampuan untuk beradaptasi dengan berbagai dinamika kelompok.",
                 "{Sangat dianjurkan|Sangat disarankan|Amat dianjurkan} untuk secara aktif terlibat dalam proyek lintas tim, {sehingga|hingga|sampai} pengalaman bekerja dengan berbagai karakter orang dapat memperluas fleksibilitas dalam berkolaborasi.",
                 "{Penting untuk|Krusial untuk|Esensial untuk} belajar memahami gaya kerja {dan|serta} motivasi orang lain sebelum memulai kerja sama, {agar|supaya} penyesuaian dapat berlangsung lebih cepat dan harmonis.",
                 "{Sebaiknya|Ada baiknya|Alangkah baiknya} mengambil inisiatif untuk mengenal anggota tim baru secara personal, karena kedekatan interpersonal yang dibangun lebih awal akan memperlancar kolaborasi di kemudian hari.",
-                "{Direkomendasikan|Disarankan|Dianjurkan} untuk mengikuti pelatihan {kerja tim|kerja sama tim|kolaborasi tim} atau {lokakarya|sesi lokakarya|forum lokakarya} kolaborasi, {agar|supaya} kemampuan beradaptasi dalam berbagai dinamika kelompok semakin meningkat."
+                "{Direkomendasikan|Disarankan|Dianjurkan} untuk mengikuti pelatihan teamwork atau workshop kolaborasi, {agar|supaya} kemampuan beradaptasi dalam berbagai dinamika kelompok semakin meningkat."
             ]
         },
         {
@@ -841,9 +841,9 @@
             ],
             teks5: [
                 "{Sebaiknya|Ada baiknya|Alangkah baiknya} tentukan batas waktu untuk setiap fase implementasi, {agar|supaya} tidak terjebak dalam perencanaan yang berlarut-larut {dan|serta} dapat segera memulai eksekusi.",
-                "{Disarankan|Dianjurkan|Direkomendasikan} untuk menerapkan prinsip {'cukup baik untuk memulai'|'cukup matang untuk mulai bertindak'|'sudah layak untuk dieksekusi'} dalam setiap perencanaan, yaitu memulai eksekusi ketika rencana sudah cukup solid meski belum sempurna.",
+                "{Disarankan|Dianjurkan|Direkomendasikan} untuk menerapkan prinsip 'good enough to start' dalam setiap perencanaan, yaitu memulai eksekusi ketika rencana sudah cukup solid meski belum sempurna.",
                 "{Penting untuk|Krusial untuk|Esensial untuk} membiasakan diri menetapkan tenggat waktu yang ketat untuk setiap tahap perencanaan, {sehingga|hingga|sampai} energi {dan|serta} waktu tidak habis sebelum eksekusi dimulai.",
-                "{Direkomendasikan|Disarankan|Dianjurkan} untuk menggunakan metode manajemen proyek seperti {Agile atau perencanaan sprint|pendekatan Agile dan perencanaan bertahap ala sprint|kerangka kerja Agile dan perencanaan sprint}, {agar|supaya} keseimbangan antara perencanaan {dan|serta} pelaksanaan dapat terjaga dengan lebih baik.",
+                "{Direkomendasikan|Disarankan|Dianjurkan} untuk menggunakan metode manajemen proyek seperti Agile atau sprint planning, {agar|supaya} keseimbangan antara perencanaan {dan|serta} pelaksanaan dapat terjaga dengan lebih baik.",
                 "{Sebaiknya|Ada baiknya|Alangkah baiknya} belajar menerima bahwa rencana yang sempurna tidak selalu mungkin dicapai, {dan|serta} bahwa tindakan nyata yang terarah jauh lebih berharga daripada rencana yang tak pernah dieksekusi."
             ]
         },
@@ -891,8 +891,8 @@
                 "{Sangat penting|Amat penting|Sangat krusial} untuk terlibat dalam proyek kolaboratif yang dapat membantu meningkatkan keterampilan kerja sama {dan|serta} beradaptasi dalam lingkungan tim.",
                 "{Disarankan|Dianjurkan|Direkomendasikan} untuk secara sadar melatih diri memberikan kepercayaan kepada rekan kerja untuk mengerjakan bagian tertentu, {sehingga|hingga|sampai} kemampuan berkolaborasi dapat berkembang secara bertahap.",
                 "{Penting untuk|Krusial untuk|Esensial untuk} memahami bahwa kemandirian {dan|serta} kolaborasi bukan dua hal yang bertentangan, melainkan dua kekuatan yang perlu diseimbangkan untuk mencapai hasil terbaik.",
-                "{Direkomendasikan|Disarankan|Dianjurkan} untuk aktif terlibat dalam sesi {curah pendapat|diskusi ide bersama|forum curah gagasan} atau pengerjaan proyek bersama, {agar|supaya} nilai dari perspektif {dan|serta} kontribusi orang lain dapat lebih dihargai.",
-                "{Sebaiknya|Ada baiknya|Alangkah baiknya} membiasakan diri untuk secara aktif meminta {dan|serta} mempertimbangkan masukan dari rekan sebelum menyelesaikan pekerjaan {secara mandiri|tanpa bergantung pihak lain|secara independen}, {guna menghasilkan|untuk menghasilkan|demi menghasilkan} {hasil kerja|capaian kerja|luaran} yang lebih komprehensif."
+                "{Direkomendasikan|Disarankan|Dianjurkan} untuk aktif terlibat dalam sesi brainstorming atau pengerjaan proyek bersama, {agar|supaya} nilai dari perspektif {dan|serta} kontribusi orang lain dapat lebih dihargai.",
+                "{Sebaiknya|Ada baiknya|Alangkah baiknya} membiasakan diri untuk secara aktif meminta {dan|serta} mempertimbangkan masukan dari rekan sebelum menyelesaikan pekerjaan {secara mandiri|tanpa bergantung pihak lain|secara independen}, {guna menghasilkan|untuk menghasilkan|demi menghasilkan} output yang lebih komprehensif."
             ]
         }
     ];
