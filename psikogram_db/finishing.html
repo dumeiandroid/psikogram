@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finishing — Aksi Filter</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg:       #0d0f14;
+            --surface:  #151820;
+            --surface2: #1c2030;
+            --border:   #2a2f3f;
+            --accent:   #4fffb0;
+            --accent2:  #4f8fff;
+            --danger:   #ff4f6d;
+            --text:     #e8eaf0;
+            --muted:    #6b7280;
+            --radius:   10px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 28px 20px;
+        }
+
+        .header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+        }
+        .header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px; font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .header h1 span { color: var(--accent); }
+        .header .sub {
+            font-size: 12px; color: var(--muted);
+            margin-top: 3px; font-family: 'DM Mono', monospace;
+        }
+
+        .error-box {
+            display: none; background: rgba(255,79,109,.12); border: 1px solid var(--danger);
+            color: var(--danger); border-radius: var(--radius); padding: 12px 16px;
+            margin-bottom: 16px; font-size: 13px;
+        }
+
+        .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 18px; border-radius: var(--radius); border: none;
+            cursor: pointer; font-family: 'DM Sans', sans-serif;
+            font-size: 13px; font-weight: 500; text-decoration:none;
+            transition: opacity .18s, transform .12s;
+        }
+        .btn:hover { opacity: .88; transform: translateY(-1px); }
+        .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+        .btn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+
+        .box {
+            background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 16px; margin-bottom: 16px;
+        }
+        .box-title { font-size:12px; color:var(--muted); margin-bottom:10px; font-family:'DM Mono',monospace; letter-spacing:.4px; }
+
+        input[type="text"], input[type="number"], textarea {
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            border-radius: 7px; padding: 8px 12px; font-family: 'DM Mono', monospace;
+            font-size: 13px; outline: none;
+        }
+        textarea { font-family: 'DM Sans', sans-serif; resize: vertical; width:100%; }
+
+        .radio-row { display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+        .radio-row label { display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; }
+
+        .filter-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 18px; margin-bottom: 16px;
+        }
+        .filter-card h3 { font-family:'Syne', sans-serif; font-size:15px; margin-bottom:14px; color:var(--accent); }
+
+        .empty-state {
+            background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius);
+            padding: 40px 20px; text-align:center; color: var(--muted); font-size: 13px; line-height:1.7;
+        }
+
+        .preview-line { font-size:12.5px; color:var(--muted); margin-top:10px; }
+        .preview-line strong { color: var(--text); }
+
+        /* Modal (identik index_rekap.html) */
+        .modal-overlay {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.6); z-index: 10000;
+            align-items: flex-start; justify-content: center;
+            overflow-y: auto; padding: 30px 16px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: white; border-radius: 12px; width: 100%; max-width: 640px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.35); overflow: hidden; margin: auto;
+            color: #222; font-family: Arial, sans-serif;
+        }
+        .modal-header {
+            background: #5F4EDA; color: white; padding: 16px 22px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-header h2 { font-size: 17px; margin: 0; }
+        .modal-close-btn {
+            background: rgba(255,255,255,0.2); border: none; color: white;
+            width: 30px; height: 30px; border-radius: 50%; font-size: 16px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close-btn:hover { background: rgba(255,255,255,0.35); }
+        .modal-body { padding: 22px; }
+        .modal-footer {
+            padding: 16px 22px; border-top: 2px solid #f0f0f0;
+            display: flex; gap: 10px; justify-content: flex-end; background: #fafafa;
+        }
+        .btn-modal {
+            padding: 10px 22px; border: none; border-radius: 6px;
+            font-size: 14px; font-weight: bold; cursor: pointer; transition: all .2s;
+        }
+        .btn-modal:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-save   { background: #28a745; color: white; }
+        .btn-save:hover:not(:disabled)   { background: #218838; }
+        .btn-cancel { background: #6c757d; color: white; }
+        .btn-cancel:hover { background: #545b62; }
+
+        .pagination-bar {
+            display:flex; align-items:center; justify-content:space-between; gap:10px;
+            margin-top:12px; padding-top:12px; border-top:1px solid #eee; flex-wrap:wrap;
+        }
+        .pagination-bar .info { font-size:12px; color:#777; }
+        .pagination-bar .nav { display:flex; gap:6px; align-items:center; }
+        .pg-btn {
+            background:#f1f1f1; border:1px solid #ddd; border-radius:6px; padding:5px 12px;
+            font-size:12px; cursor:pointer;
+        }
+        .pg-btn:disabled { opacity:.4; cursor:not-allowed; }
+        .pg-label { font-size:12px; color:#555; min-width:80px; text-align:center; }
+
+        #toast-msg {
+            display: none; position: fixed; bottom: 24px; right: 24px;
+            background: #333; color: white; padding: 13px 20px; border-radius: 8px;
+            font-size: 14px; z-index: 99999; box-shadow: 0 4px 20px rgba(0,0,0,.3);
+            max-width: 360px; line-height: 1.5; font-family: Arial, sans-serif;
+        }
+        #toast-msg.success { background: #28a745; }
+        #toast-msg.error   { background: #dc3545; }
+    </style>
+</head>
+<body>
+
+<div id="toast-msg"></div>
+
+<div style="max-width:900px; margin:0 auto;">
+
+    <div class="header">
+        <div>
+            <h1>Finishing — <span>Aksi Filter</span></h1>
+            <div class="sub">psikogram_db · tabel: <strong id="namaTableHeader" style="color:var(--accent)">—</strong></div>
+        </div>
+        <a class="btn btn-secondary" href="javascript:void(0)" onclick="kembaliKeRekap()">⬅ Kembali ke Rekap</a>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <button class="btn btn-secondary" id="btnGantiTabel" onclick="toggleTabelInput()">🗄 Ganti Tabel</button>
+        <button class="btn btn-secondary" id="btnRefreshData" onclick="refreshDataManual()">↻ Refresh Data</button>
+    </div>
+
+    <!-- Input ganti tabel (identik index_rekap.html) -->
+    <div id="gantiTabelBox" class="box" style="display:none;">
+        <div class="box-title">GANTI TABEL SUMBER</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="inputTabelBaru" placeholder="Nama tabel (contoh: rekap_nilai2)"
+                style="flex:1; min-width:200px;"
+                onkeydown="if(event.key==='Enter') gantiTabel()">
+            <button class="btn btn-secondary" onclick="gantiTabel()" style="background:var(--accent); color:#0d0f14; border:none;">Terapkan</button>
+            <button class="btn btn-secondary" onclick="toggleTabelInput()">Batal</button>
+        </div>
+        <div id="tabelList" style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;"></div>
+    </div>
+
+    <!-- Pemilihan mode filter -->
+    <div class="box">
+        <div class="box-title">PILIH FILTER (SATU AKTIF SEKALIGUS)</div>
+        <div class="radio-row" id="filterRadioRow"></div>
+    </div>
+
+    <!-- Panel-panel filter (dirender otomatis dari konfigurasi FILTERS) -->
+    <div id="filterPanelsContainer"></div>
+
+    <!-- Pesan awal, sebelum filter dipilih -->
+    <div class="empty-state" id="emptyStateBox">
+        Halaman ini tidak menampilkan tabel peserta.<br>
+        Pilih salah satu filter di atas untuk mengatur kriteria dan kalimat rekomendasi, lalu kirim ke peserta yang cocok.
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL KONFIRMASI SUBMIT KE PESERTA TERFILTER
+     ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-terapkan-rekom" onclick="tutupPopupSubmitDiluar(event)">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 id="trk-judul">📤 Terapkan Rekomendasi</h2>
+            <button class="modal-close-btn" onclick="tutupPopupSubmit()">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <div style="font-size:12.5px; color:#666; margin-bottom:14px; line-height:1.6;" id="trk-info"></div>
+            <label id="trk-pilih-semua-wrap" style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:12px; cursor:pointer;">
+                <input type="checkbox" id="trk-pilih-semua" checked onchange="toggleSemuaTrk(this.checked)" style="width:16px; height:16px; cursor:pointer;">
+                Pilih semua (<span id="trk-pilih-semua-jumlah">0</span> peserta)
+            </label>
+            <div id="trk-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+            <div class="pagination-bar" id="trk-pagination-wrap">
+                <span class="info" id="trk-selected-count"></span>
+                <div class="nav">
+                    <button class="pg-btn" id="trk-prev" onclick="trkPrevPage()">← Sebelumnya</button>
+                    <span class="pg-label" id="trk-page-label">Hal. 1/1</span>
+                    <button class="pg-btn" id="trk-next" onclick="trkNextPage()">Berikutnya →</button>
+                </div>
+            </div>
+
+            <div id="trk-progress-wrap" style="display:none; margin-top:14px;">
+                <div style="font-size:13px; margin-bottom:8px; color:#333;" id="trk-progress-label">Menyimpan...</div>
+                <div style="background:#eee; border:1px solid #ddd; border-radius:8px; height:10px; overflow:hidden;">
+                    <div id="trk-progress-bar" style="background:#4fffb0; height:100%; width:0%; transition:width .15s;"></div>
+                </div>
+                <div style="font-size:12px; color:#777; margin-top:6px;" id="trk-progress-count">0 / 0</div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-modal btn-cancel" id="btn-batal-terapkan-rekom" onclick="tutupPopupSubmit()">Batal</button>
+            <button class="btn-modal btn-save" id="btn-konfirmasi-terapkan-rekom" onclick="konfirmasiSubmit()">✅ Tambahkan ke Peserta Terpilih</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL    = 'https://lidan-co-id.pages.dev/api/db_psikogram1';
+    const SECRET     = 'admin';
+    const DEFAULT_TABLE = 'rekap_nilai1';
+    const LS_TABEL_TERAKHIR = 'rekap_tabelAktifTerakhir';
+    const TRK_PAGE_SIZE = 15;
+
+    // =========================================================
+    // KONFIGURASI FILTER — untuk menambah filter bertipe "skor < ambang
+    // DAN arah minat cocok" (kind:'minat'), cukup tambah satu objek baru
+    // dengan kind itu. Untuk bentuk logika lain, tambahkan kind baru lalu
+    // implementasikan fungsi buatAksi-nya di bagian "AKSI PER JENIS FILTER"
+    // di bawah — panel, radio, dan tombol submit tetap otomatis mengikuti
+    // array ini (lihat renderFilterPanels & buatAksi).
+    // id harus unik & tidak berubah walau nomor tampilan (label) berubah,
+    // supaya tidak ada dua filter yang tabrakan penomoran.
+    // =========================================================
+    const FILTERS = [
+        {
+            id: 'f1',
+            kind: 'iqfloor',
+            label: 'Filter 1 — Nilai Minimum IQ',
+            defaultThreshold: 65,
+            defaultFloor: 65
+        },
+        {
+            id: 'f2',
+            kind: 'minat',
+            num: 2,
+            label: 'Filter 2 — Kemampuan Numerik & Arah Minat',
+            scoreLabel: 'Kemampuan Numerik',
+            scoreKey: 'penalaran_numerik',
+            minatTetap: ['COMPUTATIONAL', 'PRACTICAL', 'SCIENTIFIC', 'MEDICAL'],
+            defaultThreshold: 5,
+            defaultTemplate: 'Disarankan untuk {secara konsisten|secara rutin|dengan tekun|secara bertahap|secara disiplin} berlatih dan mengasah kemampuan numerik yang saat ini masih tergolong rendah, agar potensi di bidang minat tersebut dapat {berkembang lebih optimal|tergali lebih maksimal|terasah dengan baik|meningkat signifikan|terwujud secara nyata}, sehingga peserta dapat {lebih siap menghadapi tantangan ke depan|semakin percaya diri di bidang tersebut|memaksimalkan potensi dirinya|mencapai hasil yang lebih baik|berkontribusi secara maksimal}.'
+        },
+        {
+            id: 'f3',
+            kind: 'minat',
+            num: 3,
+            label: 'Filter 3 — Kemampuan Verbal & Arah Minat',
+            scoreLabel: 'Kemampuan Verbal',
+            scoreKey: 'penalaran_verbal',
+            minatTetap: ['LITERATURE'],
+            defaultThreshold: 5,
+            defaultTemplate: 'Disarankan untuk {secara konsisten|secara rutin|dengan tekun|secara bertahap|secara disiplin} berlatih dan mengasah kemampuan verbal yang saat ini masih tergolong rendah, agar potensi di bidang minat tersebut dapat {berkembang lebih optimal|tergali lebih maksimal|terasah dengan baik|meningkat signifikan|terwujud secara nyata}, sehingga peserta dapat {lebih siap menghadapi tantangan ke depan|semakin percaya diri di bidang tersebut|memaksimalkan potensi dirinya|mencapai hasil yang lebih baik|berkontribusi secara maksimal}.'
+        },
+        {
+            // Tadinya diminta sebagai "Filter 3", tapi nomor itu sudah dipakai
+            // (Kemampuan Verbal & Arah Minat) — supaya tidak tabrakan/ambigu,
+            // filter ini sengaja TIDAK diberi nomor urut.
+            id: 'fskormin',
+            kind: 'skormin',
+            label: 'Kalibrasi Skor Minimum — Kemampuan / Kepribadian / Sikap Kerja',
+            defaultDari: 1,
+            defaultKe: 2
+        },
+        {
+            id: 'f4',
+            kind: 'iqcalib',
+            num: 4,
+            label: 'Filter 4 — Kalibrasi IQ berdasarkan Numerik & Verbal',
+            defaultThresholdNumerik: 5,
+            defaultThresholdVerbal: 5,
+            defaultKenaikan: 10
+        }
+    ];
+
+    // Definisi aspek Kemampuan/Kepribadian/Sikap Kerja (sama dgn index_rekap.html) — dipakai Filter "Kalibrasi Skor Minimum"
+    const ASPEK_KEMAMPUAN       = ['Kemampuan Umum','Daya Tangkap Visual','Kemampuan Berpikir Logis','Kemampuan Berpikir Abstrak','Penalaran Verbal','Penalaran Numerik'];
+    const ASPEK_KEPRIBADIAN     = ['Hasrat Berprestasi','Daya Tahan Stress','Kepercayaan Diri','Relasi Sosial','Kerjasama'];
+    const ASPEK_SIKAP           = ['Sistematika Kerja','Inisiatif','Kemandirian'];
+    const ASPEK_KEY_KEMAMPUAN   = ['kemampuan_umum','daya_tangkap_visual','kemampuan_berpikir_logis','kemampuan_berpikir_abstrak','penalaran_verbal','penalaran_numerik'];
+    const ASPEK_KEY_KEPRIBADIAN = ['hasrat_berprestasi','daya_tahan_stress','kepercayaan_diri','relasi_sosial','kerjasama'];
+    const ASPEK_KEY_SIKAP       = ['sistematika_kerja','inisiatif','kemandirian'];
+
+    // Ambil nama tabel & halaman-asal dari URL, sinkron dengan index_rekap.html lewat localStorage
+    function getTabelFromUrl() {
+        const p = new URLSearchParams(window.location.search);
+        const dariUrl = p.get('tabel');
+        if (dariUrl && dariUrl.trim()) {
+            localStorage.setItem(LS_TABEL_TERAKHIR, dariUrl.trim());
+            return dariUrl.trim();
+        }
+        const dariStorage = localStorage.getItem(LS_TABEL_TERAKHIR);
+        return (dariStorage && dariStorage.trim()) || DEFAULT_TABLE;
+    }
+    function getHalamanAsal() {
+        const p = new URLSearchParams(window.location.search);
+        return p.get('back') || 'index_rekap.html';
+    }
+
+    let TABLE_NAME   = getTabelFromUrl();
+    const HALAMAN_ASAL = getHalamanAsal();
+    let _lastRows    = null;   // cache data tabel saat ini — null berarti belum/harus diambil ulang
+    let _filterAktifId = null;
+
+    // state kriteria per filter (dicari via f.id) — bentuknya beda tergantung f.kind
+    const filterState = {};
+    FILTERS.forEach(f => {
+        if (f.kind === 'minat') {
+            filterState[f.id] = { threshold: f.defaultThreshold, selectedMinat: [], template: f.defaultTemplate };
+        } else if (f.kind === 'iqfloor') {
+            filterState[f.id] = { threshold: f.defaultThreshold, floor: f.defaultFloor };
+        } else if (f.kind === 'skormin') {
+            filterState[f.id] = { dari: f.defaultDari, ke: f.defaultKe };
+        } else if (f.kind === 'iqcalib') {
+            filterState[f.id] = { thresholdNumerik: f.defaultThresholdNumerik, thresholdVerbal: f.defaultThresholdVerbal, kenaikan: f.defaultKenaikan };
+        }
+    });
+
+    function kembaliKeRekap() {
+        window.location.href = `${HALAMAN_ASAL}?tabel=${encodeURIComponent(TABLE_NAME)}`;
+    }
+
+    function setTabelAktif(nama) {
+        if (!nama || !nama.trim()) return;
+        nama = nama.trim();
+        const url = new URL(window.location.href);
+        url.searchParams.set('tabel', nama);
+        window.history.pushState({}, '', url.toString());
+        localStorage.setItem(LS_TABEL_TERAKHIR, nama);
+        TABLE_NAME = nama;
+        document.getElementById('namaTableHeader').textContent = nama;
+        document.title = `Finishing — ${nama}`;
+        _lastRows = null; // paksa ambil ulang data untuk tabel baru
+        if (_filterAktifId) {
+            const el = document.getElementById(`f${_filterAktifId}Preview`);
+            if (el) el.innerHTML = 'Memuat data peserta...';
+            muatDataJikaPerlu(true).then(() => updatePreview(_filterAktifId));
+        }
+    }
+
+    // ── Ganti tabel (identik index_rekap.html) ──
+    function toggleTabelInput() {
+        const box = document.getElementById('gantiTabelBox');
+        const isOpen = box.style.display !== 'none';
+        box.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+            document.getElementById('inputTabelBaru').value = TABLE_NAME;
+            document.getElementById('inputTabelBaru').focus();
+            loadTabelList();
+        }
+    }
+
+    function gantiTabel() {
+        const val = document.getElementById('inputTabelBaru').value.trim();
+        if (!val) return;
+        document.getElementById('gantiTabelBox').style.display = 'none';
+        setTabelAktif(val);
+    }
+
+    async function loadTabelList() {
+        try {
+            const res = await fetch(`${API_URL}?action=list_tables`, {
+                headers: { 'X-Custom-Auth': SECRET }
+            });
+            const result = await res.json();
+            const container = document.getElementById('tabelList');
+            container.innerHTML = '';
+            (result.tables || []).forEach(t => {
+                const btn = document.createElement('button');
+                btn.textContent = t;
+                btn.style.cssText = `background:${t === TABLE_NAME ? 'var(--accent)' : 'var(--surface)'};
+                    color:${t === TABLE_NAME ? '#0d0f14' : 'var(--text)'};
+                    border:1px solid var(--border); border-radius:6px;
+                    padding:5px 12px; font-size:12px; font-family:'DM Mono',monospace;
+                    cursor:pointer; transition:background .15s;`;
+                btn.onclick = () => {
+                    document.getElementById('inputTabelBaru').value = t;
+                    document.getElementById('gantiTabelBox').style.display = 'none';
+                    setTabelAktif(t);
+                };
+                container.appendChild(btn);
+            });
+        } catch (e) { /* silent */ }
+    }
+
+    function refreshDataManual() {
+        muatDataJikaPerlu(true).then(() => {
+            if (_filterAktifId) updatePreview(_filterAktifId);
+            tampilToast('Data peserta diperbarui.', 'success');
+        });
+    }
+
+    // ── Ambil data tabel (hanya saat perlu — bukan polling) ──
+    async function muatDataJikaPerlu(force = false) {
+        if (_lastRows && !force) return;
+        try {
+            const res = await fetch(`${API_URL}?table=${TABLE_NAME}`, {
+                headers: { 'X-Custom-Auth': SECRET, 'Content-Type': 'application/json' }
+            });
+            if (!res.ok) throw new Error(`Server error: ${res.status}`);
+            const result = await res.json();
+            if (!result.success) throw new Error(result.error || 'Gagal ambil data');
+            _lastRows = result.data;
+            document.getElementById('errorBox').style.display = 'none';
+        } catch (e) {
+            document.getElementById('errorBox').textContent = '⚠ ' + e.message;
+            document.getElementById('errorBox').style.display = 'block';
+        }
+    }
+
+    function safeJSON(str, def) {
+        try { return JSON.parse(str) || def; } catch { return def; }
+    }
+    function escHtml(s) {
+        return (s || '').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function ambilMinatRow(row) {
+        const minat = safeJSON(row.x_10, [{}, {}, {}]);
+        return minat
+            .map(m => ((m && (m.nama || m.singkatan)) || '').toString().trim().toUpperCase())
+            .filter(Boolean);
+    }
+    function tampilToast(msg, type = '') {
+        const t = document.getElementById('toast-msg');
+        t.textContent = msg;
+        t.className   = type;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 4000);
+    }
+
+    // =========================================================
+    // RENDER RADIO PILIH FILTER + PANEL (otomatis dari FILTERS, per kind)
+    // =========================================================
+    function renderFilterRadios() {
+        const wrap = document.getElementById('filterRadioRow');
+        wrap.innerHTML = FILTERS.map(f => `
+            <label>
+                <input type="radio" name="filterAktifId" value="${f.id}" onchange="pilihModeFilter('${f.id}')">
+                ${escHtml(f.label)}
+            </label>`).join('');
+    }
+
+    function panelHeaderHtml(f) {
+        return `<h3>${escHtml(f.label)}</h3>`;
+    }
+    function panelFooterHtml(f) {
+        return `
+                <div class="preview-line" id="f${f.id}Preview">Pilih filter ini untuk melihat jumlah peserta yang cocok.</div>
+                <button class="btn btn-secondary" style="margin-top:12px; background:var(--accent); color:#0d0f14; border:none;"
+                    onclick="bukaPopupSubmit('${f.id}')">📤 Submit ke Peserta Terfilter</button>`;
+    }
+
+    function renderPanelMinat(f) {
+        return `
+            <div class="filter-card" id="panel-filter-${f.id}" style="display:none;">
+                ${panelHeaderHtml(f)}
+                <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:14px;">
+                    ${escHtml(f.scoreLabel)} &lt;
+                    <input type="number" id="f${f.id}Threshold" value="${f.defaultThreshold}" min="1" max="10"
+                        style="width:70px;" onchange="ubahThreshold('${f.id}')" oninput="ubahThreshold('${f.id}')">
+                </label>
+                <div class="box-title">ARAH MINAT (centang satu atau lebih — cukup salah satu yang cocok dengan minat peserta)</div>
+                <div id="f${f.id}MinatChecklist" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+                <div style="font-size:11.5px; color:var(--muted); margin-top:12px; line-height:1.6;">
+                    Peserta cocok jika <strong style="color:var(--text)">skor ${escHtml(f.scoreLabel)} di bawah ambang</strong> DAN
+                    salah satu arah minatnya <strong style="color:var(--text)">cocok dengan yang dicentang</strong> di atas.
+                    Jika tidak ada arah minat yang dicentang, hanya syarat skor yang berlaku.
+                </div>
+                <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border);">
+                    <div class="box-title">KALIMAT REKOMENDASI PENGEMBANGAN (akan ditambahkan ke Rekomendasi peserta terpilih)</div>
+                    <textarea id="f${f.id}Template" rows="4" onchange="ubahTemplate('${f.id}')">${escHtml(f.defaultTemplate)}</textarea>
+                    <div style="font-size:10.5px; color:var(--muted); margin-top:5px; line-height:1.5;">
+                        💡 Bisa pakai <strong>spintax</strong>: tulis pilihan kata di dalam kurung kurawal dipisah <code>|</code>, contoh
+                        <code>{cepat|lambat|sedang}</code> — sistem otomatis memilih satu variasi acak (tapi konsisten per peserta) agar kalimat lebih natural dan tidak seragam.
+                    </div>
+                    ${panelFooterHtml(f)}
+                </div>
+            </div>`;
+    }
+
+    function renderPanelIqFloor(f) {
+        const st = filterState[f.id];
+        return `
+            <div class="filter-card" id="panel-filter-${f.id}" style="display:none;">
+                ${panelHeaderHtml(f)}
+                <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:10px;">
+                    Nilai IQ di bawah
+                    <input type="number" id="f${f.id}Threshold" value="${st.threshold}" min="1" max="200"
+                        style="width:70px;" onchange="ubahIqFloorField('${f.id}','threshold')" oninput="ubahIqFloorField('${f.id}','threshold')">
+                </label>
+                <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:14px;">
+                    akan diubah menjadi
+                    <input type="number" id="f${f.id}Floor" value="${st.floor}" min="1" max="200"
+                        style="width:70px;" onchange="ubahIqFloorField('${f.id}','floor')" oninput="ubahIqFloorField('${f.id}','floor')">
+                </label>
+                <div style="font-size:11.5px; color:var(--muted); line-height:1.6;">
+                    Peserta cocok jika <strong style="color:var(--text)">Nilai IQ (x_06) di bawah ambang</strong> di atas.
+                    Submit akan langsung meng-set IQ peserta yang cocok menjadi nilai floor di atas (bukan ditambah).
+                    Sudah otomatis tidak akan diproses ulang — begitu IQ sudah jadi ${escHtml(String(st.floor))} (atau lebih), peserta itu tidak lagi cocok dengan kriteria ini.
+                </div>
+                <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
+                    ${panelFooterHtml(f)}
+                </div>
+            </div>`;
+    }
+
+    function renderPanelSkormin(f) {
+        const st = filterState[f.id];
+        return `
+            <div class="filter-card" id="panel-filter-${f.id}" style="display:none;">
+                ${panelHeaderHtml(f)}
+                <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:10px;">
+                    Skor aspek bernilai persis
+                    <input type="number" id="f${f.id}Dari" value="${st.dari}" min="0" max="10"
+                        style="width:60px;" onchange="ubahSkorminField('${f.id}','dari')" oninput="ubahSkorminField('${f.id}','dari')">
+                </label>
+                <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:14px;">
+                    akan diubah menjadi
+                    <input type="number" id="f${f.id}Ke" value="${st.ke}" min="0" max="10"
+                        style="width:60px;" onchange="ubahSkorminField('${f.id}','ke')" oninput="ubahSkorminField('${f.id}','ke')">
+                </label>
+                <div style="font-size:11.5px; color:var(--muted); line-height:1.6;">
+                    Berlaku untuk semua aspek di ketiga kategori: <strong style="color:var(--text)">Kemampuan (x_03), Kepribadian (x_04), Sikap Kerja (x_05)</strong>.
+                    Peserta cocok jika <strong style="color:var(--text)">minimal satu aspek</strong> di ketiga kategori itu bernilai persis angka di atas —
+                    dan submit akan mengubah <strong style="color:var(--text)">semua</strong> aspek miliknya yang bernilai itu (bukan cuma satu).
+                    Aman diulang: aspek yang sudah diubah tidak akan bernilai ${escHtml(String(st.dari))} lagi, jadi tidak diproses dobel.
+                </div>
+                <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
+                    ${panelFooterHtml(f)}
+                </div>
+            </div>`;
+    }
+
+    function renderPanelIqCalib(f) {
+        const st = filterState[f.id];
+        return `
+            <div class="filter-card" id="panel-filter-${f.id}" style="display:none;">
+                ${panelHeaderHtml(f)}
+                <div style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:14px;">
+                    <label style="display:flex; align-items:center; gap:7px; font-size:13px;">
+                        Kemampuan Numerik &gt;
+                        <input type="number" id="f${f.id}ThNumerik" value="${st.thresholdNumerik}" min="1" max="10"
+                            style="width:60px;" onchange="ubahIqCalibField('${f.id}','thresholdNumerik')" oninput="ubahIqCalibField('${f.id}','thresholdNumerik')">
+                    </label>
+                    <label style="display:flex; align-items:center; gap:7px; font-size:13px;">
+                        Kemampuan Verbal &gt;
+                        <input type="number" id="f${f.id}ThVerbal" value="${st.thresholdVerbal}" min="1" max="10"
+                            style="width:60px;" onchange="ubahIqCalibField('${f.id}','thresholdVerbal')" oninput="ubahIqCalibField('${f.id}','thresholdVerbal')">
+                    </label>
+                    <label style="display:flex; align-items:center; gap:7px; font-size:13px;">
+                        Kenaikan IQ (poin)
+                        <input type="number" id="f${f.id}Kenaikan" value="${st.kenaikan}" min="1" max="30"
+                            style="width:60px;" onchange="ubahIqCalibField('${f.id}','kenaikan')" oninput="ubahIqCalibField('${f.id}','kenaikan')">
+                    </label>
+                </div>
+                <div style="font-size:11.5px; color:var(--muted); line-height:1.6;">
+                    Peserta cocok jika <strong style="color:var(--text)">Kemampuan Numerik DAN Kemampuan Verbal keduanya di atas ambang</strong> di atas,
+                    <strong style="color:var(--text)">DAN</strong> Nilai IQ saat ini ada di rentang 70–79 atau 80–89.
+                    Submit akan menaikkan IQ peserta yang cocok sebesar nilai "Kenaikan IQ" di atas
+                    (mis. rentang 70an → 80an, rentang 80an → 90an). Peserta di luar rentang itu (termasuk yang sudah naik ke rentang berikutnya) tidak akan diproses ulang.
+                </div>
+                <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
+                    ${panelFooterHtml(f)}
+                </div>
+            </div>`;
+    }
+
+    function renderFilterPanels() {
+        const container = document.getElementById('filterPanelsContainer');
+        container.innerHTML = FILTERS.map(f => {
+            if (f.kind === 'minat')   return renderPanelMinat(f);
+            if (f.kind === 'iqfloor') return renderPanelIqFloor(f);
+            if (f.kind === 'skormin') return renderPanelSkormin(f);
+            if (f.kind === 'iqcalib') return renderPanelIqCalib(f);
+            return '';
+        }).join('');
+    }
+
+    function renderMinatChecklist(id) {
+        const f  = FILTERS.find(x => x.id === id);
+        const st = filterState[id];
+        const wrap = document.getElementById(`f${id}MinatChecklist`);
+        wrap.innerHTML = f.minatTetap.map(nama => {
+            const checked = st.selectedMinat.includes(nama) ? 'checked' : '';
+            const idAman  = nama.replace(/[^a-zA-Z0-9]/g, '_');
+            return `
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;
+                          background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:5px 10px;">
+                <input type="checkbox" id="f${id}-minat-${idAman}" value="${escHtml(nama)}"
+                    ${checked} onchange="toggleMinat('${id}', '${nama.replace(/'/g, "\\'")}', this.checked)"
+                    style="width:15px; height:15px; cursor:pointer;">
+                ${escHtml(nama)}
+            </label>`;
+        }).join('');
+    }
+
+    function toggleMinat(id, nama, checked) {
+        const st = filterState[id];
+        if (checked) {
+            if (!st.selectedMinat.includes(nama)) st.selectedMinat.push(nama);
+        } else {
+            st.selectedMinat = st.selectedMinat.filter(n => n !== nama);
+        }
+        updatePreview(id);
+    }
+
+    function ubahThreshold(id) {
+        const val = parseInt(document.getElementById(`f${id}Threshold`).value) || 1;
+        filterState[id].threshold = val;
+        updatePreview(id);
+    }
+
+    function ubahTemplate(id) {
+        filterState[id].template = document.getElementById(`f${id}Template`).value;
+    }
+
+    function ubahIqFloorField(id, field) {
+        const el = document.getElementById(field === 'threshold' ? `f${id}Threshold` : `f${id}Floor`);
+        const val = parseInt(el.value);
+        filterState[id][field] = isNaN(val) ? filterState[id][field] : val;
+        updatePreview(id);
+    }
+
+    function ubahSkorminField(id, field) {
+        const el = document.getElementById(field === 'dari' ? `f${id}Dari` : `f${id}Ke`);
+        const val = parseInt(el.value);
+        filterState[id][field] = isNaN(val) ? filterState[id][field] : val;
+        updatePreview(id);
+    }
+
+    function ubahIqCalibField(id, field) {
+        const mapEl = { thresholdNumerik: `f${id}ThNumerik`, thresholdVerbal: `f${id}ThVerbal`, kenaikan: `f${id}Kenaikan` };
+        const el = document.getElementById(mapEl[field]);
+        const val = parseInt(el.value);
+        filterState[id][field] = isNaN(val) ? filterState[id][field] : val;
+        updatePreview(id);
+    }
+
+    // =========================================================
+    // AKSI PER JENIS FILTER — masing-masing mengembalikan item aksi
+    // { id_x, nama, tampilLama, tampilBaru, payload, sudahAda } kalau baris
+    // cocok & perlu diproses, atau null kalau tidak cocok / sudah selesai.
+    // rowMatchesFilter() dan bukaPopupSubmit() sama-sama memakai fungsi ini,
+    // supaya "cocok" dan "aksi yang akan dijalankan" selalu konsisten satu sama lain
+    // dan peserta yang sudah pernah diproses (datanya sudah berubah) otomatis
+    // tidak muncul lagi di proses berikutnya.
+    // =========================================================
+    function namaFromRow(row) {
+        const biodata = safeJSON(row.x_02, {});
+        return biodata.nama || `(ID ${row.id_x})`;
+    }
+
+    function buatAksiMinat(f, row) {
+        const st = filterState[f.id];
+        const kemampuan = safeJSON(row.x_03, {});
+        const skor = parseInt(kemampuan[f.scoreKey]);
+        if (isNaN(skor) || skor >= st.threshold) return null;
+        const minatRow = ambilMinatRow(row);
+        if (st.selectedMinat.length > 0 && !minatRow.some(m => st.selectedMinat.includes(m))) return null;
+
+        const template = (st.template || '').trim();
+        const cocok    = st.selectedMinat.length > 0 ? minatRow.filter(m => st.selectedMinat.includes(m)) : minatRow;
+        const kalimat  = template ? buatKalimatRekomendasi(cocok, template, row.id_x) : '';
+
+        const minatLama = safeJSON(row.x_10, [{}, {}, {}]);
+        const minatArr  = Array.isArray(minatLama) ? [...minatLama] : [{}, {}, {}];
+        while (minatArr.length < 3) minatArr.push({});
+        const minatKe3       = minatArr[2] || {};
+        const teksSebelumnya = (minatKe3.keterangan || '').toString();
+        // Pemisah pakai newline asli ("\n\n"), BUKAN tag <br><br> — supaya kalimat baru
+        // benar-benar turun/enter ke baris baru di mana pun teks ini nanti ditampilkan
+        // (selama halaman penampil menghormati newline, mis. CSS white-space:pre-line,
+        // atau mengonversinya sendiri ke <br> sebelum render). <br> literal sebelumnya
+        // ikut dipertahankan kalau memang sudah ada di data lama (data lama tidak diubah).
+        const kalimatGabungan = teksSebelumnya ? `${teksSebelumnya}\n\n${kalimat}` : kalimat;
+        const sudahAda = teksSebelumnya.length > 0 && teksSebelumnya.trim().endsWith(kalimat.trim()) && kalimat.trim() !== '';
+
+        const minatArrBaru = minatArr.map((m, idx) => idx === 2 ? { ...m, keterangan: kalimatGabungan } : m);
+        return {
+            id_x: row.id_x, nama: namaFromRow(row), row,
+            tampilLama: teksSebelumnya, tampilBaru: kalimatGabungan,
+            payload: { x_10: JSON.stringify(minatArrBaru) },
+            sudahAda
+        };
+    }
+
+    function buatAksiIqFloor(f, row) {
+        const st = filterState[f.id];
+        const iq = parseInt(row.x_06);
+        if (isNaN(iq) || iq >= st.threshold) return null;
+        return {
+            id_x: row.id_x, nama: namaFromRow(row), row,
+            tampilLama: `IQ: ${iq}`, tampilBaru: `IQ: ${st.floor}`,
+            payload: { x_06: String(st.floor) },
+            sudahAda: false
+        };
+    }
+
+    function _daftarAspekKolom() {
+        return [
+            { kolom: 'x_03', keys: ASPEK_KEY_KEMAMPUAN,   labels: ASPEK_KEMAMPUAN },
+            { kolom: 'x_04', keys: ASPEK_KEY_KEPRIBADIAN, labels: ASPEK_KEPRIBADIAN },
+            { kolom: 'x_05', keys: ASPEK_KEY_SIKAP,       labels: ASPEK_SIKAP }
+        ];
+    }
+
+    function buatAksiSkormin(f, row) {
+        const st = filterState[f.id];
+        const payload = {};
+        const labelLama = [], labelBaru = [];
+        _daftarAspekKolom().forEach(def => {
+            const data = safeJSON(row[def.kolom], {});
+            const baru = { ...data };
+            let berubah = false;
+            def.keys.forEach((k, i) => {
+                if (parseInt(data[k]) === st.dari) {
+                    baru[k] = st.ke;
+                    berubah = true;
+                    labelLama.push(`${def.labels[i]}: ${st.dari}`);
+                    labelBaru.push(`${def.labels[i]}: ${st.ke}`);
+                }
+            });
+            if (berubah) payload[def.kolom] = JSON.stringify(baru);
+        });
+        if (Object.keys(payload).length === 0) return null;
+        return {
+            id_x: row.id_x, nama: namaFromRow(row), row,
+            tampilLama: labelLama.join(', '), tampilBaru: labelBaru.join(', '),
+            payload, sudahAda: false
+        };
+    }
+
+    function buatAksiIqCalib(f, row) {
+        const st = filterState[f.id];
+        const kemampuan = safeJSON(row.x_03, {});
+        const numerik = parseInt(kemampuan.penalaran_numerik);
+        const verbal  = parseInt(kemampuan.penalaran_verbal);
+        if (isNaN(numerik) || isNaN(verbal)) return null;
+        if (!(numerik > st.thresholdNumerik && verbal > st.thresholdVerbal)) return null;
+        const iq = parseInt(row.x_06);
+        if (isNaN(iq)) return null;
+        const cocokRentang = (iq >= 70 && iq <= 79) || (iq >= 80 && iq <= 89);
+        if (!cocokRentang) return null;
+        const iqBaru = iq + st.kenaikan;
+        return {
+            id_x: row.id_x, nama: namaFromRow(row), row,
+            tampilLama: `IQ: ${iq} (Numerik ${numerik}, Verbal ${verbal})`, tampilBaru: `IQ: ${iqBaru}`,
+            payload: { x_06: String(iqBaru) },
+            sudahAda: false
+        };
+    }
+
+    function buatAksi(f, row) {
+        switch (f.kind) {
+            case 'minat':   return buatAksiMinat(f, row);
+            case 'iqfloor': return buatAksiIqFloor(f, row);
+            case 'skormin': return buatAksiSkormin(f, row);
+            case 'iqcalib': return buatAksiIqCalib(f, row);
+            default: return null;
+        }
+    }
+
+    // Cek apakah satu baris memenuhi filter id (dipakai utk hitung preview jumlah cocok)
+    function rowMatchesFilter(id, row) {
+        const f = FILTERS.find(x => x.id === id);
+        return !!buatAksi(f, row);
+    }
+
+    function updatePreview(id) {
+        const el = document.getElementById(`f${id}Preview`);
+        if (!el) return;
+        if (!_lastRows) { el.textContent = 'Memuat data peserta...'; return; }
+        const jumlah = _lastRows.filter(r => rowMatchesFilter(id, r)).length;
+        el.innerHTML = `<strong>${jumlah}</strong> dari <strong>${_lastRows.length}</strong> peserta cocok dengan kriteria saat ini.`;
+    }
+
+    async function pilihModeFilter(id) {
+        _filterAktifId = id;
+        const f = FILTERS.find(x => x.id === id);
+        document.querySelectorAll('.filter-card').forEach(p => p.style.display = 'none');
+        document.getElementById('emptyStateBox').style.display = 'none';
+        document.getElementById(`panel-filter-${id}`).style.display = 'block';
+        if (f.kind === 'minat') renderMinatChecklist(id);
+        if (!_lastRows) {
+            document.getElementById(`f${id}Preview`).textContent = 'Memuat data peserta...';
+            await muatDataJikaPerlu();
+        }
+        updatePreview(id);
+    }
+
+    // =========================================================
+    // SPINTAX & KALIMAT REKOMENDASI (identik index_rekap.html)
+    // =========================================================
+    function _hashSeed(str) {
+        let h = 0;
+        for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+        return h;
+    }
+    function _pilihSpintax(seed, groupIdx, jumlahOpsi) {
+        return _hashSeed(`${seed}::${groupIdx}`) % jumlahOpsi;
+    }
+    function resolveSpintax(template, seed) {
+        let groupIdx = 0;
+        return template.replace(/\{([^{}]+)\}/g, (match, isi) => {
+            const opsi = isi.split('|').map(s => s.trim()).filter(s => s.length > 0);
+            if (opsi.length === 0) return '';
+            const idx = _pilihSpintax(seed, groupIdx, opsi.length);
+            groupIdx++;
+            return opsi[idx];
+        });
+    }
+    function buatKalimatRekomendasi(minatCocok, template, seed) {
+        const label = (minatCocok && minatCocok.length > 0) ? minatCocok.join(', ') : '';
+        const templateFix = resolveSpintax(template, seed);
+        return label ? `Minat ${label}: ${templateFix}` : templateFix;
+    }
+
+    const KOLOM_SNAPSHOT_ASLI = ['x_02','x_03','x_04','x_05','x_06','x_07','x_08','x_09','x_10','x_18'];
+    function siapkanSnapshotAsli(rowSaatIni) {
+        if (rowSaatIni && rowSaatIni.x_20 && String(rowSaatIni.x_20).trim() !== '' && rowSaatIni.x_20 !== '{}') {
+            return null;
+        }
+        const snapshot = { _disimpan_pada: new Date().toISOString() };
+        KOLOM_SNAPSHOT_ASLI.forEach(k => {
+            snapshot[k] = (rowSaatIni && rowSaatIni[k] !== undefined) ? rowSaatIni[k] : null;
+        });
+        return JSON.stringify(snapshot);
+    }
+
+    // =========================================================
+    // POPUP SUBMIT KE PESERTA TERFILTER — dengan paginasi
+    // =========================================================
+    let _trkFilterId = null;
+    let _trkItems      = [];        // peserta yang tampil (sudah dikurangi yang duplikat)
+    let _trkSelected   = new Set(); // id_x yang dicentang, berlaku lintas halaman
+    let _trkPage        = 0;
+
+    function bukaPopupSubmit(id) {
+        if (!_lastRows) { tampilToast('❌ Data belum dimuat, coba lagi sesaat.', 'error'); return; }
+        const f  = FILTERS.find(x => x.id === id);
+        if (f.kind === 'minat') {
+            const template = (filterState[id].template || '').trim();
+            if (!template) { tampilToast('❌ Isi dulu kalimat rekomendasinya.', 'error'); return; }
+        }
+
+        _trkFilterId = id;
+
+        const semuaCocok = [];
+        _lastRows.forEach(row => {
+            const item = buatAksi(f, row);
+            if (item) semuaCocok.push(item);
+        });
+
+        _trkItems = semuaCocok.filter(it => !it.sudahAda);
+        const jumlahSudahAda = semuaCocok.length - _trkItems.length;
+        _trkSelected = new Set(_trkItems.map(it => it.id_x));
+        _trkPage = 0;
+
+        document.getElementById('trk-judul').textContent = `📤 Terapkan Aksi — ${f.label}`;
+        const info = document.getElementById('trk-info');
+        const btnKonfirmasi = document.getElementById('btn-konfirmasi-terapkan-rekom');
+
+        if (semuaCocok.length === 0) {
+            info.innerHTML = 'Tidak ada peserta yang cocok dengan kriteria saat ini.';
+            btnKonfirmasi.disabled = true;
+        } else if (_trkItems.length === 0) {
+            info.innerHTML = `Total <strong>${semuaCocok.length}</strong> peserta cocok — semuanya (<strong style="color:#e07a5f">${jumlahSudahAda}</strong>) `
+                + `sudah pernah diproses dengan aksi identik ini sebelumnya, jadi tidak ada yang perlu diproses lagi (mencegah dobel).`;
+            btnKonfirmasi.disabled = true;
+        } else {
+            info.innerHTML = `Total <strong>${semuaCocok.length}</strong> peserta cocok — `
+                + (jumlahSudahAda > 0 ? `<strong style="color:#e07a5f">${jumlahSudahAda} sudah pernah diproses</strong> (otomatis disembunyikan) · ` : '')
+                + `<strong style="color:#218838">${_trkItems.length} belum pernah</strong>, siap diproses. `
+                + `Centang satu per satu atau gunakan "Pilih semua".`;
+            btnKonfirmasi.disabled = false;
+        }
+
+        document.getElementById('trk-progress-wrap').style.display = 'none';
+        document.getElementById('trk-progress-bar').style.width = '0%';
+        document.getElementById('trk-progress-count').textContent = '0 / 0';
+        document.getElementById('btn-batal-terapkan-rekom').disabled = false;
+
+        renderTrkPage();
+        document.getElementById('modal-terapkan-rekom').classList.add('open');
+    }
+
+    function renderTrkPage() {
+        const list = document.getElementById('trk-list');
+        const totalPages = Math.max(1, Math.ceil(_trkItems.length / TRK_PAGE_SIZE));
+        if (_trkPage >= totalPages) _trkPage = totalPages - 1;
+        if (_trkPage < 0) _trkPage = 0;
+
+        const start = _trkPage * TRK_PAGE_SIZE;
+        const pageItems = _trkItems.slice(start, start + TRK_PAGE_SIZE);
+
+        // Catatan: teks lama & baru bisa mengandung newline asli ("\n") — dikonversi
+        // ke <br> di sini murni untuk tampilan popup ini, TIDAK mengubah data tersimpan.
+        const tampilBr = s => escHtml(s || '').replace(/&lt;br&gt;/g, '<br>').replace(/\n/g, '<br>');
+
+        list.innerHTML = pageItems.map(it => `
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px; cursor:pointer;
+                          background:#f7f7f9; border:1px solid #e4e4e8; border-radius:8px; padding:10px 12px;">
+                <input type="checkbox" class="trk-item-check" data-id="${it.id_x}" ${_trkSelected.has(it.id_x) ? 'checked' : ''}
+                    onchange="toggleTrkItem(${it.id_x}, this.checked)" style="width:16px; height:16px; margin-top:2px; cursor:pointer;">
+                <span>
+                    <strong>${escHtml(it.nama)}</strong><br>
+                    ${it.tampilLama ? `<span style="color:#888; font-style:italic;">${tampilBr(it.tampilLama)}</span><br><br>` : ''}<span>${tampilBr(it.tampilBaru)}</span>
+                </span>
+            </label>`).join('');
+
+        document.getElementById('trk-page-label').textContent = `Hal. ${_trkPage + 1}/${totalPages}`;
+        document.getElementById('trk-prev').disabled = _trkPage <= 0;
+        document.getElementById('trk-next').disabled = _trkPage >= totalPages - 1;
+        document.getElementById('trk-pagination-wrap').style.display = _trkItems.length > 0 ? 'flex' : 'none';
+
+        const semuaCheck = document.getElementById('trk-pilih-semua');
+        semuaCheck.checked = _trkItems.length > 0 && _trkSelected.size === _trkItems.length;
+        semuaCheck.indeterminate = _trkSelected.size > 0 && _trkSelected.size < _trkItems.length;
+        document.getElementById('trk-pilih-semua-jumlah').textContent = _trkItems.length;
+        document.getElementById('trk-selected-count').textContent = `${_trkSelected.size} dari ${_trkItems.length} dipilih`;
+    }
+
+    function toggleTrkItem(id_x, checked) {
+        if (checked) _trkSelected.add(id_x); else _trkSelected.delete(id_x);
+        const semuaCheck = document.getElementById('trk-pilih-semua');
+        semuaCheck.checked = _trkItems.length > 0 && _trkSelected.size === _trkItems.length;
+        semuaCheck.indeterminate = _trkSelected.size > 0 && _trkSelected.size < _trkItems.length;
+        document.getElementById('trk-selected-count').textContent = `${_trkSelected.size} dari ${_trkItems.length} dipilih`;
+    }
+
+    function toggleSemuaTrk(checked) {
+        if (checked) _trkItems.forEach(it => _trkSelected.add(it.id_x));
+        else _trkSelected.clear();
+        renderTrkPage();
+    }
+
+    function trkPrevPage() { if (_trkPage > 0) { _trkPage--; renderTrkPage(); } }
+    function trkNextPage() {
+        const totalPages = Math.max(1, Math.ceil(_trkItems.length / TRK_PAGE_SIZE));
+        if (_trkPage < totalPages - 1) { _trkPage++; renderTrkPage(); }
+    }
+
+    function tutupPopupSubmit() {
+        document.getElementById('modal-terapkan-rekom').classList.remove('open');
+    }
+    function tutupPopupSubmitDiluar(e) {
+        if (e.target === document.getElementById('modal-terapkan-rekom')) tutupPopupSubmit();
+    }
+
+    async function konfirmasiSubmit() {
+        const terpilih = _trkItems.filter(it => _trkSelected.has(it.id_x));
+        if (terpilih.length === 0) { tampilToast('❌ Pilih minimal satu peserta.', 'error'); return; }
+
+        const btn        = document.getElementById('btn-konfirmasi-terapkan-rekom');
+        const btnBatal    = document.getElementById('btn-batal-terapkan-rekom');
+        const listEl      = document.getElementById('trk-list');
+        const pilihWrap    = document.getElementById('trk-pilih-semua-wrap');
+        const paginWrap     = document.getElementById('trk-pagination-wrap');
+        const progressWrap = document.getElementById('trk-progress-wrap');
+        const progressLbl  = document.getElementById('trk-progress-label');
+        const progressBar  = document.getElementById('trk-progress-bar');
+        const progressCnt  = document.getElementById('trk-progress-count');
+        const total = terpilih.length;
+
+        btn.disabled = true;
+        btnBatal.disabled = true;
+        listEl.style.display = 'none';
+        pilihWrap.style.display = 'none';
+        paginWrap.style.display = 'none';
+        progressWrap.style.display = 'block';
+
+        let sukses = 0, gagal = 0;
+
+        for (let i = 0; i < total; i++) {
+            const it = terpilih[i];
+            try {
+                progressLbl.textContent = `Menyimpan: ${it.nama}...`;
+                btn.textContent = `⏳ Menyimpan ${i + 1}/${total}...`;
+
+                const payload = { ...it.payload };
+
+                const snapshotAsli = siapkanSnapshotAsli(it.row);
+                if (snapshotAsli) payload.x_20 = snapshotAsli;
+
+                const apiUrl = `${API_URL}?table=${TABLE_NAME}&id_x=${it.id_x}`;
+                const res = await fetch(apiUrl, {
+                    method : 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': SECRET },
+                    body   : JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const result = await res.json();
+                if (!result.success) throw new Error(result.message || 'Gagal menyimpan');
+                sukses++;
+            } catch (err) {
+                gagal++;
+            }
+
+            const done = i + 1;
+            const pct  = total > 0 ? Math.round((done / total) * 100) : 0;
+            progressBar.style.width = pct + '%';
+            progressCnt.textContent = `${done} / ${total} (✅ ${sukses} berhasil${gagal > 0 ? `, ❌ ${gagal} gagal` : ''})`;
+        }
+
+        btn.disabled = false;
+        btnBatal.disabled = false;
+        btn.textContent = '✅ Tambahkan ke Peserta Terpilih';
+        listEl.style.display = '';
+        pilihWrap.style.display = '';
+        paginWrap.style.display = '';
+        progressWrap.style.display = 'none';
+
+        tutupPopupSubmit();
+        tampilToast(`Selesai: ${sukses} berhasil ditambahkan, ${gagal} gagal.`, gagal > 0 ? 'error' : 'success');
+
+        // Data sudah berubah di tabel yang sama dipakai index rekap — muat ulang cache lokal
+        // supaya jumlah "peserta cocok" di panel ikut ter-update, dan index rekap akan
+        // otomatis menampilkan perubahan ini saat dibuka/refresh karena sama-sama baca dari D1.
+        await muatDataJikaPerlu(true);
+        if (_filterAktifId) updatePreview(_filterAktifId);
+    }
+
+    // ── Init ──
+    document.getElementById('namaTableHeader').textContent = TABLE_NAME;
+    document.title = `Finishing — ${TABLE_NAME}`;
+    renderFilterRadios();
+    renderFilterPanels();
+
+    window.addEventListener('popstate', () => {
+        TABLE_NAME = getTabelFromUrl();
+        document.getElementById('namaTableHeader').textContent = TABLE_NAME;
+        document.title = `Finishing — ${TABLE_NAME}`;
+        _lastRows = null;
+        if (_filterAktifId) muatDataJikaPerlu(true).then(() => updatePreview(_filterAktifId));
+    });
+</script>
+</body>
+</html>
