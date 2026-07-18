@@ -7,7 +7,6 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         :root {
@@ -177,18 +176,15 @@
     <div class="toolbar">
         <button class="btn btn-secondary" id="btnGantiTabel" onclick="toggleTabelInput()">🗄 Ganti Tabel</button>
         <button class="btn btn-secondary" id="btnRefreshData" onclick="refreshDataManual()">↻ Refresh Data</button>
-        <button class="btn btn-secondary" id="btnView" onclick="bukaView()"
-                style="background:#2980b9; color:#fff; border:none;">👁 View</button>
     </div>
 
     <!-- Input ganti tabel (identik index_rekap.html) -->
     <div id="gantiTabelBox" class="box" style="display:none;">
         <div class="box-title">GANTI TABEL SUMBER</div>
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-            <input type="text" id="inputTabelBaru" placeholder="Cari tabel atau ketik nama tabel baru..."
+            <input type="text" id="inputTabelBaru" placeholder="Nama tabel (contoh: rekap_nilai2)"
                 style="flex:1; min-width:200px;"
-                onkeydown="if(event.key==='Enter') gantiTabel()"
-                oninput="renderTabelListFiltered()">
+                onkeydown="if(event.key==='Enter') gantiTabel()">
             <button class="btn btn-secondary" onclick="gantiTabel()" style="background:var(--accent); color:#0d0f14; border:none;">Terapkan</button>
             <button class="btn btn-secondary" onclick="toggleTabelInput()">Batal</button>
         </div>
@@ -253,40 +249,6 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     MODAL KONFIRMASI HAPUS — FILTER PERIKSA KELENGKAPAN
-     ═══════════════════════════════════════ -->
-<div class="modal-overlay" id="modal-hapus-kelengkapan" onclick="tutupModalHapusKelengkapanDiluar(event)">
-    <div class="modal-box" style="max-width:480px;">
-        <div class="modal-header" style="background:var(--danger);">
-            <h2>🗑 Konfirmasi Hapus Permanen</h2>
-            <button class="modal-close-btn" onclick="tutupModalHapusKelengkapan()">✕</button>
-        </div>
-        <div class="modal-body">
-            <div style="font-size:13px; color:#333; margin-bottom:14px; line-height:1.6;" id="hapus-kelengkapan-info"></div>
-            <div style="font-size:12.5px; color:#666; margin-bottom:8px;">
-                Ketik <strong>delete</strong> di bawah ini untuk mengonfirmasi. Tindakan ini <strong>tidak bisa dibatalkan</strong>.
-            </div>
-            <input type="text" id="hapus-kelengkapan-input" placeholder="ketik: delete"
-                style="width:100%;" oninput="cekInputHapusKelengkapan()"
-                onkeydown="if(event.key==='Enter' && !document.getElementById('btn-konfirmasi-hapus-kelengkapan').disabled) konfirmasiHapusKelengkapan()">
-
-            <div id="hapus-kelengkapan-progress-wrap" style="display:none; margin-top:14px;">
-                <div style="font-size:13px; margin-bottom:8px; color:#333;" id="hapus-kelengkapan-progress-label">Menghapus...</div>
-                <div style="background:#eee; border:1px solid #ddd; border-radius:8px; height:10px; overflow:hidden;">
-                    <div id="hapus-kelengkapan-progress-bar" style="background:var(--danger); height:100%; width:0%; transition:width .15s;"></div>
-                </div>
-                <div style="font-size:12px; color:#777; margin-top:6px;" id="hapus-kelengkapan-progress-count">0 / 0</div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-modal btn-cancel" id="btn-batal-hapus-kelengkapan" onclick="tutupModalHapusKelengkapan()">Batal</button>
-            <button class="btn-modal" id="btn-konfirmasi-hapus-kelengkapan" onclick="konfirmasiHapusKelengkapan()" disabled
-                style="background:var(--danger); color:#fff;">🗑 Hapus Permanen</button>
-        </div>
-    </div>
-</div>
-
 <script>
     const API_URL    = 'https://lidan-co-id.pages.dev/api/db_psikogram1';
     const SECRET     = 'admin';
@@ -305,11 +267,6 @@
     // supaya tidak ada dua filter yang tabrakan penomoran.
     // =========================================================
     const FILTERS = [
-        {
-            id: 'fkelengkapan',
-            kind: 'kelengkapan',
-            label: 'Periksa Kelengkapan'
-        },
         {
             id: 'f1',
             kind: 'iqfloor',
@@ -354,9 +311,9 @@
             kind: 'iqcalib',
             num: 4,
             label: 'Filter 4 — Kalibrasi IQ berdasarkan Numerik & Verbal',
-            defaultThresholdNumerik: 4,
-            defaultThresholdVerbal: 4,
-            defaultKenaikan: 5
+            defaultThresholdNumerik: 5,
+            defaultThresholdVerbal: 5,
+            defaultKenaikan: 10
         }
     ];
 
@@ -407,11 +364,6 @@
         window.location.href = `${HALAMAN_ASAL}?tabel=${encodeURIComponent(TABLE_NAME)}`;
     }
 
-    // Buka halaman View (periksa & bandingkan data), bawa tabel aktif saat ini, di tab/jendela baru
-    function bukaView() {
-        window.open(`view.html?tabel=${encodeURIComponent(TABLE_NAME)}&back=finishing.html`, '_blank');
-    }
-
     function setTabelAktif(nama) {
         if (!nama || !nama.trim()) return;
         nama = nama.trim();
@@ -426,7 +378,7 @@
         if (_filterAktifId) {
             const el = document.getElementById(`f${_filterAktifId}Preview`);
             if (el) el.innerHTML = 'Memuat data peserta...';
-            muatDataJikaPerlu(true).then(() => refreshActivePreview());
+            muatDataJikaPerlu(true).then(() => updatePreview(_filterAktifId));
         }
     }
 
@@ -449,53 +401,35 @@
         setTabelAktif(val);
     }
 
-    let _semuaTabelList = []; // cache daftar tabel lengkap dari server — dipakai utk filter/pencarian lokal
-
     async function loadTabelList() {
         try {
             const res = await fetch(`${API_URL}?action=list_tables`, {
                 headers: { 'X-Custom-Auth': SECRET }
             });
             const result = await res.json();
-            _semuaTabelList = result.tables || [];
-            renderTabelListFiltered();
+            const container = document.getElementById('tabelList');
+            container.innerHTML = '';
+            (result.tables || []).forEach(t => {
+                const btn = document.createElement('button');
+                btn.textContent = t;
+                btn.style.cssText = `background:${t === TABLE_NAME ? 'var(--accent)' : 'var(--surface)'};
+                    color:${t === TABLE_NAME ? '#0d0f14' : 'var(--text)'};
+                    border:1px solid var(--border); border-radius:6px;
+                    padding:5px 12px; font-size:12px; font-family:'DM Mono',monospace;
+                    cursor:pointer; transition:background .15s;`;
+                btn.onclick = () => {
+                    document.getElementById('inputTabelBaru').value = t;
+                    document.getElementById('gantiTabelBox').style.display = 'none';
+                    setTabelAktif(t);
+                };
+                container.appendChild(btn);
+            });
         } catch (e) { /* silent */ }
-    }
-
-    // Render ulang daftar tabel di bawah kotak input, hanya yg namanya mengandung
-    // teks yg sedang diketik (pencarian live, tidak sensitif huruf besar/kecil).
-    // Dipanggil tiap kali user mengetik (oninput) maupun sesudah data tabel dimuat.
-    function renderTabelListFiltered() {
-        const container = document.getElementById('tabelList');
-        if (!container) return;
-        const q = (document.getElementById('inputTabelBaru').value || '').trim().toLowerCase();
-        const daftar = q ? _semuaTabelList.filter(t => t.toLowerCase().includes(q)) : _semuaTabelList;
-
-        container.innerHTML = '';
-        if (daftar.length === 0) {
-            container.innerHTML = `<div style="font-size:12px; color:var(--muted); padding:4px 2px;">Tidak ada tabel yang cocok dengan "${escHtml(q)}".</div>`;
-            return;
-        }
-        daftar.forEach(t => {
-            const btn = document.createElement('button');
-            btn.textContent = t;
-            btn.style.cssText = `background:${t === TABLE_NAME ? 'var(--accent)' : 'var(--surface)'};
-                color:${t === TABLE_NAME ? '#0d0f14' : 'var(--text)'};
-                border:1px solid var(--border); border-radius:6px;
-                padding:5px 12px; font-size:12px; font-family:'DM Mono',monospace;
-                cursor:pointer; transition:background .15s;`;
-            btn.onclick = () => {
-                document.getElementById('inputTabelBaru').value = t;
-                document.getElementById('gantiTabelBox').style.display = 'none';
-                setTabelAktif(t);
-            };
-            container.appendChild(btn);
-        });
     }
 
     function refreshDataManual() {
         muatDataJikaPerlu(true).then(() => {
-            refreshActivePreview();
+            if (_filterAktifId) updatePreview(_filterAktifId);
             tampilToast('Data peserta diperbarui.', 'success');
         });
     }
@@ -524,27 +458,6 @@
     function escHtml(s) {
         return (s || '').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
-    // "Tidak Mengerjakan": biodata x_02 ada, tapi field "nama" di dalamnya kosong.
-    // Contoh isi x_02: {"nama":"","jk":"","usia":"", ...}
-    function isNamaKosong(row) {
-        const biodata = safeJSON(row.x_02, {});
-        const nama = (biodata && biodata.nama) ? String(biodata.nama).trim() : '';
-        return nama === '';
-    }
-
-    // "Tidak Selesai Mengerjakan": salah satu dari x_07 / x_08 / x_09 (masing-masing
-    // array, contoh ["","",""]) punya elemen yang kosong. Hanya relevan kalau nama
-    // di x_02 SUDAH terisi (kalau nama kosong, sudah masuk kategori "Tidak Mengerjakan").
-    function adaArrayKosong(val) {
-        const arr = safeJSON(val, null);
-        if (!Array.isArray(arr)) return true; // tidak ada / rusak → anggap belum lengkap
-        if (arr.length === 0) return true;
-        return arr.some(el => String(el === null || el === undefined ? '' : el).trim() === '');
-    }
-    function isBelumSelesai(row) {
-        return adaArrayKosong(row.x_07) || adaArrayKosong(row.x_08) || adaArrayKosong(row.x_09);
-    }
-
     function ambilMinatRow(row) {
         const minat = safeJSON(row.x_10, [{}, {}, {}]);
         return minat
@@ -688,49 +601,10 @@
                     Peserta cocok jika <strong style="color:var(--text)">Kemampuan Numerik DAN Kemampuan Verbal keduanya di atas ambang</strong> di atas,
                     <strong style="color:var(--text)">DAN</strong> Nilai IQ saat ini ada di rentang 70–79 atau 80–89.
                     Submit akan menaikkan IQ peserta yang cocok sebesar nilai "Kenaikan IQ" di atas
-                    (mis. rentang 70an → 80an, rentang 80an → 90an). Peserta yang <strong style="color:var(--text)">sudah pernah dinaikkan lewat filter ini sebelumnya</strong>
-                    tidak akan tampil lagi sebagai pilihan — walaupun IQ-nya sekarang kebetulan masuk lagi ke salah satu rentang di atas —
-                    dan hanya ditampilkan sebagai riwayat info di bawah ini.
+                    (mis. rentang 70an → 80an, rentang 80an → 90an). Peserta di luar rentang itu (termasuk yang sudah naik ke rentang berikutnya) tidak akan diproses ulang.
                 </div>
-
-                <div style="margin-top:18px;">
-                    <div class="box-title">ℹ️ SUDAH PERNAH DINAIKKAN SEBELUMNYA (info saja, tidak bisa diproses ulang) — <span id="f${f.id}RiwayatCount">0</span> peserta</div>
-                    <div id="f${f.id}Riwayat" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto;"></div>
-                </div>
-
                 <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
                     ${panelFooterHtml(f)}
-                </div>
-            </div>`;
-    }
-
-    function renderPanelKelengkapan(f) {
-        return `
-            <div class="filter-card" id="panel-filter-${f.id}" style="display:none;">
-                ${panelHeaderHtml(f)}
-                <div style="font-size:11.5px; color:var(--muted); line-height:1.6; margin-bottom:14px;">
-                    Menampilkan peserta yang datanya belum lengkap: <strong style="color:var(--text)">Tidak Mengerjakan</strong>
-                    (field "nama" di x_02 kosong) dan <strong style="color:var(--text)">Tidak Selesai Mengerjakan</strong>
-                    (nama di x_02 sudah terisi, tapi salah satu dari x_07 / x_08 / x_09 masih ada elemen kosong).
-                    Peserta yang namanya kosong hanya dihitung sebagai "Tidak Mengerjakan" — tidak ikut dihitung di "Tidak Selesai".
-                </div>
-                <div class="preview-line" id="f${f.id}Preview">Pilih filter ini untuk memeriksa kelengkapan data.</div>
-
-                <div style="margin-top:18px;">
-                    <div class="box-title" style="color:#ff9f4f;">🚫 TIDAK MENGERJAKAN (nama di x_02 kosong) — <span id="f${f.id}CountA">0</span> peserta</div>
-                    <div id="f${f.id}ListA" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto;"></div>
-                </div>
-
-                <div style="margin-top:18px;">
-                    <div class="box-title" style="color:#ffcf4f;">⏳ TIDAK SELESAI MENGERJAKAN (x_07/x_08/x_09 ada yg kosong) — <span id="f${f.id}CountB">0</span> peserta</div>
-                    <div id="f${f.id}ListB" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto;"></div>
-                </div>
-
-                <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border); display:flex; gap:10px; flex-wrap:wrap;">
-                    <button class="btn btn-secondary" style="background:var(--accent2); color:#fff; border:none;"
-                        onclick="downloadKelengkapanExcel('${f.id}')">⬇ Download Excel</button>
-                    <button class="btn btn-secondary" style="background:var(--danger); color:#fff; border:none;"
-                        onclick="bukaKonfirmasiHapusKelengkapan('${f.id}')">🗑 Hapus Semua Baris Ini</button>
                 </div>
             </div>`;
     }
@@ -738,11 +612,10 @@
     function renderFilterPanels() {
         const container = document.getElementById('filterPanelsContainer');
         container.innerHTML = FILTERS.map(f => {
-            if (f.kind === 'minat')       return renderPanelMinat(f);
-            if (f.kind === 'iqfloor')     return renderPanelIqFloor(f);
-            if (f.kind === 'skormin')     return renderPanelSkormin(f);
-            if (f.kind === 'iqcalib')     return renderPanelIqCalib(f);
-            if (f.kind === 'kelengkapan') return renderPanelKelengkapan(f);
+            if (f.kind === 'minat')   return renderPanelMinat(f);
+            if (f.kind === 'iqfloor') return renderPanelIqFloor(f);
+            if (f.kind === 'skormin') return renderPanelSkormin(f);
+            if (f.kind === 'iqcalib') return renderPanelIqCalib(f);
             return '';
         }).join('');
     }
@@ -901,24 +774,6 @@
         };
     }
 
-    // Deteksi apakah baris ini SUDAH PERNAH dinaikkan lewat Filter 4 sebelumnya.
-    // Dipakai supaya peserta yang sama tidak tampil lagi sebagai pilihan begitu IQ-nya
-    // kebetulan naik ke rentang 80-89 (yang juga rentang awal yang valid) — sebelumnya ini
-    // jadi bug: cocokRentang mencakup KEDUA rentang, jadi peserta yang baru saja naik dari
-    // 70an ke 80an langsung "cocok" lagi. Sumber kebenaran: snapshot x_20 (dibuat otomatis
-    // sekali saat baris pertama kali diubah oleh Finishing manapun, berisi x_06 = IQ asli
-    // sebelum ada perubahan apa pun). Kalau IQ asli itu ada di salah satu rentang kalibrasi
-    // DAN IQ sekarang sudah lebih tinggi dari IQ asli, berarti baris ini sudah pernah diproses.
-    function iqCalibSudahDiproses(row) {
-        const snap = safeJSON(row.x_20, null);
-        if (!snap || snap.x_06 === undefined || snap.x_06 === null) return false;
-        const iqAsli    = parseInt(snap.x_06);
-        const iqSekarang = parseInt(row.x_06);
-        if (isNaN(iqAsli) || isNaN(iqSekarang)) return false;
-        const asliDalamRentang = (iqAsli >= 70 && iqAsli <= 79) || (iqAsli >= 80 && iqAsli <= 89);
-        return asliDalamRentang && iqSekarang > iqAsli;
-    }
-
     function buatAksiIqCalib(f, row) {
         const st = filterState[f.id];
         const kemampuan = safeJSON(row.x_03, {});
@@ -928,7 +783,6 @@
         if (!(numerik > st.thresholdNumerik && verbal > st.thresholdVerbal)) return null;
         const iq = parseInt(row.x_06);
         if (isNaN(iq)) return null;
-        if (iqCalibSudahDiproses(row)) return null; // sudah pernah dinaikkan — jangan tampilkan lagi sbg pilihan
         const cocokRentang = (iq >= 70 && iq <= 79) || (iq >= 80 && iq <= 89);
         if (!cocokRentang) return null;
         const iqBaru = iq + st.kenaikan;
@@ -964,35 +818,6 @@
         el.innerHTML = `<strong>${jumlah}</strong> dari <strong>${_lastRows.length}</strong> peserta cocok dengan kriteria saat ini.`;
     }
 
-    // Render daftar info "sudah pernah dinaikkan" khusus panel Filter 4 (iqcalib) —
-    // murni informasi riwayat, tidak bisa dicentang/diproses ulang dari sini.
-    function renderIqCalibRiwayat(id) {
-        const wrap  = document.getElementById(`f${id}Riwayat`);
-        const count = document.getElementById(`f${id}RiwayatCount`);
-        if (!wrap || !count) return;
-        if (!_lastRows) { wrap.innerHTML = ''; count.textContent = '0'; return; }
-
-        const daftar = _lastRows.filter(iqCalibSudahDiproses);
-        wrap.innerHTML = daftar.length > 0
-            ? daftar.map(row => {
-                const snap = safeJSON(row.x_20, {});
-                const iqAsli    = parseInt(snap.x_06);
-                const iqSekarang = parseInt(row.x_06);
-                return `<div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
-                              background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:7px 12px; font-size:12.5px;">
-                    <span><strong style="color:var(--text)">${escHtml(namaFromRow(row))}</strong></span>
-                    <span style="color:var(--muted); font-family:'DM Mono',monospace;">IQ ${iqAsli} → ${iqSekarang} · ID ${row.id_x}</span>
-                </div>`;
-            }).join('')
-            : `<div style="font-size:12px; color:var(--muted); padding:6px 2px;">Belum ada yang pernah diproses lewat filter ini.</div>`;
-        count.textContent = daftar.length;
-    }
-
-    function updatePreviewIqCalib(id) {
-        updatePreview(id);
-        renderIqCalibRiwayat(id);
-    }
-
     async function pilihModeFilter(id) {
         _filterAktifId = id;
         const f = FILTERS.find(x => x.id === id);
@@ -1004,204 +829,7 @@
             document.getElementById(`f${id}Preview`).textContent = 'Memuat data peserta...';
             await muatDataJikaPerlu();
         }
-        if (f.kind === 'kelengkapan') updatePreviewKelengkapan(id);
-        else if (f.kind === 'iqcalib') updatePreviewIqCalib(id);
-        else updatePreview(id);
-    }
-
-    // Perbarui preview filter yang sedang aktif, sesuai jenisnya — dipakai
-    // sesudah refresh data, ganti tabel, atau sesudah aksi (submit/hapus) selesai.
-    function refreshActivePreview() {
-        if (!_filterAktifId) return;
-        const f = FILTERS.find(x => x.id === _filterAktifId);
-        if (!f) return;
-        if (f.kind === 'kelengkapan') updatePreviewKelengkapan(_filterAktifId);
-        else if (f.kind === 'iqcalib') updatePreviewIqCalib(_filterAktifId);
-        else updatePreview(_filterAktifId);
-    }
-
-    // =========================================================
-    // FILTER "PERIKSA KELENGKAPAN" — bukan bagian dari alur buatAksi/submit
-    // rekomendasi seperti filter lain, karena tujuannya memeriksa & menghapus
-    // baris yang datanya tidak lengkap, bukan mengubah nilai suatu kolom.
-    // =========================================================
-    const _kelengkapanData = {}; // cache list per filter id — dipakai saat download/hapus
-
-    function hitungKelengkapan() {
-        const tidakMengerjakan = [];
-        const tidakSelesai = [];
-        (_lastRows || []).forEach(row => {
-            if (isNamaKosong(row)) {
-                tidakMengerjakan.push(row);
-            } else if (isBelumSelesai(row)) {
-                tidakSelesai.push(row);
-            }
-        });
-        return { tidakMengerjakan, tidakSelesai };
-    }
-
-    function labelBarisKelengkapan(row) {
-        const biodata = safeJSON(row.x_02, {});
-        return {
-            nama: biodata.nama || `(ID ${row.id_x})`,
-            kode: row.x_01 || '—',
-            tanggal: biodata.tanggal || '—'
-        };
-    }
-
-    function renderKelengkapanList(id, tidakMengerjakan, tidakSelesai) {
-        const listA = document.getElementById(`f${id}ListA`);
-        const listB = document.getElementById(`f${id}ListB`);
-        if (!listA || !listB) return;
-
-        const rowHtml = row => {
-            const { nama, kode, tanggal } = labelBarisKelengkapan(row);
-            return `<div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
-                          background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:7px 12px; font-size:12.5px;">
-                <span><strong style="color:var(--text)">${escHtml(nama)}</strong> <span style="color:var(--muted)">· ${escHtml(kode)}</span></span>
-                <span style="color:var(--muted); font-family:'DM Mono',monospace;">ID ${row.id_x} · ${escHtml(tanggal)}</span>
-            </div>`;
-        };
-
-        listA.innerHTML = tidakMengerjakan.length > 0
-            ? tidakMengerjakan.map(rowHtml).join('')
-            : `<div style="font-size:12px; color:var(--muted); padding:6px 2px;">Tidak ada.</div>`;
-        listB.innerHTML = tidakSelesai.length > 0
-            ? tidakSelesai.map(rowHtml).join('')
-            : `<div style="font-size:12px; color:var(--muted); padding:6px 2px;">Tidak ada.</div>`;
-
-        document.getElementById(`f${id}CountA`).textContent = tidakMengerjakan.length;
-        document.getElementById(`f${id}CountB`).textContent = tidakSelesai.length;
-    }
-
-    function updatePreviewKelengkapan(id) {
-        const el = document.getElementById(`f${id}Preview`);
-        if (!el) return;
-        if (!_lastRows) { el.textContent = 'Memuat data peserta...'; return; }
-
-        const { tidakMengerjakan, tidakSelesai } = hitungKelengkapan();
-        _kelengkapanData[id] = { tidakMengerjakan, tidakSelesai };
-
-        const total = tidakMengerjakan.length + tidakSelesai.length;
-        el.innerHTML = `<strong>${total}</strong> dari <strong>${_lastRows.length}</strong> peserta datanya belum lengkap.`;
-        renderKelengkapanList(id, tidakMengerjakan, tidakSelesai);
-    }
-
-    // ── Download Excel ──
-    function downloadKelengkapanExcel(id) {
-        const data = _kelengkapanData[id];
-        if (!data || (data.tidakMengerjakan.length === 0 && data.tidakSelesai.length === 0)) {
-            tampilToast('❌ Tidak ada data untuk didownload.', 'error');
-            return;
-        }
-        if (typeof XLSX === 'undefined') {
-            tampilToast('❌ Modul Excel gagal dimuat, coba refresh halaman.', 'error');
-            return;
-        }
-        const rows = [];
-        data.tidakMengerjakan.forEach(row => {
-            const { nama, kode, tanggal } = labelBarisKelengkapan(row);
-            rows.push({ ID: row.id_x, Kode: kode, Nama: nama, Tanggal: tanggal, Kategori: 'Tidak Mengerjakan' });
-        });
-        data.tidakSelesai.forEach(row => {
-            const { nama, kode, tanggal } = labelBarisKelengkapan(row);
-            rows.push({ ID: row.id_x, Kode: kode, Nama: nama, Tanggal: tanggal, Kategori: 'Tidak Selesai Mengerjakan' });
-        });
-        const ws = XLSX.utils.json_to_sheet(rows);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Kelengkapan');
-        const namaFile = `kelengkapan_${TABLE_NAME}_${new Date().toISOString().slice(0, 10)}.xlsx`;
-        XLSX.writeFile(wb, namaFile);
-    }
-
-    // ── Hapus semua baris tidak lengkap, dengan konfirmasi ketik "delete" ──
-    let _hapusKelengkapanFilterId = null;
-
-    function bukaKonfirmasiHapusKelengkapan(id) {
-        const data = _kelengkapanData[id];
-        if (!data || (data.tidakMengerjakan.length === 0 && data.tidakSelesai.length === 0)) {
-            tampilToast('❌ Tidak ada baris untuk dihapus.', 'error');
-            return;
-        }
-        _hapusKelengkapanFilterId = id;
-        const total = data.tidakMengerjakan.length + data.tidakSelesai.length;
-        document.getElementById('hapus-kelengkapan-info').innerHTML =
-            `Anda akan menghapus <strong>${total}</strong> baris secara permanen dari tabel <strong>${escHtml(TABLE_NAME)}</strong> `
-            + `(<strong>${data.tidakMengerjakan.length}</strong> tidak mengerjakan, `
-            + `<strong>${data.tidakSelesai.length}</strong> tidak selesai mengerjakan).`;
-        document.getElementById('hapus-kelengkapan-input').value = '';
-        document.getElementById('btn-konfirmasi-hapus-kelengkapan').disabled = true;
-        document.getElementById('hapus-kelengkapan-progress-wrap').style.display = 'none';
-        document.getElementById('modal-hapus-kelengkapan').classList.add('open');
-    }
-
-    function cekInputHapusKelengkapan() {
-        const val = (document.getElementById('hapus-kelengkapan-input').value || '').trim().toLowerCase();
-        document.getElementById('btn-konfirmasi-hapus-kelengkapan').disabled = (val !== 'delete');
-    }
-
-    function tutupModalHapusKelengkapan() {
-        document.getElementById('modal-hapus-kelengkapan').classList.remove('open');
-    }
-    function tutupModalHapusKelengkapanDiluar(e) {
-        if (e.target === document.getElementById('modal-hapus-kelengkapan')) tutupModalHapusKelengkapan();
-    }
-
-    async function konfirmasiHapusKelengkapan() {
-        const id = _hapusKelengkapanFilterId;
-        const data = _kelengkapanData[id];
-        if (!data) return;
-        const semuaBaris = [...data.tidakMengerjakan, ...data.tidakSelesai];
-        if (semuaBaris.length === 0) return;
-
-        const btn         = document.getElementById('btn-konfirmasi-hapus-kelengkapan');
-        const btnBatal     = document.getElementById('btn-batal-hapus-kelengkapan');
-        const inputEl       = document.getElementById('hapus-kelengkapan-input');
-        const progressWrap  = document.getElementById('hapus-kelengkapan-progress-wrap');
-        const progressLbl   = document.getElementById('hapus-kelengkapan-progress-label');
-        const progressBar   = document.getElementById('hapus-kelengkapan-progress-bar');
-        const progressCnt   = document.getElementById('hapus-kelengkapan-progress-count');
-        const total = semuaBaris.length;
-
-        btn.disabled = true;
-        btnBatal.disabled = true;
-        inputEl.disabled = true;
-        progressWrap.style.display = 'block';
-
-        let sukses = 0, gagal = 0;
-        for (let i = 0; i < total; i++) {
-            const row = semuaBaris[i];
-            try {
-                progressLbl.textContent = `Menghapus ID ${row.id_x}...`;
-                btn.textContent = `⏳ Menghapus ${i + 1}/${total}...`;
-                const res = await fetch(`${API_URL}?table=${TABLE_NAME}&id_x=${row.id_x}`, {
-                    method: 'DELETE',
-                    headers: { 'X-Custom-Auth': SECRET }
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const result = await res.json();
-                if (!result.success) throw new Error(result.message || 'Gagal menghapus');
-                sukses++;
-            } catch (e) {
-                gagal++;
-            }
-            const done = i + 1;
-            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-            progressBar.style.width = pct + '%';
-            progressCnt.textContent = `${done} / ${total} (✅ ${sukses} berhasil${gagal > 0 ? `, ❌ ${gagal} gagal` : ''})`;
-        }
-
-        btn.disabled = false;
-        btnBatal.disabled = false;
-        inputEl.disabled = false;
-        btn.textContent = '🗑 Hapus Permanen';
-        progressWrap.style.display = 'none';
-
-        tutupModalHapusKelengkapan();
-        tampilToast(`Selesai: ${sukses} baris dihapus, ${gagal} gagal.`, gagal > 0 ? 'error' : 'success');
-
-        await muatDataJikaPerlu(true);
-        refreshActivePreview();
+        updatePreview(id);
     }
 
     // =========================================================
@@ -1433,7 +1061,7 @@
         // supaya jumlah "peserta cocok" di panel ikut ter-update, dan index rekap akan
         // otomatis menampilkan perubahan ini saat dibuka/refresh karena sama-sama baca dari D1.
         await muatDataJikaPerlu(true);
-        refreshActivePreview();
+        if (_filterAktifId) updatePreview(_filterAktifId);
     }
 
     // ── Init ──
@@ -1447,7 +1075,7 @@
         document.getElementById('namaTableHeader').textContent = TABLE_NAME;
         document.title = `Finishing — ${TABLE_NAME}`;
         _lastRows = null;
-        if (_filterAktifId) muatDataJikaPerlu(true).then(() => refreshActivePreview());
+        if (_filterAktifId) muatDataJikaPerlu(true).then(() => updatePreview(_filterAktifId));
     });
 </script>
 </body>

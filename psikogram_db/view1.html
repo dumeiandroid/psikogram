@@ -490,7 +490,6 @@
 <!-- Tombol Navigasi -->
 <div class="tombol-nav no-download">
     <button onclick="bukaModalTabel()">🔁 Ganti Tabel</button>
-    <span class="posisi-info" id="nama-tabel-display">📋 Tabel: -</span>
     <button id="btnBack" onclick="posisiSebelumnya()">⬅ Sebelumnya</button>
     <button id="btnNext" onclick="posisiSelanjutnya()">Selanjutnya ➡</button>
     <span class="posisi-info" id="posisi-display">- / -</span>
@@ -501,27 +500,15 @@
     <button onclick="bukaPreview()">🔍 Preview PDF</button>
     <button id="downloadBtn2">📥 Download PDF</button>
     <button class="btn-edit" onclick="bukaModalEdit()">✏️ Edit Data</button>
-    <span class="idx-jump" style="background:rgba(255,255,255,0.12); padding:5px 8px; border-radius:6px;">
-        <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0;">
-            <input type="radio" name="zipMode" id="zipModeRange" value="range" checked onchange="toggleZipMode()"> Range
-        </label>
-        <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0 0 0 6px;">
-            <input type="radio" name="zipMode" id="zipModeAll" value="all" onchange="toggleZipMode()"> All
-        </label>
-        <input type="number" id="inputRangeMulai" placeholder="dari id_x" style="width:85px; margin-left:6px;">
+    <span class="idx-jump">
+        <input type="number" id="inputRangeMulai" placeholder="dari id_x" style="width:85px;">
         <input type="number" id="inputRangeSampai" placeholder="sampai id_x" style="width:90px;">
-        <button onclick="downloadRangeZip()">📦 Download ZIP</button>
+        <button onclick="downloadRangeZip()">📦 Download ZIP (Range)</button>
     </span>
-    <span class="idx-jump" style="background:rgba(255,255,255,0.12); padding:5px 8px; border-radius:6px;">
-        <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0;">
-            <input type="radio" name="excelMode" id="excelModeRange" value="range" checked onchange="toggleExcelMode()"> Range
-        </label>
-        <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0 0 0 6px;">
-            <input type="radio" name="excelMode" id="excelModeAll" value="all" onchange="toggleExcelMode()"> All
-        </label>
-        <input type="number" id="inputExcelMulai" placeholder="dari id_x" style="width:85px; margin-left:6px;">
+    <span class="idx-jump">
+        <input type="number" id="inputExcelMulai" placeholder="dari id_x" style="width:85px;">
         <input type="number" id="inputExcelSampai" placeholder="sampai id_x" style="width:90px;">
-        <button onclick="bukaModalExcelRange()">📊 Export Excel</button>
+        <button onclick="bukaModalExcelRange()">📊 Export Excel (Range)</button>
     </span>
     <span class="konsistensi-info" id="konsistensi-display">Konsistensi = -</span>
 </div>
@@ -2874,15 +2861,11 @@ function updateTombolPosisi() {
     const info  = document.getElementById('posisi-display');
     const btnN  = document.getElementById('btnNext');
     const btnB  = document.getElementById('btnBack');
-    const namaTabelInfo = document.getElementById('nama-tabel-display');
     if (total && _posisiSekarang >= 0) {
         const row = _daftarRows[_posisiSekarang];
         info.textContent = `#${_posisiSekarang + 1} / ${total}  (id_x: ${row.id_x})`;
     } else {
         info.textContent = '- / -';
-    }
-    if (namaTabelInfo) {
-        namaTabelInfo.textContent = `📋 Tabel: ${CONFIG.TABLE_NAME || '-'}`;
     }
     btnB.disabled = _posisiSekarang <= 0;
     btnN.disabled = _posisiSekarang >= total - 1;
@@ -2991,61 +2974,34 @@ function ambilNamaDariBiodata(row) {
     } catch { return ''; }
 }
 
-// Aktif/nonaktifkan input range ZIP sesuai mode radio yang dipilih (Range / All)
-function toggleZipMode() {
-    const isAll = document.getElementById('zipModeAll').checked;
-    document.getElementById('inputRangeMulai').disabled  = isAll;
-    document.getElementById('inputRangeSampai').disabled = isAll;
-    document.getElementById('inputRangeMulai').style.opacity  = isAll ? 0.5 : 1;
-    document.getElementById('inputRangeSampai').style.opacity = isAll ? 0.5 : 1;
-}
-
 async function downloadRangeZip() {
     if (!_daftarRows.length) {
         tampilToast('⚠️ Pilih tabel terlebih dahulu.', 'error');
         return;
     }
 
-    const modeAll = document.getElementById('zipModeAll').checked;
-    let target;
-    let mulai, sampai;
-    let labelRange;
+    const inputMulai  = document.getElementById('inputRangeMulai');
+    const inputSampai = document.getElementById('inputRangeSampai');
+    let mulai  = parseInt(inputMulai.value, 10);
+    let sampai = parseInt(inputSampai.value, 10);
 
-    if (modeAll) {
-        target = _daftarRows.slice();
-        if (!target.length) {
-            tampilToast(`⚠️ Tidak ada data di tabel "${CONFIG.TABLE_NAME}".`, 'error');
-            return;
-        }
-        const idxList = target.map(r => parseInt(r.id_x, 10)).filter(n => !isNaN(n));
-        mulai  = idxList.length ? Math.min(...idxList) : 0;
-        sampai = idxList.length ? Math.max(...idxList) : 0;
-        labelRange = `semua data (${target.length} baris)`;
-    } else {
-        const inputMulai  = document.getElementById('inputRangeMulai');
-        const inputSampai = document.getElementById('inputRangeSampai');
-        mulai  = parseInt(inputMulai.value, 10);
-        sampai = parseInt(inputSampai.value, 10);
+    if (isNaN(mulai) || isNaN(sampai)) {
+        tampilToast('⚠️ Isi id_x "dari" dan "sampai" dengan angka.', 'error');
+        return;
+    }
+    if (mulai > sampai) { const tmp = mulai; mulai = sampai; sampai = tmp; }
 
-        if (isNaN(mulai) || isNaN(sampai)) {
-            tampilToast('⚠️ Isi id_x "dari" dan "sampai" dengan angka.', 'error');
-            return;
-        }
-        if (mulai > sampai) { const tmp = mulai; mulai = sampai; sampai = tmp; }
+    const target = _daftarRows.filter(r => {
+        const idx = parseInt(r.id_x, 10);
+        return !isNaN(idx) && idx >= mulai && idx <= sampai;
+    });
 
-        target = _daftarRows.filter(r => {
-            const idx = parseInt(r.id_x, 10);
-            return !isNaN(idx) && idx >= mulai && idx <= sampai;
-        });
-
-        if (!target.length) {
-            tampilToast(`⚠️ Tidak ada data dengan id_x antara ${mulai} - ${sampai} di tabel "${CONFIG.TABLE_NAME}".`, 'error');
-            return;
-        }
-        labelRange = `id_x ${mulai} - ${sampai}`;
+    if (!target.length) {
+        tampilToast(`⚠️ Tidak ada data dengan id_x antara ${mulai} - ${sampai} di tabel "${CONFIG.TABLE_NAME}".`, 'error');
+        return;
     }
 
-    if (!confirm(`Akan membuat ${target.length} PDF (${labelRange}) dan menggabungkannya jadi 1 file ZIP.\n\nProses ini bisa memakan waktu, terutama jika jumlah data banyak. Lanjutkan?`)) {
+    if (!confirm(`Akan membuat ${target.length} PDF (id_x ${mulai} - ${sampai}) dan menggabungkannya jadi 1 file ZIP.\n\nProses ini bisa memakan waktu, terutama jika jumlah data banyak. Lanjutkan?`)) {
         return;
     }
 
@@ -3110,9 +3066,7 @@ async function downloadRangeZip() {
             const url = URL.createObjectURL(zipBlob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = modeAll
-                ? `psikogram_${CONFIG.TABLE_NAME}_ALL.zip`
-                : `psikogram_${CONFIG.TABLE_NAME}_id${mulai}-${sampai}.zip`;
+            a.download = `psikogram_${CONFIG.TABLE_NAME}_id${mulai}-${sampai}.zip`;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -3153,53 +3107,30 @@ function escapeHtml(str) {
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// Aktif/nonaktifkan input range Excel sesuai mode radio yang dipilih (Range / All)
-function toggleExcelMode() {
-    const isAll = document.getElementById('excelModeAll').checked;
-    document.getElementById('inputExcelMulai').disabled  = isAll;
-    document.getElementById('inputExcelSampai').disabled = isAll;
-    document.getElementById('inputExcelMulai').style.opacity  = isAll ? 0.5 : 1;
-    document.getElementById('inputExcelSampai').style.opacity = isAll ? 0.5 : 1;
-}
-
 function bukaModalExcelRange() {
     if (!_daftarRows.length) { tampilToast('⚠️ Pilih tabel terlebih dahulu.', 'error'); return; }
 
-    const modeAll = document.getElementById('excelModeAll').checked;
-    let target;
-    let labelTeks;
+    const inputMulai  = document.getElementById('inputExcelMulai');
+    const inputSampai = document.getElementById('inputExcelSampai');
+    const mulai  = parseInt(inputMulai.value, 10);
+    const sampai = parseInt(inputSampai.value, 10);
 
-    if (modeAll) {
-        target = _daftarRows.slice();
-        if (!target.length) {
-            tampilToast(`⚠️ Tidak ada data di tabel "${CONFIG.TABLE_NAME}".`, 'error');
-            return;
-        }
-        labelTeks = `Semua (${target.length} data)`;
-    } else {
-        const inputMulai  = document.getElementById('inputExcelMulai');
-        const inputSampai = document.getElementById('inputExcelSampai');
-        const mulai  = parseInt(inputMulai.value, 10);
-        const sampai = parseInt(inputSampai.value, 10);
+    if (isNaN(mulai) || isNaN(sampai)) {
+        tampilToast('⚠️ Isi id_x "dari" dan "sampai" dengan angka.', 'error');
+        return;
+    }
 
-        if (isNaN(mulai) || isNaN(sampai)) {
-            tampilToast('⚠️ Isi id_x "dari" dan "sampai" dengan angka.', 'error');
-            return;
-        }
+    const batasBawah = Math.min(mulai, sampai);
+    const batasAtas  = Math.max(mulai, sampai);
 
-        const batasBawah = Math.min(mulai, sampai);
-        const batasAtas  = Math.max(mulai, sampai);
+    const target = _daftarRows.filter(r => {
+        const idx = parseInt(r.id_x, 10);
+        return !isNaN(idx) && idx >= batasBawah && idx <= batasAtas;
+    });
 
-        target = _daftarRows.filter(r => {
-            const idx = parseInt(r.id_x, 10);
-            return !isNaN(idx) && idx >= batasBawah && idx <= batasAtas;
-        });
-
-        if (!target.length) {
-            tampilToast(`⚠️ Tidak ada data dengan id_x antara ${batasBawah} - ${batasAtas} di tabel "${CONFIG.TABLE_NAME}".`, 'error');
-            return;
-        }
-        labelTeks = `${batasBawah} - ${batasAtas} (${target.length} data)`;
+    if (!target.length) {
+        tampilToast(`⚠️ Tidak ada data dengan id_x antara ${batasBawah} - ${batasAtas} di tabel "${CONFIG.TABLE_NAME}".`, 'error');
+        return;
     }
 
     _excelRangeData = target.map(row => ({
@@ -3208,7 +3139,8 @@ function bukaModalExcelRange() {
         iq    : parseInt(row.x_06) || 0
     }));
 
-    document.getElementById('excel-range-label').textContent = labelTeks;
+    document.getElementById('excel-range-label').textContent =
+        `${batasBawah} - ${batasAtas} (${_excelRangeData.length} data)`;
 
     const tbody = document.getElementById('excel-range-tbody');
     tbody.innerHTML = _excelRangeData.map((d, i) => `
@@ -3246,14 +3178,9 @@ function downloadExcelRange() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Data');
 
-    const modeAll = document.getElementById('excelModeAll').checked;
-    if (modeAll) {
-        XLSX.writeFile(wb, `data_${CONFIG.TABLE_NAME}_ALL.xlsx`);
-    } else {
-        const mulaiInp  = document.getElementById('inputExcelMulai').value;
-        const sampaiInp = document.getElementById('inputExcelSampai').value;
-        XLSX.writeFile(wb, `data_${CONFIG.TABLE_NAME}_id${mulaiInp}-${sampaiInp}.xlsx`);
-    }
+    const mulaiInp  = document.getElementById('inputExcelMulai').value;
+    const sampaiInp = document.getElementById('inputExcelSampai').value;
+    XLSX.writeFile(wb, `data_${CONFIG.TABLE_NAME}_id${mulaiInp}-${sampaiInp}.xlsx`);
 }
 
 async function tampilkanPosisi(idx) {
