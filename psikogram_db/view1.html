@@ -2983,11 +2983,7 @@ async function downloadRangeZip() {
                 });
 
                 const nama = document.getElementById('td-nama')?.textContent?.trim() || 'psikogram';
-                const tokenMentah = String(row.x_01 || row.id_x || '');
-                // Buang prefix nama di awal token (huruf sebelum angka pertama), sisakan kodenya saja.
-                // Contoh: "adil10a347" -> "10a347"
-                const token = tokenMentah.replace(/^[^0-9]+/, '') || tokenMentah;
-                const namaFile = `${token}_${sanitizeNamaFile(nama)}.pdf`;
+                const namaFile = `${row.id_x}_${sanitizeNamaFile(nama)}.pdf`;
                 zip.file(namaFile, blob);
                 berhasil++;
                 if (diperkecil) diperkecilList.push(`${row.id_x} (narasi→${fs2Terpakai}pt)`);
