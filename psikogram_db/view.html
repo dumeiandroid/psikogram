@@ -505,7 +505,52 @@
         <input type="number" id="inputRangeSampai" placeholder="sampai id_x" style="width:90px;">
         <button onclick="downloadRangeZip()">📦 Download ZIP (Range)</button>
     </span>
+    <span class="idx-jump">
+        <input type="number" id="inputExcelMulai" placeholder="dari id_x" style="width:85px;">
+        <input type="number" id="inputExcelSampai" placeholder="sampai id_x" style="width:90px;">
+        <button onclick="bukaModalExcelRange()">📊 Export Excel (Range)</button>
+    </span>
     <span class="konsistensi-info" id="konsistensi-display">Konsistensi = -</span>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL EXPORT EXCEL (RANGE) — Token, Nama, IQ
+     ═══════════════════════════════════════ -->
+<div id="modal-excel-overlay" style="
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.6); z-index:10600;
+    align-items:flex-start; justify-content:center;
+    overflow-y:auto; padding:30px 16px;">
+    <div style="background:white; border-radius:12px; width:100%; max-width:700px;
+        box-shadow:0 8px 40px rgba(0,0,0,0.35); overflow:hidden; margin:auto;
+        display:flex; flex-direction:column; max-height:85vh;">
+        <div style="padding:16px 22px; border-bottom:1px solid #eee; display:flex;
+            justify-content:space-between; align-items:center;">
+            <strong style="color:#5F4EDA; font-size:16px;">📊 Export Data — id_x <span id="excel-range-label"></span></strong>
+            <button onclick="tutupModalExcelRange()" style="background:none; border:none;
+                font-size:20px; cursor:pointer; color:#888;">✕</button>
+        </div>
+        <div style="overflow-y:auto; padding:14px 22px;">
+            <table style="width:100%; border-collapse:collapse; font-size:14px;">
+                <thead>
+                    <tr style="background:#f5f3ff;">
+                        <th style="padding:8px; text-align:left; border-bottom:2px solid #e0d9ff;">No</th>
+                        <th style="padding:8px; text-align:left; border-bottom:2px solid #e0d9ff;">Token</th>
+                        <th style="padding:8px; text-align:left; border-bottom:2px solid #e0d9ff;">Nama</th>
+                        <th style="padding:8px; text-align:left; border-bottom:2px solid #e0d9ff;">IQ</th>
+                    </tr>
+                </thead>
+                <tbody id="excel-range-tbody"></tbody>
+            </table>
+        </div>
+        <div style="padding:14px 22px; border-top:1px solid #eee; display:flex;
+            justify-content:flex-end; gap:10px;">
+            <button onclick="tutupModalExcelRange()" style="background:#eee; color:#333;
+                border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">Tutup</button>
+            <button onclick="downloadExcelRange()" style="background:#5F4EDA; color:white;
+                border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">⬇️ Download Excel (.xlsx)</button>
+        </div>
+    </div>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -1011,6 +1056,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 // =========================================================
@@ -2913,6 +2959,21 @@ function sanitizeNamaFile(str) {
         .slice(0, 80) || 'psikogram';
 }
 
+// Buang prefix nama di awal token (huruf sebelum angka pertama), sisakan kodenya saja.
+// Contoh: "adil10a347" -> "10a347"
+function tokenBersih(tokenMentah) {
+    const t = String(tokenMentah || '');
+    return t.replace(/^[^0-9]+/, '') || t;
+}
+
+// Ambil nama peserta langsung dari JSON biodata (x_02) tanpa perlu render halaman penuh
+function ambilNamaDariBiodata(row) {
+    try {
+        const biodata = JSON.parse(row.x_02 || '{}');
+        return biodata.nama || '';
+    } catch { return ''; }
+}
+
 async function downloadRangeZip() {
     if (!_daftarRows.length) {
         tampilToast('⚠️ Pilih tabel terlebih dahulu.', 'error');
@@ -2983,10 +3044,7 @@ async function downloadRangeZip() {
                 });
 
                 const nama = document.getElementById('td-nama')?.textContent?.trim() || 'psikogram';
-                const tokenMentah = String(row.x_01 || row.id_x || '');
-                // Buang prefix nama di awal token (huruf sebelum angka pertama), sisakan kodenya saja.
-                // Contoh: "adil10a347" -> "10a347"
-                const token = tokenMentah.replace(/^[^0-9]+/, '') || tokenMentah;
+                const token = tokenBersih(row.x_01 || row.id_x);
                 const namaFile = `${token}_${sanitizeNamaFile(nama)}.pdf`;
                 zip.file(namaFile, blob);
                 berhasil++;
@@ -3037,6 +3095,92 @@ async function downloadRangeZip() {
             updateTombolPosisi();
         }
     }
+}
+
+// =========================================================
+// EXPORT EXCEL (RANGE) — Token, Nama, IQ untuk id_x dalam rentang tertentu
+// =========================================================
+let _excelRangeData = []; // hasil filter terakhir, dipakai saat tombol download ditekan
+
+function escapeHtml(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function bukaModalExcelRange() {
+    if (!_daftarRows.length) { tampilToast('⚠️ Pilih tabel terlebih dahulu.', 'error'); return; }
+
+    const inputMulai  = document.getElementById('inputExcelMulai');
+    const inputSampai = document.getElementById('inputExcelSampai');
+    const mulai  = parseInt(inputMulai.value, 10);
+    const sampai = parseInt(inputSampai.value, 10);
+
+    if (isNaN(mulai) || isNaN(sampai)) {
+        tampilToast('⚠️ Isi id_x "dari" dan "sampai" dengan angka.', 'error');
+        return;
+    }
+
+    const batasBawah = Math.min(mulai, sampai);
+    const batasAtas  = Math.max(mulai, sampai);
+
+    const target = _daftarRows.filter(r => {
+        const idx = parseInt(r.id_x, 10);
+        return !isNaN(idx) && idx >= batasBawah && idx <= batasAtas;
+    });
+
+    if (!target.length) {
+        tampilToast(`⚠️ Tidak ada data dengan id_x antara ${batasBawah} - ${batasAtas} di tabel "${CONFIG.TABLE_NAME}".`, 'error');
+        return;
+    }
+
+    _excelRangeData = target.map(row => ({
+        token : tokenBersih(row.x_01 || row.id_x),
+        nama  : ambilNamaDariBiodata(row),
+        iq    : parseInt(row.x_06) || 0
+    }));
+
+    document.getElementById('excel-range-label').textContent =
+        `${batasBawah} - ${batasAtas} (${_excelRangeData.length} data)`;
+
+    const tbody = document.getElementById('excel-range-tbody');
+    tbody.innerHTML = _excelRangeData.map((d, i) => `
+        <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:6px 8px;">${i + 1}</td>
+            <td style="padding:6px 8px;">${escapeHtml(d.token)}</td>
+            <td style="padding:6px 8px;">${escapeHtml(d.nama)}</td>
+            <td style="padding:6px 8px;">${d.iq}</td>
+        </tr>
+    `).join('');
+
+    document.getElementById('modal-excel-overlay').style.display = 'flex';
+}
+
+function tutupModalExcelRange() {
+    document.getElementById('modal-excel-overlay').style.display = 'none';
+}
+
+function downloadExcelRange() {
+    if (!_excelRangeData.length) {
+        tampilToast('⚠️ Tidak ada data untuk diexport.', 'error');
+        return;
+    }
+    if (typeof XLSX === 'undefined') {
+        tampilToast('⚠️ Library Excel gagal dimuat. Cek koneksi lalu muat ulang halaman.', 'error');
+        return;
+    }
+
+    const wsData = [
+        ['Token', 'Nama', 'IQ'],
+        ..._excelRangeData.map(d => [d.token, d.nama, d.iq])
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [{ wch: 14 }, { wch: 30 }, { wch: 8 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Data');
+
+    const mulaiInp  = document.getElementById('inputExcelMulai').value;
+    const sampaiInp = document.getElementById('inputExcelSampai').value;
+    XLSX.writeFile(wb, `data_${CONFIG.TABLE_NAME}_id${mulaiInp}-${sampaiInp}.xlsx`);
 }
 
 async function tampilkanPosisi(idx) {
