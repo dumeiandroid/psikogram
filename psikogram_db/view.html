@@ -579,6 +579,9 @@
     <div style="width:280px; max-width:80vw; height:10px; background:rgba(255,255,255,0.2); border-radius:5px; overflow:hidden; margin-top:6px;">
         <div id="zip-progress-bar" style="width:0%; height:100%; background:#4fffb0; transition:width 0.2s;"></div>
     </div>
+    <button id="zip-progress-next" onclick="lanjutkanZipBatch()" style="
+        display:none; margin-top:22px; background:#4fffb0; color:#0d3d2a; border:none;
+        padding:10px 26px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:bold;">➡ Lanjutkan Batch Berikutnya</button>
     <button id="zip-progress-cancel" onclick="batalkanDownloadZip()" style="
         margin-top:22px; background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.4);
         padding:8px 22px; border-radius:6px; cursor:pointer; font-size:14px;">✖ Batalkan</button>
@@ -2963,6 +2966,8 @@ async function buatPdfAutoFit(opts = {}) {
 // lalu bungkus jadi 1 file .zip
 // =========================================================
 let _zipDibatalkan = false;
+let _zipBatchState = null; // { chunks, chunkIndex, mulai, sampai, modeAll, tableName, posisiSemula, dataSemula }
+const ZIP_BATCH_SIZE = 100;
 
 function batalkanDownloadZip() {
     _zipDibatalkan = true;
@@ -3045,102 +3050,162 @@ async function downloadRangeZip() {
         labelRange = `id_x ${mulai} - ${sampai}`;
     }
 
-    if (!confirm(`Akan membuat ${target.length} PDF (${labelRange}) dan menggabungkannya jadi 1 file ZIP.\n\nProses ini bisa memakan waktu, terutama jika jumlah data banyak. Lanjutkan?`)) {
+    // Pecah menjadi batch per ZIP_BATCH_SIZE baris. Kalau datanya banyak (mis. mode "All"
+    // dengan >100 baris), setiap batch akan didownload sebagai file ZIP terpisah, satu per satu —
+    // batch berikutnya baru diproses setelah pengguna klik "Lanjutkan Batch Berikutnya".
+    const chunks = [];
+    for (let i = 0; i < target.length; i += ZIP_BATCH_SIZE) {
+        chunks.push(target.slice(i, i + ZIP_BATCH_SIZE));
+    }
+    const totalBatch = chunks.length;
+
+    const pesanKonfirmasi = totalBatch > 1
+        ? `Akan membuat ${target.length} PDF (${labelRange}).\n\nKarena jumlah datanya banyak, proses akan dipecah menjadi ${totalBatch} batch (maks ${ZIP_BATCH_SIZE} data per ZIP). Setiap batch selesai akan langsung terdownload, lalu Anda perlu klik "Lanjutkan" untuk memproses batch berikutnya. Lanjutkan?`
+        : `Akan membuat ${target.length} PDF (${labelRange}) dan menggabungkannya jadi 1 file ZIP.\n\nProses ini bisa memakan waktu, terutama jika jumlah data banyak. Lanjutkan?`;
+
+    if (!confirm(pesanKonfirmasi)) {
         return;
     }
 
-    // Simpan posisi & data saat ini supaya bisa dikembalikan setelah proses selesai
-    const posisiSemula = _posisiSekarang;
-    const dataSemula   = _daftarRows[_posisiSekarang] || null;
+    _zipBatchState = {
+        chunks,
+        chunkIndex: 0,
+        totalBatch,
+        modeAll,
+        mulai,
+        sampai,
+        tableName: CONFIG.TABLE_NAME,
+        // Simpan posisi & data saat ini supaya bisa dikembalikan setelah SELURUH batch selesai
+        posisiSemula: _posisiSekarang,
+        dataSemula: _daftarRows[_posisiSekarang] || null
+    };
+
+    await prosesZipBatch();
+}
+
+// Memproses satu batch (maks ZIP_BATCH_SIZE baris) dari _zipBatchState, lalu download ZIP-nya.
+// Jika masih ada batch berikutnya, overlay progress tetap terbuka menampilkan tombol
+// "Lanjutkan Batch Berikutnya" dan menunggu klik pengguna (lanjutkanZipBatch()).
+async function prosesZipBatch() {
+    const state = _zipBatchState;
+    if (!state) return;
+    const { chunks, chunkIndex, totalBatch } = state;
+    const batchRows = chunks[chunkIndex];
 
     _zipDibatalkan = false;
-    const overlay   = document.getElementById('zip-progress-overlay');
-    const progText  = document.getElementById('zip-progress-text');
-    const progBar   = document.getElementById('zip-progress-bar');
+    const overlay  = document.getElementById('zip-progress-overlay');
+    const progText = document.getElementById('zip-progress-text');
+    const progBar  = document.getElementById('zip-progress-bar');
+    const nextBtn  = document.getElementById('zip-progress-next');
+    nextBtn.style.display = 'none';
     overlay.style.display = 'flex';
+
+    const labelBatch = totalBatch > 1 ? `Batch ${chunkIndex + 1}/${totalBatch} — ` : '';
 
     const zip = new JSZip();
     let berhasil = 0;
     let gagal = [];
     let diperkecilList = [];
 
-    try {
-        for (let i = 0; i < target.length; i++) {
-            if (_zipDibatalkan) {
-                tampilToast('⏹️ Download ZIP dibatalkan.', 'error');
-                break;
-            }
-
-            const row = target[i];
-            const persen = Math.round(((i) / target.length) * 100);
-            progText.textContent = `Memproses ${i + 1} / ${target.length} (id_x: ${row.id_x})...`;
-            progBar.style.width = persen + '%';
-
-            try {
-                await renderDataPeserta(row);
-
-                // Generate PDF dengan auto-fit: kalau ketahuan ada halaman ekstra
-                // (mis. "No SIPP" jatuh ke halaman baru), font narasi (Hal.2) otomatis
-                // dikecilkan bertahap sampai jumlah halamannya kembali normal.
-                progText.textContent = `Memproses ${i + 1} / ${target.length} (id_x: ${row.id_x}) — cek halaman...`;
-                const { blob, fs2Terpakai, diperkecil } = await buatPdfAutoFit({
-                    FS1: _previewFS1, FS2: 11, FS3: _previewFS3, FS4: _previewFS4
-                });
-
-                const nama = document.getElementById('td-nama')?.textContent?.trim() || 'psikogram';
-                const token = tokenBersih(row.x_01 || row.id_x);
-                const namaFile = `${token}_${sanitizeNamaFile(nama)}.pdf`;
-                zip.file(namaFile, blob);
-                berhasil++;
-                if (diperkecil) diperkecilList.push(`${row.id_x} (narasi→${fs2Terpakai}pt)`);
-            } catch (errSatu) {
-                console.error(`Gagal memproses id_x ${row.id_x}:`, errSatu);
-                gagal.push(row.id_x);
-            }
+    for (let i = 0; i < batchRows.length; i++) {
+        if (_zipDibatalkan) {
+            tampilToast('⏹️ Download ZIP dibatalkan.', 'error');
+            break;
         }
 
-        if (!_zipDibatalkan && berhasil > 0) {
-            progText.textContent = 'Membungkus file menjadi ZIP...';
-            progBar.style.width = '100%';
+        const row = batchRows[i];
+        const persen = Math.round(((i) / batchRows.length) * 100);
+        progText.textContent = `${labelBatch}Memproses ${i + 1} / ${batchRows.length} (id_x: ${row.id_x})...`;
+        progBar.style.width = persen + '%';
 
-            const zipBlob = await zip.generateAsync({ type: 'blob' }, (meta) => {
-                progText.textContent = `Membungkus ZIP... ${Math.round(meta.percent)}%`;
+        try {
+            await renderDataPeserta(row);
+
+            // Generate PDF dengan auto-fit: kalau ketahuan ada halaman ekstra
+            // (mis. "No SIPP" jatuh ke halaman baru), font narasi (Hal.2) otomatis
+            // dikecilkan bertahap sampai jumlah halamannya kembali normal.
+            progText.textContent = `${labelBatch}Memproses ${i + 1} / ${batchRows.length} (id_x: ${row.id_x}) — cek halaman...`;
+            const { blob, fs2Terpakai, diperkecil } = await buatPdfAutoFit({
+                FS1: _previewFS1, FS2: 11, FS3: _previewFS3, FS4: _previewFS4
             });
 
-            const url = URL.createObjectURL(zipBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = modeAll
-                ? `psikogram_${CONFIG.TABLE_NAME}_ALL.zip`
-                : `psikogram_${CONFIG.TABLE_NAME}_id${mulai}-${sampai}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(url), 5000);
-
-            if (diperkecilList.length) {
-                console.log('%cData yang font narasinya otomatis dikecilkan (auto-fit):', 'color:orange;font-weight:bold', diperkecilList);
-            }
-
-            if (gagal.length) {
-                tampilToast(`✅ ZIP selesai: ${berhasil} berhasil, ${gagal.length} gagal (id_x: ${gagal.join(', ')}).`, 'error');
-            } else if (diperkecilList.length) {
-                tampilToast(`✅ ZIP berhasil: ${berhasil} file. ${diperkecilList.length} di antaranya auto-fit (font narasi dikecilkan). Lihat console untuk detail.`, '');
-            } else {
-                tampilToast(`✅ ZIP berhasil didownload: ${berhasil} file PDF.`, '');
-            }
-        } else if (!_zipDibatalkan && berhasil === 0) {
-            tampilToast('❌ Semua data gagal diproses, ZIP tidak dibuat.', 'error');
-        }
-    } finally {
-        overlay.style.display = 'none';
-        // Kembalikan tampilan ke posisi semula sebelum proses batch dimulai
-        if (dataSemula) {
-            await renderDataPeserta(dataSemula);
-            _posisiSekarang = posisiSemula;
-            updateTombolPosisi();
+            const nama = document.getElementById('td-nama')?.textContent?.trim() || 'psikogram';
+            const token = tokenBersih(row.x_01 || row.id_x);
+            const namaFile = `${token}_${sanitizeNamaFile(nama)}.pdf`;
+            zip.file(namaFile, blob);
+            berhasil++;
+            if (diperkecil) diperkecilList.push(`${row.id_x} (narasi→${fs2Terpakai}pt)`);
+        } catch (errSatu) {
+            console.error(`Gagal memproses id_x ${row.id_x}:`, errSatu);
+            gagal.push(row.id_x);
         }
     }
+
+    if (!_zipDibatalkan && berhasil > 0) {
+        progText.textContent = `${labelBatch}Membungkus file menjadi ZIP...`;
+        progBar.style.width = '100%';
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' }, (meta) => {
+            progText.textContent = `${labelBatch}Membungkus ZIP... ${Math.round(meta.percent)}%`;
+        });
+
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = totalBatch > 1
+            ? `psikogram_${state.tableName}_batch${chunkIndex + 1}dari${totalBatch}.zip`
+            : (state.modeAll
+                ? `psikogram_${state.tableName}_ALL.zip`
+                : `psikogram_${state.tableName}_id${state.mulai}-${state.sampai}.zip`);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+        if (diperkecilList.length) {
+            console.log('%cData yang font narasinya otomatis dikecilkan (auto-fit):', 'color:orange;font-weight:bold', diperkecilList);
+        }
+
+        if (gagal.length) {
+            tampilToast(`✅ ${labelBatch}selesai: ${berhasil} berhasil, ${gagal.length} gagal (id_x: ${gagal.join(', ')}).`, 'error');
+        } else if (diperkecilList.length) {
+            tampilToast(`✅ ${labelBatch}berhasil: ${berhasil} file. ${diperkecilList.length} di antaranya auto-fit (font narasi dikecilkan). Lihat console untuk detail.`, '');
+        } else {
+            tampilToast(`✅ ${labelBatch}berhasil didownload: ${berhasil} file PDF.`, '');
+        }
+    } else if (!_zipDibatalkan && berhasil === 0) {
+        tampilToast(`❌ ${labelBatch}semua data gagal diproses, ZIP tidak dibuat.`, 'error');
+    }
+
+    const masihAdaBatchBerikutnya = !_zipDibatalkan && (chunkIndex + 1 < totalBatch);
+
+    if (masihAdaBatchBerikutnya) {
+        // Tunggu pengguna klik "Lanjutkan" sebelum memproses batch berikutnya —
+        // overlay TETAP TERBUKA, tidak mengembalikan posisi tampilan dulu.
+        progText.textContent = `✅ Batch ${chunkIndex + 1}/${totalBatch} selesai (${berhasil} data). Klik tombol di bawah untuk lanjut ke batch ${chunkIndex + 2}/${totalBatch}.`;
+        progBar.style.width = '100%';
+        nextBtn.textContent = `➡ Lanjutkan ke Batch ${chunkIndex + 2}/${totalBatch}`;
+        nextBtn.style.display = 'inline-block';
+        return;
+    }
+
+    // Semua batch selesai (atau dibatalkan) — tutup overlay & kembalikan tampilan ke posisi semula
+    overlay.style.display = 'none';
+    nextBtn.style.display = 'none';
+    if (state.dataSemula) {
+        await renderDataPeserta(state.dataSemula);
+        _posisiSekarang = state.posisiSemula;
+        updateTombolPosisi();
+    }
+    _zipBatchState = null;
+}
+
+// Dipanggil saat pengguna klik tombol "Lanjutkan Batch Berikutnya" di overlay progress
+function lanjutkanZipBatch() {
+    if (!_zipBatchState) return;
+    _zipBatchState.chunkIndex++;
+    document.getElementById('zip-progress-next').style.display = 'none';
+    prosesZipBatch();
 }
 
 // =========================================================
