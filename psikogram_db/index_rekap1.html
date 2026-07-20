@@ -155,25 +155,6 @@
         }
         .sert-btn:hover { background: #b45309; color: white; }
 
-        .btn-view-laporan {
-            background: var(--accent2); color: white;
-            border-radius: 6px; padding: 4px 12px;
-            font-size: 11px; cursor: pointer; border: none;
-            display: inline-flex; align-items:center; gap:5px;
-            transition: opacity .15s;
-        }
-        .btn-view-laporan:hover { opacity: .85; }
-
-        /* Grid tombol laporan di dalam modal "Lihat Laporan" */
-        .laporan-grid {
-            display: flex; flex-wrap: wrap; gap: 10px;
-        }
-        .laporan-grid a, .laporan-grid .sert-group {
-            font-size: 13px !important; padding: 9px 16px !important;
-        }
-        .laporan-grid .sert-label { padding: 9px 12px; font-size: 13px; }
-        .laporan-grid .sert-btn { padding: 9px 14px; font-size: 13px; }
-
         /* Table */
         .table-wrap {
             background: var(--surface); border: 1px solid var(--border);
@@ -1314,23 +1295,6 @@
     </div>
 </div>
 
-<!-- Modal: Lihat Laporan (kumpulan tombol Full/CPMI/SSC/Gabungan/IQ/Sertifikat, dsb) -->
-<div class="modal-overlay" id="modal-lihat-laporan" onclick="tutupModalLihatLaporanDiluar(event)">
-    <div class="modal-box" style="max-width:600px;">
-        <div class="modal-header">
-            <h2>👁️ Lihat Laporan <span id="laporan-nama-header" style="font-weight:400; color:#ccc; font-size:14px;"></span></h2>
-            <button class="modal-close-btn" onclick="tutupModalLihatLaporan()">✕</button>
-        </div>
-        <div class="modal-body">
-            <p style="font-size:12px; color:#888; margin-bottom:14px;">Pilih laporan yang ingin dibuka:</p>
-            <div class="laporan-grid" id="laporan-link-grid"></div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-modal btn-cancel" onclick="tutupModalLihatLaporan()">Tutup</button>
-        </div>
-    </div>
-</div>
-
 <script>
     const API_URL    = 'https://lidan-co-id.pages.dev/api/db_psikogram1';
     const SECRET     = 'admin';
@@ -2258,10 +2222,13 @@
                         const iq      = row.x_06 || '—';
                         const tgl     = formatTgl(row.x_11);
                         const kode    = row.x_01 || '—';
-                        // Catatan: daftar link laporan (Full, CPMI, SSC, Gabungan, IQ, Sertifikat, dst)
-                        // sekarang dibangun terpusat di fungsi daftarLinkLaporan(row) dan ditampilkan
-                        // lewat tombol "👁️ View" -> modal "Lihat Laporan", supaya mudah menambah
-                        // jenis laporan baru ke depannya tanpa mengubah baris tabel.
+                        const link    = `index_final.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
+                        const linkIQ  = `index_final_iq.html?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
+                        const linkGabungan = `https://psikogram.lidan.co.id/psikogram_db/index_final_gabungan?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
+                        const linkCpmi = `https://psikogram.lidan.co.id/psikogram_db/index_final_gabungan_cpmi?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
+                        const linkSsc = `https://psikogram.lidan.co.id/psikogram_db/index_final_gabungan-ssc?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
+                        const linkSert1 = `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
+                        const linkSert2 = `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq1?id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
                         const isChecked1  = cekStatusOk(row, 1) ? 'checked' : '';
                         const isChecked2  = cekStatusOk(row, 2) ? 'checked' : '';
                         const isChecked3  = cekStatusOk(row, 3) ? 'checked' : '';
@@ -2287,7 +2254,16 @@
                             <td><span class="iq-badge">${iq}</span></td>
                             <td><span class="tgl-text">${tgl}</span></td>
                             <td style="display:flex; gap:6px; align-items:center;">
-                                <button class="btn-view-laporan" onclick="bukaModalLihatLaporan(${row.id_x})">👁️ View</button>
+                                <a href="${link}" target="_blank" class="btn-link">📄 Full</a>
+                                <a href="${linkCpmi}" target="_blank" class="btn-link-cpmi">🧾 CPMI</a>
+                                <a href="${linkSsc}" target="_blank" class="btn-link-ssc">🎓 SSC</a>
+                                <a href="${linkGabungan}" target="_blank" class="btn-link-gabungan">🔗 Gabungan</a>
+                                <a href="${linkIQ}" target="_blank" class="btn-link-iq">🧠 IQ</a>
+                                <div class="sert-group">
+                                    <span class="sert-label">🏅 Sertifikat</span>
+                                    <a href="${linkSert1}" target="_blank" class="sert-btn">1</a>
+                                    <a href="${linkSert2}" target="_blank" class="sert-btn">2</a>
+                                </div>
                                 <button class="btn-edit-sm" onclick="bukaModalEdit(${row.id_x})">✏️ Edit</button>
                                 <button class="btn-parafrase-sm" onclick="bukaModalParafrase(${row.id_x})">🔄 Parafrase</button>
                                 ${adaPerubahanDariAsli(row) ? `<button class="btn-asli-sm" onclick="bukaModalAsli(${row.id_x})" title="Lihat & kembalikan data asli">🕰️ Asli</button>` : ''}
@@ -3639,57 +3615,6 @@
     }
     function tutupModalAsliDiluar(e) {
         if (e.target === document.getElementById('modal-asli')) tutupModalAsli();
-    }
-
-    // ── Modal "Lihat Laporan" ──────────────────────────────────────────────
-    // Daftar semua jenis laporan/link yang tersedia untuk 1 peserta.
-    // Untuk menambah jenis laporan baru ke depannya, cukup tambahkan satu
-    // entri baru di array ini (dan class CSS-nya kalau perlu warna baru) —
-    // tombol "View" & modalnya otomatis ikut menampilkan yang baru, tanpa
-    // perlu mengubah bagian render baris tabel.
-    function daftarLinkLaporan(row) {
-        const kode = row.x_01 || '—';
-        const q = `id_x=${row.id_x}&x_01=${encodeURIComponent(kode)}&tabel=${encodeURIComponent(TABLE_NAME)}`;
-        return [
-            { tipe: 'link', label: '📄 Full',      cls: 'btn-link',          url: `index_final.html?${q}` },
-            { tipe: 'link', label: '🧾 CPMI',      cls: 'btn-link-cpmi',     url: `https://psikogram.lidan.co.id/psikogram_db/index_final_gabungan_cpmi?${q}` },
-            { tipe: 'link', label: '🎓 SSC',       cls: 'btn-link-ssc',      url: `https://psikogram.lidan.co.id/psikogram_db/index_final_gabungan-ssc?${q}` },
-            { tipe: 'link', label: '🔗 Gabungan',  cls: 'btn-link-gabungan', url: `https://psikogram.lidan.co.id/psikogram_db/index_final_gabungan?${q}` },
-            { tipe: 'link', label: '🧠 IQ',        cls: 'btn-link-iq',       url: `index_final_iq.html?${q}` },
-            { tipe: 'sertifikat', label: '🏅 Sertifikat', items: [
-                { label: '1', url: `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq?${q}` },
-                { label: '2', url: `https://psikogram.lidan.co.id/psikogram_db/sertifikat-iq1?${q}` },
-            ] },
-        ];
-    }
-
-    function bukaModalLihatLaporan(id_x) {
-        const row = _lastRows.find(r => String(r.id_x) === String(id_x));
-        if (!row) { tampilToast('❌ Data tidak ditemukan di cache, coba refresh dulu.', 'error'); return; }
-
-        const biodata = safeJSON(row.x_02, {});
-        document.getElementById('laporan-nama-header').textContent = biodata.nama ? `— ${biodata.nama}` : '';
-
-        const daftar = daftarLinkLaporan(row);
-        const grid = document.getElementById('laporan-link-grid');
-        grid.innerHTML = daftar.map(item => {
-            if (item.tipe === 'sertifikat') {
-                return `<div class="sert-group">
-                    <span class="sert-label">${item.label}</span>
-                    ${item.items.map(sub => `<a href="${sub.url}" target="_blank" class="sert-btn">${sub.label}</a>`).join('')}
-                </div>`;
-            }
-            return `<a href="${item.url}" target="_blank" class="${item.cls}">${item.label}</a>`;
-        }).join('');
-
-        document.getElementById('modal-lihat-laporan').classList.add('open');
-    }
-
-    function tutupModalLihatLaporan() {
-        document.getElementById('modal-lihat-laporan').classList.remove('open');
-    }
-    function tutupModalLihatLaporanDiluar(e) {
-        if (e.target === document.getElementById('modal-lihat-laporan')) tutupModalLihatLaporan();
     }
 
     function toggleSemuaAsli(checked) {
