@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> -->
     <title>View Psikogram SSC — Pilih Tabel</title>
 
     <style>
@@ -152,7 +152,7 @@
         .container_a::before {
             content: ""; position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
-            background-image: var(--watermark-logo, url('gambar/logo-ssc.png'));
+            background-image: url('gambar/logo-ssc.png');
             background-size: 70%; background-position: center;
             background-repeat: no-repeat; opacity: 0.1; z-index: 0;
         }
@@ -169,8 +169,7 @@
         .info-container_a {
             text-align: center; display: flex;
             flex-direction: column; align-items: center;
-            margin-left: -80px;
-            width: 95%;
+            width: 100%;
         }
         .header-title  { font-size: 24px; font-weight: bold; color: white; margin: 2px 0; }
         .header-subtitle { font-size: 18px; font-style: italic; color: #e0f7fa; margin: 2px 0; }
@@ -492,14 +491,6 @@
 <div class="tombol-nav no-download">
     <button onclick="bukaModalTabel()">🔁 Ganti Tabel</button>
     <span class="posisi-info" id="nama-tabel-display">📋 Tabel: -</span>
-    <span class="idx-jump" style="background:rgba(255,255,255,0.12); padding:5px 8px; border-radius:6px;">
-        <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0;">
-            <input type="radio" name="versiKop" id="versiKop1" value="v1" onchange="terapkanVersiKop('v1')"> Versi 1
-        </label>
-        <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0 0 0 6px;">
-            <input type="radio" name="versiKop" id="versiKop2" value="v2" onchange="terapkanVersiKop('v2')"> Versi 2
-        </label>
-    </span>
     <button id="btnBack" onclick="posisiSebelumnya()">⬅ Sebelumnya</button>
     <button id="btnNext" onclick="posisiSelanjutnya()">Selanjutnya ➡</button>
     <span class="posisi-info" id="posisi-display">- / -</span>
@@ -698,9 +689,9 @@
         <!-- Header Institusi -->
         <div class="custom-header no-download">
             <div class="logo-container_a">
-                <img id="header-logo-img" src="gambar/logo-ssc1.png" alt="Logo" class="logo"/>
+                <img src="gambar/logo-ssc1.png" alt="Logo" class="logo"/>
             </div>
-            <div class="info-container_a" id="header-info-container">
+            <div class="info-container_a">
                 <div class="header-title">BIRO KONSULTASI PSIKOLOGI DAN BIMBINGAN BELAJAR</div>
                 <div class="header-subtitle">SD-SMP-SMA/SMK-ALUMNI, PERSIAPAN SELEKSI PTN,KEDINASAN-TNI-POLRI DAN SMA UNGGULAN</div>
                 <div class="address">Jl. Asahan Komplek Megaland Blok A No. 16, Siopat Suhu Pematang Siantar, Lt2 G. 1B – R2 Jl. A.H.Nasution No.25b Simpang Pos Medan</div>
@@ -786,16 +777,16 @@
 
         <!-- Tanda Tangan -->
         <div class="signature" style="position:relative;">
-            <!-- QR Code absolute di tengah, tidak ganggu layout — hanya tampil di Versi 2 -->
-            <div id="qr-wrap" style="display:none; position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
+            <!-- QR Code absolute di tengah, tidak ganggu layout -->
+            <!-- <div id="qr-wrap" style="position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
                 <a id="qr-link" href="#" target="_blank" title="Buka laporan online">
                     <div id="qr-code" style="display:inline-block;"></div>
                 </a>
                 <p style="font-size:10px; color:#888; margin:4px 0 0 0;">Scan untuk lihat laporan</p>
-            </div>
+            </div> -->
             <p style="text-align:right;"><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
             <p style="margin-top:-12px; text-align:right;">Psikolog,</p>
-            <div style="text-align:right;"><img id="header-ttd-img" src="gambar/ttd-ssc1.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
+            <div style="text-align:right;"><img src="gambar/ttd-ssc1.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
             <p style="margin-top:-5px; text-align:right;"><strong>Dr. Karina M. Brahmana, M.Psi, Psikolog</strong></p>
             <p style="margin-top:-12px; text-align:right;">No SIPP: 20070136-2021-02-0799</p><br>
             <div class="enter"></div>
@@ -1588,95 +1579,6 @@ function renderPreview() {
 // =========================================================
 // DOWNLOAD PDF — pdfmake (langsung dari data, bukan screenshot)
 // =========================================================
-// Cache gambar kop/logo/ttd — SENGAJA di luar setupDownload() supaya persist SATU KALI
-// untuk seluruh sesi (termasuk sepanjang proses download ZIP ratusan data), bukan
-// dibuat ulang & di-convert base64 tiap kali 1 peserta dirender (dulu jadi bottleneck).
-// =========================================================
-// VERSI KOP SURAT — Versi 1 (kop/logo saat ini, tanpa QR) vs
-// Versi 2 (kop/logo seperti index_final.html, dengan QR code)
-// =========================================================
-const VERSI_KOP_CONFIG = {
-    v1: {
-        logoImg: 'gambar/logo-ssc1.png',
-        watermarkImg: 'gambar/logo-ssc.png',
-        hdrImg: 'gambar/kop-ssc.png',
-        ttdImg: 'gambar/ttd-ssc1.png',
-        showQr: false,
-        headerHtml: `
-            <div class="header-title">BIRO KONSULTASI PSIKOLOGI DAN BIMBINGAN BELAJAR</div>
-            <div class="header-subtitle">SD-SMP-SMA/SMK-ALUMNI, PERSIAPAN SELEKSI PTN,KEDINASAN-TNI-POLRI DAN SMA UNGGULAN</div>
-            <div class="address">Jl. Asahan Komplek Megaland Blok A No. 16, Siopat Suhu Pematang Siantar, Lt2 G. 1B – R2 Jl. A.H.Nasution No.25b Simpang Pos Medan</div>
-            <div class="phone">Hp. 0822 9418 5814 (Dedy), 0877 4845 1289 (Dwi) Email: educationproxecla@gmail.com</div>`
-    },
-    v2: {
-        logoImg: 'gambar/logo1.png',
-        watermarkImg: 'gambar/logo1.png',
-        hdrImg: 'gambar/01d.jpg',
-        ttdImg: 'gambar/ttd.png',
-        showQr: true,
-        headerHtml: `
-            <div class="header-title">PT. LIDAN INDAH ABADI</div>
-            <div class="header-subtitle">LIDAN PSIKOLOGI</div>
-            <div class="location">Regus Forum Nine, Lantai 9 CIMB NIAGA PLAZA</div>
-            <div class="address">Jalan Imam Bonjol No.9, Medan 20159, Sumatera Utara</div>
-            <div class="phone">Telepon: +62851-5960-1400</div>
-            <div class="website">Website: <a href="http://www.lidan.co.id">www.lidan.co.id</a></div>`
-    }
-};
-
-let _versiKop = localStorage.getItem('psikogram_versi_kop') === 'v2' ? 'v2' : 'v1';
-
-// Terapkan versi kop ke tampilan on-screen (logo, teks institusi, watermark, ttd, QR),
-// reset cache gambar PDF (supaya kop/logo/ttd untuk PDF ikut ganti sesuai versi), dan
-// simpan pilihan ke localStorage supaya diingat untuk kunjungan berikutnya.
-function terapkanVersiKop(versi) {
-    const cfg = VERSI_KOP_CONFIG[versi] || VERSI_KOP_CONFIG.v1;
-    _versiKop = versi;
-    try { localStorage.setItem('psikogram_versi_kop', versi); } catch (e) {}
-
-    const logoEl = document.getElementById('header-logo-img');
-    const infoEl = document.getElementById('header-info-container');
-    const ttdEl  = document.getElementById('header-ttd-img');
-    const qrWrap = document.getElementById('qr-wrap');
-    if (logoEl) logoEl.src = cfg.logoImg;
-    if (infoEl) infoEl.innerHTML = cfg.headerHtml;
-    if (ttdEl)  ttdEl.src = cfg.ttdImg;
-    document.documentElement.style.setProperty('--watermark-logo', `url('${cfg.watermarkImg}')`);
-    if (qrWrap) qrWrap.style.display = cfg.showQr ? 'block' : 'none';
-
-    const r1 = document.getElementById('versiKop1');
-    const r2 = document.getElementById('versiKop2');
-    if (r1) r1.checked = versi === 'v1';
-    if (r2) r2.checked = versi === 'v2';
-
-    // Cache gambar PDF (logo/kop/ttd) di-reset supaya di-fetch ulang sesuai versi yang baru dipilih
-    _imgCache = null;
-
-    // QR di halaman aktif ikut diperbarui/dikosongkan sesuai versi
-    if (cfg.showQr && _globalData) {
-        renderQrCode(_globalData);
-    } else if (!cfg.showQr && qrWrap) {
-        document.getElementById('qr-code').innerHTML = '';
-    }
-}
-
-// Generate/isi ulang QR code untuk 1 peserta — dipakai saat render peserta & saat ganti versi kop
-function renderQrCode(rawData) {
-    const qrLinkEl = document.getElementById('qr-link');
-    const qrCodeEl = document.getElementById('qr-code');
-    if (!qrLinkEl || !qrCodeEl || typeof QRCode === 'undefined') return;
-    qrCodeEl.innerHTML = '';
-    const qrUrl = `https://laporan.lidan.co.id/?id_x=${rawData.id_x}&x_01=${rawData.x_01 || ''}&tabel=${CONFIG.TABLE_NAME || ''}`;
-    qrLinkEl.href = qrUrl;
-    new QRCode(qrCodeEl, {
-        text: qrUrl, width: 130, height: 130,
-        colorDark: '#000000', colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-    });
-}
-
-let _imgCache = null;
-
 function setupDownload() {
 
     // Warna utama
@@ -1701,15 +1603,14 @@ function setupDownload() {
         });
     }
 
-    // Cache gambar agar tidak fetch ulang setiap kali preview (variabel _imgCache global, lihat atas).
-    // Cache di-reset otomatis (_imgCache = null) tiap kali versi kop diganti (lihat terapkanVersiKop()).
+    // Cache gambar agar tidak fetch ulang setiap kali preview
+    let _imgCache = null;
     async function getImages() {
         if (_imgCache) return _imgCache;
-        const cfg = VERSI_KOP_CONFIG[_versiKop] || VERSI_KOP_CONFIG.v1;
         const [logoB64, hdrB64, ttdB64] = await Promise.all([
-            toBase64(cfg.logoImg),
-            toBase64(cfg.hdrImg),
-            toBase64(cfg.ttdImg)
+            toBase64('gambar/logo-ssc.png'),
+            toBase64('gambar/kop-ssc.png'),
+            toBase64('gambar/ttd-ssc1.png')
         ]);
         _imgCache = { logoB64, hdrB64, ttdB64 };
         return _imgCache;
@@ -3075,96 +2976,12 @@ async function buatPdfAutoFit(opts = {}) {
 }
 
 // =========================================================
-// RESUME DOWNLOAD ZIP — supaya proses yang terputus (koneksi putus, tab
-// crash, browser ditutup, dsb) tidak perlu diulang dari nol.
-//
-// Strategi:
-// - Mode "All"/"Range" (per100): tiap batch (maks ZIP_BATCH_SIZE data) SUDAH langsung
-//   di-zip & didownload begitu selesai -> begitu sebuah batch selesai, datanya sudah
-//   AMAN tersimpan di disk pengguna. Resume tinggal skip batch yang sudah selesai.
-// - Mode "Per Token": PDF tiap peserta yang sudah jadi disimpan sementara ke IndexedDB
-//   (bukan ditahan di memory JS sepanjang proses seperti sebelumnya). Kalau proses
-//   terputus, file yang sudah digenerate TETAP ada di IndexedDB dan token yang belum
-//   selesai bisa dilanjutkan; ZIP gabungan akhir baru dirakit dari IndexedDB saat
-//   semua token (baik dari sesi ini maupun sesi sebelumnya) sudah lengkap.
-// - Progres (bagian mana yang sudah selesai) dicatat di localStorage per nama tabel.
-// =========================================================
-const ZIPDB_NAME  = 'psikogram_zip_resume';
-const ZIPDB_STORE = 'files';
-
-function bukaZipDB() {
-    return new Promise((resolve, reject) => {
-        const req = indexedDB.open(ZIPDB_NAME, 1);
-        req.onupgradeneeded = () => {
-            const db = req.result;
-            if (!db.objectStoreNames.contains(ZIPDB_STORE)) {
-                db.createObjectStore(ZIPDB_STORE, { keyPath: 'key' });
-            }
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror   = () => reject(req.error);
-    });
-}
-
-// Simpan 1 file PDF hasil generate ke IndexedDB, dikelompokkan per sesiKey + groupKey (angka token)
-async function simpanFileZipDB(sesiKey, groupKey, namaFile, blob) {
-    const db = await bukaZipDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(ZIPDB_STORE, 'readwrite');
-        tx.objectStore(ZIPDB_STORE).put({ key: `${sesiKey}::${groupKey}::${namaFile}`, sesiKey, groupKey, namaFile, blob });
-        tx.oncomplete = () => resolve();
-        tx.onerror    = () => reject(tx.error);
-    });
-}
-
-// Ambil semua file tersimpan untuk 1 sesi (dipakai saat merakit ZIP gabungan final)
-async function ambilFileZipDBSesi(sesiKey) {
-    const db = await bukaZipDB();
-    return new Promise((resolve, reject) => {
-        const tx  = db.transaction(ZIPDB_STORE, 'readonly');
-        const req = tx.objectStore(ZIPDB_STORE).getAll();
-        req.onsuccess = () => resolve((req.result || []).filter(r => r.sesiKey === sesiKey));
-        req.onerror   = () => reject(req.error);
-    });
-}
-
-// Hapus semua file tersimpan untuk 1 sesi (dipanggil setelah ZIP final berhasil didownload,
-// atau saat pengguna memilih "Mulai Baru" dan membuang progres lama)
-async function hapusFileZipDBSesi(sesiKey) {
-    const db = await bukaZipDB();
-    return new Promise((resolve, reject) => {
-        const tx    = db.transaction(ZIPDB_STORE, 'readwrite');
-        const store = tx.objectStore(ZIPDB_STORE);
-        const req   = store.getAll();
-        req.onsuccess = () => { (req.result || []).forEach(r => { if (r.sesiKey === sesiKey) store.delete(r.key); }); };
-        tx.oncomplete = () => resolve();
-        tx.onerror    = () => reject(tx.error);
-    });
-}
-
-function kunciProgresZip(tableName) { return `zipdl_progress_${tableName}`; }
-
-function simpanProgresZip(tableName, data) {
-    try { localStorage.setItem(kunciProgresZip(tableName), JSON.stringify(data)); } catch (e) { console.warn('Gagal simpan progres ZIP:', e); }
-}
-function ambilProgresZip(tableName) {
-    try { const raw = localStorage.getItem(kunciProgresZip(tableName)); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
-}
-function hapusProgresZip(tableName) {
-    try { localStorage.removeItem(kunciProgresZip(tableName)); } catch (e) {}
-}
-
-// =========================================================
 // DOWNLOAD MASSAL (ZIP) — generate PDF utk semua id_x dalam range,
 // lalu bungkus jadi 1 file .zip
 // =========================================================
 let _zipDibatalkan = false;
 let _zipBatchState = null; // { chunks, chunkIndex, mulai, sampai, modeAll, tableName, posisiSemula, dataSemula }
 const ZIP_BATCH_SIZE = 100;
-// Beri jeda tiap sekian item supaya browser sempat garbage-collect & UI tidak macet
-// saat memproses ratusan data berturut-turut.
-const ZIP_YIELD_EVERY = 10;
-function yieldSebentar() { return new Promise(r => setTimeout(r, 0)); }
 
 function batalkanDownloadZip() {
     _zipDibatalkan = true;
@@ -3342,63 +3159,12 @@ async function downloadRangeZip() {
         }
     }
     const totalBatch = chunks.length;
-    const modeKey = metodeToken ? 'token' : 'per100';
 
-    // === CEK APAKAH ADA PROGRES SEBELUMNYA YANG BELUM SELESAI (untuk tabel & konfigurasi yang SAMA) ===
-    // Dicocokkan berdasarkan tabel, metode, dan range/jumlah kelompok — kalau pengguna ganti range
-    // atau metode, progres lama otomatis dianggap tidak relevan (bukan progres request ini).
-    const progresLama = ambilProgresZip(CONFIG.TABLE_NAME);
-    let sesiKey = null;
-    let completedGroups = [];
-    let startIndex = 0;
-
-    const progresCocok = progresLama
-        && progresLama.mode === modeKey
-        && progresLama.mulai === mulai
-        && progresLama.sampai === sampai
-        && progresLama.totalGroups === totalBatch;
-
-    if (progresCocok) {
-        const jumlahSelesai = progresLama.completedGroups.length;
-        const mauLanjut = confirm(
-            `Ditemukan proses Download ZIP sebelumnya untuk tabel "${CONFIG.TABLE_NAME}" yang belum selesai ` +
-            `(${jumlahSelesai} dari ${totalBatch} bagian sudah selesai, terakhir diproses: ${new Date(progresLama.updatedAt).toLocaleString('id-ID')}).\n\n` +
-            `Klik OK untuk MELANJUTKAN dari bagian terakhir yang belum selesai,\n` +
-            `atau Cancel untuk MULAI DARI AWAL (progres lama akan dihapus).`
-        );
-        if (mauLanjut) {
-            sesiKey = progresLama.sesiKey;
-            completedGroups = progresLama.completedGroups.slice();
-            if (metodeToken && progresLama.baseName) baseName = progresLama.baseName;
-            for (let i = 0; i < totalBatch; i++) {
-                const idKey = metodeToken ? angkaPerChunk[i] : i;
-                if (!completedGroups.includes(idKey)) { startIndex = i; break; }
-                startIndex = i + 1;
-            }
-        } else {
-            await hapusFileZipDBSesi(progresLama.sesiKey);
-            hapusProgresZip(CONFIG.TABLE_NAME);
-        }
-    } else if (progresLama) {
-        // Ada progres lama tapi untuk konfigurasi berbeda (range/mode/jumlah kelompok tidak cocok) — buang saja.
-        await hapusFileZipDBSesi(progresLama.sesiKey);
-        hapusProgresZip(CONFIG.TABLE_NAME);
-    }
-
-    if (!sesiKey) sesiKey = `${CONFIG.TABLE_NAME}_${modeKey}_${Date.now()}`;
-
-    if (startIndex >= totalBatch) {
-        tampilToast('✅ Progres sebelumnya sudah lengkap. Tidak ada bagian tersisa untuk diproses.', '');
-        return;
-    }
-
-    const pesanKonfirmasi = startIndex > 0
-        ? `Melanjutkan proses dari bagian ${startIndex + 1} dari ${totalBatch}. Lanjutkan?`
-        : (metodeToken
-            ? `Akan membuat ${target.length} PDF (${labelRange}), dikelompokkan menjadi ${totalBatch} folder token (angka: ${angkaPerChunk.join(', ')}) di dalam SATU file ZIP "${baseName}.zip".\n\nSetiap kelompok token selesai diproses, progres otomatis tersimpan (aman kalau koneksi/browser terputus di tengah jalan). ZIP baru didownload sekali di akhir, setelah semua token selesai. Lanjutkan?`
-            : (totalBatch > 1
-                ? `Akan membuat ${target.length} PDF (${labelRange}).\n\nKarena jumlah datanya banyak, proses akan dipecah menjadi ${totalBatch} batch (maks ${ZIP_BATCH_SIZE} data per ZIP). Setiap batch selesai akan langsung terdownload, lalu Anda perlu klik "Lanjutkan" untuk memproses batch berikutnya. Lanjutkan?`
-                : `Akan membuat ${target.length} PDF (${labelRange}) dan menggabungkannya jadi 1 file ZIP.\n\nProses ini bisa memakan waktu, terutama jika jumlah data banyak. Lanjutkan?`));
+    const pesanKonfirmasi = metodeToken
+        ? `Akan membuat ${target.length} PDF (${labelRange}), dikelompokkan menjadi ${totalBatch} folder token (angka: ${angkaPerChunk.join(', ')}) di dalam SATU file ZIP "${baseName}.zip".\n\nSetiap kelompok token selesai diproses, Anda akan diminta konfirmasi sebelum lanjut ke token berikutnya. ZIP baru didownload sekali di akhir, setelah semua token selesai. Lanjutkan?`
+        : (totalBatch > 1
+            ? `Akan membuat ${target.length} PDF (${labelRange}).\n\nKarena jumlah datanya banyak, proses akan dipecah menjadi ${totalBatch} batch (maks ${ZIP_BATCH_SIZE} data per ZIP). Setiap batch selesai akan langsung terdownload, lalu Anda perlu klik "Lanjutkan" untuk memproses batch berikutnya. Lanjutkan?`
+            : `Akan membuat ${target.length} PDF (${labelRange}) dan menggabungkannya jadi 1 file ZIP.\n\nProses ini bisa memakan waktu, terutama jika jumlah data banyak. Lanjutkan?`);
 
     if (!confirm(pesanKonfirmasi)) {
         return;
@@ -3406,7 +3172,7 @@ async function downloadRangeZip() {
 
     _zipBatchState = {
         chunks,
-        chunkIndex: startIndex,
+        chunkIndex: 0,
         totalBatch,
         modeAll,
         mulai,
@@ -3415,21 +3181,12 @@ async function downloadRangeZip() {
         method: metodeToken ? 'token' : 'per100',
         angkaPerChunk,
         baseName,
-        sesiKey,
-        completedGroups,
-        // Mode token: PDF TIDAK lagi ditahan di 1 objek JSZip di memory sepanjang proses —
-        // disimpan ke IndexedDB per file, dan ZIP gabungan baru dirakit sekali di akhir
-        // (lihat prosesZipBatch). Ini menghindari penumpukan memory browser saat data banyak,
-        // dan sekaligus membuat proses bisa dilanjutkan kalau terputus di tengah jalan.
+        // Mode token: satu objek JSZip dipakai bersama untuk SEMUA kelompok (folder per angka token)
+        zip: metodeToken ? new JSZip() : null,
         // Simpan posisi & data saat ini supaya bisa dikembalikan setelah SELURUH batch selesai
         posisiSemula: _posisiSekarang,
         dataSemula: _daftarRows[_posisiSekarang] || null
     };
-
-    simpanProgresZip(CONFIG.TABLE_NAME, {
-        sesiKey, mode: modeKey, mulai, sampai, totalGroups: totalBatch,
-        baseName, completedGroups: completedGroups.slice(), updatedAt: Date.now()
-    });
 
     await prosesZipBatch();
 }
@@ -3453,18 +3210,14 @@ async function prosesZipBatch() {
     overlay.style.display = 'flex';
 
     const angkaSekarang = isToken ? angkaPerChunk[chunkIndex] : null;
-    const groupKey = isToken ? String(angkaSekarang) : String(chunkIndex);
     const labelBatch = isToken
         ? `Token ${angkaSekarang} (${chunkIndex + 1}/${totalBatch}) — `
         : (totalBatch > 1 ? `Batch ${chunkIndex + 1}/${totalBatch} — ` : '');
 
-    // Mode per100: JSZip baru per batch, langsung digenerate & didownload begitu batch selesai —
-    // artinya begitu 1 batch kelar, datanya SUDAH AMAN di disk pengguna (tidak akan hilang
-    // walau proses berikutnya terputus).
-    // Mode token: PDF TIDAK ditulis ke JSZip di memory sepanjang proses (dulu jadi beban memory
-    // yang terus menumpuk). Tiap file disimpan ke IndexedDB per kelompok — ZIP gabungan baru
-    // dirakit sekali dari IndexedDB setelah SEMUA kelompok token selesai (lihat blok akhir fungsi).
-    const zip = isToken ? null : new JSZip();
+    // Mode token: semua kelompok menulis ke SATU JSZip yang sama (state.zip), masing-masing
+    // ke dalam folder-nya sendiri. Mode per100: JSZip baru untuk tiap batch, seperti semula.
+    const zip = isToken ? state.zip : new JSZip();
+    const folderTarget = isToken ? zip.folder(`${baseName} (${angkaSekarang})`) : zip;
 
     let berhasil = 0;
     let gagal = [];
@@ -3473,13 +3226,9 @@ async function prosesZipBatch() {
 
     for (let i = 0; i < batchRows.length; i++) {
         if (_zipDibatalkan) {
-            tampilToast('⏹️ Download ZIP dibatalkan. Progres yang sudah selesai tetap tersimpan — bisa dilanjutkan lain waktu.', 'error');
+            tampilToast('⏹️ Download ZIP dibatalkan.', 'error');
             break;
         }
-
-        // Jeda singkat tiap beberapa item supaya browser sempat garbage-collect & UI tetap responsif
-        // (penting saat data banyak — dulu proses tanpa jeda ini yang bikin makin lama makin berat).
-        if (i > 0 && i % ZIP_YIELD_EVERY === 0) await yieldSebentar();
 
         const row = batchRows[i];
         const persen = Math.round(((i) / batchRows.length) * 100);
@@ -3513,12 +3262,7 @@ async function prosesZipBatch() {
             const namaFile = isToken
                 ? `${sanitizeNamaFile(nama)}.pdf`
                 : `${token}_${sanitizeNamaFile(nama)}.pdf`;
-
-            if (isToken) {
-                await simpanFileZipDB(state.sesiKey, groupKey, namaFile, blob);
-            } else {
-                zip.file(namaFile, blob);
-            }
+            folderTarget.file(namaFile, blob);
             berhasil++;
             if (diperkecil) diperkecilList.push(`${row.id_x} (narasi→${fs2Terpakai}pt)`);
         } catch (errSatu) {
@@ -3527,20 +3271,9 @@ async function prosesZipBatch() {
         }
     }
 
-    // Tandai kelompok/batch ini selesai & simpan progres — supaya kalau terputus SETELAH titik ini,
-    // resume berikutnya tidak perlu mengulang kelompok yang sudah beres.
-    if (!_zipDibatalkan) {
-        state.completedGroups.push(isToken ? angkaSekarang : chunkIndex);
-        simpanProgresZip(state.tableName, {
-            sesiKey: state.sesiKey, mode: isToken ? 'token' : 'per100',
-            mulai: state.mulai, sampai: state.sampai, totalGroups: totalBatch,
-            baseName, completedGroups: state.completedGroups, updatedAt: Date.now()
-        });
-    }
-
     if (isToken) {
-        // Mode token: file kelompok ini sudah aman di IndexedDB. ZIP gabungan baru dibuat
-        // & didownload sekali, setelah kelompok token TERAKHIR selesai.
+        // Mode token: file HANYA ditampung di folder dalam state.zip — belum di-generate/download.
+        // ZIP gabungan baru dibuat & didownload sekali, setelah kelompok token TERAKHIR selesai.
         if (diperkecilList.length) {
             console.log('%cData yang font narasinya otomatis dikecilkan (auto-fit):', 'color:orange;font-weight:bold', diperkecilList);
         }
@@ -3555,9 +3288,7 @@ async function prosesZipBatch() {
         progText.textContent = `${labelBatch}Membungkus file menjadi ZIP...`;
         progBar.style.width = '100%';
 
-        // compression: 'STORE' — skip kompresi DEFLATE (isinya PDF yang sudah relatif padat,
-        // jadi DEFLATE cuma buang waktu CPU tanpa banyak mengecilkan ukuran).
-        const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' }, (meta) => {
+        const zipBlob = await zip.generateAsync({ type: 'blob' }, (meta) => {
             progText.textContent = `${labelBatch}Membungkus ZIP... ${Math.round(meta.percent)}%`;
         });
 
@@ -3595,55 +3326,30 @@ async function prosesZipBatch() {
 
     const masihAdaBatchBerikutnya = !_zipDibatalkan && (chunkIndex + 1 < totalBatch);
 
-    // Pengaman: kalau beberapa kelompok BERTURUT-TURUT gagal total (bukan cuma dilewati karena
-    // data kosong/tidak lengkap, tapi benar-benar error), auto-lanjut DIHENTIKAN sementara —
-    // kemungkinan ada masalah sistemik (mis. koneksi/server bermasalah) yang perlu dicek pengguna
-    // dulu, daripada diam-diam gagal ratusan kali tanpa disadari.
-    const gagalTotalKelompokIni = berhasil === 0 && gagal.length > 0;
-    state.gagalBerturut = gagalTotalKelompokIni ? (state.gagalBerturut || 0) + 1 : 0;
-    const BATAS_GAGAL_BERTURUT = 3;
-
     if (masihAdaBatchBerikutnya) {
-        if (state.gagalBerturut >= BATAS_GAGAL_BERTURUT) {
-            // Berhenti otomatis & minta konfirmasi pengguna — progres yang sudah selesai tetap aman.
-            const labelBerikut = isToken
-                ? `token ${angkaPerChunk[chunkIndex + 1]}`
-                : `batch ${chunkIndex + 2}/${totalBatch}`;
-            progText.textContent = `⚠️ ${state.gagalBerturut} kelompok berturut-turut gagal total — proses otomatis dihentikan sementara. Cek koneksi/console, lalu klik tombol untuk lanjut ke ${labelBerikut}, atau tutup halaman ini (progres tetap tersimpan).`;
-            progBar.style.width = '100%';
-            nextBtn.textContent = `➡ Lanjutkan ke ${labelBerikut}`;
-            nextBtn.style.display = 'inline-block';
-            return;
-        }
-        // Lanjut otomatis ke kelompok/batch berikutnya TANPA perlu klik tombol — data yang
-        // sudah selesai sejauh ini sudah tersimpan aman (lihat catatan IndexedDB/localStorage
-        // di atas), jadi tidak perlu jeda manual per kelompok lagi.
+        // Tunggu pengguna klik "Lanjutkan" sebelum memproses kelompok/batch berikutnya —
+        // overlay TETAP TERBUKA, tidak mengembalikan posisi tampilan dulu.
         if (isToken) {
             const angkaBerikutnya = angkaPerChunk[chunkIndex + 1];
-            progText.textContent = `✅ Token ${angkaSekarang} selesai (${berhasil} data). Lanjut otomatis ke token ${angkaBerikutnya} (${chunkIndex + 2}/${totalBatch})...`;
+            progText.textContent = `✅ Token ${angkaSekarang} selesai (${berhasil} data). Klik tombol di bawah untuk lanjut ke token ${angkaBerikutnya} (${chunkIndex + 2}/${totalBatch}).`;
+            progBar.style.width = '100%';
+            nextBtn.textContent = `➡ Lanjutkan ke Token ${angkaBerikutnya}`;
         } else {
-            progText.textContent = `✅ Batch ${chunkIndex + 1}/${totalBatch} selesai (${berhasil} data). Lanjut otomatis ke batch ${chunkIndex + 2}/${totalBatch}...`;
+            progText.textContent = `✅ Batch ${chunkIndex + 1}/${totalBatch} selesai (${berhasil} data). Klik tombol di bawah untuk lanjut ke batch ${chunkIndex + 2}/${totalBatch}.`;
+            progBar.style.width = '100%';
+            nextBtn.textContent = `➡ Lanjutkan ke Batch ${chunkIndex + 2}/${totalBatch}`;
         }
-        progBar.style.width = '100%';
-        state.chunkIndex = chunkIndex + 1;
-        await yieldSebentar();
-        return prosesZipBatch();
+        nextBtn.style.display = 'inline-block';
+        return;
     }
 
     // Mode token: semua kelompok selesai (dan tidak dibatalkan) — baru sekarang ZIP gabungan
-    // dirakit dari IndexedDB (mencakup kelompok dari sesi ini MAUPUN sesi sebelumnya kalau
-    // proses sempat dilanjutkan setelah terputus) & didownload, SATU KALI.
+    // (berisi semua folder token) di-generate & didownload, SATU KALI.
     if (isToken && !_zipDibatalkan) {
-        progText.textContent = `Mengambil data tersimpan & membungkus semua token menjadi 1 ZIP "${baseName}.zip"...`;
+        progText.textContent = `Membungkus semua token menjadi 1 ZIP "${baseName}.zip"...`;
         progBar.style.width = '100%';
         try {
-            const semuaFile = await ambilFileZipDBSesi(state.sesiKey);
-            const zipGabungan = new JSZip();
-            semuaFile.forEach(f => {
-                zipGabungan.folder(`${baseName} (${f.groupKey})`).file(f.namaFile, f.blob);
-            });
-
-            const zipBlobGabungan = await zipGabungan.generateAsync({ type: 'blob', compression: 'STORE' }, (meta) => {
+            const zipBlobGabungan = await state.zip.generateAsync({ type: 'blob' }, (meta) => {
                 progText.textContent = `Membungkus ZIP "${baseName}"... ${Math.round(meta.percent)}%`;
             });
             const url = URL.createObjectURL(zipBlobGabungan);
@@ -3655,18 +3361,10 @@ async function prosesZipBatch() {
             a.remove();
             setTimeout(() => URL.revokeObjectURL(url), 5000);
             tampilToast(`✅ ZIP "${baseName}.zip" berhasil didownload (${totalBatch} folder token).`, '');
-
-            // Selesai total & sukses — bersihkan progres tersimpan & data sementara di IndexedDB.
-            await hapusFileZipDBSesi(state.sesiKey);
-            hapusProgresZip(state.tableName);
         } catch (errZipGabungan) {
             console.error('Gagal membungkus ZIP gabungan:', errZipGabungan);
-            tampilToast('❌ Gagal membungkus ZIP gabungan. Progres tetap tersimpan, silakan coba lagi (data yang sudah selesai tidak akan diproses ulang).', 'error');
+            tampilToast('❌ Gagal membungkus ZIP gabungan.', 'error');
         }
-    } else if (!isToken && !_zipDibatalkan && (chunkIndex + 1 >= totalBatch)) {
-        // Mode per100/All — semua batch selesai & sudah terdownload masing-masing. Bersihkan progres.
-        await hapusFileZipDBSesi(state.sesiKey);
-        hapusProgresZip(state.tableName);
     }
 
     // Semua batch/kelompok selesai (atau dibatalkan) — tutup overlay & kembalikan tampilan ke posisi semula
@@ -3905,12 +3603,18 @@ async function renderDataPeserta(rawData) {
             document.getElementById('vak-temp-error-msg').textContent = 'Data tes gaya belajar & temperamen tidak ditemukan.';
         }
 
-        // QR Code — hanya digenerate kalau Versi 2 (kop index_final) sedang aktif; lihat VERSI_KOP_CONFIG.
-        if ((VERSI_KOP_CONFIG[_versiKop] || VERSI_KOP_CONFIG.v1).showQr) {
-            renderQrCode(rawData);
-        } else {
-            const qrCodeEl = document.getElementById('qr-code');
-            if (qrCodeEl) qrCodeEl.innerHTML = '';
+        // QR Code — dinonaktifkan di versi SSC ini (elemen & library QR sudah dikomentari di HTML)
+        const qrLinkEl = document.getElementById('qr-link');
+        const qrCodeEl = document.getElementById('qr-code');
+        if (qrLinkEl && qrCodeEl && typeof QRCode !== 'undefined') {
+            qrCodeEl.innerHTML = '';
+            const qrUrl = `https://laporan.lidan.co.id/?id_x=${rawData.id_x}&x_01=${rawData.x_01 || ''}&tabel=${CONFIG.TABLE_NAME || ''}`;
+            qrLinkEl.href = qrUrl;
+            new QRCode(qrCodeEl, {
+                text: qrUrl, width: 130, height: 130,
+                colorDark: '#000000', colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
         }
 
     } catch (err) {
@@ -3931,7 +3635,6 @@ async function renderDataPeserta(rawData) {
 function init() {
     document.getElementById('loading-screen').classList.add('hidden');
     document.getElementById('pilih-tabel-screen').classList.remove('hidden');
-    terapkanVersiKop(_versiKop); // terapkan versi kop terakhir yang dipilih (localStorage), default Versi 1
 }
 
 init();
