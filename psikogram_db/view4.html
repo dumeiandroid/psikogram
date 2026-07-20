@@ -3010,62 +3010,6 @@ function ambilNamaDariBiodata(row) {
     } catch { return ''; }
 }
 
-// Deteksi KELOMPOK TOKEN secara BERURUTAN berdasarkan urutan baris dalam daftar (bukan
-// langsung dari nilai digit token). Lebar digit kelompok dimulai dari 1 digit; setiap kali
-// digit awal token berbeda dari kelompok yang sedang berjalan, kelompok dianggap PINDAH dan
-// labelnya naik tepat +1 — lebar digitnya otomatis menyesuaikan panjang label baru itu.
-// Contoh: 11,12,13 -> kelompok 1 (lebar 1). 21,22 -> kelompok 2. ... 98,99 -> kelompok 9.
-// Token berikutnya "102" -> kelompok baru = 9+1 = 10, lebar jadi 2 digit ("10"), dst.
-// tokenList HARUS sudah terurut sesuai urutan tampilan (id_x terbesar -> terkecil).
-function hitungKelompokUrut(tokenList) {
-    let blockIndex = 0;
-    let width = 1;
-    let anchor = null;
-    return tokenList.map(tok => {
-        const m = String(tok).match(/^\d+/);
-        const digitStr = m ? m[0] : '';
-        if (blockIndex === 0) {
-            blockIndex = 1;
-            width = 1;
-            anchor = digitStr.slice(0, width);
-        } else {
-            const candidate = digitStr.slice(0, width);
-            if (candidate !== anchor) {
-                blockIndex++;
-                width = String(blockIndex).length;
-                anchor = digitStr.slice(0, width);
-            }
-        }
-        return blockIndex;
-    });
-}
-// - nama di x_02 kosong/tidak ada           -> 'tidak_ikut'   (dianggap tidak ikut ujian)
-// - x_07 / x_08 / x_09 bukan array, kosong,
-//   atau ada elemen di dalamnya yang kosong -> 'tidak_lengkap' (tidak menyelesaikan seluruh tes)
-// - selain itu                              -> 'lengkap'
-function cekKelengkapanPeserta(row) {
-    const tokenLengkap = String(row.x_01 || row.id_x || '');
-    let nama = '';
-    try { nama = (JSON.parse(row.x_02 || '{}').nama || '').trim(); } catch {}
-
-    if (!nama) {
-        return { status: 'tidak_ikut', nama, tokenLengkap };
-    }
-
-    const arrayPunyaKosong = (str) => {
-        let arr;
-        try { arr = JSON.parse(str || '[]'); } catch { return true; }
-        if (!Array.isArray(arr) || arr.length === 0) return true;
-        return arr.some(el => !String(el || '').trim());
-    };
-
-    if (arrayPunyaKosong(row.x_07) || arrayPunyaKosong(row.x_08) || arrayPunyaKosong(row.x_09)) {
-        return { status: 'tidak_lengkap', nama, tokenLengkap };
-    }
-
-    return { status: 'lengkap', nama, tokenLengkap };
-}
-
 // Aktif/nonaktifkan input range ZIP sesuai mode radio yang dipilih (Range / All)
 function toggleZipMode() {
     const isAll = document.getElementById('zipModeAll').checked;
@@ -3127,18 +3071,16 @@ async function downloadRangeZip() {
     let baseName = '';        // hanya dipakai mode token: nama dasar file zip & folder
 
     if (metodeToken) {
-        // Urutkan dulu sesuai id_x TERBESAR -> TERKECIL, baru deteksi kelompok token secara
-        // berurutan (lebar digit adaptif — lihat hitungKelompokUrut).
-        target = target.slice().sort((a, b) => (parseInt(b.id_x, 10) || 0) - (parseInt(a.id_x, 10) || 0));
-
-        const tokenList  = target.map(row => tokenBersih(row.x_01 || row.id_x));
-        const kelompokList = hitungKelompokUrut(tokenList);
-
+        // Kelompokkan berdasarkan ANGKA AWAL token (dibaca sebagai bilangan bulat, bukan
+        // dicocokkan sebagai prefix string) — supaya "1" tidak ikut menangkap "10","11",...
+        // Contoh token "adil10a347" -> tokenBersih -> "10a347" -> angka = 10.
         const groupsMap = new Map();
-        target.forEach((row, i) => {
-            const kelompok = kelompokList[i];
-            if (!groupsMap.has(kelompok)) groupsMap.set(kelompok, []);
-            groupsMap.get(kelompok).push(row);
+        target.forEach(row => {
+            const tok = tokenBersih(row.x_01 || row.id_x);
+            const m = tok.match(/^\d+/);
+            const angka = m ? parseInt(m[0], 10) : 0;
+            if (!groupsMap.has(angka)) groupsMap.set(angka, []);
+            groupsMap.get(angka).push(row);
         });
         angkaPerChunk = Array.from(groupsMap.keys()).sort((a, b) => a - b);
         chunks = angkaPerChunk.map(angka => groupsMap.get(angka));
@@ -3221,7 +3163,6 @@ async function prosesZipBatch() {
 
     let berhasil = 0;
     let gagal = [];
-    let dilewati = [];
     let diperkecilList = [];
 
     for (let i = 0; i < batchRows.length; i++) {
@@ -3232,17 +3173,6 @@ async function prosesZipBatch() {
 
         const row = batchRows[i];
         const persen = Math.round(((i) / batchRows.length) * 100);
-
-        // Lewati peserta yang namanya kosong (tidak ikut ujian) atau salah satu array
-        // x_07/x_08/x_09 tidak lengkap (tidak menyelesaikan seluruh tes) — filenya TIDAK dibuat.
-        const cek = cekKelengkapanPeserta(row);
-        if (cek.status !== 'lengkap') {
-            dilewati.push(row.id_x);
-            progText.textContent = `${labelBatch}Melewati ${i + 1} / ${batchRows.length} (id_x: ${row.id_x}) — ${cek.status === 'tidak_ikut' ? 'tidak ikut ujian' : 'tidak menyelesaikan seluruh tes'}...`;
-            progBar.style.width = persen + '%';
-            continue;
-        }
-
         progText.textContent = `${labelBatch}Memproses ${i + 1} / ${batchRows.length} (id_x: ${row.id_x})...`;
         progBar.style.width = persen + '%';
 
@@ -3278,9 +3208,7 @@ async function prosesZipBatch() {
             console.log('%cData yang font narasinya otomatis dikecilkan (auto-fit):', 'color:orange;font-weight:bold', diperkecilList);
         }
         if (gagal.length) {
-            tampilToast(`⚠️ Token ${angkaSekarang}: ${berhasil} berhasil, ${gagal.length} gagal (id_x: ${gagal.join(', ')})${dilewati.length ? `, ${dilewati.length} dilewati` : ''}.`, 'error');
-        } else if (dilewati.length) {
-            tampilToast(`✅ Token ${angkaSekarang} selesai: ${berhasil} file. ${dilewati.length} dilewati (nama kosong/tes tidak lengkap).`, '');
+            tampilToast(`⚠️ Token ${angkaSekarang}: ${berhasil} berhasil, ${gagal.length} gagal (id_x: ${gagal.join(', ')}).`, 'error');
         } else {
             tampilToast(`✅ Token ${angkaSekarang} selesai: ${berhasil} file.`, '');
         }
@@ -3310,16 +3238,12 @@ async function prosesZipBatch() {
         }
 
         if (gagal.length) {
-            tampilToast(`✅ ${labelBatch}selesai: ${berhasil} berhasil, ${gagal.length} gagal (id_x: ${gagal.join(', ')})${dilewati.length ? `, ${dilewati.length} dilewati` : ''}.`, 'error');
-        } else if (dilewati.length) {
-            tampilToast(`✅ ${labelBatch}berhasil didownload: ${berhasil} file PDF. ${dilewati.length} dilewati (nama kosong/tes tidak lengkap).`, '');
+            tampilToast(`✅ ${labelBatch}selesai: ${berhasil} berhasil, ${gagal.length} gagal (id_x: ${gagal.join(', ')}).`, 'error');
         } else if (diperkecilList.length) {
             tampilToast(`✅ ${labelBatch}berhasil: ${berhasil} file. ${diperkecilList.length} di antaranya auto-fit (font narasi dikecilkan). Lihat console untuk detail.`, '');
         } else {
             tampilToast(`✅ ${labelBatch}berhasil didownload: ${berhasil} file PDF.`, '');
         }
-    } else if (!_zipDibatalkan && berhasil === 0 && dilewati.length && !gagal.length) {
-        tampilToast(`⚠️ ${labelBatch}semua data (${dilewati.length}) dilewati — nama kosong atau tes tidak lengkap, ZIP tidak dibuat untuk batch ini.`, 'error');
     } else if (!_zipDibatalkan && berhasil === 0) {
         tampilToast(`❌ ${labelBatch}semua data gagal diproses, ZIP tidak dibuat.`, 'error');
     }
@@ -3445,23 +3369,14 @@ function bukaModalExcelRange() {
         labelTeks = `${batasBawah} - ${batasAtas} (${target.length} data)`;
     }
 
-    const targetUrut = target
+    _excelRangeData = target
         .slice()
-        .sort((a, b) => (parseInt(b.id_x, 10) || 0) - (parseInt(a.id_x, 10) || 0));
-    const kelompokList = hitungKelompokUrut(targetUrut.map(row => tokenBersih(row.x_01 || row.id_x)));
-
-    _excelRangeData = targetUrut.map((row, i) => {
-        const token = tokenBersih(row.x_01 || row.id_x);
-        const kelompok = kelompokList[i];
-        const cek = cekKelengkapanPeserta(row);
-        if (cek.status === 'tidak_ikut') {
-            return { token, kelompok, nama: `${cek.tokenLengkap} (TIDAK IKUT UJIAN)`, iq: '' };
-        }
-        if (cek.status === 'tidak_lengkap') {
-            return { token, kelompok, nama: `${cek.tokenLengkap} (TIDAK MENYELESAIKAN SELURUH TES)`, iq: '' };
-        }
-        return { token, kelompok, nama: cek.nama, iq: parseInt(row.x_06) || 0 };
-    });
+        .sort((a, b) => (parseInt(b.id_x, 10) || 0) - (parseInt(a.id_x, 10) || 0))
+        .map(row => ({
+            token : tokenBersih(row.x_01 || row.id_x),
+            nama  : ambilNamaDariBiodata(row),
+            iq    : parseInt(row.x_06) || 0
+        }));
 
     document.getElementById('excel-range-label').textContent = labelTeks;
     document.getElementById('excelKelompokToken').checked = false;
@@ -3470,26 +3385,26 @@ function bukaModalExcelRange() {
     document.getElementById('modal-excel-overlay').style.display = 'flex';
 }
 
-// Susun _excelRangeData (urutan sesuai id_x, TIDAK diurutkan ulang lagi di sini) menjadi daftar
-// baris siap-tulis: header selalu di baris pertama; kalau dikelompokkan=true, setiap kali angka
-// awal token (dari tokenBersih, dibaca sebagai integer) berubah dari baris sebelumnya, sisipkan
-// 1 baris kosong, lalu 1 baris "KELOMPOK : <angka>", lalu 1 baris header baru sebelum lanjut data.
+// Susun _excelRangeData (urutan ASLI sesuai id_x, TIDAK diurutkan ulang) menjadi daftar baris
+// siap-tulis: header selalu di baris pertama; kalau dikelompokkan=true, setiap kali angka awal
+// token (dari tokenBersih, dibaca sebagai integer) berubah dari baris sebelumnya, sisipkan 1
+// baris kosong lalu 1 baris header baru sebelum lanjut data.
 function susunEksporToken(data, dikelompokkan) {
+    const baris = [{ tipe: 'header' }];
     if (!dikelompokkan) {
-        const baris = [{ tipe: 'header' }];
         data.forEach(d => baris.push({ tipe: 'data', d }));
         return baris;
     }
-    const baris = [];
-    let kelompokSebelumnya = null;
+    let angkaSebelumnya = null;
     data.forEach(d => {
-        if (d.kelompok !== kelompokSebelumnya) {
-            if (kelompokSebelumnya !== null) baris.push({ tipe: 'blank' });
-            baris.push({ tipe: 'kelompok', angka: d.kelompok });
+        const m = String(d.token).match(/^\d+/);
+        const angka = m ? parseInt(m[0], 10) : null;
+        if (angkaSebelumnya !== null && angka !== angkaSebelumnya) {
+            baris.push({ tipe: 'blank' });
             baris.push({ tipe: 'header' });
         }
         baris.push({ tipe: 'data', d });
-        kelompokSebelumnya = d.kelompok;
+        angkaSebelumnya = angka;
     });
     return baris;
 }
@@ -3502,9 +3417,6 @@ function renderExcelPreview() {
     tbody.innerHTML = baris.map(b => {
         if (b.tipe === 'blank') {
             return `<tr><td colspan="4" style="padding:4px; border-bottom:1px solid #eee;">&nbsp;</td></tr>`;
-        }
-        if (b.tipe === 'kelompok') {
-            return `<tr><td colspan="4" style="padding:8px; font-weight:bold; color:#333; background:#fafafa;">KELOMPOK : ${b.angka}</td></tr>`;
         }
         if (b.tipe === 'header') {
             nomor = 0;
@@ -3543,9 +3455,8 @@ function downloadExcelRange() {
     const baris = susunEksporToken(_excelRangeData, dikelompokkan);
     let nomorExport = 0;
     const wsData = baris.map(b => {
-        if (b.tipe === 'blank')    return [];
-        if (b.tipe === 'kelompok') return [`KELOMPOK : ${b.angka}`];
-        if (b.tipe === 'header')   { nomorExport = 0; return ['No', 'Nama', 'IQ']; }
+        if (b.tipe === 'blank')  return [];
+        if (b.tipe === 'header') { nomorExport = 0; return ['No', 'Nama', 'IQ']; }
         nomorExport++;
         return [nomorExport, b.d.nama, b.d.iq];
     });

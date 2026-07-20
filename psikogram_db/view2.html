@@ -510,14 +510,6 @@
         </label>
         <input type="number" id="inputRangeMulai" placeholder="dari id_x" style="width:85px; margin-left:6px;">
         <input type="number" id="inputRangeSampai" placeholder="sampai id_x" style="width:90px;">
-        <span style="border-left:1px solid rgba(255,255,255,0.35); margin-left:6px; padding-left:6px; display:inline-flex; align-items:center; gap:3px;">
-            <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0;">
-                <input type="radio" name="zipMethod" id="zipMethodPer100" value="per100" checked> Per 100
-            </label>
-            <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0 0 0 6px;">
-                <input type="radio" name="zipMethod" id="zipMethodToken" value="token"> Per Token
-            </label>
-        </span>
         <button onclick="downloadRangeZip()">📦 Download ZIP</button>
     </span>
     <span class="idx-jump" style="background:rgba(255,255,255,0.12); padding:5px 8px; border-radius:6px;">
@@ -550,12 +542,6 @@
             <strong style="color:#5F4EDA; font-size:16px;">📊 Export Data — id_x <span id="excel-range-label"></span></strong>
             <button onclick="tutupModalExcelRange()" style="background:none; border:none;
                 font-size:20px; cursor:pointer; color:#888;">✕</button>
-        </div>
-        <div style="padding:10px 22px 0; border-bottom:1px solid #f0f0f0;">
-            <label style="font-size:13px; color:#444; display:flex; align-items:center; gap:6px; cursor:pointer; padding-bottom:10px;">
-                <input type="checkbox" id="excelKelompokToken" onchange="renderExcelPreview()">
-                Kelompokkan per Token (sisipkan baris kosong + header baru tiap angka token berubah)
-            </label>
         </div>
         <div style="overflow-y:auto; padding:14px 22px;">
             <table style="width:100%; border-collapse:collapse; font-size:14px;">
@@ -3010,62 +2996,6 @@ function ambilNamaDariBiodata(row) {
     } catch { return ''; }
 }
 
-// Deteksi KELOMPOK TOKEN secara BERURUTAN berdasarkan urutan baris dalam daftar (bukan
-// langsung dari nilai digit token). Lebar digit kelompok dimulai dari 1 digit; setiap kali
-// digit awal token berbeda dari kelompok yang sedang berjalan, kelompok dianggap PINDAH dan
-// labelnya naik tepat +1 — lebar digitnya otomatis menyesuaikan panjang label baru itu.
-// Contoh: 11,12,13 -> kelompok 1 (lebar 1). 21,22 -> kelompok 2. ... 98,99 -> kelompok 9.
-// Token berikutnya "102" -> kelompok baru = 9+1 = 10, lebar jadi 2 digit ("10"), dst.
-// tokenList HARUS sudah terurut sesuai urutan tampilan (id_x terbesar -> terkecil).
-function hitungKelompokUrut(tokenList) {
-    let blockIndex = 0;
-    let width = 1;
-    let anchor = null;
-    return tokenList.map(tok => {
-        const m = String(tok).match(/^\d+/);
-        const digitStr = m ? m[0] : '';
-        if (blockIndex === 0) {
-            blockIndex = 1;
-            width = 1;
-            anchor = digitStr.slice(0, width);
-        } else {
-            const candidate = digitStr.slice(0, width);
-            if (candidate !== anchor) {
-                blockIndex++;
-                width = String(blockIndex).length;
-                anchor = digitStr.slice(0, width);
-            }
-        }
-        return blockIndex;
-    });
-}
-// - nama di x_02 kosong/tidak ada           -> 'tidak_ikut'   (dianggap tidak ikut ujian)
-// - x_07 / x_08 / x_09 bukan array, kosong,
-//   atau ada elemen di dalamnya yang kosong -> 'tidak_lengkap' (tidak menyelesaikan seluruh tes)
-// - selain itu                              -> 'lengkap'
-function cekKelengkapanPeserta(row) {
-    const tokenLengkap = String(row.x_01 || row.id_x || '');
-    let nama = '';
-    try { nama = (JSON.parse(row.x_02 || '{}').nama || '').trim(); } catch {}
-
-    if (!nama) {
-        return { status: 'tidak_ikut', nama, tokenLengkap };
-    }
-
-    const arrayPunyaKosong = (str) => {
-        let arr;
-        try { arr = JSON.parse(str || '[]'); } catch { return true; }
-        if (!Array.isArray(arr) || arr.length === 0) return true;
-        return arr.some(el => !String(el || '').trim());
-    };
-
-    if (arrayPunyaKosong(row.x_07) || arrayPunyaKosong(row.x_08) || arrayPunyaKosong(row.x_09)) {
-        return { status: 'tidak_lengkap', nama, tokenLengkap };
-    }
-
-    return { status: 'lengkap', nama, tokenLengkap };
-}
-
 // Aktif/nonaktifkan input range ZIP sesuai mode radio yang dipilih (Range / All)
 function toggleZipMode() {
     const isAll = document.getElementById('zipModeAll').checked;
@@ -3120,51 +3050,18 @@ async function downloadRangeZip() {
         labelRange = `id_x ${mulai} - ${sampai}`;
     }
 
-    const metodeToken = document.getElementById('zipMethodToken').checked;
-
-    let chunks = [];
-    let angkaPerChunk = [];   // hanya dipakai mode token: angka asli token per kelompok
-    let baseName = '';        // hanya dipakai mode token: nama dasar file zip & folder
-
-    if (metodeToken) {
-        // Urutkan dulu sesuai id_x TERBESAR -> TERKECIL, baru deteksi kelompok token secara
-        // berurutan (lebar digit adaptif — lihat hitungKelompokUrut).
-        target = target.slice().sort((a, b) => (parseInt(b.id_x, 10) || 0) - (parseInt(a.id_x, 10) || 0));
-
-        const tokenList  = target.map(row => tokenBersih(row.x_01 || row.id_x));
-        const kelompokList = hitungKelompokUrut(tokenList);
-
-        const groupsMap = new Map();
-        target.forEach((row, i) => {
-            const kelompok = kelompokList[i];
-            if (!groupsMap.has(kelompok)) groupsMap.set(kelompok, []);
-            groupsMap.get(kelompok).push(row);
-        });
-        angkaPerChunk = Array.from(groupsMap.keys()).sort((a, b) => a - b);
-        chunks = angkaPerChunk.map(angka => groupsMap.get(angka));
-
-        const inputNama = prompt('Masukkan nama untuk file ZIP & folder (contoh: SMAN2 MEDAN):', '');
-        if (inputNama === null) return; // pengguna klik Cancel
-        baseName = sanitizeNamaFile(inputNama.trim());
-        if (!baseName) {
-            tampilToast('⚠️ Nama tidak boleh kosong.', 'error');
-            return;
-        }
-    } else {
-        // Mode lama: pecah menjadi batch per ZIP_BATCH_SIZE baris. Kalau datanya banyak (mis.
-        // mode "All" dengan >100 baris), setiap batch didownload sebagai file ZIP terpisah,
-        // satu per satu — batch berikutnya baru diproses setelah klik "Lanjutkan Batch Berikutnya".
-        for (let i = 0; i < target.length; i += ZIP_BATCH_SIZE) {
-            chunks.push(target.slice(i, i + ZIP_BATCH_SIZE));
-        }
+    // Pecah menjadi batch per ZIP_BATCH_SIZE baris. Kalau datanya banyak (mis. mode "All"
+    // dengan >100 baris), setiap batch akan didownload sebagai file ZIP terpisah, satu per satu —
+    // batch berikutnya baru diproses setelah pengguna klik "Lanjutkan Batch Berikutnya".
+    const chunks = [];
+    for (let i = 0; i < target.length; i += ZIP_BATCH_SIZE) {
+        chunks.push(target.slice(i, i + ZIP_BATCH_SIZE));
     }
     const totalBatch = chunks.length;
 
-    const pesanKonfirmasi = metodeToken
-        ? `Akan membuat ${target.length} PDF (${labelRange}), dikelompokkan menjadi ${totalBatch} folder token (angka: ${angkaPerChunk.join(', ')}) di dalam SATU file ZIP "${baseName}.zip".\n\nSetiap kelompok token selesai diproses, Anda akan diminta konfirmasi sebelum lanjut ke token berikutnya. ZIP baru didownload sekali di akhir, setelah semua token selesai. Lanjutkan?`
-        : (totalBatch > 1
-            ? `Akan membuat ${target.length} PDF (${labelRange}).\n\nKarena jumlah datanya banyak, proses akan dipecah menjadi ${totalBatch} batch (maks ${ZIP_BATCH_SIZE} data per ZIP). Setiap batch selesai akan langsung terdownload, lalu Anda perlu klik "Lanjutkan" untuk memproses batch berikutnya. Lanjutkan?`
-            : `Akan membuat ${target.length} PDF (${labelRange}) dan menggabungkannya jadi 1 file ZIP.\n\nProses ini bisa memakan waktu, terutama jika jumlah data banyak. Lanjutkan?`);
+    const pesanKonfirmasi = totalBatch > 1
+        ? `Akan membuat ${target.length} PDF (${labelRange}).\n\nKarena jumlah datanya banyak, proses akan dipecah menjadi ${totalBatch} batch (maks ${ZIP_BATCH_SIZE} data per ZIP). Setiap batch selesai akan langsung terdownload, lalu Anda perlu klik "Lanjutkan" untuk memproses batch berikutnya. Lanjutkan?`
+        : `Akan membuat ${target.length} PDF (${labelRange}) dan menggabungkannya jadi 1 file ZIP.\n\nProses ini bisa memakan waktu, terutama jika jumlah data banyak. Lanjutkan?`;
 
     if (!confirm(pesanKonfirmasi)) {
         return;
@@ -3178,11 +3075,6 @@ async function downloadRangeZip() {
         mulai,
         sampai,
         tableName: CONFIG.TABLE_NAME,
-        method: metodeToken ? 'token' : 'per100',
-        angkaPerChunk,
-        baseName,
-        // Mode token: satu objek JSZip dipakai bersama untuk SEMUA kelompok (folder per angka token)
-        zip: metodeToken ? new JSZip() : null,
         // Simpan posisi & data saat ini supaya bisa dikembalikan setelah SELURUH batch selesai
         posisiSemula: _posisiSekarang,
         dataSemula: _daftarRows[_posisiSekarang] || null
@@ -3197,9 +3089,8 @@ async function downloadRangeZip() {
 async function prosesZipBatch() {
     const state = _zipBatchState;
     if (!state) return;
-    const { chunks, chunkIndex, totalBatch, angkaPerChunk, baseName } = state;
+    const { chunks, chunkIndex, totalBatch } = state;
     const batchRows = chunks[chunkIndex];
-    const isToken = state.method === 'token';
 
     _zipDibatalkan = false;
     const overlay  = document.getElementById('zip-progress-overlay');
@@ -3209,19 +3100,11 @@ async function prosesZipBatch() {
     nextBtn.style.display = 'none';
     overlay.style.display = 'flex';
 
-    const angkaSekarang = isToken ? angkaPerChunk[chunkIndex] : null;
-    const labelBatch = isToken
-        ? `Token ${angkaSekarang} (${chunkIndex + 1}/${totalBatch}) — `
-        : (totalBatch > 1 ? `Batch ${chunkIndex + 1}/${totalBatch} — ` : '');
+    const labelBatch = totalBatch > 1 ? `Batch ${chunkIndex + 1}/${totalBatch} — ` : '';
 
-    // Mode token: semua kelompok menulis ke SATU JSZip yang sama (state.zip), masing-masing
-    // ke dalam folder-nya sendiri. Mode per100: JSZip baru untuk tiap batch, seperti semula.
-    const zip = isToken ? state.zip : new JSZip();
-    const folderTarget = isToken ? zip.folder(`${baseName} (${angkaSekarang})`) : zip;
-
+    const zip = new JSZip();
     let berhasil = 0;
     let gagal = [];
-    let dilewati = [];
     let diperkecilList = [];
 
     for (let i = 0; i < batchRows.length; i++) {
@@ -3232,17 +3115,6 @@ async function prosesZipBatch() {
 
         const row = batchRows[i];
         const persen = Math.round(((i) / batchRows.length) * 100);
-
-        // Lewati peserta yang namanya kosong (tidak ikut ujian) atau salah satu array
-        // x_07/x_08/x_09 tidak lengkap (tidak menyelesaikan seluruh tes) — filenya TIDAK dibuat.
-        const cek = cekKelengkapanPeserta(row);
-        if (cek.status !== 'lengkap') {
-            dilewati.push(row.id_x);
-            progText.textContent = `${labelBatch}Melewati ${i + 1} / ${batchRows.length} (id_x: ${row.id_x}) — ${cek.status === 'tidak_ikut' ? 'tidak ikut ujian' : 'tidak menyelesaikan seluruh tes'}...`;
-            progBar.style.width = persen + '%';
-            continue;
-        }
-
         progText.textContent = `${labelBatch}Memproses ${i + 1} / ${batchRows.length} (id_x: ${row.id_x})...`;
         progBar.style.width = persen + '%';
 
@@ -3259,10 +3131,8 @@ async function prosesZipBatch() {
 
             const nama = document.getElementById('td-nama')?.textContent?.trim() || 'psikogram';
             const token = tokenBersih(row.x_01 || row.id_x);
-            const namaFile = isToken
-                ? `${sanitizeNamaFile(nama)}.pdf`
-                : `${token}_${sanitizeNamaFile(nama)}.pdf`;
-            folderTarget.file(namaFile, blob);
+            const namaFile = `${token}_${sanitizeNamaFile(nama)}.pdf`;
+            zip.file(namaFile, blob);
             berhasil++;
             if (diperkecil) diperkecilList.push(`${row.id_x} (narasi→${fs2Terpakai}pt)`);
         } catch (errSatu) {
@@ -3271,20 +3141,7 @@ async function prosesZipBatch() {
         }
     }
 
-    if (isToken) {
-        // Mode token: file HANYA ditampung di folder dalam state.zip — belum di-generate/download.
-        // ZIP gabungan baru dibuat & didownload sekali, setelah kelompok token TERAKHIR selesai.
-        if (diperkecilList.length) {
-            console.log('%cData yang font narasinya otomatis dikecilkan (auto-fit):', 'color:orange;font-weight:bold', diperkecilList);
-        }
-        if (gagal.length) {
-            tampilToast(`⚠️ Token ${angkaSekarang}: ${berhasil} berhasil, ${gagal.length} gagal (id_x: ${gagal.join(', ')})${dilewati.length ? `, ${dilewati.length} dilewati` : ''}.`, 'error');
-        } else if (dilewati.length) {
-            tampilToast(`✅ Token ${angkaSekarang} selesai: ${berhasil} file. ${dilewati.length} dilewati (nama kosong/tes tidak lengkap).`, '');
-        } else {
-            tampilToast(`✅ Token ${angkaSekarang} selesai: ${berhasil} file.`, '');
-        }
-    } else if (!_zipDibatalkan && berhasil > 0) {
+    if (!_zipDibatalkan && berhasil > 0) {
         progText.textContent = `${labelBatch}Membungkus file menjadi ZIP...`;
         progBar.style.width = '100%';
 
@@ -3310,16 +3167,12 @@ async function prosesZipBatch() {
         }
 
         if (gagal.length) {
-            tampilToast(`✅ ${labelBatch}selesai: ${berhasil} berhasil, ${gagal.length} gagal (id_x: ${gagal.join(', ')})${dilewati.length ? `, ${dilewati.length} dilewati` : ''}.`, 'error');
-        } else if (dilewati.length) {
-            tampilToast(`✅ ${labelBatch}berhasil didownload: ${berhasil} file PDF. ${dilewati.length} dilewati (nama kosong/tes tidak lengkap).`, '');
+            tampilToast(`✅ ${labelBatch}selesai: ${berhasil} berhasil, ${gagal.length} gagal (id_x: ${gagal.join(', ')}).`, 'error');
         } else if (diperkecilList.length) {
             tampilToast(`✅ ${labelBatch}berhasil: ${berhasil} file. ${diperkecilList.length} di antaranya auto-fit (font narasi dikecilkan). Lihat console untuk detail.`, '');
         } else {
             tampilToast(`✅ ${labelBatch}berhasil didownload: ${berhasil} file PDF.`, '');
         }
-    } else if (!_zipDibatalkan && berhasil === 0 && dilewati.length && !gagal.length) {
-        tampilToast(`⚠️ ${labelBatch}semua data (${dilewati.length}) dilewati — nama kosong atau tes tidak lengkap, ZIP tidak dibuat untuk batch ini.`, 'error');
     } else if (!_zipDibatalkan && berhasil === 0) {
         tampilToast(`❌ ${labelBatch}semua data gagal diproses, ZIP tidak dibuat.`, 'error');
     }
@@ -3327,47 +3180,16 @@ async function prosesZipBatch() {
     const masihAdaBatchBerikutnya = !_zipDibatalkan && (chunkIndex + 1 < totalBatch);
 
     if (masihAdaBatchBerikutnya) {
-        // Tunggu pengguna klik "Lanjutkan" sebelum memproses kelompok/batch berikutnya —
+        // Tunggu pengguna klik "Lanjutkan" sebelum memproses batch berikutnya —
         // overlay TETAP TERBUKA, tidak mengembalikan posisi tampilan dulu.
-        if (isToken) {
-            const angkaBerikutnya = angkaPerChunk[chunkIndex + 1];
-            progText.textContent = `✅ Token ${angkaSekarang} selesai (${berhasil} data). Klik tombol di bawah untuk lanjut ke token ${angkaBerikutnya} (${chunkIndex + 2}/${totalBatch}).`;
-            progBar.style.width = '100%';
-            nextBtn.textContent = `➡ Lanjutkan ke Token ${angkaBerikutnya}`;
-        } else {
-            progText.textContent = `✅ Batch ${chunkIndex + 1}/${totalBatch} selesai (${berhasil} data). Klik tombol di bawah untuk lanjut ke batch ${chunkIndex + 2}/${totalBatch}.`;
-            progBar.style.width = '100%';
-            nextBtn.textContent = `➡ Lanjutkan ke Batch ${chunkIndex + 2}/${totalBatch}`;
-        }
+        progText.textContent = `✅ Batch ${chunkIndex + 1}/${totalBatch} selesai (${berhasil} data). Klik tombol di bawah untuk lanjut ke batch ${chunkIndex + 2}/${totalBatch}.`;
+        progBar.style.width = '100%';
+        nextBtn.textContent = `➡ Lanjutkan ke Batch ${chunkIndex + 2}/${totalBatch}`;
         nextBtn.style.display = 'inline-block';
         return;
     }
 
-    // Mode token: semua kelompok selesai (dan tidak dibatalkan) — baru sekarang ZIP gabungan
-    // (berisi semua folder token) di-generate & didownload, SATU KALI.
-    if (isToken && !_zipDibatalkan) {
-        progText.textContent = `Membungkus semua token menjadi 1 ZIP "${baseName}.zip"...`;
-        progBar.style.width = '100%';
-        try {
-            const zipBlobGabungan = await state.zip.generateAsync({ type: 'blob' }, (meta) => {
-                progText.textContent = `Membungkus ZIP "${baseName}"... ${Math.round(meta.percent)}%`;
-            });
-            const url = URL.createObjectURL(zipBlobGabungan);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${baseName}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(url), 5000);
-            tampilToast(`✅ ZIP "${baseName}.zip" berhasil didownload (${totalBatch} folder token).`, '');
-        } catch (errZipGabungan) {
-            console.error('Gagal membungkus ZIP gabungan:', errZipGabungan);
-            tampilToast('❌ Gagal membungkus ZIP gabungan.', 'error');
-        }
-    }
-
-    // Semua batch/kelompok selesai (atau dibatalkan) — tutup overlay & kembalikan tampilan ke posisi semula
+    // Semua batch selesai (atau dibatalkan) — tutup overlay & kembalikan tampilan ke posisi semula
     overlay.style.display = 'none';
     nextBtn.style.display = 'none';
     if (state.dataSemula) {
@@ -3445,84 +3267,25 @@ function bukaModalExcelRange() {
         labelTeks = `${batasBawah} - ${batasAtas} (${target.length} data)`;
     }
 
-    const targetUrut = target
-        .slice()
-        .sort((a, b) => (parseInt(b.id_x, 10) || 0) - (parseInt(a.id_x, 10) || 0));
-    const kelompokList = hitungKelompokUrut(targetUrut.map(row => tokenBersih(row.x_01 || row.id_x)));
-
-    _excelRangeData = targetUrut.map((row, i) => {
-        const token = tokenBersih(row.x_01 || row.id_x);
-        const kelompok = kelompokList[i];
-        const cek = cekKelengkapanPeserta(row);
-        if (cek.status === 'tidak_ikut') {
-            return { token, kelompok, nama: `${cek.tokenLengkap} (TIDAK IKUT UJIAN)`, iq: '' };
-        }
-        if (cek.status === 'tidak_lengkap') {
-            return { token, kelompok, nama: `${cek.tokenLengkap} (TIDAK MENYELESAIKAN SELURUH TES)`, iq: '' };
-        }
-        return { token, kelompok, nama: cek.nama, iq: parseInt(row.x_06) || 0 };
-    });
+    _excelRangeData = target.map(row => ({
+        token : tokenBersih(row.x_01 || row.id_x),
+        nama  : ambilNamaDariBiodata(row),
+        iq    : parseInt(row.x_06) || 0
+    }));
 
     document.getElementById('excel-range-label').textContent = labelTeks;
-    document.getElementById('excelKelompokToken').checked = false;
-    renderExcelPreview();
+
+    const tbody = document.getElementById('excel-range-tbody');
+    tbody.innerHTML = _excelRangeData.map((d, i) => `
+        <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:6px 8px;">${i + 1}</td>
+            <td style="padding:6px 8px;">${escapeHtml(d.token)}</td>
+            <td style="padding:6px 8px;">${escapeHtml(d.nama)}</td>
+            <td style="padding:6px 8px;">${d.iq}</td>
+        </tr>
+    `).join('');
 
     document.getElementById('modal-excel-overlay').style.display = 'flex';
-}
-
-// Susun _excelRangeData (urutan sesuai id_x, TIDAK diurutkan ulang lagi di sini) menjadi daftar
-// baris siap-tulis: header selalu di baris pertama; kalau dikelompokkan=true, setiap kali angka
-// awal token (dari tokenBersih, dibaca sebagai integer) berubah dari baris sebelumnya, sisipkan
-// 1 baris kosong, lalu 1 baris "KELOMPOK : <angka>", lalu 1 baris header baru sebelum lanjut data.
-function susunEksporToken(data, dikelompokkan) {
-    if (!dikelompokkan) {
-        const baris = [{ tipe: 'header' }];
-        data.forEach(d => baris.push({ tipe: 'data', d }));
-        return baris;
-    }
-    const baris = [];
-    let kelompokSebelumnya = null;
-    data.forEach(d => {
-        if (d.kelompok !== kelompokSebelumnya) {
-            if (kelompokSebelumnya !== null) baris.push({ tipe: 'blank' });
-            baris.push({ tipe: 'kelompok', angka: d.kelompok });
-            baris.push({ tipe: 'header' });
-        }
-        baris.push({ tipe: 'data', d });
-        kelompokSebelumnya = d.kelompok;
-    });
-    return baris;
-}
-
-function renderExcelPreview() {
-    const dikelompokkan = document.getElementById('excelKelompokToken').checked;
-    const baris = susunEksporToken(_excelRangeData, dikelompokkan);
-    const tbody = document.getElementById('excel-range-tbody');
-    let nomor = 0;
-    tbody.innerHTML = baris.map(b => {
-        if (b.tipe === 'blank') {
-            return `<tr><td colspan="4" style="padding:4px; border-bottom:1px solid #eee;">&nbsp;</td></tr>`;
-        }
-        if (b.tipe === 'kelompok') {
-            return `<tr><td colspan="4" style="padding:8px; font-weight:bold; color:#333; background:#fafafa;">KELOMPOK : ${b.angka}</td></tr>`;
-        }
-        if (b.tipe === 'header') {
-            nomor = 0;
-            return `<tr style="background:#f5f3ff;">
-                <td style="padding:6px 8px; font-weight:bold; color:#5F4EDA;"></td>
-                <td style="padding:6px 8px; font-weight:bold; color:#5F4EDA;">Token</td>
-                <td style="padding:6px 8px; font-weight:bold; color:#5F4EDA;">Nama</td>
-                <td style="padding:6px 8px; font-weight:bold; color:#5F4EDA;">IQ</td>
-            </tr>`;
-        }
-        nomor++;
-        return `<tr style="border-bottom:1px solid #eee;">
-            <td style="padding:6px 8px;">${nomor}</td>
-            <td style="padding:6px 8px;">${escapeHtml(b.d.token)}</td>
-            <td style="padding:6px 8px;">${escapeHtml(b.d.nama)}</td>
-            <td style="padding:6px 8px;">${b.d.iq}</td>
-        </tr>`;
-    }).join('');
 }
 
 function tutupModalExcelRange() {
@@ -3539,18 +3302,12 @@ function downloadExcelRange() {
         return;
     }
 
-    const dikelompokkan = document.getElementById('excelKelompokToken').checked;
-    const baris = susunEksporToken(_excelRangeData, dikelompokkan);
-    let nomorExport = 0;
-    const wsData = baris.map(b => {
-        if (b.tipe === 'blank')    return [];
-        if (b.tipe === 'kelompok') return [`KELOMPOK : ${b.angka}`];
-        if (b.tipe === 'header')   { nomorExport = 0; return ['No', 'Nama', 'IQ']; }
-        nomorExport++;
-        return [nomorExport, b.d.nama, b.d.iq];
-    });
+    const wsData = [
+        ['Token', 'Nama', 'IQ'],
+        ..._excelRangeData.map(d => [d.token, d.nama, d.iq])
+    ];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!cols'] = [{ wch: 6 }, { wch: 30 }, { wch: 8 }];
+    ws['!cols'] = [{ wch: 14 }, { wch: 30 }, { wch: 8 }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Data');
 
