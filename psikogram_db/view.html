@@ -169,6 +169,12 @@
         .info-container_a {
             text-align: center; display: flex;
             flex-direction: column; align-items: center;
+            width: 100%;
+        }
+        /* Hanya dipakai saat Versi 2 aktif (lihat terapkanVersiKop()) — menarik teks ke tengah
+           layar penuh, karena kop Versi 2 (index_final) memang didesain seperti itu. Versi 1
+           TIDAK memakai ini, tetap seperti aslinya (center di dalam kolom grid). */
+        .info-container_a.versi2-center {
             margin-left: -80px;
             width: 95%;
         }
@@ -1639,7 +1645,10 @@ function terapkanVersiKop(versi) {
     const ttdEl  = document.getElementById('header-ttd-img');
     const qrWrap = document.getElementById('qr-wrap');
     if (logoEl) logoEl.src = cfg.logoImg;
-    if (infoEl) infoEl.innerHTML = cfg.headerHtml;
+    if (infoEl) {
+        infoEl.innerHTML = cfg.headerHtml;
+        infoEl.classList.toggle('versi2-center', versi === 'v2');
+    }
     if (ttdEl)  ttdEl.src = cfg.ttdImg;
     document.documentElement.style.setProperty('--watermark-logo', `url('${cfg.watermarkImg}')`);
     if (qrWrap) qrWrap.style.display = cfg.showQr ? 'block' : 'none';
