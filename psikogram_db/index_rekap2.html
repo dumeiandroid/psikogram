@@ -623,74 +623,9 @@
         .skor-c  { background: #fff3cd; color: #856404; }  /* 5-6  Cukup  */
         .skor-b  { background: #cce5ff; color: #004085; }  /* 7-8  Baik   */
         .skor-bs { background: #d4edda; color: #155724; }  /* 9-10 Baik Sekali */
-
-        /* ── LOGIN OVERLAY (shared login via cookie domain=.lidan.co.id) ── */
-        #login-overlay {
-            position: fixed; inset: 0; z-index: 99999;
-            background: var(--bg);
-            display: flex; align-items: center; justify-content: center; padding: 16px;
-        }
-        #login-overlay.hidden { display: none; }
-        .login-card {
-            width: 100%; max-width: 380px; background: var(--surface);
-            border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px;
-            box-shadow: 0 20px 60px rgba(0,0,0,.4);
-        }
-        .login-logo { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-        .login-logo span { color: var(--accent); }
-        .login-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
-        .login-field { margin-bottom: 14px; }
-        .login-field label {
-            display: block; font-size: 12px; font-weight: 700; color: var(--muted);
-            text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px;
-        }
-        .login-field input {
-            width: 100%; padding: 11px 14px; border: 1px solid var(--border);
-            border-radius: var(--radius); font-size: 14px; outline: none;
-            background: var(--surface2); color: var(--text); transition: border-color .2s;
-        }
-        .login-field input:focus { border-color: var(--accent); }
-        .login-btn {
-            width: 100%; padding: 12px; margin-top: 6px; border: none; border-radius: var(--radius);
-            background: var(--accent); color: #0d1117;
-            font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .2s;
-        }
-        .login-btn:hover:not(:disabled) { opacity: .9; }
-        .login-btn:disabled { opacity: .6; cursor: not-allowed; }
-        .login-err {
-            display: none; margin-top: 12px; font-size: 12px; color: var(--danger);
-            background: rgba(255,79,109,.1); border: 1px solid rgba(255,79,109,.35);
-            border-radius: 8px; padding: 8px 10px;
-        }
-        .logout-btn-rekap {
-            position: fixed; top: 16px; right: 16px; z-index: 500;
-            background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-            font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 99px; cursor: pointer;
-        }
-        .logout-btn-rekap:hover { border-color: var(--accent); }
     </style>
 </head>
 <body>
-
-<!-- ─── LOGIN (shared cookie domain=.lidan.co.id, sama dgn tools admin lain) ─── -->
-<div id="login-overlay">
-    <div class="login-card">
-        <div class="login-logo">lidan<span>.co</span></div>
-        <p class="login-subtitle">Admin Portal — Masuk untuk melanjutkan</p>
-        <div class="login-field">
-            <label>Username</label>
-            <input type="text" id="loginUsername" placeholder="Masukkan username" autocomplete="username">
-        </div>
-        <div class="login-field">
-            <label>Password</label>
-            <input type="password" id="loginPassword" placeholder="Masukkan password" autocomplete="current-password" onkeydown="if(event.key==='Enter') handleLogin()">
-        </div>
-        <button class="login-btn" id="loginBtn" onclick="handleLogin()">Masuk Dashboard</button>
-        <p id="loginErrMsg" class="login-err"></p>
-    </div>
-</div>
-<button class="logout-btn-rekap" onclick="handleLogout()">🚪 Keluar</button>
-
 
 <!-- Toast Notifikasi -->
 <div id="toast-msg"></div>
@@ -1397,83 +1332,6 @@
 </div>
 
 <script>
-    /* ══════════════════════════════════════════════════════════
-       AUTH — cookie shared 'isAdminLoggedIn' (domain=.lidan.co.id)
-       Sama dengan index.html / monitoring_akun.html, sehingga kalau
-       sudah login di salah satu tool admin, halaman ini otomatis
-       dianggap login juga (asal masih 1 domain akar lidan.co.id).
-    ══════════════════════════════════════════════════════════ */
-    const AUTH_COOKIE = 'isAdminLoggedIn';
-    const AUTH_COOKIE_DOMAIN = '.lidan.co.id';
-    const AUTH_LOGIN_ENDPOINT = 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis6';
-
-    function setAuthCookie(value, days = 7) {
-        const maxAge = days * 24 * 60 * 60;
-        document.cookie = `${AUTH_COOKIE}=${value}; domain=${AUTH_COOKIE_DOMAIN}; path=/; max-age=${maxAge}; samesite=lax; secure`;
-    }
-    function getAuthCookie() {
-        const m = document.cookie.match(new RegExp('(?:^|; )' + AUTH_COOKIE + '=([^;]*)'));
-        return m ? m[1] : null;
-    }
-    function clearAuthCookie() {
-        document.cookie = `${AUTH_COOKIE}=; domain=${AUTH_COOKIE_DOMAIN}; path=/; max-age=0`;
-    }
-
-    async function handleLogin() {
-        const user = document.getElementById('loginUsername').value.trim();
-        const pass = document.getElementById('loginPassword').value;
-        const errEl = document.getElementById('loginErrMsg');
-        errEl.style.display = 'none';
-
-        if (!user || !pass) {
-            errEl.textContent = 'Username dan password wajib diisi';
-            errEl.style.display = 'block';
-            return;
-        }
-
-        const btn = document.getElementById('loginBtn');
-        btn.disabled = true; btn.textContent = 'Memproses...';
-
-        try {
-            const response = await fetch(`${AUTH_LOGIN_ENDPOINT}?action=login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Custom-Auth': 'admin',
-                    'X-Role': 'admin'
-                },
-                body: JSON.stringify({ username: user, password: pass })
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                setAuthCookie('true');
-                document.getElementById('login-overlay').classList.add('hidden');
-            } else {
-                errEl.textContent = result.message || 'Login gagal. Periksa kembali kredensial Anda.';
-                errEl.style.display = 'block';
-            }
-        } catch (e) {
-            errEl.textContent = 'Terjadi kesalahan koneksi. Coba lagi.';
-            errEl.style.display = 'block';
-        } finally {
-            btn.disabled = false; btn.textContent = 'Masuk Dashboard';
-        }
-    }
-
-    function handleLogout() {
-        if (!confirm('Keluar dari dashboard?')) return;
-        clearAuthCookie();
-        location.reload();
-    }
-
-    // Cek status login saat halaman dibuka
-    (function checkLoginOnLoad() {
-        if (getAuthCookie() === 'true') {
-            document.getElementById('login-overlay').classList.add('hidden');
-        }
-    })();
-
     const API_URL    = 'https://lidan-co-id.pages.dev/api/db_psikogram1';
     const SECRET     = 'admin';
     const REFRESH_MS = 5000;
