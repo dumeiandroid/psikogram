@@ -782,7 +782,6 @@
                 style="flex:1; min-width:200px; background:var(--bg); border:1px solid var(--border);
                        color:var(--text); border-radius:7px; padding:8px 12px; font-family:'DM Mono',monospace;
                        font-size:13px; outline:none;"
-                oninput="renderTabelList(this.value)"
                 onkeydown="if(event.key==='Enter') gantiTabel()">
             <button class="btn btn-secondary" onclick="gantiTabel()" style="background:var(--accent); color:#0d0f14; border:none;">Terapkan</button>
             <button class="btn btn-secondary" onclick="toggleTabelInput()">Batal</button>
@@ -1785,8 +1784,7 @@
         const isOpen = box.style.display !== 'none';
         box.style.display = isOpen ? 'none' : 'block';
         if (!isOpen) {
-            document.getElementById('inputTabelBaru').value = '';
-            document.getElementById('inputTabelBaru').placeholder = `Aktif: ${TABLE_NAME} — ketik untuk cari tabel lain`;
+            document.getElementById('inputTabelBaru').value = TABLE_NAME;
             document.getElementById('inputTabelBaru').focus();
             loadTabelList();
         }
@@ -1800,40 +1798,31 @@
         setTabelAktif(val);
     }
 
-    let _semuaTabel = [];
-
     async function loadTabelList() {
         try {
             const res = await fetch(`${API_URL}?action=list_tables`, {
                 headers: { 'X-Custom-Auth': SECRET }
             });
             const result = await res.json();
-            _semuaTabel = result.tables || [];
-            renderTabelList(document.getElementById('inputTabelBaru').value);
+            const container = document.getElementById('tabelList');
+            container.innerHTML = '';
+            (result.tables || []).forEach(t => {
+                const btn = document.createElement('button');
+                btn.textContent = t;
+                btn.style.cssText = `background:${t === TABLE_NAME ? 'var(--accent)' : 'var(--surface)'};
+                    color:${t === TABLE_NAME ? '#0d0f14' : 'var(--text)'};
+                    border:1px solid var(--border); border-radius:6px;
+                    padding:5px 12px; font-size:12px; font-family:'DM Mono',monospace;
+                    cursor:pointer; transition:background .15s;`;
+                btn.onclick = () => {
+                    TABLE_NAME = t;
+                    document.getElementById('inputTabelBaru').value = t;
+                    document.getElementById('gantiTabelBox').style.display = 'none';
+                    setTabelAktif(t);
+                };
+                container.appendChild(btn);
+            });
         } catch(e) { /* silent */ }
-    }
-
-    function renderTabelList(katakunci) {
-        const container = document.getElementById('tabelList');
-        container.innerHTML = '';
-        const q = (katakunci || '').trim().toLowerCase();
-        const daftar = q ? _semuaTabel.filter(t => t.toLowerCase().includes(q)) : _semuaTabel;
-        daftar.forEach(t => {
-            const btn = document.createElement('button');
-            btn.textContent = t;
-            btn.style.cssText = `background:${t === TABLE_NAME ? 'var(--accent)' : 'var(--surface)'};
-                color:${t === TABLE_NAME ? '#0d0f14' : 'var(--text)'};
-                border:1px solid var(--border); border-radius:6px;
-                padding:5px 12px; font-size:12px; font-family:'DM Mono',monospace;
-                cursor:pointer; transition:background .15s;`;
-            btn.onclick = () => {
-                TABLE_NAME = t;
-                document.getElementById('inputTabelBaru').value = t;
-                document.getElementById('gantiTabelBox').style.display = 'none';
-                setTabelAktif(t);
-            };
-            container.appendChild(btn);
-        });
     }
 
     function safeJSON(str, def) {
