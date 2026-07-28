@@ -545,7 +545,6 @@
         <input type="number" id="inputExcelMulai" placeholder="dari id_x" style="width:85px; margin-left:6px;">
         <input type="number" id="inputExcelSampai" placeholder="sampai id_x" style="width:90px;">
         <button onclick="bukaModalExcelRange()">📊 Export Excel</button>
-        <button onclick="bukaModalKelengkapan()">🔍 Kelengkapan</button>
     </span>
     <span class="konsistensi-info" id="konsistensi-display">Konsistensi = -</span>
 </div>
@@ -592,66 +591,6 @@
                 border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">Tutup</button>
             <button onclick="downloadExcelRange()" style="background:#5F4EDA; color:white;
                 border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">⬇️ Download Excel (.xlsx)</button>
-        </div>
-    </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     MODAL KELENGKAPAN — Tidak Mengikuti Tes & Tidak Menyelesaikan Tes
-     ═══════════════════════════════════════ -->
-<div id="modal-kelengkapan-overlay" style="
-    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.6); z-index:10600;
-    align-items:flex-start; justify-content:center;
-    overflow-y:auto; padding:30px 16px;">
-    <div style="background:white; border-radius:12px; width:100%; max-width:750px;
-        box-shadow:0 8px 40px rgba(0,0,0,0.35); overflow:hidden; margin:auto;
-        display:flex; flex-direction:column; max-height:85vh;">
-        <div style="padding:16px 22px; border-bottom:1px solid #eee; display:flex;
-            justify-content:space-between; align-items:center;">
-            <strong style="color:#5F4EDA; font-size:16px;">🔍 Kelengkapan Data — id_x <span id="kelengkapan-range-label"></span></strong>
-            <button onclick="tutupModalKelengkapan()" style="background:none; border:none;
-                font-size:20px; cursor:pointer; color:#888;">✕</button>
-        </div>
-        <div style="overflow-y:auto; padding:14px 22px;">
-            <div style="margin-bottom:18px;">
-                <div style="font-weight:bold; color:#c0392b; font-size:14px; margin-bottom:6px;">
-                    ⚠️ Tidak Mengikuti Tes (<span id="kelengkapan-tidak-ikut-count">0</span>)
-                </div>
-                <table style="width:100%; border-collapse:collapse; font-size:13px;">
-                    <thead>
-                        <tr style="background:#f5f3ff;">
-                            <th style="padding:6px 8px; text-align:left; border-bottom:2px solid #e0d9ff; width:40px;">No</th>
-                            <th style="padding:6px 8px; text-align:left; border-bottom:2px solid #e0d9ff;">Token</th>
-                            <th style="padding:6px 8px; text-align:left; border-bottom:2px solid #e0d9ff;">Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="kelengkapan-tidak-ikut-body"></tbody>
-                </table>
-            </div>
-            <div>
-                <div style="font-weight:bold; color:#c0392b; font-size:14px; margin-bottom:6px;">
-                    ⚠️ Tidak Menyelesaikan Tes (<span id="kelengkapan-tidak-lengkap-count">0</span>)
-                </div>
-                <table style="width:100%; border-collapse:collapse; font-size:13px;">
-                    <thead>
-                        <tr style="background:#f5f3ff;">
-                            <th style="padding:6px 8px; text-align:left; border-bottom:2px solid #e0d9ff; width:40px;">No</th>
-                            <th style="padding:6px 8px; text-align:left; border-bottom:2px solid #e0d9ff;">Token</th>
-                            <th style="padding:6px 8px; text-align:left; border-bottom:2px solid #e0d9ff;">Nama</th>
-                            <th style="padding:6px 8px; text-align:left; border-bottom:2px solid #e0d9ff;">Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="kelengkapan-tidak-lengkap-body"></tbody>
-                </table>
-            </div>
-        </div>
-        <div style="padding:14px 22px; border-top:1px solid #eee; display:flex;
-            justify-content:flex-end; gap:10px;">
-            <button onclick="tutupModalKelengkapan()" style="background:#eee; color:#333;
-                border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">Tutup</button>
-            <button onclick="downloadKelengkapanTxt()" style="background:#5F4EDA; color:white;
-                border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">⬇️ Download (.txt)</button>
         </div>
     </div>
 </div>
@@ -3777,11 +3716,9 @@ function toggleExcelMode() {
     document.getElementById('inputExcelSampai').style.opacity = isAll ? 0.5 : 1;
 }
 
-// Ambil daftar baris (target) sesuai mode Range/All yang di-set di panel Export Excel.
-// Dipakai bersama oleh Export Excel & modal Kelengkapan supaya kedua tombol selalu
-// konsisten mengacu ke rentang id_x yang sama. Return null (+ toast error) kalau input
-// tidak valid / tidak ada data.
-function ambilTargetRangeExcel() {
+function bukaModalExcelRange() {
+    if (!_daftarRows.length) { tampilToast('⚠️ Pilih tabel terlebih dahulu.', 'error'); return; }
+
     const modeAll = document.getElementById('excelModeAll').checked;
     let target;
     let labelTeks;
@@ -3790,7 +3727,7 @@ function ambilTargetRangeExcel() {
         target = _daftarRows.slice();
         if (!target.length) {
             tampilToast(`⚠️ Tidak ada data di tabel "${CONFIG.TABLE_NAME}".`, 'error');
-            return null;
+            return;
         }
         labelTeks = `Semua (${target.length} data)`;
     } else {
@@ -3801,7 +3738,7 @@ function ambilTargetRangeExcel() {
 
         if (isNaN(mulai) || isNaN(sampai)) {
             tampilToast('⚠️ Isi id_x "dari" dan "sampai" dengan angka.', 'error');
-            return null;
+            return;
         }
 
         const batasBawah = Math.min(mulai, sampai);
@@ -3814,20 +3751,10 @@ function ambilTargetRangeExcel() {
 
         if (!target.length) {
             tampilToast(`⚠️ Tidak ada data dengan id_x antara ${batasBawah} - ${batasAtas} di tabel "${CONFIG.TABLE_NAME}".`, 'error');
-            return null;
+            return;
         }
         labelTeks = `${batasBawah} - ${batasAtas} (${target.length} data)`;
     }
-
-    return { target, labelTeks };
-}
-
-function bukaModalExcelRange() {
-    if (!_daftarRows.length) { tampilToast('⚠️ Pilih tabel terlebih dahulu.', 'error'); return; }
-
-    const hasilRange = ambilTargetRangeExcel();
-    if (!hasilRange) return;
-    const { target, labelTeks } = hasilRange;
 
     const targetUrut = target
         .slice()
@@ -3946,124 +3873,6 @@ function downloadExcelRange() {
         const sampaiInp = document.getElementById('inputExcelSampai').value;
         XLSX.writeFile(wb, `data_${CONFIG.TABLE_NAME}_id${mulaiInp}-${sampaiInp}.xlsx`);
     }
-}
-
-// =========================================================
-// MODAL KELENGKAPAN — Tidak Mengikuti Tes & Tidak Menyelesaikan Tes
-// Pakai rentang id_x yang sama dengan panel Export Excel (Range/All)
-// =========================================================
-let _kelengkapanData = { tidakIkut: [], tidakLengkap: [], labelTeks: '' };
-
-function bukaModalKelengkapan() {
-    if (!_daftarRows.length) { tampilToast('⚠️ Pilih tabel terlebih dahulu.', 'error'); return; }
-
-    const hasilRange = ambilTargetRangeExcel();
-    if (!hasilRange) return;
-    const { target, labelTeks } = hasilRange;
-
-    const targetUrut = target
-        .slice()
-        .sort((a, b) => (parseInt(a.id_x, 10) || 0) - (parseInt(b.id_x, 10) || 0));
-
-    const tidakIkut = [];
-    const tidakLengkap = [];
-
-    targetUrut.forEach(row => {
-        const cek = cekKelengkapanPeserta(row);
-        if (cek.status === 'tidak_ikut') {
-            tidakIkut.push({ token: cek.tokenLengkap });
-        } else if (cek.status === 'tidak_lengkap') {
-            tidakLengkap.push({ token: cek.tokenLengkap, nama: cek.nama });
-        }
-    });
-
-    _kelengkapanData = { tidakIkut, tidakLengkap, labelTeks };
-
-    document.getElementById('kelengkapan-range-label').textContent = labelTeks;
-    renderKelengkapanPreview();
-
-    document.getElementById('modal-kelengkapan-overlay').style.display = 'flex';
-}
-
-function renderKelengkapanPreview() {
-    const { tidakIkut, tidakLengkap } = _kelengkapanData;
-
-    document.getElementById('kelengkapan-tidak-ikut-count').textContent = tidakIkut.length;
-    document.getElementById('kelengkapan-tidak-lengkap-count').textContent = tidakLengkap.length;
-
-    const bodyIkut = document.getElementById('kelengkapan-tidak-ikut-body');
-    bodyIkut.innerHTML = tidakIkut.length
-        ? tidakIkut.map((d, i) => `<tr style="border-bottom:1px solid #eee;">
-            <td style="padding:6px 8px;">${i + 1}</td>
-            <td style="padding:6px 8px;">${escapeHtml(d.token)}</td>
-            <td style="padding:6px 8px; color:#c0392b;">Tidak Mengikuti Tes</td>
-        </tr>`).join('')
-        : `<tr><td colspan="3" style="padding:10px; color:#888; text-align:center;">Tidak ada data.</td></tr>`;
-
-    const bodyLengkap = document.getElementById('kelengkapan-tidak-lengkap-body');
-    bodyLengkap.innerHTML = tidakLengkap.length
-        ? tidakLengkap.map((d, i) => `<tr style="border-bottom:1px solid #eee;">
-            <td style="padding:6px 8px;">${i + 1}</td>
-            <td style="padding:6px 8px;">${escapeHtml(d.token)}</td>
-            <td style="padding:6px 8px;">${escapeHtml(d.nama)}</td>
-            <td style="padding:6px 8px; color:#c0392b;">Tidak Menyelesaikan Tes</td>
-        </tr>`).join('')
-        : `<tr><td colspan="4" style="padding:10px; color:#888; text-align:center;">Tidak ada data.</td></tr>`;
-}
-
-function tutupModalKelengkapan() {
-    document.getElementById('modal-kelengkapan-overlay').style.display = 'none';
-}
-
-function downloadKelengkapanTxt() {
-    const { tidakIkut, tidakLengkap, labelTeks } = _kelengkapanData;
-
-    if (!tidakIkut.length && !tidakLengkap.length) {
-        tampilToast('⚠️ Tidak ada data bermasalah pada rentang ini.', 'error');
-        return;
-    }
-
-    const lines = [];
-    lines.push(`LAPORAN KELENGKAPAN DATA — ${CONFIG.TABLE_NAME}`);
-    lines.push(`Rentang id_x : ${labelTeks}`);
-    lines.push(`Dicetak      : ${new Date().toLocaleString('id-ID')}`);
-    lines.push('');
-    lines.push('='.repeat(60));
-    lines.push(`TIDAK MENGIKUTI TES (${tidakIkut.length})`);
-    lines.push('='.repeat(60));
-    if (tidakIkut.length) {
-        tidakIkut.forEach((d, i) => lines.push(`${i + 1}. Token: ${d.token} — Tidak Mengikuti Tes`));
-    } else {
-        lines.push('(tidak ada)');
-    }
-    lines.push('');
-    lines.push('='.repeat(60));
-    lines.push(`TIDAK MENYELESAIKAN TES (${tidakLengkap.length})`);
-    lines.push('='.repeat(60));
-    if (tidakLengkap.length) {
-        tidakLengkap.forEach((d, i) => lines.push(`${i + 1}. Nama: ${d.nama} — Token: ${d.token} — Tidak Menyelesaikan Tes`));
-    } else {
-        lines.push('(tidak ada)');
-    }
-
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-
-    const modeAll = document.getElementById('excelModeAll').checked;
-    if (modeAll) {
-        a.download = `kelengkapan_${CONFIG.TABLE_NAME}_ALL.txt`;
-    } else {
-        const mulaiInp  = document.getElementById('inputExcelMulai').value;
-        const sampaiInp = document.getElementById('inputExcelSampai').value;
-        a.download = `kelengkapan_${CONFIG.TABLE_NAME}_id${mulaiInp}-${sampaiInp}.txt`;
-    }
-
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
 }
 
 async function tampilkanPosisi(idx) {
