@@ -3292,11 +3292,10 @@ function hitungKelompokUrut(tokenList) {
         return blockIndex;
     });
 }
-// - nama di x_02 kosong/tidak ada              -> 'tidak_ikut'   (dianggap tidak ikut ujian)
-// - (sudah punya nama, jadi bukan 'tidak_ikut') tapi salah satu dari
-//   x_04 / x_05 / x_06 bukan objek JSON valid, kosong, atau ada
-//   field di dalamnya bernilai null/undefined/''  -> 'tidak_lengkap' (tidak menyelesaikan tes)
-// - selain itu                                    -> 'lengkap'
+// - nama di x_02 kosong/tidak ada           -> 'tidak_ikut'   (dianggap tidak ikut ujian)
+// - x_07 / x_08 / x_09 bukan array, kosong,
+//   atau ada elemen di dalamnya yang kosong -> 'tidak_lengkap' (tidak menyelesaikan seluruh tes)
+// - selain itu                              -> 'lengkap'
 function cekKelengkapanPeserta(row) {
     const tokenLengkap = String(row.x_01 || row.id_x || '');
     let nama = '';
@@ -3306,16 +3305,14 @@ function cekKelengkapanPeserta(row) {
         return { status: 'tidak_ikut', nama, tokenLengkap };
     }
 
-    const jsonPunyaNull = (str) => {
-        let obj;
-        try { obj = JSON.parse(str || '{}'); } catch { return true; }
-        if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return true;
-        const keys = Object.keys(obj);
-        if (keys.length === 0) return true;
-        return keys.some(k => obj[k] === null || obj[k] === undefined || obj[k] === '');
+    const arrayPunyaKosong = (str) => {
+        let arr;
+        try { arr = JSON.parse(str || '[]'); } catch { return true; }
+        if (!Array.isArray(arr) || arr.length === 0) return true;
+        return arr.some(el => !String(el || '').trim());
     };
 
-    if (jsonPunyaNull(row.x_04) || jsonPunyaNull(row.x_05) || jsonPunyaNull(row.x_06)) {
+    if (arrayPunyaKosong(row.x_07) || arrayPunyaKosong(row.x_08) || arrayPunyaKosong(row.x_09)) {
         return { status: 'tidak_lengkap', nama, tokenLengkap };
     }
 
