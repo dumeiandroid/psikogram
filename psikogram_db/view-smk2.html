@@ -817,8 +817,8 @@
             <button onclick="ubahFont(2,+0.5)" style="width:28px;height:28px;border-radius:50%;border:1px solid #5F4EDA;background:white;color:#5F4EDA;font-size:16px;cursor:pointer;font-weight:bold;">+</button>
         </div>
 
-        <!-- Zoom Halaman 3 — Gaya Belajar (disembunyikan; VAK tidak lagi ditampilkan/diproses) -->
-        <div style="display:none; align-items:center; gap:8px; background:#f0edff; padding:8px 12px; border-radius:8px;">
+        <!-- Zoom Halaman 3 — Gaya Belajar -->
+        <div style="display:flex; align-items:center; gap:8px; background:#f0edff; padding:8px 12px; border-radius:8px;">
             <span style="font-size:13px; font-weight:bold; color:#5F4EDA;">Hal. 3 (Gaya Belajar):</span>
             <button onclick="ubahFont(3,-5)" style="width:28px;height:28px;border-radius:50%;border:1px solid #5F4EDA;background:white;color:#5F4EDA;font-size:16px;cursor:pointer;font-weight:bold;">−</button>
             <span id="label-fs3" style="min-width:36px;text-align:center;font-weight:bold;font-size:13px;color:#333;"></span>
@@ -881,8 +881,8 @@
             </div>
         </div>
 
-        <h1 style="text-align:center; margin-bottom:0; font-weight:bold; color:#5F4EDA;">Laporan Hasil</h1>
-        <h1 style="text-align:center; margin-top:4px;">PSIKOTES KESIAPAN KERJA</h1>
+        <h2 style="text-align:center; margin-bottom:0;">Laporan Hasil</h2>
+        <h2 style="text-align:center; margin-top:4px;">PSIKOTES KESIAPAN KERJA</h2>
 
         <!-- Data Peserta -->
         <div class="pdf-section-header">Data Peserta</div>
@@ -984,8 +984,8 @@
         </div>
         <div id="vak-temp-content" style="display:none;">
 
-            <!-- ── GAYA BELAJAR VAK (disembunyikan dari layar & PDF atas permintaan user) ── -->
-            <div id="vak-section" style="display:none; margin-bottom:30px;">
+            <!-- ── GAYA BELAJAR VAK ── -->
+            <div id="vak-section" style="margin-bottom:30px;">
                 <h3 class="pdf-section-header" style="text-align:center;">📚 Hasil Tes Gaya Belajar VAK</h3>
 
                 <div id="vak-result-card" style="padding:20px; border-radius:10px; border-left:8px solid; background:#f8f9fa; margin-bottom:16px;">
@@ -1030,12 +1030,6 @@
                         <strong style="color:#e74c3c;">⚠️ Kelemahan</strong>
                         <ul id="temp-kelemahan" style="list-style:none; padding:0; margin-top:8px;"></ul>
                     </div>
-                </div>
-
-                <!-- ── KETERANGAN 4 TIPE DISC (referensi umum, ringkas) ── -->
-                <div id="disc-keterangan-section" style="margin-top:18px;">
-                    <h4 style="text-align:center; color:#2c3e50; margin:0 0 10px;">📌 Keterangan Tipe DISC</h4>
-                    <div id="disc-keterangan-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
                 </div>
 
             </div>
@@ -1173,7 +1167,7 @@
                 <div id="iq-kategori-info" style="margin-top:8px; font-size:14px; color:#555;"></div>
                 <div style="margin-top:16px; background:#f8f9fa; border-radius:8px; padding:14px; font-size:13px; color:#555; line-height:1.8;">
                     <strong>Panduan Kategori IQ:</strong><br>
-                    ≤79 = Borderline &nbsp;|&nbsp; 80–89 = Rata-rata Bawah<br>
+                    ≤69 = Mental Defective &nbsp;|&nbsp; 70–79 = Borderline &nbsp;|&nbsp; 80–89 = Rata-rata Bawah<br>
                     90–109 = Rata-rata &nbsp;|&nbsp; 110–119 = Di Atas Rata-rata<br>
                     120–129 = Superior &nbsp;|&nbsp; 130–139 = Sangat Superior &nbsp;|&nbsp; ≥140 = Genius
                 </div>
@@ -1479,34 +1473,6 @@ const TEMPERAMENTS = {
     }
 };
 
-// ── Render keterangan ringkas 4 tipe DISC (statis, tidak bergantung pada data peserta) ──
-// Urutan ditampilkan sesuai akronim D-I-S-C: Dominance(B), Influence(A), Steadiness(D), Compliance(C)
-// Deskripsi khusus untuk kartu "Keterangan Tipe DISC" (format "[NAMA] adalah tipe
-// kepribadian yang ..."), terpisah dari TEMPERAMENTS[k].description (dipakai di
-// kartu hasil dominan peserta) supaya tidak saling mempengaruhi.
-const DISC_KETERANGAN_DESC = {
-    B: 'DOMINANCE adalah tipe kepribadian yang ekstrovert, tegas, dan berorientasi pada tujuan. Individu dengan tipe ini cenderung suka memimpin, berani mengambil keputusan dengan cepat, dan fokus mencapai hasil.',
-    A: 'INFLUENCE adalah tipe kepribadian yang ekstrovert, antusias, dan suka bersosialisasi. Individu dengan tipe ini cenderung senang menjadi pusat perhatian, mudah bergaul, dan membuat suasana di sekitarnya menyenangkan.',
-    D: 'STEADINESS adalah tipe kepribadian yang introvert, tenang, dan menyukai harmoni. Individu dengan tipe ini cenderung sabar, suportif, dan berusaha menghindari konflik.',
-    C: 'COMPLIANCE adalah tipe kepribadian yang introvert, analitis, dan detail-oriented. Individu dengan tipe ini cenderung teliti, terstruktur, dan mengutamakan kesempurnaan dalam bekerja.'
-};
-
-function renderDiscKeterangan() {
-    const grid = document.getElementById('disc-keterangan-grid');
-    if (!grid) return;
-    const urutan = ['B', 'A', 'D', 'C'];
-    grid.innerHTML = urutan.map(k => {
-        const t = TEMPERAMENTS[k] || {};
-        return `<div style="border:2px solid ${t.color || '#ccc'}22; border-left:5px solid ${t.color || '#ccc'};
-            border-radius:8px; padding:10px 12px; background:#fff;">
-            <div style="font-weight:bold; color:${t.color || '#333'}; margin-bottom:4px;">
-                ${t.icon || ''} ${t.name || k}
-            </div>
-            <div style="font-size:0.85em; color:#555; line-height:1.4;">${DISC_KETERANGAN_DESC[k] || ''}</div>
-        </div>`;
-    }).join('');
-}
-
 // Seeded shuffle deterministik berdasarkan token
 function seededRandom(seed) {
     let h = 0;
@@ -1664,7 +1630,8 @@ function parseRekapData(row) {
 // KATEGORI IQ (dipakai di renderPage & buatDocDef)
 // =========================================================
 const KATEGORI_IQ_LIST = [
-    { range:'≤ 79',    label:'Borderline',        min:-Infinity, max:79  },
+    { range:'≤ 69',    label:'Mental Defective',  min:-Infinity, max:69  },
+    { range:'70-79',   label:'Borderline',        min:70,  max:79  },
     { range:'80-89',   label:'Rata-rata Bawah',   min:80,  max:89  },
     { range:'90-109',  label:'Rata-rata',         min:90,  max:109 },
     { range:'110-119', label:'Di Atas Rata-rata', min:110, max:119 },
@@ -2186,60 +2153,15 @@ function setupDownload() {
             return content;
         };
 
-        // Helper: bikin gambar bar gradient hitam→emas (sesuai CSS .pdf-section-header on-screen)
-        // via <canvas>, supaya di PDF bar-nya benar-benar gradient (bukan hitam polos seperti
-        // sebelumnya — keterbatasan pdfMake yang cuma bisa fillColor solid pada tabel).
-        function buatGradientBarImage(txt, fontSizePt, barHeightPt) {
-            const K = 3; // faktor skala render (biar teks tetap tajam)
-            const pdfW = 535;
-            const canvas = document.createElement('canvas');
-            canvas.width  = pdfW * K;
-            canvas.height = barHeightPt * K;
-            const ctx = canvas.getContext('2d');
-
-            // Gradient identik dgn CSS: linear-gradient(to right, #000 0%, #4a3d00 55%, #d4a017 100%)
-            const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-            grad.addColorStop(0,    '#000000');
-            grad.addColorStop(0.55, '#4a3d00');
-            grad.addColorStop(1,    '#d4a017');
-            ctx.fillStyle = grad;
-
-            // Rounded rect (border-radius:3px)
-            const r = 3 * K;
-            const w = canvas.width, h = canvas.height;
-            ctx.beginPath();
-            ctx.moveTo(r, 0);
-            ctx.lineTo(w - r, 0);
-            ctx.quadraticCurveTo(w, 0, w, r);
-            ctx.lineTo(w, h - r);
-            ctx.quadraticCurveTo(w, h, w - r, h);
-            ctx.lineTo(r, h);
-            ctx.quadraticCurveTo(0, h, 0, h - r);
-            ctx.lineTo(0, r);
-            ctx.quadraticCurveTo(0, 0, r, 0);
-            ctx.closePath();
-            ctx.fill();
-
-            // Teks putih bold, rata kiri (padding mirip CSS: 8pt kiri)
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `bold ${fontSizePt * K}px Arial, Helvetica, sans-serif`;
-            ctx.textBaseline = 'middle';
-            ctx.textAlign = 'left';
-            ctx.fillText(txt, 8 * K, h / 2 + (1 * K));
-
-            return { dataUrl: canvas.toDataURL('image/png'), width: pdfW, height: barHeightPt };
-        }
-
-        // Helper section-header gaya lampiran (pita hitam→emas, gradient)
-        const sectionBar = (txt, extraFS = 0) => {
-            const fontSizePt  = FS2 + 2 + extraFS;
-            const barHeightPt = fontSizePt + 12;
-            const img = buatGradientBarImage(txt, fontSizePt, barHeightPt);
-            return {
-                image: img.dataUrl, width: img.width, height: img.height,
-                margin:[0,10,0,8]
-            };
-        };
+        // Helper section-header gaya lampiran (pita hitam→emas)
+        const sectionBar = (txt, extraFS = 0) => ({
+            table: { widths:['*'], body:[[{
+                text:txt, bold:true, color:'#fff', fillColor:'#000',
+                fontSize:FS2 + 2 + extraFS, margin:[8,5,8,5]
+            }]] },
+            layout:{ hLineWidth:()=>0, vLineWidth:()=>0 },
+            margin:[0,10,0,8]
+        });
 
         // ── Halaman 1: Data Peserta + Verifikasi & Tanda Tangan Psikolog ──
         const hal1Content = [];
@@ -2422,8 +2344,7 @@ function setupDownload() {
                 // halaman dan lebar penuh, bukan proporsi gambar yang sempurna.
                 const gapVakTemp = 8; // jarak antara gambar VAK & Temperamen (pt)
 
-                // VAK sengaja dilewati total (tidak di-screenshot) — hanya DISC yang masuk PDF.
-                const vakRaw  = null;
+                const vakRaw  = await screenshotToImg('vak-section',  pdfW, FS3, null);
                 const tempRaw = await screenshotToImg('temp-section', pdfW, FS4, null);
 
                 let vakH  = vakRaw?.height  || 0;
@@ -2506,8 +2427,8 @@ function setupDownload() {
             content: [
                 // Halaman 1 — Data Peserta & Verifikasi Tanda Tangan Psikolog
                 ...headerInstitusi(),
-                { text:'Laporan Hasil', bold:true, color: UNGU, fontSize:FS1+6, alignment:'center', margin:[0,4,0,0] },
-                { text:'PSIKOTES KESIAPAN KERJA', bold:true, fontSize:FS1+6, alignment:'center', margin:[0,0,0,4] },
+                { text:'Laporan Hasil', bold:true, fontSize:FS1+4, alignment:'center', margin:[0,4,0,0] },
+                { text:'PSIKOTES KESIAPAN KERJA', bold:true, fontSize:FS1+4, alignment:'center', margin:[0,0,0,4] },
                 { stack: hal1Content, margin:[10,0,10,0] },
 
                 // Halaman 2 — A. Kategori IQ + B. Profil Psikologis
@@ -2820,7 +2741,8 @@ function updateIqKategori() {
     const iq = parseInt(document.getElementById('ed-iq').value) || 0;
     const el = document.getElementById('iq-kategori-info');
     let kat = '', warna = '';
-    if      (iq <= 79)  { kat='Borderline';           warna='#e67e22'; }
+    if      (iq <= 69)  { kat='Mental Defective';    warna='#dc3545'; }
+    else if (iq <= 79)  { kat='Borderline';           warna='#e67e22'; }
     else if (iq <= 89)  { kat='Rata-rata Bawah';      warna='#e6a817'; }
     else if (iq <= 109) { kat='Rata-rata';            warna='#27ae60'; }
     else if (iq <= 119) { kat='Di Atas Rata-rata';   warna='#2980b9'; }
@@ -3070,15 +2992,66 @@ function renderVakTempFromX18(rawData) {
     try {
         const x18 = typeof rawData.x_18 === 'string' ? JSON.parse(rawData.x_18 || '{}') : (rawData.x_18 || {});
 
-        if (!x18 || !x18.temperamen) {
+        if (!x18 || (!x18.vak && !x18.temperamen)) {
             loading.style.display = 'none';
             errDiv.style.display  = 'block';
-            errMsg.textContent    = 'Data tes DISC tidak ditemukan (x_18 kosong).';
+            errMsg.textContent    = 'Data tes gaya belajar & temperamen tidak ditemukan (x_18 kosong).';
             return;
         }
 
-        // ── Gaya Belajar VAK: SENGAJA DILEWATI TOTAL (tidak diproses/dirender) ──
-        // atas permintaan user — tampilan langsung DISC. #vak-section disembunyikan via CSS.
+        // ── Render Gaya Belajar VAK ──
+        const vak = x18.vak;
+        if (vak && vak.dominan) {
+            const vakDom  = vak.dominan;
+            const vakSkor = vak.skor || {};
+            const vakPct  = vak.persentase || {};
+            const total   = vak.total || Object.values(vakSkor).reduce((a, b) => a + b, 0) || 15;
+            const vakS    = LEARNING_STYLES[vakDom] || {};
+
+            document.getElementById('vak-dominan-label').innerHTML =
+                `<span style="color:${vakS.color || '#4a90e2'}">${vakS.icon || ''} ${vak.nama || vakS.name || ''}</span>`;
+            document.getElementById('vak-dominan-desc').textContent = vak.deskripsi || vakS.description || '';
+            document.getElementById('vak-result-card').style.borderColor = vakS.color || '#4a90e2';
+
+            // Bars
+            const barColors = { A: '#4a90e2', B: '#f39c12', C: '#2ecc71' };
+            const barLabels = { A: '👁️ Visual', B: '👂 Auditory', C: '🤸 Kinestetik' };
+            document.getElementById('vak-bars').innerHTML =
+                ['A','B','C'].map(k => `
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:bold;">
+                        <span>${barLabels[k]}</span><span>${vakPct[k] ?? 0}%</span>
+                    </div>
+                    <div style="background:#e0e0e0; height:22px; border-radius:11px; overflow:hidden;">
+                        <div style="width:${vakPct[k] ?? 0}%; height:100%; background:${barColors[k]};
+                            display:flex; align-items:center; padding-left:10px;
+                            color:white; font-weight:bold; font-size:12px;">
+                            ${vakSkor[k] ?? 0}/${total}
+                        </div>
+                    </div>
+                </div>`).join('');
+
+            // Karakteristik & Tips langsung dari x_18 (sudah final, tanpa perlu variasi ulang)
+            const karakteristik = vak.karakteristik || [];
+            const tips          = vak.tips || [];
+            document.getElementById('vak-karakteristik').innerHTML =
+                karakteristik.map(c =>
+                    `<li style="padding:5px 0; padding-left:22px; position:relative; color:#555; line-height:1.5;">
+                        <span style="position:absolute;left:0;color:#667eea;font-weight:bold;">✓</span>${c}</li>`
+                ).join('');
+            document.getElementById('vak-tips').innerHTML =
+                tips.map(t =>
+                    `<li style="padding:5px 0; padding-left:22px; position:relative; color:#555; line-height:1.5;">
+                        <span style="position:absolute;left:0;color:#667eea;font-weight:bold;">✓</span>${t}</li>`
+                ).join('');
+
+            // Simpan ke global untuk PDF
+            window._vakResult = { dom: vakDom, skor: vakSkor, pct: vakPct, total };
+        } else {
+            document.getElementById('vak-section').innerHTML =
+                '<p style="color:#888; text-align:center; padding:20px;">Data Gaya Belajar VAK belum tersedia.</p>';
+            window._vakResult = null;
+        }
 
         // ── Render Temperamen ──
         const temperamen = x18.temperamen;
@@ -3165,15 +3138,75 @@ async function fetchAndRenderVakTemp(token) {
         if (!json.success || json.count === 0) {
             loading.style.display = 'none';
             errDiv.style.display  = 'block';
-            errMsg.textContent    = 'Data tes DISC tidak ditemukan untuk token ini.';
+            errMsg.textContent    = 'Data tes gaya belajar & temperamen tidak ditemukan untuk token ini.';
             return;
         }
 
         const data = json.data[0];
         const x07  = JSON.parse(data.x_07 || '{}');
 
-        // ── Gaya Belajar VAK: SENGAJA DILEWATI TOTAL (tidak diproses/dirender) ──
-        // atas permintaan user — tampilan langsung DISC. #vak-section disembunyikan via CSS.
+        // ── Render Gaya Belajar VAK ──
+        const vakKey      = x07['tes-gaya-belajar-vak'] !== undefined ? 'tes-gaya-belajar-vak'
+                          : (x07['who_1'] !== undefined ? 'who_1' : null);
+        const vakStr      = vakKey ? x07[vakKey] : null;
+
+        if (vakStr) {
+            const vakArr  = vakStr.split(';').filter(v => v.trim() !== '');
+            const vakSkor = { A: 0, B: 0, C: 0 };
+            vakArr.forEach(v => { if (vakSkor[v] !== undefined) vakSkor[v]++; });
+            const total   = vakArr.length || 15;
+            const vakPct  = {
+                A: Math.round((vakSkor.A / total) * 100),
+                B: Math.round((vakSkor.B / total) * 100),
+                C: Math.round((vakSkor.C / total) * 100)
+            };
+            const vakDom  = Object.keys(vakSkor).reduce((a, b) => vakSkor[a] > vakSkor[b] ? a : b);
+            const vakS    = LEARNING_STYLES[vakDom];
+
+            document.getElementById('vak-dominan-label').innerHTML =
+                `<span style="color:${vakS.color}">${vakS.icon} ${vakS.name}</span>`;
+            document.getElementById('vak-dominan-desc').textContent = vakS.description;
+            document.getElementById('vak-result-card').style.borderColor = vakS.color;
+
+            // Bars
+            const barColors = { A: '#4a90e2', B: '#f39c12', C: '#2ecc71' };
+            const barLabels = { A: '👁️ Visual', B: '👂 Auditory', C: '🤸 Kinestetik' };
+            document.getElementById('vak-bars').innerHTML =
+                ['A','B','C'].map(k => `
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:bold;">
+                        <span>${barLabels[k]}</span><span>${vakPct[k]}%</span>
+                    </div>
+                    <div style="background:#e0e0e0; height:22px; border-radius:11px; overflow:hidden;">
+                        <div style="width:${vakPct[k]}%; height:100%; background:${barColors[k]};
+                            display:flex; align-items:center; padding-left:10px;
+                            color:white; font-weight:bold; font-size:12px;">
+                            ${vakSkor[k]}/${total}
+                        </div>
+                    </div>
+                </div>`).join('');
+
+            // Karakteristik & Tips (variasi deterministik per token)
+            const varChar = getVariasiVak(vakDom, 'characteristics', token);
+            const varTips = getVariasiVak(vakDom, 'tips', token);
+            document.getElementById('vak-karakteristik').innerHTML =
+                varChar.map(c =>
+                    `<li style="padding:5px 0; padding-left:22px; position:relative; color:#555; line-height:1.5;">
+                        <span style="position:absolute;left:0;color:#667eea;font-weight:bold;">✓</span>${c}</li>`
+                ).join('');
+            document.getElementById('vak-tips').innerHTML =
+                varTips.map(t =>
+                    `<li style="padding:5px 0; padding-left:22px; position:relative; color:#555; line-height:1.5;">
+                        <span style="position:absolute;left:0;color:#667eea;font-weight:bold;">✓</span>${t}</li>`
+                ).join('');
+
+            // Simpan ke global untuk PDF
+            window._vakResult = { dom: vakDom, skor: vakSkor, pct: vakPct, total };
+        } else {
+            document.getElementById('vak-section').innerHTML =
+                '<p style="color:#888; text-align:center; padding:20px;">Data Gaya Belajar VAK belum tersedia.</p>';
+            window._vakResult = null;
+        }
 
         // ── Render Temperamen ──
         const tempKey  = x07['input-tes-temperamen'] !== undefined ? 'input-tes-temperamen'
@@ -4577,7 +4610,7 @@ async function renderDataPeserta(rawData) {
         } else {
             document.getElementById('vak-temp-loading').style.display = 'none';
             document.getElementById('vak-temp-error').style.display  = 'block';
-            document.getElementById('vak-temp-error-msg').textContent = 'Data tes DISC tidak ditemukan.';
+            document.getElementById('vak-temp-error-msg').textContent = 'Data tes gaya belajar & temperamen tidak ditemukan.';
         }
 
         // QR Code — hanya digenerate kalau Versi 2 (kop index_final) sedang aktif; lihat VERSI_KOP_CONFIG.
@@ -4607,7 +4640,6 @@ function init() {
     document.getElementById('loading-screen').classList.add('hidden');
     document.getElementById('pilih-tabel-screen').classList.remove('hidden');
     terapkanVersiKop(_versiKop); // terapkan versi kop terakhir yang dipilih (localStorage), default Versi 1
-    renderDiscKeterangan(); // isi keterangan 4 tipe DISC (statis, sekali render)
 }
 
 init();

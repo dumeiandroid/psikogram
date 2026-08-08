@@ -1173,7 +1173,7 @@
                 <div id="iq-kategori-info" style="margin-top:8px; font-size:14px; color:#555;"></div>
                 <div style="margin-top:16px; background:#f8f9fa; border-radius:8px; padding:14px; font-size:13px; color:#555; line-height:1.8;">
                     <strong>Panduan Kategori IQ:</strong><br>
-                    ≤79 = Borderline &nbsp;|&nbsp; 80–89 = Rata-rata Bawah<br>
+                    ≤69 = Mental Defective &nbsp;|&nbsp; 70–79 = Borderline &nbsp;|&nbsp; 80–89 = Rata-rata Bawah<br>
                     90–109 = Rata-rata &nbsp;|&nbsp; 110–119 = Di Atas Rata-rata<br>
                     120–129 = Superior &nbsp;|&nbsp; 130–139 = Sangat Superior &nbsp;|&nbsp; ≥140 = Genius
                 </div>
@@ -1664,7 +1664,8 @@ function parseRekapData(row) {
 // KATEGORI IQ (dipakai di renderPage & buatDocDef)
 // =========================================================
 const KATEGORI_IQ_LIST = [
-    { range:'≤ 79',    label:'Borderline',        min:-Infinity, max:79  },
+    { range:'≤ 69',    label:'Mental Defective',  min:-Infinity, max:69  },
+    { range:'70-79',   label:'Borderline',        min:70,  max:79  },
     { range:'80-89',   label:'Rata-rata Bawah',   min:80,  max:89  },
     { range:'90-109',  label:'Rata-rata',         min:90,  max:109 },
     { range:'110-119', label:'Di Atas Rata-rata', min:110, max:119 },
@@ -2507,7 +2508,7 @@ function setupDownload() {
                 // Halaman 1 — Data Peserta & Verifikasi Tanda Tangan Psikolog
                 ...headerInstitusi(),
                 { text:'Laporan Hasil', bold:true, color: UNGU, fontSize:FS1+6, alignment:'center', margin:[0,4,0,0] },
-                { text:'PSIKOTES KESIAPAN KERJA', bold:true, fontSize:FS1+6, alignment:'center', margin:[0,0,0,4] },
+                { text:'PSIKOTES KESIAPAN KERJA', bold:true, fontSize:FS1+4, alignment:'center', margin:[0,0,0,4] },
                 { stack: hal1Content, margin:[10,0,10,0] },
 
                 // Halaman 2 — A. Kategori IQ + B. Profil Psikologis
@@ -2820,7 +2821,8 @@ function updateIqKategori() {
     const iq = parseInt(document.getElementById('ed-iq').value) || 0;
     const el = document.getElementById('iq-kategori-info');
     let kat = '', warna = '';
-    if      (iq <= 79)  { kat='Borderline';           warna='#e67e22'; }
+    if      (iq <= 69)  { kat='Mental Defective';    warna='#dc3545'; }
+    else if (iq <= 79)  { kat='Borderline';           warna='#e67e22'; }
     else if (iq <= 89)  { kat='Rata-rata Bawah';      warna='#e6a817'; }
     else if (iq <= 109) { kat='Rata-rata';            warna='#27ae60'; }
     else if (iq <= 119) { kat='Di Atas Rata-rata';   warna='#2980b9'; }
