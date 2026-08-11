@@ -772,6 +772,8 @@
                 style="background:#9b59b6; color:#fff; border:none;">🏁 Finishing</button>
         <button class="btn btn-secondary" id="btnView" onclick="bukaView()"
                 style="background:#2980b9; color:#fff; border:none;">👁 View</button>
+        <button class="btn btn-secondary" id="btnViewRekap" onclick="bukaViewRekap()"
+                style="background:#1abc9c; color:#fff; border:none;">👁 View Rekap</button>
         <span style="font-size:12px; color:var(--muted); margin-left:auto;" id="recordCount"></span>
     </div>
     <!-- Input ganti tabel -->
@@ -1777,6 +1779,11 @@
     // Buka halaman View, bawa tabel aktif saat ini, di tab/jendela baru
     function bukaView() {
         window.open(`view.html?tabel=${encodeURIComponent(TABLE_NAME)}&back=index_rekap.html`, '_blank');
+    }
+
+    // Buka halaman View Rekap, bawa tabel aktif saat ini, di tab/jendela baru
+    function bukaViewRekap() {
+        window.open(`view-smk.html?tabel=${encodeURIComponent(TABLE_NAME)}&back=index_rekap.html`, '_blank');
     }
 
     // Toggle box ganti tabel
