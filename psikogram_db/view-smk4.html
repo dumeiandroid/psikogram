@@ -1678,40 +1678,21 @@ function getKategoriIQ(iq) {
 }
 
 // =========================================================
-// REKOMENDASI KESIAPAN KERJA
-// Tahap 1: kategori dasar dari rata-rata skor KEMAMPUAN (index 0-5)
-//   1-4 = Belum Siap ; 5-6 = Perlu Penguatan ; 7-8 = Cukup Siap ; 9-10 = Siap Kerja
-// Tahap 2: rata-rata skor KEPRIBADIAN + SIKAP KERJA digabung (index 6-13)
-//   - jika rata-rata < 5  -> kategori dasar tetap (tidak berubah)
-//   - jika rata-rata >= 5 -> kategori naik 1 level dari kategori dasar
-//     (BELUM SIAP -> PERLU PENGUATAN -> CUKUP SIAP -> SIAP KERJA),
-//     kecuali kategori dasar sudah SIAP KERJA (level tertinggi, tetap SIAP KERJA)
+// REKOMENDASI KESIAPAN KERJA (rata-rata 3 skor Sikap Kerja)
+// 1-4 = Belum Siap ; 5-6 = Kurang Siap ; 7-8 = Cukup Siap ; 9-10 = Siap Kerja
 // (selaras dengan keterangan skor di B. Profil Psikologis:
 //  1-4 Kurang, 5-6 Cukup, 7-8 Baik, 9-10 Baik Sekali)
 // =========================================================
-const URUTAN_KESIAPAN = ['BELUM SIAP', 'PERLU PENGUATAN', 'CUKUP SIAP', 'SIAP KERJA'];
-
 function getKesiapanKerja(resultScores) {
-    // Tahap 1 — dasar dari KEMAMPUAN (index 0-5)
-    const skorKemampuan = resultScores.slice(0, 6);
-    const avgKemampuan = skorKemampuan.reduce((a, b) => a + b, 0) / (skorKemampuan.length || 1);
-
-    let level;
-    if      (avgKemampuan <= 4) level = 0; // BELUM SIAP
-    else if (avgKemampuan <= 6) level = 1; // PERLU PENGUATAN
-    else if (avgKemampuan <= 8) level = 2; // CUKUP SIAP
-    else                         level = 3; // SIAP KERJA
-
-    // Tahap 2 — KEPRIBADIAN + SIKAP KERJA digabung (index 6-13)
-    const skorKepribadianSikap = resultScores.slice(6, 14);
-    const avgKepribadianSikap = skorKepribadianSikap.reduce((a, b) => a + b, 0) / (skorKepribadianSikap.length || 1);
-
-    if (avgKepribadianSikap >= 5) {
-        level = Math.min(level + 1, URUTAN_KESIAPAN.length - 1);
-    }
-
-    const kategori = URUTAN_KESIAPAN[level];
-    return { avg: avgKemampuan, avgKemampuan, avgKepribadianSikap, kategori };
+    // resultScores index 11,12,13 = Keteraturan Kerja, Daya Inisiatif, Sikap Mandiri
+    const skorSikap = resultScores.slice(11, 14);
+    const avg = skorSikap.reduce((a, b) => a + b, 0) / (skorSikap.length || 1);
+    let kategori;
+    if      (avg <= 4) kategori = 'BELUM SIAP';
+    else if (avg <= 6) kategori = 'PERLU PENGUATAN';
+    else if (avg <= 8) kategori = 'CUKUP SIAP';
+    else                kategori = 'SIAP KERJA';
+    return { avg, kategori };
 }
 
 // =========================================================
