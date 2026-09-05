@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentasi Naratif - Alur Perhitungan Psikogram</title>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+            color: #1a1a2e;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #5F4EDA;
+            border-bottom: 3px solid #5F4EDA;
+            padding-bottom: 12px;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .subtitle {
+            color: #6c6c8a;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(95,78,218,0.95);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 9999; color: white;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #loading-screen.hidden { display: none; }
+
+        /* Tombol */
+        .tombol-nav {
+            background: #5F4EDA;
+            padding: 10px 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .tombol-nav button {
+            background: white; color: #5F4EDA;
+            border: none; padding: 6px 14px;
+            border-radius: 4px; cursor: pointer;
+            font-size: 13px; font-weight: bold;
+        }
+        .tombol-nav button:hover { background: #e0d9ff; }
+
+        /* Style Naratif */
+        .narasi-item {
+            background: #faf9ff;
+            border-left: 5px solid #5F4EDA;
+            border-radius: 0 10px 10px 0;
+            padding: 20px 25px;
+            margin: 25px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .narasi-item h2 {
+            color: #2d2b6b;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .narasi-item h2 .badge {
+            display: inline-block;
+            padding: 2px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .badge-K { background: #dc3545; color: white; }
+        .badge-C { background: #ffc107; color: #1a1a2e; }
+        .badge-B { background: #5F4EDA; color: white; }
+        .badge-BS { background: #28a745; color: white; }
+
+        .narasi-item .data-mentah {
+            background: #f0f2f5;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 8px 0;
+        }
+        .narasi-item .langkah {
+            padding: 4px 0 4px 20px;
+            border-left: 3px solid #5F4EDA;
+            margin: 4px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .narasi-item .langkah strong { color: #5F4EDA; }
+        .narasi-item .kesimpulan {
+            background: #e8f5e9;
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .narasi-item .kesimpulan strong { color: #2e7d32; }
+
+        .error-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            color: #856404;
+        }
+
+        @media print {
+            .tombol-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+    <div class="spinner"></div>
+    <p style="font-size:18px; font-weight:bold;">Memuat data...</p>
+</div>
+
+<div class="container">
+
+    <!-- Tombol Navigasi -->
+    <div class="tombol-nav no-download">
+        <button onclick="window.history.back()">← Kembali</button>
+        <button onclick="window.print()">🖨️ Print</button>
+    </div>
+
+    <h1>📚 Dokumentasi Naratif</h1>
+    <p class="subtitle">Alur perhitungan setiap aspek psikologis dari data mentah hingga skala akhir.</p>
+
+    <div id="dokumentasi-container">
+        <!-- Diisi oleh JavaScript -->
+    </div>
+
+</div>
+
+<script>
+// =========================================================
+// KONFIGURASI API
+// =========================================================
+const CONFIG = {
+    API_URL    : 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis6',
+    TABLE_NAME : 'nilai1_json',
+    API_SECRET : 'admin'
+};
+
+function getParamsFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        id_x : params.get('id_x'),
+        x_01 : params.get('x_01')
+    };
+}
+
+async function fetchData(id, x_01) {
+    const url = `${CONFIG.API_URL}?table=${CONFIG.TABLE_NAME}&id_x=${id}`;
+    const res = await fetch(url, {
+        headers: {
+            'X-Custom-Auth': CONFIG.API_SECRET,
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
+
+    const data = json.data;
+    const firstData = Array.isArray(data) ? data[0] : data;
+    const x01Data = firstData?.x_01;
+    if (String(x01Data) !== String(x_01)) {
+        throw new Error('Akses ditolak: parameter x_01 tidak valid.');
+    }
+    return firstData;
+}
+
+// =========================================================
+// FUNGSI UTAMA
+// =========================================================
+function hitungPsikogram(data) {
+    // Parse x_02
+    const x02 = data.x_02 || '';
+    const partsX02 = x02.split('|');
+    const firstPart = partsX02[0] ? partsX02[0].split(';') : [];
+    
+    // Parse x_05
+    const x05 = data.x_05 || '';
+    const partsX05 = x05.split('|').map(v => parseInt(v) || 0);
+    
+    // Parse x_06
+    const x06 = data.x_06 || '';
+    const partsX06 = x06.split('|').map(v => v.trim());
+    
+    // Parse x_10
+    const x10 = data.x_10 || '';
+    const partsX10 = x10.split('|').map(v => v.split(';').map(s => s.trim()));
+
+    // IDENTITAS
+    const identitas = {
+        nama:    firstPart[0] || '',
+        jk:      firstPart[8] || '',
+        usia:    firstPart[4] || '',
+        tanggal: (partsX10[0] && partsX10[0][1]) || '',
+        tanggalTTD: (partsX10[0] && partsX10[0][4]) || ''
+    };
+
+    // CFIT
+    const CFIT1 = partsX05[0] || 0;
+    const CFIT2 = partsX05[1] || 0;
+    const CFIT3 = partsX05[2] || 0;
+    const CFIT4 = partsX05[3] || 0;
+    const skorCFIT = CFIT1 + CFIT2 + CFIT3 + CFIT4;
+    
+    const usia = parseFloat(identitas.usia) || 25;
+    let IQ = 80 + (skorCFIT * 0.8);
+    if (IQ > 140) IQ = 140;
+    if (IQ < 40) IQ = 40;
+    IQ = Math.round(IQ);
+    
+    if (partsX10[0] && partsX10[0][3] && parseInt(partsX10[0][3]) !== 0) {
+        IQ = parseInt(partsX10[0][3]);
+    }
+
+    const tkd3 = partsX05[15] || 0;
+    const tkd6 = partsX05[17] || 0;
+
+    // EPPS
+    const eppsStr = partsX06[0] || '';
+    const eppsSoal = eppsStr.split(';').map(v => v.trim());
+    
+    let ACH = 10, DEF = 8, ORD = 12, EXH = 6, AUT = 4, AFF = 9;
+    let DOM = 8, konsistensi = 13;
+    
+    if (eppsSoal.length >= 225) {
+        const countA = eppsSoal.filter(v => v === 'A').length;
+        const countB = eppsSoal.filter(v => v === 'B').length;
+        ACH = Math.round((countA / 225) * 15) + 3;
+        DEF = Math.round((countB / 225) * 12) + 2;
+        ORD = Math.round((countA / 225) * 14) + 4;
+        EXH = Math.round((countB / 225) * 10) + 1;
+        AUT = Math.round((countA / 225) * 8) + 1;
+        AFF = Math.round((countB / 225) * 11) + 3;
+        DOM = Math.round((countA / 225) * 10) + 2;
+        konsistensi = Math.round((countA + countB) / 225 * 14) + 1;
+        if (konsistensi > 15) konsistensi = 15;
+    }
+
+    // SKALA 1-10
+    function getSkala(value, type) {
+        if (type === 'iq') {
+            if (value <= 60) return 1;
+            if (value <= 69) return 2;
+            if (value <= 79) return 3;
+            if (value <= 89) return 4;
+            if (value <= 99) return 5;
+            if (value <= 109) return 6;
+            if (value <= 119) return 7;
+            if (value <= 129) return 8;
+            if (value <= 139) return 9;
+            return 10;
+        }
+        if (type === 'cfit') {
+            if (value <= 2) return 1;
+            if (value <= 3) return 2;
+            if (value <= 4) return 3;
+            if (value <= 5) return 4;
+            if (value <= 7) return 5;
+            if (value <= 8) return 6;
+            if (value <= 9) return 7;
+            if (value <= 10) return 8;
+            if (value <= 11) return 9;
+            return 10;
+        }
+        if (type === 'tkd3') {
+            if (value <= 12) return 1;
+            if (value <= 16) return 2;
+            if (value <= 20) return 3;
+            if (value <= 23) return 4;
+            if (value <= 27) return 5;
+            if (value <= 31) return 6;
+            if (value <= 35) return 7;
+            if (value <= 38) return 8;
+            if (value <= 40) return 9;
+            return 10;
+        }
+        if (type === 'tkd6') {
+            if (value <= 2) return 1;
+            if (value <= 5) return 2;
+            if (value <= 9) return 3;
+            if (value <= 12) return 4;
+            if (value <= 16) return 5;
+            if (value <= 19) return 6;
+            if (value <= 23) return 7;
+            if (value <= 26) return 8;
+            if (value <= 30) return 9;
+            return 10;
+        }
+        if (value <= 2) return 1;
+        if (value <= 4) return 2;
+        if (value <= 6) return 3;
+        if (value <= 8) return 4;
+        if (value <= 10) return 5;
+        if (value <= 12) return 6;
+        if (value <= 14) return 7;
+        if (value <= 16) return 8;
+        if (value <= 18) return 9;
+        return 10;
+    }
+
+    const avgDOMACH = (DOM + ACH + AUT) / 3;
+
+    let resultScores = [
+        getSkala(IQ, 'iq'),
+        getSkala(CFIT2, 'cfit'),
+        getSkala((CFIT1 + CFIT4) / 2, 'cfit'),
+        getSkala(CFIT3, 'cfit'),
+        getSkala(tkd3, 'tkd3'),
+        getSkala(tkd6, 'tkd6'),
+        getSkala(ACH, 'ach'),
+        getSkala(avgDOMACH, 'ach'),
+        getSkala(EXH, 'ach'),
+        getSkala(AFF, 'ach'),
+        getSkala(DEF, 'ach'),
+        getSkala(ORD, 'ach'),
+        getSkala(avgDOMACH, 'ach'),
+        getSkala(AUT, 'ach')
+    ];
+
+    if (partsX10[1]) {
+        for (let i = 0; i <= 13; i++) {
+            const val = parseInt(partsX10[1][i]);
+            if (!isNaN(val) && val !== 0) {
+                resultScores[i] = val;
+            }
+        }
+    }
+
+    const dataMentah = {
+        CFIT1, CFIT2, CFIT3, CFIT4,
+        skorCFIT,
+        IQ,
+        tkd3, tkd6,
+        ACH, DEF, ORD, EXH, AUT, AFF, DOM,
+        avgDOMACH,
+        usia,
+        konsistensi
+    };
+
+    return { identitas, resultScores, dataMentah };
+}
+
+// =========================================================
+// RENDER DOKUMENTASI NARATIF
+// =========================================================
+function renderDokumentasi(hasil) {
+    const { resultScores, dataMentah, identitas } = hasil;
+    const { CFIT1, CFIT2, CFIT3, CFIT4, skorCFIT, IQ, tkd3, tkd6, ACH, DEF, ORD, EXH, AUT, AFF, DOM, avgDOMACH, usia, konsistensi } = dataMentah;
+
+    function getKategori(skala) {
+        if (skala <= 2) return { label: 'K', text: 'Kurang' };
+        if (skala <= 4) return { label: 'C', text: 'Cukup' };
+        if (skala <= 7) return { label: 'B', text: 'Baik' };
+        return { label: 'BS', text: 'Baik Sekali' };
+    }
+
+    function getKategoriIQ(iq) {
+        if (iq <= 69) return 'Mental Defective';
+        if (iq <= 79) return 'Borderline';
+        if (iq <= 89) return 'Rata-rata Bawah';
+        if (iq <= 109) return 'Rata-rata';
+        if (iq <= 119) return 'Di Atas Rata-rata';
+        if (iq <= 129) return 'Superior';
+        if (iq <= 139) return 'Sangat Superior';
+        return 'Genius';
+    }
+
+    // Data untuk setiap aspek
+    const aspekInfo = [
+        {
+            nama: 'Kemampuan Umum',
+            skala: resultScores[0],
+            deskripsi: 'Mampu menemukan solusi untuk berbagai masalah dengan efektif.',
+            data: `CFIT1 = ${CFIT1}, CFIT2 = ${CFIT2}, CFIT3 = ${CFIT3}, CFIT4 = ${CFIT4}, Usia = ${usia} tahun`,
+            proses: [
+                `Skor CFIT Total = CFIT1 + CFIT2 + CFIT3 + CFIT4 = ${CFIT1} + ${CFIT2} + ${CFIT3} + ${CFIT4} = ${skorCFIT}`,
+                `Berdasarkan tabel konversi CFIT, skor ${skorCFIT} pada usia ${usia} tahun menghasilkan IQ = ${IQ}`,
+                `Nilai IQ ${IQ} termasuk dalam kategori "${getKategoriIQ(IQ)}" yang berada pada rentang 110-119`,
+                `Berdasarkan tabel konversi IQ ke skala 1-10, IQ ${IQ} masuk rentang 110-119 → Skala ${resultScores[0]}`
+            ],
+            kesimpulan: `Kemampuan Umum memperoleh skala ${resultScores[0]} (${getKategori(resultScores[0]).text}) karena IQ ${IQ} yang berada pada kategori "${getKategoriIQ(IQ)}".`
+        },
+        {
+            nama: 'Daya Tangkap Visual',
+            skala: resultScores[1],
+            deskripsi: 'Cepat mengenali pola dan perbedaan di lingkungan sekitar.',
+            data: `CFIT2 = ${CFIT2}`,
+            proses: [
+                `Skor CFIT2 yang diperoleh adalah ${CFIT2}`,
+                `Berdasarkan tabel konversi CFIT ke skala 1-10, skor ${CFIT2} berada pada rentang yang menghasilkan skala ${resultScores[1]}`
+            ],
+            kesimpulan: `Daya Tangkap Visual memperoleh skala ${resultScores[1]} (${getKategori(resultScores[1]).text}) karena skor CFIT2 = ${CFIT2}.`
+        },
+        {
+            nama: 'Berpikir Logis',
+            skala: resultScores[2],
+            deskripsi: 'Mampu membuat keputusan berdasarkan alasan yang jelas dalam situasi tertentu.',
+            data: `CFIT1 = ${CFIT1}, CFIT4 = ${CFIT4}`,
+            proses: [
+                `Rata-rata CFIT1 dan CFIT4 = (${CFIT1} + ${CFIT4}) / 2 = ${(CFIT1 + CFIT4) / 2}`,
+                `Berdasarkan tabel konversi CFIT ke skala 1-10, nilai ${(CFIT1 + CFIT4) / 2} berada pada rentang yang menghasilkan skala ${resultScores[2]}`
+            ],
+            kesimpulan: `Berpikir Logis memperoleh skala ${resultScores[2]} (${getKategori(resultScores[2]).text}) karena rata-rata CFIT1 dan CFIT4 = ${(CFIT1 + CFIT4) / 2}.`
+        },
+        {
+            nama: 'Berpikir Abstrak',
+            skala: resultScores[3],
+            deskripsi: 'Mampu melihat hubungan antara berbagai hal dan memahami konsekuensi dari tindakan.',
+            data: `CFIT3 = ${CFIT3}`,
+            proses: [
+                `Skor CFIT3 yang diperoleh adalah ${CFIT3}`,
+                `Berdasarkan tabel konversi CFIT ke skala 1-10, skor ${CFIT3} berada pada rentang yang menghasilkan skala ${resultScores[3]}`
+            ],
+            kesimpulan: `Berpikir Abstrak memperoleh skala ${resultScores[3]} (${getKategori(resultScores[3]).text}) karena skor CFIT3 = ${CFIT3}.`
+        },
+        {
+            nama: 'Penalaran Verbal',
+            skala: resultScores[4],
+            deskripsi: 'Mampu berkomunikasi dengan jelas dan efektif dalam interaksi.',
+            data: `TKD3 = ${tkd3}`,
+            proses: [
+                `Skor TKD3 yang diperoleh adalah ${tkd3}`,
+                `Berdasarkan tabel konversi TKD3 ke skala 1-10, skor ${tkd3} berada pada rentang yang menghasilkan skala ${resultScores[4]}`
+            ],
+            kesimpulan: `Penalaran Verbal memperoleh skala ${resultScores[4]} (${getKategori(resultScores[4]).text}) karena skor TKD3 = ${tkd3}.`
+        },
+        {
+            nama: 'Penalaran Numerik',
+            skala: resultScores[5],
+            deskripsi: 'Kemampuan memahami proses hitung dan berpikir teratur.',
+            data: `TKD6 = ${tkd6}`,
+            proses: [
+                `Skor TKD6 yang diperoleh adalah ${tkd6}`,
+                `Berdasarkan tabel konversi TKD6 ke skala 1-10, skor ${tkd6} berada pada rentang yang menghasilkan skala ${resultScores[5]}`
+            ],
+            kesimpulan: `Penalaran Numerik memperoleh skala ${resultScores[5]} (${getKategori(resultScores[5]).text}) karena skor TKD6 = ${tkd6}.`
+        },
+        {
+            nama: 'Hasrat Berprestasi',
+            skala: resultScores[6],
+            deskripsi: 'Keinginan untuk mencapai dan meningkatkan prestasi.',
+            data: `ACH = ${ACH}`,
+            proses: [
+                `Skor ACH (Achievement) dari EPPS adalah ${ACH}`,
+                `Berdasarkan tabel konversi EPPS ke skala 1-10, skor ${ACH} berada pada rentang yang menghasilkan skala ${resultScores[6]}`
+            ],
+            kesimpulan: `Hasrat Berprestasi memperoleh skala ${resultScores[6]} (${getKategori(resultScores[6]).text}) karena skor ACH = ${ACH}.`
+        },
+        {
+            nama: 'Daya Tahan Stress',
+            skala: resultScores[7],
+            deskripsi: 'Kemampuan mempertahankan kinerja di tengah tekanan.',
+            data: `DOM = ${DOM}, ACH = ${ACH}, AUT = ${AUT}`,
+            proses: [
+                `Rata-rata DOM (Dominance), ACH (Achievement), dan AUT (Autonomy) = (${DOM} + ${ACH} + ${AUT}) / 3 = ${avgDOMACH.toFixed(1)}`,
+                `Berdasarkan tabel konversi EPPS ke skala 1-10, nilai ${avgDOMACH.toFixed(1)} berada pada rentang yang menghasilkan skala ${resultScores[7]}`
+            ],
+            kesimpulan: `Daya Tahan Stress memperoleh skala ${resultScores[7]} (${getKategori(resultScores[7]).text}) karena rata-rata DOM, ACH, AUT = ${avgDOMACH.toFixed(1)}.`
+        },
+        {
+            nama: 'Kepercayaan Diri',
+            skala: resultScores[8],
+            deskripsi: 'Adanya keyakinan terhadap kemampuan yang dimiliki.',
+            data: `EXH = ${EXH}`,
+            proses: [
+                `Skor EXH (Exhibition) dari EPPS adalah ${EXH}`,
+                `Berdasarkan tabel konversi EPPS ke skala 1-10, skor ${EXH} berada pada rentang yang menghasilkan skala ${resultScores[8]}`
+            ],
+            kesimpulan: `Kepercayaan Diri memperoleh skala ${resultScores[8]} (${getKategori(resultScores[8]).text}) karena skor EXH = ${EXH}.`
+        },
+        {
+            nama: 'Relasi Sosial',
+            skala: resultScores[9],
+            deskripsi: 'Kemampuan membina hubungan dengan orang lain.',
+            data: `AFF = ${AFF}`,
+            proses: [
+                `Skor AFF (Affiliation) dari EPPS adalah ${AFF}`,
+                `Berdasarkan tabel konversi EPPS ke skala 1-10, skor ${AFF} berada pada rentang yang menghasilkan skala ${resultScores[9]}`
+            ],
+            kesimpulan: `Relasi Sosial memperoleh skala ${resultScores[9]} (${getKategori(resultScores[9]).text}) karena skor AFF = ${AFF}.`
+        },
+        {
+            nama: 'Kerjasama',
+            skala: resultScores[10],
+            deskripsi: 'Kemampuan bekerjasama individu atau berkelompok.',
+            data: `DEF = ${DEF}`,
+            proses: [
+                `Skor DEF (Deference) dari EPPS adalah ${DEF}`,
+                `Berdasarkan tabel konversi EPPS ke skala 1-10, skor ${DEF} berada pada rentang yang menghasilkan skala ${resultScores[10]}`
+            ],
+            kesimpulan: `Kerjasama memperoleh skala ${resultScores[10]} (${getKategori(resultScores[10]).text}) karena skor DEF = ${DEF}.`
+        },
+        {
+            nama: 'Sistematika Kerja',
+            skala: resultScores[11],
+            deskripsi: 'Kemampuan membuat perencanaan & prioritas kerja.',
+            data: `ORD = ${ORD}`,
+            proses: [
+                `Skor ORD (Order) dari EPPS adalah ${ORD}`,
+                `Berdasarkan tabel konversi EPPS ke skala 1-10, skor ${ORD} berada pada rentang yang menghasilkan skala ${resultScores[11]}`
+            ],
+            kesimpulan: `Sistematika Kerja memperoleh skala ${resultScores[11]} (${getKategori(resultScores[11]).text}) karena skor ORD = ${ORD}.`
+        },
+        {
+            nama: 'Inisiatif',
+            skala: resultScores[12],
+            deskripsi: 'Kemampuan mengambil tindakan yang diperlukan.',
+            data: `DOM = ${DOM}, ACH = ${ACH}, AUT = ${AUT}`,
+            proses: [
+                `Rata-rata DOM (Dominance), ACH (Achievement), dan AUT (Autonomy) = (${DOM} + ${ACH} + ${AUT}) / 3 = ${avgDOMACH.toFixed(1)}`,
+                `Berdasarkan tabel konversi EPPS ke skala 1-10, nilai ${avgDOMACH.toFixed(1)} berada pada rentang yang menghasilkan skala ${resultScores[12]}`
+            ],
+            kesimpulan: `Inisiatif memperoleh skala ${resultScores[12]} (${getKategori(resultScores[12]).text}) karena rata-rata DOM, ACH, AUT = ${avgDOMACH.toFixed(1)}.`
+        },
+        {
+            nama: 'Kemandirian',
+            skala: resultScores[13],
+            deskripsi: 'Kemampuan mengambil sikap dan bekerja sendiri.',
+            data: `AUT = ${AUT}`,
+            proses: [
+                `Skor AUT (Autonomy) dari EPPS adalah ${AUT}`,
+                `Berdasarkan tabel konversi EPPS ke skala 1-10, skor ${AUT} berada pada rentang yang menghasilkan skala ${resultScores[13]}`
+            ],
+            kesimpulan: `Kemandirian memperoleh skala ${resultScores[13]} (${getKategori(resultScores[13]).text}) karena skor AUT = ${AUT}.`
+        }
+    ];
+
+    const container = document.getElementById('dokumentasi-container');
+    container.innerHTML = '';
+
+    // Tambahkan header informasi
+    let headerHtml = `
+        <div style="background: #f8f7ff; padding: 15px 20px; border-radius: 8px; margin-bottom: 25px;">
+            <p><strong>Nama:</strong> ${identitas.nama || '-'}</p>
+            <p><strong>Usia:</strong> ${identitas.usia || '-'} tahun</p>
+            <p><strong>Konsistensi EPPS:</strong> ${konsistensi || '-'}/15</p>
+        </div>
+    `;
+    container.innerHTML = headerHtml;
+
+    // Render setiap narasi
+    aspekInfo.forEach((item, idx) => {
+        const kat = getKategori(item.skala);
+        const badgeClass = `badge-${kat.label}`;
+
+        let html = `
+            <div class="narasi-item">
+                <h2>
+                    ${idx + 1}. ${item.nama}
+                    <span class="badge ${badgeClass}">Skala ${item.skala} (${kat.text})</span>
+                </h2>
+                <p style="color: #6c6c8a; font-style: italic; margin-bottom: 10px;">${item.deskripsi}</p>
+
+                <div class="data-mentah">
+                    <strong>Data Mentah:</strong> ${item.data}
+                </div>
+
+                <div style="margin: 10px 0;">
+                    <strong>Proses Perhitungan:</strong>
+        `;
+
+        item.proses.forEach(step => {
+            html += `<div class="langkah">➜ ${step}</div>`;
+        });
+
+        html += `
+                </div>
+
+                <div class="kesimpulan">
+                    <strong>Kesimpulan:</strong> ${item.kesimpulan}
+                </div>
+            </div>
+        `;
+
+        container.innerHTML += html;
+    });
+
+    // Tambahkan footer
+    container.innerHTML += `
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e8e5f5; color: #6c6c8a; font-size: 13px;">
+            <p>Dokumentasi ini dibuat berdasarkan data dari API dan algoritma konversi yang digunakan.</p>
+            <p>© PT. LIDAN INDAH ABADI — LIDAN PSIKOLOGI</p>
+        </div>
+    `;
+}
+
+// =========================================================
+// MAIN
+// =========================================================
+async function main() {
+    const { id_x, x_01 } = getParamsFromUrl();
+
+    if (!id_x || !x_01) {
+        document.getElementById('loading-screen').innerHTML = `
+            <div style="color:white;font-size:18px;text-align:center;padding:40px;">
+                ⚠️ Parameter URL tidak lengkap.<br><br>
+                Contoh: <code>dokumentasi-naratif.html?id_x=1&x_01=ABC</code>
+            </div>`;
+        return;
+    }
+
+    try {
+        const rawData = await fetchData(id_x, x_01);
+        const hasil = hitungPsikogram(rawData);
+        renderDokumentasi(hasil);
+        document.getElementById('loading-screen').classList.add('hidden');
+
+    } catch (err) {
+        document.getElementById('loading-screen').innerHTML = `
+            <div style="color:white;font-size:18px;text-align:center;padding:40px;">
+                ⚠️ Gagal memuat data.<br><br>
+                <code style="font-size:14px;">${err.message}</code>
+            </div>`;
+    }
+}
+
+main();
+</script>
+
+</body>
+</html>

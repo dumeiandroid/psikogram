@@ -1,0 +1,3120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Psikologi - Dinamis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+    </script>
+    <style>
+        /* ============================================================
+           STYLE UTAMA
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header h1 {
+            font-size: 2em;
+        }
+        .header p {
+            opacity: 0.9;
+        }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .header-actions button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+        .btn-download-all {
+            background: white;
+            color: #667eea;
+        }
+        .btn-download-all:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        }
+        .btn-print {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .btn-print:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            border-top: 4px solid #667eea;
+        }
+        .stat-card .number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        .stat-card .label {
+            font-size: 0.75em;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+
+        .group-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .group-header .title {
+            font-size: 1.2em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .group-header .stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 0.85em;
+        }
+        .group-header .stats .avg {
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 20px;
+            background: #f0f2f5;
+        }
+        .group-header .stats .count {
+            color: #7f8c8d;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+        .card-title {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-title .badge {
+            font-size: 0.6em;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .card-title .score-100 {
+            font-size: 0.7em;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-left: auto;
+            color: white;
+            font-weight: 700;
+        }
+        .chart-container {
+            position: relative;
+            height: 160px;
+        }
+        .chart-container.tall {
+            height: 200px;
+        }
+
+        .psiko-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .psiko-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+        .psiko-card .title {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .psiko-card .title .source {
+            font-size: 0.65em;
+            font-weight: 400;
+            color: #7f8c8d;
+            margin-left: auto;
+        }
+
+        .iq-display {
+            text-align: center;
+            padding: 6px 0;
+        }
+        .iq-display .number {
+            font-size: 2.8em;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .iq-display .category {
+            font-size: 1em;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .iq-display .detail {
+            font-size: 0.7em;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+        .iq-display .bar-track {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 99px;
+            overflow: hidden;
+            max-width: 80%;
+            margin: 8px auto 0;
+        }
+        .iq-display .bar-track .bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            max-width: 100%;
+        }
+
+        .psiko-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .psiko-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72em;
+        }
+        .psiko-row .label {
+            width: 110px;
+            flex-shrink: 0;
+            font-weight: 500;
+            color: #2c3e50;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .psiko-row .label .kategori {
+            font-size: 0.7em;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-left: 3px;
+        }
+        .psiko-row .track {
+            flex: 1;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .psiko-row .track .fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .psiko-row .value {
+            width: 44px;
+            flex-shrink: 0;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .psiko-row .emoji {
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .psiko-avg {
+            font-size: 0.7em;
+            color: #7f8c8d;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e9ecef;
+            text-align: right;
+        }
+        .psiko-avg strong {
+            font-weight: 700;
+        }
+
+        .sw-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sw-list li {
+            padding: 3px 0;
+            font-size: 0.78em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .sw-list li:last-child {
+            border-bottom: none;
+        }
+        .sw-list .badge-score {
+            font-size: 0.65em;
+            font-weight: 700;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+        .sw-section {
+            margin-bottom: 6px;
+        }
+        .sw-section .sw-title {
+            font-size: 0.7em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .minat-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .minat-item:last-child {
+            border-bottom: none;
+        }
+        .minat-item .rank {
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+        .minat-item .name {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .minat-item .desc {
+            font-size: 0.7em;
+            color: #7f8c8d;
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+        .minat-item .score-minat {
+            font-size: 0.65em;
+            font-weight: 600;
+            color: #7f8c8d;
+            float: right;
+        }
+        .minat-item .bar-track {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 99px;
+            overflow: hidden;
+            max-width: 80%;
+            margin-top: 4px;
+        }
+        .minat-item .bar-track .bar-fill {
+            height: 100%;
+            border-radius: 99px;
+        }
+
+        .disc-card {
+            background: white;
+            border-radius: 12px;
+            padding: 14px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+        }
+        .disc-card .title {
+            font-size: 0.75em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .disc-card .title .dom {
+            font-size: 0.6em;
+            background: #667eea;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-left: auto;
+        }
+        .disc-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .disc-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7em;
+        }
+        .disc-row .label {
+            width: 18px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .disc-row .track {
+            flex: 1;
+            height: 5px;
+            background: #e9ecef;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .disc-row .track .fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 1s ease;
+        }
+        .disc-row .value {
+            width: 32px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.75em;
+        }
+        .disc-desc {
+            font-size: 0.65em;
+            color: #7f8c8d;
+            margin-top: 4px;
+            font-style: italic;
+            line-height: 1.3;
+        }
+
+        .disc-radar-wrap {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+            margin-top: 12px;
+        }
+        .disc-radar-wrap .title {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .disc-radar-wrap .chart-box {
+            height: 200px;
+            position: relative;
+        }
+        .disc-radar-wrap .legend {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.65em;
+            flex-wrap: wrap;
+        }
+        .disc-radar-wrap .legend span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .disc-radar-wrap .legend .dot {
+            display: inline-block;
+            width: 16px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        .unknown-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .unknown-tab-btn {
+            padding: 6px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            background: white;
+            font-size: 0.75em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #7f8c8d;
+        }
+        .unknown-tab-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .unknown-tab-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        .unknown-panel {
+            display: none;
+        }
+        .unknown-panel.active {
+            display: block;
+        }
+        .unknown-panel .card {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1200px) {
+            .grid-4 {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+        @media (max-width: 1024px) {
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+            .grid-4 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .grid-2,
+            .grid-3,
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 1.4em;
+            }
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .group-section {
+                padding: 16px;
+            }
+            .group-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .psiko-row .label {
+                width: 80px;
+                font-size: 0.65em;
+            }
+            .iq-display .number {
+                font-size: 2.2em;
+            }
+            .disc-radar-wrap .chart-box {
+                height: 160px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 10px;
+            }
+            .header-actions {
+                display: none !important;
+            }
+            .card:hover {
+                transform: none !important;
+            }
+            .psiko-card:hover {
+                transform: none !important;
+            }
+            .dashboard {
+                max-width: 100%;
+            }
+            .unknown-tabs {
+                display: none !important;
+            }
+            .unknown-panel {
+                display: block !important;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 80px 40px;
+            color: #7f8c8d;
+        }
+        .loading .spinner {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .error-msg {
+            text-align: center;
+            padding: 60px 40px;
+            color: #e74c3c;
+            background: white;
+            border-radius: 16px;
+        }
+
+        /* Config editor */
+        .config-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+        .config-toggle button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+        }
+        .config-toggle button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(102, 126, 234, 0.5);
+        }
+
+        .config-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .config-modal.active {
+            display: flex;
+        }
+        .config-modal .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 800px;
+            width: 95%;
+            max-height: 90vh;
+            padding: 30px;
+            overflow-y: auto;
+            position: relative;
+        }
+        .config-modal .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #7f8c8d;
+            background: none;
+            border: none;
+        }
+        .config-modal .modal-close:hover {
+            color: #2c3e50;
+        }
+        .config-modal h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .config-modal textarea {
+            width: 100%;
+            min-height: 400px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            resize: vertical;
+        }
+        .config-modal textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .config-modal .btn-save-config {
+            margin-top: 15px;
+            padding: 10px 30px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .config-modal .btn-save-config:hover {
+            background: #219a52;
+        }
+        .config-modal .btn-reset-config {
+            margin-top: 15px;
+            margin-left: 10px;
+            padding: 10px 30px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .config-modal .btn-reset-config:hover {
+            background: #c0392b;
+        }
+        .config-modal .config-helper {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+        .config-modal .config-helper code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard" id="app">
+        <div class="loading">
+            <div class="spinner">⏳</div>
+            <h3>Memuat Dashboard Psikologi...</h3>
+            <p style="margin-top:8px;font-size:0.9em;">Semua grup dalam satu tampilan</p>
+        </div>
+    </div>
+
+    <!-- Config Toggle -->
+    <div class="config-toggle">
+        <button onclick="openConfig()">⚙️ Atur Tampilan</button>
+    </div>
+
+    <!-- Config Modal -->
+    <div class="config-modal" id="configModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeConfig()">&times;</button>
+            <h2>⚙️ Konfigurasi Tampilan Dashboard</h2>
+            <p style="color:#7f8c8d;margin-bottom:15px;">Atur grup dan card mana yang ingin ditampilkan. <strong>enabled: false</strong> untuk menyembunyikan.</p>
+            <textarea id="configEditor"></textarea>
+            <div>
+                <button class="btn-save-config" onclick="saveConfig()">💾 Simpan & Muat Ulang</button>
+                <button class="btn-reset-config" onclick="resetConfig()">↺ Reset ke Default</button>
+            </div>
+            <div class="config-helper">
+                <strong>📖 Panduan:</strong><br>
+                • <code>"enabled": true</code> → tampilkan grup/card<br>
+                • <code>"enabled": false</code> → sembunyikan grup/card<br>
+                • <code>"displayName": "Nama Baru"</code> → ubah nama grup<br>
+                • <code>"icon": "🚀"</code> → ubah icon<br>
+                • Card dengan <code>"enabled": false</code> akan disembunyikan dari grupnya
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // KONFIGURASI DASHBOARD - DAPAT DIATUR DARI JSON
+        // ============================================================
+
+        // DEFAULT CONFIG - Bisa dimodifikasi
+        const DEFAULT_DASHBOARD_CONFIG = {
+            groups: [{
+                id: 'kognitif',
+                name: 'Gaya Belajar & Kognitif',
+                icon: '🧠',
+                color: '#4a90e2',
+                desc: 'Mengukur cara memproses informasi, belajar, dan kemampuan kognitif',
+                enabled: true,
+                cards: {
+                    'gaya-belajar-vak': { enabled: true, displayName: 'Gaya Belajar VAK' },
+                    'otak-kiri-kanan': { enabled: true, displayName: 'Dominasi Otak' },
+                    'kecerdasan-majemuk': { enabled: true, displayName: 'Kecerdasan Majemuk' },
+                    'manajemen-waktu': { enabled: true, displayName: 'Manajemen Waktu' },
+                    'stres-kerja': { enabled: true, displayName: 'Stres Kerja' },
+                    'iq': { enabled: true, displayName: 'IQ & Kategori' },
+                    'aspek-kognitif': { enabled: true, displayName: 'Aspek Kognitif' }
+                }
+            }, {
+                id: 'kepribadian',
+                name: 'Kepribadian & Temperamen',
+                icon: '🎭',
+                color: '#9b59b6',
+                desc: 'Mengukur karakter dasar, tipe kepribadian, dan aspek psikologis',
+                enabled: true,
+                cards: {
+                    'temperamen': { enabled: true, displayName: 'Temperamen' },
+                    'ekstrovert-introvert': { enabled: true, displayName: 'Ekstrovert vs Introvert' },
+                    'sensing-intuitif': { enabled: true, displayName: 'Sensing vs Intuitif' },
+                    'thinking-feeling': { enabled: true, displayName: 'Thinking vs Feeling' },
+                    'judging-perceiving': { enabled: true, displayName: 'Judging vs Perceiving' },
+                    'disc': { enabled: true, displayName: 'DISC Kepribadian' },
+                    'aspek-kepribadian': { enabled: true, displayName: 'Aspek Kepribadian' },
+                    'kelebihan-kelemahan': { enabled: true, displayName: 'Kelebihan & Kelemahan' }
+                }
+            }, {
+                id: 'hubungan',
+                name: 'Hubungan & Cinta',
+                icon: '💕',
+                color: '#e74c3c',
+                desc: 'Mengukur pola hubungan, gaya mencintai, dan komitmen',
+                enabled: true,
+                cards: {
+                    'tipe-cinta': { enabled: true, displayName: 'Tipe Cinta' },
+                    'jenis-cinta': { enabled: true, displayName: 'Jenis Cinta' },
+                    'jenis-cinta-2': { enabled: true, displayName: 'Jenis Cinta 2' },
+                    'kecanduan-hubungan': { enabled: true, displayName: 'Kecanduan Hubungan' },
+                    'mengenal-pasangan': { enabled: true, displayName: 'Mengenal Pasangan' },
+                    'kesetiaan': { enabled: true, displayName: 'Kesetiaan' }
+                }
+            }, {
+                id: 'sosial',
+                name: 'Relasi Sosial & Keluarga',
+                icon: '👨‍👩‍👧',
+                color: '#27ae60',
+                desc: 'Mengukur hubungan dengan orang lain dan pola asuh keluarga',
+                enabled: true,
+                cards: {
+                    'pola-asuh': { enabled: true, displayName: 'Pola Asuh Orangtua' },
+                    'sahabat': { enabled: true, displayName: 'Sahabat Baik' },
+                    'siap-pendamping': { enabled: true, displayName: 'Siap Pendamping Hidup' }
+                }
+            }, {
+                id: 'karir',
+                name: 'Karir & Kepemimpinan',
+                icon: '👑',
+                color: '#f39c12',
+                desc: 'Mengukur potensi karir dan jiwa kepemimpinan',
+                enabled: true,
+                cards: {
+                    'minat-karier': { enabled: true, displayName: 'Minat Karier' },
+                    'jiwa-kepemimpinan': { enabled: true, displayName: 'Jiwa Kepemimpinan' },
+                    'gaya-kepemimpinan': { enabled: true, displayName: 'Gaya Kepemimpinan' },
+                    'motivasi-kepemimpinan': { enabled: true, displayName: 'Motivasi Kepemimpinan' },
+                    'arah-minat': { enabled: true, displayName: 'Arah Minat' }
+                }
+            }, {
+                id: 'unknown',
+                name: 'Tes Tambahan',
+                icon: '📊',
+                color: '#95a5a6',
+                desc: 'Tes yang belum teridentifikasi',
+                enabled: false,
+                cards: {}
+            }],
+            stats: {
+                showTotalTests: true,
+                showAverageScore: true,
+                showAge: true,
+                showCity: true,
+                showIQ: true
+            },
+            header: {
+                showDownloadButton: true,
+                showPrintButton: true
+            }
+        };
+
+        // ============================================================
+        // STATE
+        // ============================================================
+
+        let dashboardConfig = loadConfig();
+
+        function loadConfig() {
+            try {
+                const saved = localStorage.getItem('dashboardConfig');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    // Merge dengan default untuk memastikan semua field ada
+                    return mergeConfig(DEFAULT_DASHBOARD_CONFIG, parsed);
+                }
+            } catch (e) {
+                console.warn('Config load error:', e);
+            }
+            return JSON.parse(JSON.stringify(DEFAULT_DASHBOARD_CONFIG));
+        }
+
+        function saveConfigToStorage(config) {
+            try {
+                localStorage.setItem('dashboardConfig', JSON.stringify(config));
+            } catch (e) {
+                console.warn('Config save error:', e);
+            }
+        }
+
+        function mergeConfig(defaultConfig, userConfig) {
+            const merged = JSON.parse(JSON.stringify(defaultConfig));
+
+            // Merge groups
+            if (userConfig.groups) {
+                userConfig.groups.forEach(ug => {
+                    const existing = merged.groups.find(g => g.id === ug.id);
+                    if (existing) {
+                        Object.assign(existing, ug);
+                        // Merge cards jika ada
+                        if (ug.cards) {
+                            Object.keys(ug.cards).forEach(cardId => {
+                                if (existing.cards[cardId]) {
+                                    Object.assign(existing.cards[cardId], ug.cards[cardId]);
+                                } else {
+                                    existing.cards[cardId] = ug.cards[cardId];
+                                }
+                            });
+                        }
+                    } else {
+                        merged.groups.push(ug);
+                    }
+                });
+            }
+
+            // Merge stats
+            if (userConfig.stats) {
+                Object.assign(merged.stats, userConfig.stats);
+            }
+
+            // Merge header
+            if (userConfig.header) {
+                Object.assign(merged.header, userConfig.header);
+            }
+
+            return merged;
+        }
+
+        function resetConfig() {
+            dashboardConfig = JSON.parse(JSON.stringify(DEFAULT_DASHBOARD_CONFIG));
+            saveConfigToStorage(dashboardConfig);
+            closeConfig();
+            loadDashboard();
+        }
+
+        function openConfig() {
+            const modal = document.getElementById('configModal');
+            const editor = document.getElementById('configEditor');
+            editor.value = JSON.stringify(dashboardConfig, null, 2);
+            modal.classList.add('active');
+        }
+
+        function closeConfig() {
+            document.getElementById('configModal').classList.remove('active');
+        }
+
+        function saveConfig() {
+            try {
+                const editor = document.getElementById('configEditor');
+                const parsed = JSON.parse(editor.value);
+                dashboardConfig = mergeConfig(DEFAULT_DASHBOARD_CONFIG, parsed);
+                saveConfigToStorage(dashboardConfig);
+                closeConfig();
+                loadDashboard();
+            } catch (e) {
+                alert('❌ Error: JSON tidak valid!\n\n' + e.message);
+            }
+        }
+
+        // ============================================================
+        // KONFIGURASI TES (tetap)
+        // ============================================================
+
+        const TEST_CONFIG = [
+            // Grup Kognitif
+            { id: 'gaya-belajar-vak', label: 'Gaya Belajar VAK', icon: '📚', key: 'who_1', color: '#4a90e2',
+                maxScore: 15, group: 'kognitif' },
+            { id: 'otak-kiri-kanan', label: 'Dominasi Otak', icon: '🧠', key: 'who_2', color: '#8e44ad',
+                maxScore: 22, group: 'kognitif' },
+            { id: 'kecerdasan-majemuk', label: 'Kecerdasan Majemuk', icon: '🧩', key: 'who_3', color: '#27ae60',
+                maxScore: 10, group: 'kognitif' },
+            { id: 'manajemen-waktu', label: 'Manajemen Waktu', icon: '⏰', key: 'who_24', color: '#8e44ad',
+                maxScore: 30, group: 'kognitif' },
+            { id: 'stres-kerja', label: 'Stres Kerja', icon: '😰', key: 'who_25', color: '#e74c3c', maxScore: 12,
+                group: 'kognitif' },
+            { id: 'iq', label: 'IQ & Kategori', icon: '🧠', key: 'psiko_iq', color: '#8e44ad', maxScore: 100,
+                group: 'kognitif', isPsiko: true },
+            { id: 'aspek-kognitif', label: 'Aspek Kognitif', icon: '📊', key: 'psiko_kognitif',
+                color: '#4a90e2', maxScore: 100, group: 'kognitif', isPsiko: true },
+
+            // Grup Kepribadian
+            { id: 'temperamen', label: 'Temperamen', icon: '🎭', key: 'who_4', color: '#f1c40f', maxScore: 26,
+                group: 'kepribadian' },
+            { id: 'ekstrovert-introvert', label: 'Ekstrovert vs Introvert', icon: '🌓', key: 'who_5',
+                color: '#e74c3c', maxScore: 17, group: 'kepribadian' },
+            { id: 'sensing-intuitif', label: 'Sensing vs Intuitif', icon: '🔍', key: 'who_6', color: '#2980b9',
+                maxScore: 14, group: 'kepribadian' },
+            { id: 'thinking-feeling', label: 'Thinking vs Feeling', icon: '⚖️', key: 'who_7', color: '#e91e63',
+                maxScore: 20, group: 'kepribadian' },
+            { id: 'judging-perceiving', label: 'Judging vs Perceiving', icon: '📋', key: 'who_8',
+                color: '#27ae60', maxScore: 10, group: 'kepribadian' },
+            { id: 'disc', label: 'DISC Kepribadian', icon: '🎯', key: 'who_disc', color: '#6c5ce7', maxScore: 100,
+                group: 'kepribadian' },
+            { id: 'aspek-kepribadian', label: 'Aspek Kepribadian', icon: '📊', key: 'psiko_kepribadian',
+                color: '#9b59b6', maxScore: 100, group: 'kepribadian', isPsiko: true },
+            { id: 'kelebihan-kelemahan', label: 'Kelebihan & Kelemahan', icon: '⚖️', key: 'psiko_sw',
+                color: '#e67e22', maxScore: 100, group: 'kepribadian', isPsiko: true },
+
+            // Grup Hubungan
+            { id: 'tipe-cinta', label: 'Tipe Cinta', icon: '💕', key: 'who_12', color: '#ff4757', maxScore: 10,
+                group: 'hubungan' },
+            { id: 'jenis-cinta', label: 'Jenis Cinta', icon: '❤️', key: 'who_13', color: '#d63031', maxScore: 35,
+                group: 'hubungan' },
+            { id: 'jenis-cinta-2', label: 'Jenis Cinta 2', icon: '💖', key: 'who_27', color: '#fd79a8',
+                maxScore: 35, group: 'hubungan' },
+            { id: 'kecanduan-hubungan', label: 'Kecanduan Hubungan', icon: '🔗', key: 'who_14',
+                color: '#e17055', maxScore: 30, group: 'hubungan' },
+            { id: 'mengenal-pasangan', label: 'Mengenal Pasangan', icon: '💑', key: 'who_15', color: '#6c5ce7',
+                maxScore: 22, group: 'hubungan' },
+            { id: 'kesetiaan', label: 'Kesetiaan', icon: '🤝', key: 'who_16', color: '#3498db', maxScore: 30,
+                group: 'hubungan' },
+
+            // Grup Sosial
+            { id: 'pola-asuh', label: 'Pola Asuh Orangtua', icon: '👨‍👩‍👧', key: 'who_9', color: '#c0392b',
+                maxScore: 10, group: 'sosial' },
+            { id: 'sahabat', label: 'Sahabat Baik', icon: '🌟', key: 'who_17', color: '#6c5ce7', maxScore: 30,
+                group: 'sosial' },
+            { id: 'siap-pendamping', label: 'Siap Pendamping Hidup', icon: '💍', key: 'who_18', color: '#27ae60',
+                maxScore: 36, group: 'sosial' },
+
+            // Grup Karir
+            { id: 'minat-karier', label: 'Minat Karier', icon: '🎯', key: 'who_20', color: '#3498db',
+                maxScore: 9, group: 'karir' },
+            { id: 'jiwa-kepemimpinan', label: 'Jiwa Kepemimpinan', icon: '👑', key: 'who_21', color: '#f39c12',
+                maxScore: 42, group: 'karir' },
+            { id: 'gaya-kepemimpinan', label: 'Gaya Kepemimpinan', icon: '⚡', key: 'who_22', color: '#e67e22',
+                maxScore: 7, group: 'karir' },
+            { id: 'motivasi-kepemimpinan', label: 'Motivasi Kepemimpinan', icon: '🔥', key: 'who_23',
+                color: '#e74c3c', maxScore: 70, group: 'karir' },
+            { id: 'arah-minat', label: 'Arah Minat', icon: '🎯', key: 'psiko_minat', color: '#27ae60',
+                maxScore: 100, group: 'karir', isPsiko: true }
+        ];
+
+        // ============================================================
+        // KONFIGURASI PSIKOGRAM
+        // ============================================================
+
+        const ASPEK_PSIKOLOGIS = {
+            kognitif: [
+                { id: 'cfit1', nama: 'Kemampuan Umum', sumber: 'CFIT' },
+                { id: 'cfit2', nama: 'Daya Tangkap Visual', sumber: 'CFIT' },
+                { id: 'cfit3', nama: 'Berpikir Logis', sumber: 'CFIT' },
+                { id: 'cfit4', nama: 'Berpikir Abstrak', sumber: 'CFIT' },
+                { id: 'tkd3', nama: 'Penalaran Verbal', sumber: 'TKD Verbal' },
+                { id: 'tkd5', nama: 'Penalaran Numerik', sumber: 'TKD Numerik' }
+            ],
+            kepribadian: [
+                { id: 'epps_1', nama: 'Hasrat Berprestasi', sumber: 'EPPS' },
+                { id: 'epps_2', nama: 'Daya Tahan Stress', sumber: 'EPPS' },
+                { id: 'epps_3', nama: 'Kepercayaan Diri', sumber: 'EPPS' },
+                { id: 'epps_4', nama: 'Relasi Sosial', sumber: 'EPPS' },
+                { id: 'epps_5', nama: 'Kerjasama', sumber: 'EPPS' },
+                { id: 'epps_6', nama: 'Sistematika Kerja', sumber: 'EPPS' },
+                { id: 'epps_7', nama: 'Inisiatif', sumber: 'EPPS' },
+                { id: 'epps_8', nama: 'Kemandirian', sumber: 'EPPS' },
+                { id: 'epps_9', nama: 'Tanggung Jawab', sumber: 'EPPS' },
+                { id: 'epps_10', nama: 'Kreativitas', sumber: 'EPPS' },
+                { id: 'epps_11', nama: 'Fleksibilitas', sumber: 'EPPS' },
+                { id: 'epps_12', nama: 'Integritas', sumber: 'EPPS' },
+                { id: 'epps_13', nama: 'Kepemimpinan', sumber: 'EPPS' },
+                { id: 'epps_14', nama: 'Komunikasi', sumber: 'EPPS' },
+                { id: 'epps_15', nama: 'Adaptabilitas', sumber: 'EPPS' }
+            ]
+        };
+
+        const RMIB_MAP = {
+            rmib_k1: { singkatan: 'R', nama: 'Realistik',
+            desc: 'Pekerjaan yang melibatkan aktivitas fisik, mesin, alat, dan lingkungan luar ruangan' },
+            rmib_k2: { singkatan: 'I', nama: 'Investigatif',
+            desc: 'Pekerjaan yang melibatkan penelitian, analisis, dan pemecahan masalah ilmiah' },
+            rmib_k3: { singkatan: 'A', nama: 'Artistik',
+            desc: 'Pekerjaan yang melibatkan kreativitas, ekspresi diri, seni, dan imajinasi' },
+            rmib_k4: { singkatan: 'S', nama: 'Sosial',
+            desc: 'Pekerjaan yang melibatkan interaksi, membantu, mengajar, dan melayani orang lain' },
+            rmib_k5: { singkatan: 'E', nama: 'Enterprising',
+            desc: 'Pekerjaan yang melibatkan kepemimpinan, persuasi, bisnis, dan pengambilan risiko' },
+            rmib_k6: { singkatan: 'C', nama: 'Konvensional',
+            desc: 'Pekerjaan yang melibatkan data, prosedur, administrasi, dan struktur yang teratur' },
+            rmib_k7: { singkatan: 'X', nama: 'Cadangan 1', desc: 'Bidang minat tambahan' },
+            rmib_k8: { singkatan: 'Y', nama: 'Cadangan 2', desc: 'Bidang minat tambahan' }
+        };
+
+        // ============================================================
+        // STATE GLOBAL
+        // ============================================================
+
+        const state = {
+            testResults: [],
+            discData: null,
+            psikoData: null,
+            swData: null,
+            rekomendasi: [],
+            minatData: [],
+            unknownTests: [],
+            charts: []
+        };
+
+        const app = document.getElementById('app');
+
+        // ============================================================
+        // FUNGSI KONVERSI
+        // ============================================================
+
+        function toPercent10(nilai) {
+            return Math.min(Math.max(nilai * 10, 0), 100);
+        }
+
+        function getKategori10(nilai) {
+            if (nilai >= 9) return { label: 'BS', color: '#27ae60', emoji: '✅' };
+            if (nilai >= 7) return { label: 'B', color: '#2980b9', emoji: '✅' };
+            if (nilai >= 5) return { label: 'C', color: '#f39c12', emoji: '⚠️' };
+            return { label: 'K', color: '#e74c3c', emoji: '❌' };
+        }
+
+        function getBarColor10(nilai) {
+            if (nilai >= 9) return '#27ae60';
+            if (nilai >= 7) return '#2980b9';
+            if (nilai >= 5) return '#f39c12';
+            return '#e74c3c';
+        }
+
+        function getKategoriIQ(iq) {
+            if (iq <= 69) return 'Mental Defective';
+            if (iq <= 79) return 'Borderline';
+            if (iq <= 89) return 'Rata-rata Bawah';
+            if (iq <= 109) return 'Rata-rata';
+            if (iq <= 119) return 'Di Atas Rata-rata';
+            if (iq <= 129) return 'Superior';
+            if (iq <= 139) return 'Sangat Superior';
+            return 'Genius';
+        }
+
+        function getScoreColor(score) {
+            if (score >= 80) return '#27ae60';
+            if (score >= 60) return '#2980b9';
+            if (score >= 40) return '#f39c12';
+            if (score >= 20) return '#e67e22';
+            return '#e74c3c';
+        }
+
+        function getScoreLabel(score) {
+            if (score >= 85) return 'Sangat Tinggi';
+            if (score >= 70) return 'Tinggi';
+            if (score >= 55) return 'Agak Tinggi';
+            if (score >= 45) return 'Netral';
+            if (score >= 30) return 'Agak Rendah';
+            if (score >= 15) return 'Rendah';
+            return 'Sangat Rendah';
+        }
+
+        function toScale100(value, maxValue) {
+            if (maxValue === 0) return 0;
+            return Math.round((value / maxValue) * 100);
+        }
+
+        // ============================================================
+        // FUNGSI PARSE PSIKOGRAM
+        // ============================================================
+
+        function parsePsikogramData(x05, x06) {
+            const result = {
+                kognitif: {},
+                kepribadian: {},
+                minat: {},
+                iq: null,
+                semuaNilai: {},
+                eppsData: null,
+                rmibData: {}
+            };
+
+            if (x05) {
+                const cfitKeys = ['cfit1', 'cfit2', 'cfit3', 'cfit4'];
+                cfitKeys.forEach((key) => {
+                    const val = parseInt(x05[key]) || 0;
+                    const normalized = Math.min(Math.max(val, 1), 10);
+                    result.kognitif[key] = normalized;
+                    result.semuaNilai[key] = normalized;
+                });
+
+                const tkd3Raw = parseInt(x05.tkd3) || 0;
+                const tkd3Val = Math.min(Math.max(Math.round(tkd3Raw / 3), 1), 10);
+                result.kognitif.tkd3 = tkd3Val;
+                result.semuaNilai.tkd3 = tkd3Val;
+
+                const tkd5Raw = parseInt(x05.tkd5) || 0;
+                const tkd5Val = Math.min(Math.max(Math.round(tkd5Raw / 3), 1), 10);
+                result.kognitif.tkd5 = tkd5Val;
+                result.semuaNilai.tkd5 = tkd5Val;
+
+                const cfitValues = cfitKeys.map(k => parseInt(x05[k]) || 0);
+                const avgCfit = cfitValues.reduce((a, b) => a + b, 0) / cfitValues.length;
+                result.iq = Math.round(avgCfit * 10);
+            }
+
+            if (x06 && x06.epps) {
+                const eppsRaw = x06.epps || '';
+                const eppsArr = eppsRaw.split(';').filter(v => v.trim() !== '');
+
+                if (eppsArr.length > 0) {
+                    const aspekCount = 15;
+                    const soalPerAspek = 15;
+                    const eppsKeys = ['epps_1', 'epps_2', 'epps_3', 'epps_4', 'epps_5',
+                        'epps_6', 'epps_7', 'epps_8', 'epps_9', 'epps_10',
+                        'epps_11', 'epps_12', 'epps_13', 'epps_14', 'epps_15'
+                    ];
+
+                    for (let i = 0; i < aspekCount && i < eppsKeys.length; i++) {
+                        const start = i * soalPerAspek;
+                        const end = start + soalPerAspek;
+                        const aspekJawaban = eppsArr.slice(start, end);
+                        const countA = aspekJawaban.filter(v => v === 'A').length;
+                        const score = Math.min(Math.max(Math.round((countA / soalPerAspek) * 10), 1), 10);
+                        const key = eppsKeys[i];
+                        result.kepribadian[key] = score;
+                        result.semuaNilai[key] = score;
+                    }
+                    result.eppsData = eppsArr;
+                }
+            }
+
+            if (x06) {
+                const rmibKeys = ['rmib_k1', 'rmib_k2', 'rmib_k3', 'rmib_k4', 'rmib_k5', 'rmib_k6', 'rmib_k7', 'rmib_k8'];
+                rmibKeys.forEach(key => {
+                    const raw = x06[key] || '';
+                    if (raw) {
+                        const ranks = raw.split(';').map(v => parseInt(v.trim()) || 0);
+                        result.minat[key] = ranks[0] || 0;
+                        result.rmibData[key] = ranks[0] || 0;
+                    }
+                });
+            }
+
+            return result;
+        }
+
+        // ============================================================
+        // FUNGSI HITUNG
+        // ============================================================
+
+        function hitungKelebihanKelemahan(semuaNilai) {
+            const entries = Object.entries(semuaNilai)
+                .filter(([key, val]) => val > 0)
+                .map(([key, val]) => {
+                    let nama = key;
+                    const kognitif = ASPEK_PSIKOLOGIS.kognitif.find(a => a.id === key);
+                    if (kognitif) nama = kognitif.nama;
+                    const kepribadian = ASPEK_PSIKOLOGIS.kepribadian.find(a => a.id === key);
+                    if (kepribadian) nama = kepribadian.nama;
+                    return { key, nama, nilai: val };
+                });
+
+            const sorted = entries.sort((a, b) => b.nilai - a.nilai);
+            const kelebihan = sorted.slice(0, 3).map(item => ({
+                ...item,
+                persen: toPercent10(item.nilai),
+                kategori: getKategori10(item.nilai)
+            }));
+            const kelemahan = sorted.slice(-3).reverse().map(item => ({
+                ...item,
+                persen: toPercent10(item.nilai),
+                kategori: getKategori10(item.nilai)
+            }));
+
+            return { kelebihan, kelemahan };
+        }
+
+        function hitungRekomendasi(kelemahan) {
+            const rekomendasiMap = {
+                'cfit1': 'Tingkatkan kemampuan umum melalui latihan soal dan belajar terstruktur',
+                'cfit2': 'Latih daya tangkap visual dengan puzzle, gambar, dan observasi',
+                'cfit3': 'Kembangkan berpikir logis dengan latihan silogisme dan problem solving',
+                'cfit4': 'Asah berpikir abstrak dengan permainan strategi dan analisis pola',
+                'tkd3': 'Perbanyak membaca dan latihan pemahaman teks untuk penalaran verbal',
+                'tkd5': 'Latih hitungan dan logika numerik secara rutin',
+                'epps_1': 'Tingkatkan motivasi dan target pencapaian harian',
+                'epps_2': 'Kelola stress dengan teknik relaksasi dan manajemen waktu',
+                'epps_3': 'Bangun kepercayaan diri melalui pencapaian kecil dan afirmasi positif',
+                'epps_4': 'Kembangkan relasi sosial dengan aktif berkomunikasi dan networking',
+                'epps_5': 'Latih kerjasama tim melalui proyek kelompok dan kolaborasi',
+                'epps_6': 'Perbaiki sistematika kerja dengan membuat checklist dan SOP',
+                'epps_7': 'Tingkatkan inisiatif dengan proaktif mencari tantangan baru',
+                'epps_8': 'Kembangkan kemandirian dengan mengambil tanggung jawab pribadi',
+                'epps_9': 'Tingkatkan tanggung jawab dengan menyelesaikan tugas tepat waktu',
+                'epps_10': 'Kembangkan kreativitas dengan mencoba pendekatan baru',
+                'epps_11': 'Latih fleksibilitas dengan menerima perubahan dan alternatif',
+                'epps_12': 'Jaga integritas dengan konsisten pada nilai dan prinsip',
+                'epps_13': 'Asah kepemimpinan dengan mengambil peran inisiatif dalam tim',
+                'epps_14': 'Perbaiki komunikasi dengan mendengarkan aktif dan klarifikasi',
+                'epps_15': 'Tingkatkan adaptabilitas dengan merespons perubahan secara positif'
+            };
+            return kelemahan.map(item => {
+                const defaultMsg = `Tingkatkan kemampuan ${item.nama} secara bertahap`;
+                return rekomendasiMap[item.key] || defaultMsg;
+            });
+        }
+
+        function hitungMinat(rmibData) {
+            const entries = Object.entries(rmibData)
+                .filter(([key, val]) => val > 0 && val <= 12)
+                .map(([key, val]) => {
+                    const info = RMIB_MAP[key] || { singkatan: '?', nama: key, desc: '' };
+                    return { key, ranking: val, ...info };
+                });
+            return entries.sort((a, b) => a.ranking - b.ranking).slice(0, 3);
+        }
+
+        // ============================================================
+        // TABEL DISC
+        // ============================================================
+
+        const TABEL = [
+            [1, 'A', 'KUNING', 'KUNING'],
+            [1, 'B', 'HIJAU', 'HIJAU'],
+            [1, 'C', 'PUTIH', 'MERAH'],
+            [1, 'D', 'BIRU', 'BIRU'],
+            [2, 'A', 'MERAH', 'MERAH'],
+            [2, 'B', 'BIRU', 'BIRU'],
+            [2, 'C', 'PUTIH', 'HIJAU'],
+            [2, 'D', 'PUTIH', 'KUNING'],
+            [3, 'A', 'PUTIH', 'BIRU'],
+            [3, 'B', 'MERAH', 'MERAH'],
+            [3, 'C', 'KUNING', 'KUNING'],
+            [3, 'D', 'HIJAU', 'PUTIH'],
+            [4, 'A', 'BIRU', 'PUTIH'],
+            [4, 'B', 'MERAH', 'MERAH'],
+            [4, 'C', 'PUTIH', 'HIJAU'],
+            [4, 'D', 'KUNING', 'KUNING'],
+            [5, 'A', 'PUTIH', 'BIRU'],
+            [5, 'B', 'MERAH', 'MERAH'],
+            [5, 'C', 'KUNING', 'KUNING'],
+            [5, 'D', 'HIJAU', 'PUTIH'],
+            [6, 'A', 'MERAH', 'MERAH'],
+            [6, 'B', 'PUTIH', 'HIJAU'],
+            [6, 'C', 'PUTIH', 'KUNING'],
+            [6, 'D', 'BIRU', 'PUTIH'],
+            [7, 'A', 'HIJAU', 'HIJAU'],
+            [7, 'B', 'PUTIH', 'BIRU'],
+            [7, 'C', 'PUTIH', 'KUNING'],
+            [7, 'D', 'MERAH', 'PUTIH'],
+            [8, 'A', 'KUNING', 'PUTIH'],
+            [8, 'B', 'PUTIH', 'HIJAU'],
+            [8, 'C', 'MERAH', 'MERAH'],
+            [8, 'D', 'BIRU', 'BIRU'],
+            [9, 'A', 'MERAH', 'MERAH'],
+            [9, 'B', 'KUNING', 'PUTIH'],
+            [9, 'C', 'HIJAU', 'HIJAU'],
+            [9, 'D', 'PUTIH', 'BIRU'],
+            [10, 'A', 'BIRU', 'BIRU'],
+            [10, 'B', 'KUNING', 'KUNING'],
+            [10, 'C', 'PUTIH', 'HIJAU'],
+            [10, 'D', 'MERAH', 'MERAH'],
+            [11, 'A', 'PUTIH', 'KUNING'],
+            [11, 'B', 'BIRU', 'PUTIH'],
+            [11, 'C', 'HIJAU', 'HIJAU'],
+            [11, 'D', 'MERAH', 'MERAH'],
+            [12, 'A', 'MERAH', 'PUTIH'],
+            [12, 'B', 'KUNING', 'KUNING'],
+            [12, 'C', 'HIJAU', 'HIJAU'],
+            [12, 'D', 'BIRU', 'PUTIH'],
+            [13, 'A', 'HIJAU', 'PUTIH'],
+            [13, 'B', 'MERAH', 'MERAH'],
+            [13, 'C', 'KUNING', 'KUNING'],
+            [13, 'D', 'PUTIH', 'BIRU'],
+            [14, 'A', 'MERAH', 'MERAH'],
+            [14, 'B', 'KUNING', 'PUTIH'],
+            [14, 'C', 'HIJAU', 'PUTIH'],
+            [14, 'D', 'PUTIH', 'BIRU'],
+            [15, 'A', 'KUNING', 'KUNING'],
+            [15, 'B', 'MERAH', 'MERAH'],
+            [15, 'C', 'HIJAU', 'HIJAU'],
+            [15, 'D', 'PUTIH', 'PUTIH'],
+            [16, 'A', 'BIRU', 'PUTIH'],
+            [16, 'B', 'MERAH', 'MERAH'],
+            [16, 'C', 'HIJAU', 'HIJAU'],
+            [16, 'D', 'KUNING', 'KUNING'],
+            [17, 'A', 'BIRU', 'BIRU'],
+            [17, 'B', 'HIJAU', 'HIJAU'],
+            [17, 'C', 'KUNING', 'PUTIH'],
+            [17, 'D', 'MERAH', 'MERAH'],
+            [18, 'A', 'KUNING', 'KUNING'],
+            [18, 'B', 'PUTIH', 'HIJAU'],
+            [18, 'C', 'MERAH', 'MERAH'],
+            [18, 'D', 'BIRU', 'BIRU'],
+            [19, 'A', 'KUNING', 'PUTIH'],
+            [19, 'B', 'HIJAU', 'HIJAU'],
+            [19, 'C', 'PUTIH', 'BIRU'],
+            [19, 'D', 'PUTIH', 'MERAH'],
+            [20, 'A', 'KUNING', 'KUNING'],
+            [20, 'B', 'BIRU', 'PUTIH'],
+            [20, 'C', 'HIJAU', 'HIJAU'],
+            [20, 'D', 'MERAH', 'MERAH'],
+            [21, 'A', 'PUTIH', 'MERAH'],
+            [21, 'B', 'HIJAU', 'PUTIH'],
+            [21, 'C', 'KUNING', 'KUNING'],
+            [21, 'D', 'PUTIH', 'BIRU'],
+            [22, 'A', 'HIJAU', 'HIJAU'],
+            [22, 'B', 'KUNING', 'KUNING'],
+            [22, 'C', 'BIRU', 'BIRU'],
+            [22, 'D', 'MERAH', 'MERAH'],
+            [23, 'A', 'PUTIH', 'MERAH'],
+            [23, 'B', 'BIRU', 'PUTIH'],
+            [23, 'C', 'HIJAU', 'HIJAU'],
+            [23, 'D', 'KUNING', 'KUNING'],
+            [24, 'A', 'PUTIH', 'KUNING'],
+            [24, 'B', 'HIJAU', 'HIJAU'],
+            [24, 'C', 'MERAH', 'PUTIH'],
+            [24, 'D', 'BIRU', 'PUTIH'],
+        ];
+
+        const DISC_META = {
+            D: { name: 'Dominance', label: 'D — Dominance', color: '#c0392b', icon: '⚡' },
+            I: { name: 'Influence', label: 'I — Influence', color: '#e67e22', icon: '🌟' },
+            S: { name: 'Steadiness', label: 'S — Steadiness', color: '#27ae60', icon: '🌿' },
+            C: { name: 'Compliance', label: 'C — Compliance', color: '#2980b9', icon: '🔍' }
+        };
+
+        // ============================================================
+        // FUNGSI DISC
+        // ============================================================
+
+        function hitungWarna(arr) {
+            const c = { MERAH: 0, HIJAU: 0, KUNING: 0, BIRU: 0, PUTIH: 0 };
+            arr.forEach(w => { if (c[w] !== undefined) c[w]++; });
+            return c;
+        }
+
+        function skorD1(v) { if (v >= 15 && v <= 21) return 8; if (v >= 13 && v <= 14) return 6; if (v >= 9 && v <= 12)
+                return 4; if (v >= 7 && v <= 8) return 2; if (v == 3) return -4; if (v >= 1 && v <= 2) return -6;
+            return -8; }
+
+        function skorI1(v) { if (v >= 9 && v <= 19) return 8; if (v >= 7 && v <= 8) return 6; if (v >= 5 && v <= 6)
+                return 4; if (v == 4) return 2; if (v == 3) return -2; if (v == 2) return -4; if (v == 1) return -6;
+            return -8; }
+
+        function skorS1(v) { if (v >= 14 && v <= 20) return 8; if (v >= 10 && v <= 12) return 6; if (v >= 7 && v <= 9)
+                return 4; if (v >= 5 && v <= 6) return 2; if (v >= 3 && v <= 4) return -2; if (v == 2) return -4;
+            if (v >= 0 && v <= 1) return -6; return -8; }
+
+        function skorC1(v) { if (v >= 11 && v <= 17) return 8; if (v >= 7 && v <= 9) return 6; if (v >= 5 && v <= 6)
+                return 4; if (v == 4) return 2; if (v == 3) return -2; if (v == 2) return -4; if (v == 1) return -6;
+            return -8; }
+
+        function skorD2(v) { if (v >= 0 && v <= 1) return 8; if (v == 2) return 6; if (v == 3) return 4; if (v >= 4 && v <= 5)
+                return 2; if (v >= 6 && v <= 8) return -2; if (v >= 9 && v <= 11) return -4; if (v >= 12 && v <= 14)
+                return -6; return -8; }
+
+        function skorI2(v) { if (v == 0) return 8; if (v == 1) return 6; if (v >= 2 && v <= 3) return 4; if (v == 4)
+                return 2; if (v == 5) return -2; if (v >= 6 && v <= 7) return -4; if (v >= 8 && v <= 9) return -6;
+            return -8; }
+
+        function skorS2(v) { if (v >= 0 && v <= 1) return 8; if (v == 2) return 6; if (v >= 3 && v <= 4) return 4;
+            if (v >= 5 && v <= 6) return 2; if (v == 7) return -2; if (v >= 8 && v <= 9) return -4; if (v >= 10 && v <= 11)
+                return -6; return -8; }
+
+        function skorC2(v) { if (v >= 0 && v <= 1) return 8; if (v == 2) return 6; if (v >= 3 && v <= 4) return 4;
+            if (v >= 5 && v <= 6) return 2; if (v >= 7 && v <= 8) return -2; if (v >= 9 && v <= 10) return -4;
+            if (v >= 11 && v <= 12) return -6; return -8; }
+
+        function skorD3(v) { if (v >= 15 && v <= 21) return 8; if (v >= 10 && v <= 14) return 6; if (v >= 7 && v <= 9)
+                return 4; if (v >= 1 && v <= 5) return 2; if (v >= -4 && v <= 0) return -2; if (v >= -9 && v <= -6)
+                return -4; if (v >= -12 && v <= -10) return -6; return -8; }
+
+        function skorI3(v) { if (v >= 8 && v <= 18) return 8; if (v >= 5 && v <= 7) return 6; if (v >= 3 && v <= 4)
+                return 4; if (v >= 0 && v <= 2) return 2; if (v >= -2 && v <= -1) return -2; if (v >= -5 && v <= -3)
+                return -4; if (v >= -8 && v <= -6) return -6; return -8; }
+
+        function skorS3(v) { if (v >= 11 && v <= 20) return 8; if (v >= 7 && v <= 10) return 6; if (v >= 3 && v <= 6)
+                return 4; if (v >= 0 && v <= 2) return 2; if (v >= -4 && v <= -1) return -2; if (v >= -7 && v <= -5)
+                return -4; if (v == -8) return -6; return -8; }
+
+        function skorC3(v) { if (v >= 6 && v <= 17) return 8; if (v >= 3 && v <= 5) return 6; if (v >= 1 && v <= 2)
+                return 4; if (v >= -2 && v <= 0) return 2; if (v >= -4 && v <= -3) return -2; if (v >= -7 && v <= -5)
+                return -4; if (v >= -10 && v <= -8) return -6; return -8; }
+
+        function hitungDISC(jawabanStr) {
+            const discStr = '_;' + jawabanStr;
+            const parts = discStr.split(';').map(s => s.trim());
+            const jawaban = parts.map(p => p.split('_').map(s => s.trim()));
+            const hasilA = [],
+                hasilB = [];
+            for (let i = 1; i < jawaban.length; i++) {
+                const soal = i,
+                    jwA = jawaban[i][0],
+                    jwB = jawaban[i][1];
+                if (!jwA || !jwB) continue;
+                const rowA = TABEL.find(r => r[0] === soal && r[1] === jwA);
+                const rowB = TABEL.find(r => r[0] === soal && r[1] === jwB);
+                if (rowA) hasilA.push(rowA[2]);
+                if (rowB) hasilB.push(rowB[3]);
+            }
+            const cA = hitungWarna(hasilA),
+                cB = hitungWarna(hasilB);
+            const selisih = { MERAH: cA.MERAH - cB.MERAH, HIJAU: cA.HIJAU - cB.HIJAU, KUNING: cA.KUNING - cB.KUNING,
+                BIRU: cA.BIRU - cB.BIRU };
+            return {
+                public: { D: skorD1(cA.MERAH), I: skorI1(cA.HIJAU), S: skorS1(cA.KUNING), C: skorC1(cA.BIRU) },
+                private: { D: skorD2(cB.MERAH), I: skorI2(cB.HIJAU), S: skorS2(cB.KUNING), C: skorC2(cB.BIRU) },
+                perceived: { D: skorD3(selisih.MERAH), I: skorI3(selisih.HIJAU), S: skorS3(selisih.KUNING), C: skorC3(
+                        selisih.BIRU) },
+                raw: { cA, cB, selisih }
+            };
+        }
+
+        function toDiscPercent(score) {
+            return Math.round(((score + 8) / 16) * 100);
+        }
+
+        // ============================================================
+        // PROSES TES (sederhana) - semua fungsi proses tetap sama
+        // ============================================================
+
+        function processTestData(testId, jawaban, maxScore) {
+            const processors = {
+                'gaya-belajar-vak': processVAK,
+                'otak-kiri-kanan': processOtak,
+                'kecerdasan-majemuk': processMI,
+                'temperamen': processTemperamen,
+                'ekstrovert-introvert': processEI,
+                'sensing-intuitif': processSI,
+                'thinking-feeling': processTF,
+                'judging-perceiving': processJP,
+                'pola-asuh': processPolaAsuh,
+                'tipe-cinta': processTipeCinta,
+                'jenis-cinta': processJenisCinta,
+                'jenis-cinta-2': processJenisCinta2,
+                'kecanduan-hubungan': processKecanduan,
+                'mengenal-pasangan': processMengenalPasangan,
+                'kesetiaan': processKesetiaan,
+                'sahabat': processSahabat,
+                'siap-pendamping': processSiapPendamping,
+                'minat-karier': processKarier,
+                'jiwa-kepemimpinan': processJiwaKepemimpinan,
+                'gaya-kepemimpinan': processGayaKepemimpinan,
+                'motivasi-kepemimpinan': processMotivasiKepemimpinan,
+                'manajemen-waktu': processManajemenWaktu,
+                'stres-kerja': processStresKerja
+            };
+
+            if (processors[testId]) {
+                return processors[testId](jawaban, maxScore);
+            }
+
+            const total = jawaban.length || maxScore || 10;
+            const score100 = toScale100(total, maxScore || total);
+            return {
+                type: 'unknown',
+                title: `${jawaban.length} jawaban`,
+                detail: `${score100}%`,
+                value: total,
+                maxScore: maxScore || total,
+                score100: score100,
+                data: [score100],
+                labels: ['Skor']
+            };
+        }
+
+        function processVAK(jawaban, maxScore) {
+            const skor = { A: 0, B: 0, C: 0 };
+            jawaban.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+            const total = jawaban.length || maxScore || 15;
+            const dominan = Object.keys(skor).reduce((a, b) => skor[a] > skor[b] ? a : b);
+            const labels = { A: 'Visual', B: 'Auditory', C: 'Kinestetik' };
+            const data = [skor.A, skor.B, skor.C].map(v => toScale100(v, total));
+            return {
+                type: 'bar',
+                title: labels[dominan],
+                labels: ['Visual', 'Auditory', 'Kinestetik'],
+                data: data,
+                colors: ['#4a90e2', '#f39c12', '#2ecc71'],
+                max: 100,
+                detail: `${labels[dominan]} (${toScale100(skor[dominan], total)}%)`,
+                value: skor[dominan],
+                maxScore: total,
+                score100: toScale100(skor[dominan], total)
+            };
+        }
+
+        function processOtak(jawaban, maxScore) {
+            let kiri = 0,
+                kanan = 0;
+            jawaban.forEach((v, i) => {
+                if (i < 11) { if (v === 'A') kiri++; } else { if (v === 'A') kanan++; }
+            });
+            const total = kiri + kanan || maxScore || 1;
+            const dominan = kiri > kanan ? 'Kiri' : kiri < kanan ? 'Kanan' : 'Seimbang';
+            const data = [toScale100(kiri, total), toScale100(kanan, total)];
+            return {
+                type: 'pie',
+                title: `Otak ${dominan}`,
+                labels: ['Otak Kiri', 'Otak Kanan'],
+                data: data,
+                colors: ['#2980b9', '#e74c3c'],
+                max: 100,
+                detail: `${toScale100(kiri, total)}% : ${toScale100(kanan, total)}%`,
+                value: Math.max(kiri, kanan),
+                maxScore: total,
+                score100: toScale100(Math.max(kiri, kanan), total)
+            };
+        }
+
+        function processMI(jawaban, maxScore) {
+            const names = ['Linguistik', 'Matematika Logis', 'Spasial', 'Kinestetik', 'Musikal', 'Interpersonal', 'Intrapersonal',
+                'Naturalis'
+            ];
+            const colors = ['#1abc9c', '#3498db', '#9b59b6', '#e67e22', '#f1c40f', '#e74c3c', '#34495e', '#27ae60'];
+            const scores = {};
+            names.forEach((name, gi) => {
+                scores[name] = jawaban.slice(gi * 10, gi * 10 + 10).filter(v => v === 'A').length;
+            });
+            const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            const top = sorted.slice(0, 3);
+            const data = names.map(n => toScale100(scores[n], maxScore || 10));
+            return {
+                type: 'radar',
+                title: top.map(([n]) => n.substring(0, 8)).join(' • '),
+                labels: names,
+                data: data,
+                colors: colors,
+                max: 100,
+                detail: top.map(([n, s]) => `${n}(${toScale100(s, maxScore || 10)}%)`).join(' • '),
+                value: sorted[0]?.[1] || 0,
+                maxScore: maxScore || 10,
+                score100: toScale100(sorted[0]?.[1] || 0, maxScore || 10)
+            };
+        }
+
+        function processTemperamen(jawaban, maxScore) {
+            const skor = { A: 0, B: 0, C: 0, D: 0 };
+            jawaban.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+            const total = maxScore || 26;
+            const dominan = Object.keys(skor).reduce((a, b) => skor[a] > skor[b] ? a : b);
+            const labels = { A: 'Sanguinis', B: 'Koleris', C: 'Melankolis', D: 'Phlegmatis' };
+            const colors = { A: '#f1c40f', B: '#e67e22', C: '#9b59b6', D: '#3498db' };
+            const data = [skor.A, skor.B, skor.C, skor.D].map(v => toScale100(v, total));
+            return {
+                type: 'polar',
+                title: labels[dominan],
+                labels: ['Sanguinis', 'Koleris', 'Melankolis', 'Phlegmatis'],
+                data: data,
+                colors: ['#f1c40f', '#e67e22', '#9b59b6', '#3498db'],
+                max: 100,
+                detail: `${labels[dominan]} (${toScale100(skor[dominan], total)}%)`,
+                value: skor[dominan],
+                maxScore: total,
+                score100: toScale100(skor[dominan], total)
+            };
+        }
+
+        function processEI(jawaban, maxScore) {
+            const skor = { A: 0, B: 0 };
+            jawaban.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+            const total = maxScore || 17;
+            const diff = Math.abs(skor.A - skor.B);
+            let label = diff <= 3 ? 'Ambivert' : skor.A > skor.B ? 'Ekstrovert' : 'Introvert';
+            const data = [toScale100(skor.A, total), toScale100(skor.B, total)];
+            return {
+                type: 'bar',
+                title: label,
+                labels: ['Ekstrovert', 'Introvert'],
+                data: data,
+                colors: ['#e74c3c', '#34495e'],
+                max: 100,
+                detail: `${toScale100(skor.A, total)}% : ${toScale100(skor.B, total)}%`,
+                value: Math.max(skor.A, skor.B),
+                maxScore: total,
+                score100: toScale100(Math.max(skor.A, skor.B), total)
+            };
+        }
+
+        function processSI(jawaban, maxScore) {
+            const skor = { A: 0, B: 0 };
+            jawaban.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+            const total = skor.A + skor.B || maxScore || 1;
+            const dominan = skor.A >= skor.B ? 'Sensing' : 'Intuitif';
+            const data = [toScale100(skor.A, total), toScale100(skor.B, total)];
+            return {
+                type: 'bar',
+                title: dominan,
+                labels: ['Sensing', 'Intuitif'],
+                data: data,
+                colors: ['#2980b9', '#8e44ad'],
+                max: 100,
+                detail: `${toScale100(skor.A, total)}% : ${toScale100(skor.B, total)}%`,
+                value: Math.max(skor.A, skor.B),
+                maxScore: total,
+                score100: toScale100(Math.max(skor.A, skor.B), total)
+            };
+        }
+
+        function processTF(jawaban, maxScore) {
+            const skor = { A: 0, B: 0 };
+            jawaban.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+            const total = maxScore || 20;
+            const dominan = skor.A >= skor.B ? 'Thinking' : 'Feeling';
+            const data = [toScale100(skor.A, total), toScale100(skor.B, total)];
+            return {
+                type: 'bar',
+                title: dominan,
+                labels: ['Thinking', 'Feeling'],
+                data: data,
+                colors: ['#2980b9', '#e91e63'],
+                max: 100,
+                detail: `${toScale100(skor.A, total)}% : ${toScale100(skor.B, total)}%`,
+                value: Math.max(skor.A, skor.B),
+                maxScore: total,
+                score100: toScale100(Math.max(skor.A, skor.B), total)
+            };
+        }
+
+        function processJP(jawaban, maxScore) {
+            const skor = { A: 0, B: 0 };
+            jawaban.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+            const total = maxScore || 10;
+            const dominan = skor.A > skor.B ? 'Judging' : 'Perceiving';
+            const data = [toScale100(skor.A, total), toScale100(skor.B, total)];
+            return {
+                type: 'bar',
+                title: dominan,
+                labels: ['Judging', 'Perceiving'],
+                data: data,
+                colors: ['#27ae60', '#e67e22'],
+                max: 100,
+                detail: `${toScale100(skor.A, total)}% : ${toScale100(skor.B, total)}%`,
+                value: Math.max(skor.A, skor.B),
+                maxScore: total,
+                score100: toScale100(Math.max(skor.A, skor.B), total)
+            };
+        }
+
+        function processPolaAsuh(jawaban, maxScore) {
+            const skor = { A: 0, B: 0, C: 0 };
+            jawaban.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+            const total = maxScore || 10;
+            const dominan = Object.keys(skor).reduce((a, b) => skor[a] > skor[b] ? a : b);
+            const labels = { A: 'Otoriter', B: 'Demokratis', C: 'Permisif' };
+            const colors = { A: '#c0392b', B: '#27ae60', C: '#f39c12' };
+            const data = [skor.A, skor.B, skor.C].map(v => toScale100(v, total));
+            return {
+                type: 'bar',
+                title: labels[dominan],
+                labels: ['Otoriter', 'Demokratis', 'Permisif'],
+                data: data,
+                colors: ['#c0392b', '#27ae60', '#f39c12'],
+                max: 100,
+                detail: `${labels[dominan]} (${toScale100(skor[dominan], total)}%)`,
+                value: skor[dominan],
+                maxScore: total,
+                score100: toScale100(skor[dominan], total)
+            };
+        }
+
+        function processTipeCinta(jawaban, maxScore) {
+            const skor = { A: 0, B: 0, C: 0, D: 0 };
+            jawaban.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+            const total = maxScore || 10;
+            const dominan = Object.keys(skor).reduce((a, b) => skor[a] > skor[b] ? a : b);
+            const labels = { A: 'Romantis', B: 'Domestik', C: 'Petualang', D: 'Elegan' };
+            const colors = { A: '#ff4757', B: '#2ed573', C: '#ffa502', D: '#5352ed' };
+            const data = [skor.A, skor.B, skor.C, skor.D].map(v => toScale100(v, total));
+            return {
+                type: 'radar',
+                title: labels[dominan],
+                labels: ['Romantis', 'Domestik', 'Petualang', 'Elegan'],
+                data: data,
+                colors: ['#ff4757', '#2ed573', '#ffa502', '#5352ed'],
+                max: 100,
+                detail: `${labels[dominan]} (${toScale100(skor[dominan], total)}%)`,
+                value: skor[dominan],
+                maxScore: total,
+                score100: toScale100(skor[dominan], total)
+            };
+        }
+
+        function processJenisCinta(jawaban, maxScore) {
+            const nilaiMap = { A: 1, B: 2, C: 3, D: 4, E: 5 };
+            const types = ['Eros', 'Ludus', 'Storge', 'Pragma', 'Mania', 'Agape'];
+            const colors = ['#d63031', '#fdcb6e', '#00b894', '#0984e3', '#e17055', '#fd79a8'];
+            const scores = {};
+            types.forEach((type, idx) => {
+                let total = 0;
+                for (let i = 0; i < 7; i++) {
+                    const jawabanVal = jawaban[idx * 7 + i] || '';
+                    total += nilaiMap[jawabanVal] || 0;
+                }
+                scores[type] = total;
+            });
+            const dominan = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            const total = maxScore || 35;
+            const data = types.map(t => toScale100(scores[t], total));
+            return {
+                type: 'radar',
+                title: dominan,
+                labels: types,
+                data: data,
+                colors: colors,
+                max: 100,
+                detail: `${dominan} (${toScale100(scores[dominan], total)}%)`,
+                value: scores[dominan],
+                maxScore: total,
+                score100: toScale100(scores[dominan], total)
+            };
+        }
+
+        function processJenisCinta2(jawaban, maxScore) {
+            return processJenisCinta(jawaban, maxScore);
+        }
+
+        function processKecanduan(jawaban, maxScore) {
+            const nilaiMap = { A: 3, B: 2, C: 1 };
+            let total = 0;
+            jawaban.forEach(v => { total += nilaiMap[v] || 0; });
+            const maxVal = maxScore || 30;
+            const score100 = toScale100(total, maxVal);
+            let label = total >= 25 ? '⚠️ Kecanduan' : total >= 18 ? '💚 Seimbang' : '⭐ Pelengkap';
+            let color = total >= 25 ? '#d63031' : total >= 18 ? '#27ae60' : '#f39c12';
+            return {
+                type: 'gauge',
+                title: label,
+                value: score100,
+                max: 100,
+                color: color,
+                detail: `${score100}% (${total}/${maxVal})`,
+                rawValue: total,
+                maxScore: maxVal,
+                score100: score100
+            };
+        }
+
+        function processMengenalPasangan(jawaban, maxScore) {
+            const nilaiMap = { A: 1, B: 0 };
+            let score = 0;
+            jawaban.forEach(v => { score += nilaiMap[v] || 0; });
+            const maxVal = maxScore || 22;
+            const score100 = toScale100(score, maxVal);
+            let label = score >= 15 ? '💑 Sangat Kuat' : score >= 8 ? '⭐ Cukup Baik' : '⚠️ Perlu Perhatian';
+            let color = score >= 15 ? '#00b894' : score >= 8 ? '#fdcb6e' : '#d63031';
+            return {
+                type: 'gauge',
+                title: label,
+                value: score100,
+                max: 100,
+                color: color,
+                detail: `${score100}% (${score}/${maxVal})`,
+                rawValue: score,
+                maxScore: maxVal,
+                score100: score100
+            };
+        }
+
+        function processKesetiaan(jawaban, maxScore) {
+            const pointMap = {
+                1: { a: 3, b: 2, c: 1 },
+                2: { a: 3, b: 2, c: 1 },
+                3: { a: 1, b: 1, c: 1 },
+                4: { a: 2, b: 3, c: 1 },
+                5: { a: 1, b: 3, c: 2 },
+                6: { a: 2, b: 3, c: 1 },
+                7: { a: 2, b: 1, c: 3 },
+                8: { a: 1, b: 1, c: 1 },
+                9: { a: 1, b: 3, c: 2 },
+                10: { a: 2, b: 1, c: 3 }
+            };
+            let total = 0;
+            for (let i = 1; i <= 10; i++) {
+                const jawabanVal = (jawaban[i - 1] || '').toLowerCase();
+                total += (pointMap[i][jawabanVal] || 0);
+            }
+            const maxVal = maxScore || 30;
+            const score100 = toScale100(total, maxVal);
+            let label = total >= 21 ? '⚠️ Petualang' : total >= 11 ? '💙 Setia' : '💚 Sangat Setia';
+            let color = total >= 21 ? '#e74c3c' : total >= 11 ? '#3498db' : '#2ecc71';
+            return {
+                type: 'gauge',
+                title: label,
+                value: score100,
+                max: 100,
+                color: color,
+                detail: `${score100}% (${total}/${maxVal})`,
+                rawValue: total,
+                maxScore: maxVal,
+                score100: score100
+            };
+        }
+
+        function processSahabat(jawaban, maxScore) {
+            const pointMap = {
+                1: { a: 2, b: 3, c: 1 },
+                2: { a: 3, b: 2, c: 1 },
+                3: { a: 2, b: 3, c: 2 },
+                4: { a: 1, b: 1, c: 2 },
+                5: { a: 2, b: 2, c: 1 },
+                6: { a: 2, b: 2, c: 3 },
+                7: { a: 2, b: 1, c: 2 },
+                8: { a: 2, b: 3, c: 3 },
+                9: { a: 1, b: 2, c: 3 },
+                10: { a: 2, b: 2, c: 3 }
+            };
+            const dimensionLabels = ['Kepercayaan', 'Dukungan', 'Komunikasi', 'Empati', 'Loyalitas', 'Kejujuran', 'Ketersediaan',
+                'Pengertian', 'Kebersamaan', 'Penghargaan'
+            ];
+            let skorList = [],
+                total = 0;
+            for (let i = 1; i <= 10; i++) {
+                const jwb = (jawaban[i - 1] || '').toLowerCase();
+                const point = pointMap[i][jwb] || 0;
+                total += point;
+                skorList.push(point);
+            }
+            const maxVal = maxScore || 30;
+            const score100 = toScale100(total, maxVal);
+            let label = total >= 24 ? '🌟 Sahabat Baik' : total >= 19 ? '💙 Teman Dekat' : '⭐ Teman Biasa';
+            let color = total >= 24 ? '#6c5ce7' : total >= 19 ? '#00cec9' : '#fab1a0';
+            const data100 = skorList.map(v => toScale100(v, 3));
+            return {
+                type: 'radar',
+                title: label,
+                labels: dimensionLabels,
+                data: data100,
+                colors: Array(10).fill(color),
+                max: 100,
+                detail: `${score100}% (${total}/${maxVal})`,
+                value: total,
+                maxScore: maxVal,
+                score100: score100
+            };
+        }
+
+        function processSiapPendamping(jawaban, maxScore) {
+            const nilaiMap = { A: 1, B: 2, C: 3 };
+            let total = 0;
+            jawaban.forEach(v => { total += nilaiMap[v] || 0; });
+            const maxVal = maxScore || 36;
+            const score100 = toScale100(total, maxVal);
+            let label = total >= 29 ? '💑 Ideal' : total >= 20 ? '⭐ Cukup Baik' : '⚠️ Kurang Dekat';
+            let color = total >= 29 ? '#27ae60' : total >= 20 ? '#f39c12' : '#e74c3c';
+            return {
+                type: 'gauge',
+                title: label,
+                value: score100,
+                max: 100,
+                color: color,
+                detail: `${score100}% (${total}/${maxVal})`,
+                rawValue: total,
+                maxScore: maxVal,
+                score100: score100
+            };
+        }
+
+        function processKarier(jawaban, maxScore) {
+            const categories = ['R', 'I', 'A', 'S', 'E', 'C'];
+            const names = { R: 'Realistic', I: 'Investigative', A: 'Artistic', S: 'Social', E: 'Enterprising', C: 'Conventional' };
+            const colors = { R: '#e74c3c', I: '#3498db', A: '#9b59b6', S: '#2ecc71', E: '#f1c40f', C: '#95a5a6' };
+            const scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+            const valMap = { A: 3, B: 2, C: 1 };
+            for (let i = 0; i < 18 && i < jawaban.length; i++) {
+                const catIdx = Math.floor(i / 3);
+                const cat = categories[catIdx] || 'R';
+                scores[cat] += valMap[jawaban[i]] || 0;
+            }
+            const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            const code = sorted.slice(0, 3).map(([c]) => c).join('');
+            const maxVal = maxScore || 9;
+            const data = categories.map(c => toScale100(scores[c], maxVal));
+            return {
+                type: 'radar',
+                title: `Kode ${code}`,
+                labels: categories.map(c => names[c]),
+                data: data,
+                colors: categories.map(c => colors[c]),
+                max: 100,
+                detail: sorted.slice(0, 3).map(([c, s]) => `${names[c]}(${toScale100(s, maxVal)}%)`).join(' • '),
+                value: sorted[0]?.[1] || 0,
+                maxScore: maxVal,
+                score100: toScale100(sorted[0]?.[1] || 0, maxVal)
+            };
+        }
+
+        function processJiwaKepemimpinan(jawaban, maxScore) {
+            const valMap = { A: 1, B: 2, C: 3 };
+            let total = 0;
+            jawaban.forEach(v => { total += valMap[v] || 0; });
+            const maxVal = maxScore || 42;
+            const score100 = toScale100(total, maxVal);
+            let label, color;
+            if (total <= 9) { label = '⭐ Pemimpin Kuat';
+                color = '#27ae60'; } else if (total <= 19) { label = '👍 Pemimpin Baik';
+                color = '#2980b9'; } else if (total <= 31) { label = '📚 Potensi';
+                color = '#f1c40f'; } else { label = '🚀 Perlu Peningkatan';
+                color = '#e74c3c'; }
+            return {
+                type: 'gauge',
+                title: label,
+                value: score100,
+                max: 100,
+                color: color,
+                detail: `${score100}% (${total}/${maxVal})`,
+                rawValue: total,
+                maxScore: maxVal,
+                score100: score100
+            };
+        }
+
+        function processGayaKepemimpinan(jawaban, maxScore) {
+            const styles = ['demo', 'oto', 'lais', 'pat'];
+            const names = { demo: 'Demokratis', oto: 'Otokratis', lais: 'Laissez Faire', pat: 'Paternalistis' };
+            const colors = { demo: '#2ecc71', oto: '#e74c3c', lais: '#95a5a6', pat: '#e67e22' };
+            const scores = { demo: 0, oto: 0, lais: 0, pat: 0 };
+            for (let i = 0; i < jawaban.length && i < 28; i++) {
+                const styleIdx = Math.floor(i / 7);
+                const style = styles[styleIdx] || 'demo';
+                if (jawaban[i] === 'A') scores[style]++;
+            }
+            const maxKey = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            const maxVal = maxScore || 7;
+            const data = [scores.demo, scores.oto, scores.lais, scores.pat].map(v => toScale100(v, maxVal));
+            return {
+                type: 'bar',
+                title: names[maxKey],
+                labels: ['Demokratis', 'Otokratis', 'Laissez Faire', 'Paternalistis'],
+                data: data,
+                colors: ['#2ecc71', '#e74c3c', '#95a5a6', '#e67e22'],
+                max: 100,
+                detail: `${names[maxKey]} (${toScale100(scores[maxKey], maxVal)}%)`,
+                value: scores[maxKey],
+                maxScore: maxVal,
+                score100: toScale100(scores[maxKey], maxVal)
+            };
+        }
+
+        function processMotivasiKepemimpinan(jawaban, maxScore) {
+            const valMap = { A: 1, B: 2, C: 3, D: 4, E: 5 };
+            let total = 0;
+            jawaban.forEach(v => { total += valMap[v] || 0; });
+            const maxVal = maxScore || 70;
+            const score100 = toScale100(total, maxVal);
+            let label, color;
+            if (total >= 56) { label = '🔥 Sangat Kuat';
+                color = '#27ae60'; } else if (total >= 28) { label = '⚖️ Moderat';
+                color = '#f1c40f'; } else { label = '🌱 Rendah';
+                color = '#e67e22'; }
+            return {
+                type: 'gauge',
+                title: label,
+                value: score100,
+                max: 100,
+                color: color,
+                detail: `${score100}% (${total}/${maxVal})`,
+                rawValue: total,
+                maxScore: maxVal,
+                score100: score100
+            };
+        }
+
+        function processManajemenWaktu(jawaban, maxScore) {
+            const valMap = { A: 3, B: 2, C: 1, D: 1 };
+            let total = 0;
+            jawaban.forEach(v => { total += valMap[v] || 0; });
+            const maxVal = maxScore || 30;
+            const score100 = toScale100(total, maxVal);
+            let label, color;
+            if (total >= 28) { label = '⚠️ Tidak Valid';
+                color = '#c0392b'; } else if (total >= 26) { label = '🌟 Prima';
+                color = '#8e44ad'; } else if (total >= 21) { label = '✅ Sangat Baik';
+                color = '#27ae60'; } else if (total >= 11) { label = '📈 Cukup Baik';
+                color = '#2980b9'; } else { label = '⏳ Perlu Belajar';
+                color = '#e67e22'; }
+            return {
+                type: 'gauge',
+                title: label,
+                value: score100,
+                max: 100,
+                color: color,
+                detail: `${score100}% (${total}/${maxVal})`,
+                rawValue: total,
+                maxScore: maxVal,
+                score100: score100
+            };
+        }
+
+        function processStresKerja(jawaban, maxScore) {
+            let skor = 0;
+            for (let i = 0; i < 12 && i < jawaban.length; i++) {
+                const val = jawaban[i];
+                if (i < 9 && val === 'A') skor++;
+                if (i >= 9 && val === 'C') skor++;
+            }
+            const maxVal = maxScore || 12;
+            const score100 = toScale100(skor, maxVal);
+            const label = skor >= 4 ? '🚨 Waspada' : '✅ Aman';
+            const color = skor >= 4 ? '#e74c3c' : '#2ecc71';
+            return {
+                type: 'gauge',
+                title: label,
+                value: score100,
+                max: 100,
+                color: color,
+                detail: `${score100}% (${skor}/${maxVal})`,
+                rawValue: skor,
+                maxScore: maxVal,
+                score100: score100
+            };
+        }
+
+        // ============================================================
+        // RENDER FUNCTIONS
+        // ============================================================
+
+        function renderIQCard(iqData) {
+            if (!iqData || !iqData.iq) {
+                return `
+                        <div class="psiko-card">
+                            <div class="title">🧠 IQ & Kategori <span class="source">Data tidak tersedia</span></div>
+                            <div style="text-align:center;padding:16px 0;color:#7f8c8d;font-size:0.9em;">📊 Belum ada data IQ</div>
+                        </div>
+                    `;
+            }
+            const iq = iqData.iq;
+            const kategori = getKategoriIQ(iq);
+            const color = iq >= 120 ? '#27ae60' : iq >= 100 ? '#2980b9' : iq >= 80 ? '#f39c12' : '#e74c3c';
+            return `
+                    <div class="psiko-card">
+                        <div class="title">🧠 IQ & Kategori <span class="source">CFIT</span></div>
+                        <div class="iq-display">
+                            <div class="number" style="color:${color};">${iq}</div>
+                            <div class="category" style="color:${color};">${kategori}</div>
+                            <div class="detail">${iq >= 120 ? '✅ Di atas rata-rata' : iq >= 100 ? '✅ Rata-rata' : '⚠️ Perlu perhatian'}</div>
+                            <div class="bar-track"><div class="bar-fill" style="width:${Math.min(iq, 160)}%;background:${color};"></div></div>
+                            <div style="font-size:0.65em;color:#7f8c8d;margin-top:2px;">Skala IQ: 0-160</div>
+                        </div>
+                    </div>
+                `;
+        }
+
+        function renderAspekCard(aspekData, title, icon, source, type) {
+            const items = type === 'kognitif' ? ASPEK_PSIKOLOGIS.kognitif : ASPEK_PSIKOLOGIS.kepribadian;
+
+            const hasData = Object.keys(aspekData || {}).some(key => aspekData[key] > 0);
+
+            if (!hasData) {
+                return `
+                        <div class="psiko-card">
+                            <div class="title">${icon} ${title} <span class="source">Data tidak tersedia</span></div>
+                            <div style="text-align:center;padding:16px 0;color:#7f8c8d;font-size:0.9em;">📊 Belum ada data ${title}</div>
+                        </div>
+                    `;
+            }
+
+            let barsHtml = '';
+            let totalNilai = 0,
+                countNilai = 0;
+            items.forEach(item => {
+                const nilai = aspekData[item.id] || 0;
+                if (nilai > 0) {
+                    const persen = toPercent10(nilai);
+                    const kategori = getKategori10(nilai);
+                    const barColor = getBarColor10(nilai);
+                    totalNilai += nilai;
+                    countNilai++;
+
+                    barsHtml += `
+                            <div class="psiko-row">
+                                <span class="label">${item.nama} <span class="kategori" style="background:${kategori.color}20;color:${kategori.color};">${kategori.label}</span></span>
+                                <span class="emoji">${kategori.emoji}</span>
+                                <div class="track"><div class="fill" style="width:${persen}%;background:${barColor};"></div></div>
+                                <span class="value" style="color:${barColor};">${nilai}/10</span>
+                            </div>
+                        `;
+                }
+            });
+
+            const avg = countNilai > 0 ? Math.round((totalNilai / countNilai) * 10) : 0;
+            const avgColor = getScoreColor(avg);
+
+            return `
+                    <div class="psiko-card">
+                        <div class="title">${icon} ${title} <span class="source">${source}</span></div>
+                        <div class="psiko-bar">${barsHtml}</div>
+                        <div class="psiko-avg">Rata-rata: <strong style="color:${avgColor};">${avg}%</strong> ${avg >= 70 ? '✅ Baik' : avg >= 50 ? '⚠️ Cukup' : '❌ Perlu perhatian'}</div>
+                    </div>
+                `;
+        }
+
+        function renderKelebihanKelemahanCard(kelebihan, kelemahan, rekomendasi) {
+            const hasData = (kelebihan && kelebihan.length > 0) || (kelemahan && kelemahan.length > 0);
+
+            if (!hasData) {
+                return `
+                        <div class="psiko-card">
+                            <div class="title">⚖️ Kelebihan & Kelemahan <span class="source">Data tidak tersedia</span></div>
+                            <div style="text-align:center;padding:16px 0;color:#7f8c8d;font-size:0.9em;">📊 Belum ada data</div>
+                        </div>
+                    `;
+            }
+
+            let kelebihanHtml = kelebihan.map(item =>
+                    `<li><span>${item.kategori.emoji} ${item.nama}</span><span class="badge-score" style="background:${item.kategori.color}20;color:${item.kategori.color};">${item.nilai}/10 (${item.persen}%)</span></li>`
+                ).join('');
+            let kelemahanHtml = kelemahan.map(item =>
+                    `<li><span>${item.kategori.emoji} ${item.nama}</span><span class="badge-score" style="background:${item.kategori.color}20;color:${item.kategori.color};">${item.nilai}/10 (${item.persen}%)</span></li>`
+                ).join('');
+            let rekomendasiHtml = rekomendasi.map((item, idx) => `<li>${idx+1}. ${item}</li>`).join('');
+
+            return `
+                    <div class="psiko-card">
+                        <div class="title">⚖️ Kelebihan & Kelemahan <span class="source">Dari 15 Aspek EPPS + CFIT</span></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="sw-section"><div class="sw-title" style="color:#27ae60;">💪 Kelebihan (3 Tertinggi)</div><ul class="sw-list">${kelebihanHtml}</ul></div>
+                            <div class="sw-section"><div class="sw-title" style="color:#e74c3c;">⚠️ Kelemahan (3 Terendah)</div><ul class="sw-list">${kelemahanHtml}</ul></div>
+                        </div>
+                        <div class="sw-section" style="margin-top:10px;padding-top:10px;border-top:1px solid #e9ecef;">
+                            <div class="sw-title" style="color:#2980b9;">💡 Rekomendasi</div>
+                            <ul class="sw-list">${rekomendasiHtml}</ul>
+                        </div>
+                    </div>
+                `;
+        }
+
+        function renderMinatCard(minatData) {
+            if (!minatData || minatData.length === 0) {
+                return `
+                        <div class="psiko-card">
+                            <div class="title">🎯 Arah Minat <span class="source">Data tidak tersedia</span></div>
+                            <div style="text-align:center;padding:16px 0;color:#7f8c8d;font-size:0.9em;">📊 Belum ada data RMIB</div>
+                        </div>
+                    `;
+            }
+
+            const emojis = ['🥇', '🥈', '🥉'];
+            let minatHtml = minatData.map((item, idx) => `
+                    <div class="minat-item">
+                        <div><span class="rank">${emojis[idx] || '🏅'}</span> <span class="name">${item.nama}</span> <span class="score-minat">Rank ${item.ranking}</span></div>
+                        <div class="desc">${item.desc}</div>
+                        <div class="bar-track"><div class="bar-fill" style="width:${(12 - item.ranking) / 11 * 100}%;background:${getBarColor10(12 - item.ranking)};"></div></div>
+                    </div>
+                `).join('');
+
+            return `
+                    <div class="psiko-card">
+                        <div class="title">🎯 Arah Minat Pendidikan / Pekerjaan <span class="source">RMIB</span></div>
+                        ${minatHtml}
+                        <div style="font-size:0.65em;color:#7f8c8d;margin-top:6px;padding-top:6px;border-top:1px solid #e9ecef;">
+                            📊 Berdasarkan 8 bidang RMIB (R,I,A,S,E,C) — Ranking 1 = paling disukai
+                        </div>
+                    </div>
+                `;
+        }
+
+        function renderDiscCard(discResult, label, icon) {
+            const keys = ['D', 'I', 'S', 'C'];
+            const sorted = keys.map(k => ({ key: k, value: discResult[k], percent: toDiscPercent(discResult[k]) }))
+                .sort((a, b) => b.percent - a.percent);
+            const dominant = sorted[0];
+            const domMeta = DISC_META[dominant.key];
+
+            let barsHtml = '';
+            keys.forEach(k => {
+                const meta = DISC_META[k];
+                const pct = toDiscPercent(discResult[k]);
+                const color = getScoreColor(pct);
+                barsHtml += `
+                        <div class="disc-row">
+                            <span class="label" style="color:${meta.color};">${k}</span>
+                            <div class="track"><div class="fill" style="width:${pct}%;background:${color};"></div></div>
+                            <span class="value" style="color:${color};">${pct}%</span>
+                        </div>
+                    `;
+            });
+
+            return `
+                    <div class="disc-card">
+                        <div class="title">${icon} ${label} <span class="dom">⬆ ${domMeta.name}</span></div>
+                        <div class="disc-bar">${barsHtml}</div>
+                        <div class="disc-desc">${domMeta.name}: ${domMeta.label}</div>
+                    </div>
+                `;
+        }
+
+        function renderDiscRadar(discData) {
+            if (!discData) return '';
+            const keys = ['D', 'I', 'S', 'C'];
+            const publicData = keys.map(k => toDiscPercent(discData.public[k]));
+            const privateData = keys.map(k => toDiscPercent(discData.private[k]));
+            const perceivedData = keys.map(k => toDiscPercent(discData.perceived[k]));
+
+            return `
+                    <div class="disc-radar-wrap">
+                        <div class="title">📊 Perbandingan 3 Dimensi DISC</div>
+                        <div class="chart-box"><canvas id="discRadarChart"></canvas></div>
+                        <div class="legend">
+                            <span><span class="dot" style="background:#667eea;"></span> Public</span>
+                            <span><span class="dot" style="background:#27ae60;"></span> Private</span>
+                            <span><span class="dot" style="background:#e74c3c;"></span> Perceived</span>
+                        </div>
+                    </div>
+                `;
+        }
+
+        function renderSingleCard(test, customDisplayName) {
+            const result = test.result;
+            if (!result) return '';
+
+            const score100 = result.score100 !== undefined ? result.score100 : 0;
+            const scoreColor = getScoreColor(score100);
+            const displayName = customDisplayName || test.label;
+
+            let cardContent = '';
+
+            if (result.type === 'gauge') {
+                cardContent = `
+                        <div style="text-align:center;padding:6px 0;">
+                            <div style="font-size:1.6em;font-weight:700;color:${scoreColor};">${score100}%</div>
+                            <div style="font-size:0.7em;color:#7f8c8d;">${result.detail || ''}</div>
+                            <div style="margin-top:8px;height:5px;background:#e9ecef;border-radius:99px;overflow:hidden;">
+                                <div style="height:100%;width:${score100}%;background:${scoreColor};border-radius:99px;"></div>
+                            </div>
+                        </div>
+                    `;
+            } else if (result.type === 'unknown') {
+                cardContent = `
+                        <div style="text-align:center;padding:16px 0;color:#7f8c8d;">
+                            <div style="font-size:1.8em;">📊</div>
+                            <div style="font-size:0.85em;">${result.detail || 'Data tersedia'}</div>
+                            <div style="font-size:1.4em;font-weight:700;color:${scoreColor};">${score100}%</div>
+                        </div>
+                    `;
+            } else {
+                const chartId = `chart-${test.id}-${Date.now()}-${Math.random()}`;
+                test._chartId = chartId;
+                cardContent = `
+                        <div class="chart-container ${result.type === 'radar' ? 'tall' : ''}">
+                            <canvas id="${chartId}"></canvas>
+                        </div>
+                        <div style="text-align:center;margin-top:6px;font-size:0.75em;color:#7f8c8d;">
+                            ${result.detail || ''}
+                            <span style="font-weight:700;color:${scoreColor};margin-left:6px;">${score100}%</span>
+                        </div>
+                    `;
+            }
+
+            return `
+                    <div class="card">
+                        <div class="card-title">
+                            ${test.icon} ${displayName}
+                            <span class="badge">${result.title || ''}</span>
+                            <span class="score-100" style="background:${scoreColor};">${score100}%</span>
+                        </div>
+                        ${cardContent}
+                    </div>
+                `;
+        }
+
+        // ============================================================
+        // RENDER DASHBOARD DENGAN KONFIGURASI
+        // ============================================================
+
+        function getGroupAverage(tests) {
+            if (tests.length === 0) return 0;
+            let total = 0,
+                count = 0;
+            tests.forEach(t => {
+                if (t.result && t.result.score100 !== undefined && t.result.score100 > 0) {
+                    total += t.result.score100;
+                    count++;
+                }
+            });
+            return count > 0 ? Math.round(total / count) : 0;
+        }
+
+        function renderDashboard(dataDiri, testResults, discData, psikoData, swData, rekomendasi, minatData) {
+            // Update state
+            state.testResults = testResults;
+            state.discData = discData;
+            state.psikoData = psikoData;
+            state.swData = swData;
+            state.rekomendasi = rekomendasi || [];
+            state.minatData = minatData || [];
+            state.unknownTests = testResults.filter(t => t.group === 'unknown');
+            state.charts = [];
+
+            const totalTes = testResults.length;
+            const hasPsiko = psikoData && Object.keys(psikoData.semuaNilai).length > 0;
+
+            // Hitung rata-rata
+            let totalScore100 = 0,
+                countScore = 0;
+            testResults.forEach(t => {
+                if (t.result && t.result.score100 !== undefined && t.result.score100 > 0) {
+                    totalScore100 += t.result.score100;
+                    countScore++;
+                }
+            });
+            const avgScore = countScore > 0 ? Math.round(totalScore100 / countScore) : 0;
+
+            // Header
+            const showDownload = dashboardConfig.header?.showDownloadButton !== false;
+            const showPrint = dashboardConfig.header?.showPrintButton !== false;
+
+            let html = `
+                    <div class="header">
+                        <div>
+                            <h1>📊 Dashboard Psikologi</h1>
+                            <p>${dataDiri.bioNama || dataDiri.nama || 'Peserta'} • ${dataDiri.bioUsia || dataDiri.usia || '-'} tahun • ${dataDiri.bioPend || dataDiri.pendidikan || '-'}</p>
+                            <p style="font-size:0.85em;opacity:0.8;margin-top:4px;">${totalTes} tes dikerjakan • Rata-rata skor: <strong>${avgScore}%</strong>
+                            ${hasPsiko ? ` • 🧠 IQ: <strong>${psikoData.iq || 0}</strong> (${getKategoriIQ(psikoData.iq || 0)})` : ''}</p>
+                        </div>
+                        <div class="header-actions">
+                            ${showDownload ? `<button class="btn-download-all" onclick="downloadDashboard()">📥 Download Semua</button>` : ''}
+                            ${showPrint ? `<button class="btn-print" onclick="window.print()">🖨️ Cetak</button>` : ''}
+                        </div>
+                    </div>
+                `;
+
+            // Stats Row
+            const stats = dashboardConfig.stats || {};
+            html += `<div class="stats-row">`;
+            if (stats.showTotalTests !== false) {
+                html += `<div class="stat-card"><div class="number">${totalTes}</div><div class="label">Total Tes</div></div>`;
+            }
+            if (stats.showAverageScore !== false) {
+                html += `<div class="stat-card" style="border-color:#27ae60;"><div class="number" style="color:${getScoreColor(avgScore)};">${avgScore}%</div><div class="label">Rata-rata Skor</div></div>`;
+            }
+            if (stats.showAge !== false) {
+                html += `<div class="stat-card" style="border-color:#e74c3c;"><div class="number">${dataDiri.bioUsia || dataDiri.usia || '-'}</div><div class="label">Usia</div></div>`;
+            }
+            if (stats.showCity !== false) {
+                html += `<div class="stat-card" style="border-color:#f39c12;"><div class="number">${dataDiri.bioKota || dataDiri.kota || '-'}</div><div class="label">Kota</div></div>`;
+            }
+            if (stats.showIQ !== false && hasPsiko) {
+                const iqColor = psikoData.iq >= 120 ? '#27ae60' : psikoData.iq >= 100 ? '#2980b9' : '#e74c3c';
+                html += `<div class="stat-card" style="border-color:#8e44ad;"><div class="number" style="color:${iqColor};">${psikoData.iq || 0}</div><div class="label">IQ</div></div>`;
+            }
+            html += `</div>`;
+
+            // Render grup berdasarkan konfigurasi
+            const groupConfigs = dashboardConfig.groups || [];
+            const allTestIds = testResults.map(t => t.id);
+            const renderedGroups = [];
+
+            groupConfigs.forEach(groupConfig => {
+                if (groupConfig.enabled === false) return;
+
+                const groupTests = testResults.filter(t => t.group === groupConfig.id);
+                if (groupTests.length === 0) return;
+
+                // Filter cards berdasarkan konfigurasi
+                const cardConfigs = groupConfig.cards || {};
+                const filteredTests = groupTests.filter(t => {
+                    const cardCfg = cardConfigs[t.id];
+                    // Jika card config ada dan enabled false, skip
+                    if (cardCfg && cardCfg.enabled === false) return false;
+                    // Jika tidak ada config, tampilkan
+                    return true;
+                });
+
+                if (filteredTests.length === 0) return;
+
+                const avg = getGroupAverage(filteredTests);
+                const avgColor = getScoreColor(avg);
+                const displayName = groupConfig.displayName || groupConfig.name;
+                const icon = groupConfig.icon || '📊';
+
+                renderedGroups.push(groupConfig.id);
+
+                html += `
+                        <div class="group-section">
+                            <div class="group-header">
+                                <div class="title">
+                                    <span class="icon">${icon}</span>
+                                    ${displayName}
+                                </div>
+                                <div class="stats">
+                                    <span class="count">${filteredTests.length} tes</span>
+                                    <span class="avg" style="color:${avgColor};">Rata-rata: ${avg}%</span>
+                                    <span style="font-size:0.8em;color:${avgColor};">${getScoreLabel(avg)}</span>
+                                </div>
+                            </div>
+                            <div class="grid-${Math.min(filteredTests.length, 4)}">
+                                ${renderGroupCards(filteredTests, cardConfigs)}
+                            </div>
+                        </div>
+                    `;
+            });
+
+            // Unknown tests (jika enabled)
+            const unknownGroupConfig = groupConfigs.find(g => g.id === 'unknown');
+            const unknownTests = testResults.filter(t => t.group === 'unknown');
+
+            if (unknownTests.length > 0 && unknownGroupConfig?.enabled !== false) {
+                const cardConfigs = unknownGroupConfig?.cards || {};
+                const filteredUnknown = unknownTests.filter(t => {
+                    const cardCfg = cardConfigs[t.id];
+                    if (cardCfg && cardCfg.enabled === false) return false;
+                    return true;
+                });
+
+                if (filteredUnknown.length > 0) {
+                    html += `
+                            <div class="group-section">
+                                <div class="group-header">
+                                    <div class="title">
+                                        <span class="icon">${unknownGroupConfig?.icon || '📊'}</span>
+                                        ${unknownGroupConfig?.displayName || 'Tes Tambahan'}
+                                    </div>
+                                    <div class="stats">
+                                        <span class="count">${filteredUnknown.length} tes</span>
+                                    </div>
+                                </div>
+                                <div class="unknown-tabs">
+                                    ${filteredUnknown.map((t, idx) => `
+                                        <button class="unknown-tab-btn ${idx === 0 ? 'active' : ''}" data-unknown="${idx}">
+                                            ${t.icon} ${cardConfigs[t.id]?.displayName || t.label}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                                ${filteredUnknown.map((t, idx) => `
+                                    <div class="unknown-panel ${idx === 0 ? 'active' : ''}" data-unknown-panel="${idx}">
+                                        <div style="max-width:400px;margin:0 auto;">
+                                            ${renderSingleCard(t, cardConfigs[t.id]?.displayName)}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                }
+            }
+
+            app.innerHTML = html;
+
+            // Event listener untuk unknown tabs
+            document.querySelectorAll('.unknown-tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.unknown);
+                    document.querySelectorAll('.unknown-tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    document.querySelectorAll('.unknown-panel').forEach(p => p.classList.remove('active'));
+                    document.querySelector(`.unknown-panel[data-unknown-panel="${idx}"]`).classList.add(
+                    'active');
+                });
+            });
+
+            // Render chart setelah DOM siap
+            setTimeout(() => {
+                const allTests = testResults.filter(t => {
+                    // Hanya render yang visible
+                    const groupCfg = dashboardConfig.groups.find(g => g.id === t.group);
+                    if (groupCfg?.enabled === false) return false;
+                    const cardCfg = groupCfg?.cards?.[t.id];
+                    if (cardCfg?.enabled === false) return false;
+                    return true;
+                });
+
+                allTests.forEach((test, idx) => {
+                    if (test.id !== 'disc' && test.result && test.result.type &&
+                        test.result.type !== 'gauge' && test.result.type !== 'unknown' &&
+                        test.result.type !== 'psiko_iq' && test.result.type !== 'psiko_aspek' &&
+                        test.result.type !== 'psiko_sw' && test.result.type !== 'psiko_minat') {
+                        renderChart(test, test._chartId);
+                    }
+                });
+
+                // Render DISC radar jika ada
+                if (discData) {
+                    // Cek apakah DISC visible
+                    const discGroupCfg = dashboardConfig.groups.find(g => g.id === 'kepribadian');
+                    const discCardCfg = discGroupCfg?.cards?.disc;
+                    if (discGroupCfg?.enabled !== false && discCardCfg?.enabled !== false) {
+                        renderDiscRadarChart(discData);
+                    }
+                }
+            }, 500);
+        }
+
+        function renderGroupCards(groupTests, cardConfigs) {
+            let html = '';
+            groupTests.forEach((test, idx) => {
+                // DISC special
+                if (test.id === 'disc' && state.discData) {
+                    const discCfg = cardConfigs?.['disc'] || {};
+                    html += renderDiscCard(state.discData.public, discCfg.displayName || 'Public Self', '🌐');
+                    html += renderDiscCard(state.discData.private, 'Private Self', '🔒');
+                    html += renderDiscCard(state.discData.perceived, 'Perceived Self', '🔮');
+                    html += renderDiscRadar(state.discData);
+                    return;
+                }
+
+                // Psikogram
+                if (test.isPsiko) {
+                    if (test.id === 'iq') {
+                        html += renderIQCard(state.psikoData);
+                        return;
+                    }
+                    if (test.id === 'aspek-kognitif') {
+                        html += renderAspekCard(state.psikoData?.kognitif, 'Aspek Kognitif', '📊', 'CFIT + TKD', 'kognitif');
+                        return;
+                    }
+                    if (test.id === 'aspek-kepribadian') {
+                        html += renderAspekCard(state.psikoData?.kepribadian, 'Aspek Kepribadian', '📊', 'EPPS',
+                            'kepribadian');
+                        return;
+                    }
+                    if (test.id === 'kelebihan-kelemahan') {
+                        html += renderKelebihanKelemahanCard(
+                            state.swData?.kelebihan || [],
+                            state.swData?.kelemahan || [],
+                            state.rekomendasi || []
+                        );
+                        return;
+                    }
+                    if (test.id === 'arah-minat') {
+                        html += renderMinatCard(state.minatData || []);
+                        return;
+                    }
+                }
+
+                // Tes biasa
+                const displayName = cardConfigs?.[test.id]?.displayName || test.label;
+                html += renderSingleCard(test, displayName);
+            });
+            return html;
+        }
+
+        function renderChart(test, chartId) {
+            const canvas = document.getElementById(chartId);
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const result = test.result;
+            if (!result || result.type === 'gauge' || result.type === 'unknown' ||
+                result.type === 'psiko_iq' || result.type === 'psiko_aspek' ||
+                result.type === 'psiko_sw' || result.type === 'psiko_minat') return;
+
+            let chartConfig;
+
+            if (result.type === 'bar') {
+                chartConfig = {
+                    type: 'bar',
+                    data: {
+                        labels: result.labels,
+                        datasets: [{ data: result.data, backgroundColor: result.colors.map(c => c + '80'),
+                            borderColor: result.colors, borderWidth: 2, borderRadius: 4 }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 8 } },
+                                grid: { color: 'rgba(0,0,0,0.05)' } },
+                            x: { ticks: { font: { size: 7 } } }
+                        }
+                    }
+                };
+            } else if (result.type === 'pie') {
+                chartConfig = {
+                    type: 'doughnut',
+                    data: {
+                        labels: result.labels,
+                        datasets: [{ data: result.data, backgroundColor: result.colors.map(c => c + 'CC'),
+                            borderColor: '#fff', borderWidth: 2 }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 6, font: { size: 8 } } }
+                        },
+                        cutout: '50%'
+                    }
+                };
+            } else if (result.type === 'polar') {
+                chartConfig = {
+                    type: 'polarArea',
+                    data: {
+                        labels: result.labels,
+                        datasets: [{ data: result.data, backgroundColor: result.colors.map(c => c + '80'),
+                            borderColor: result.colors, borderWidth: 2 }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 6, font: { size: 8 } } }
+                        }
+                    }
+                };
+            } else if (result.type === 'radar') {
+                chartConfig = {
+                    type: 'radar',
+                    data: {
+                        labels: result.labels,
+                        datasets: [{
+                            data: result.data,
+                            backgroundColor: 'rgba(102,126,234,0.15)',
+                            borderColor: '#667eea',
+                            borderWidth: 2,
+                            pointBackgroundColor: result.colors || ['#667eea'],
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: { stepSize: 20, font: { size: 7 } },
+                                pointLabels: { font: { size: 7 } }
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                };
+            }
+
+            if (chartConfig) {
+                try {
+                    const chart = new Chart(ctx, chartConfig);
+                    state.charts.push(chart);
+                } catch (e) {
+                    console.warn('Chart error:', e);
+                }
+            }
+        }
+
+        function renderDiscRadarChart(discData) {
+            const canvas = document.getElementById('discRadarChart');
+            if (!canvas) return;
+
+            try {
+                const ctx = canvas.getContext('2d');
+                const keys = ['D', 'I', 'S', 'C'];
+                const publicData = keys.map(k => toDiscPercent(discData.public[k]));
+                const privateData = keys.map(k => toDiscPercent(discData.private[k]));
+                const perceivedData = keys.map(k => toDiscPercent(discData.perceived[k]));
+
+                const chart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: keys,
+                        datasets: [{
+                            label: 'Public Self',
+                            data: publicData,
+                            backgroundColor: 'rgba(102,126,234,0.15)',
+                            borderColor: '#667eea',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#667eea',
+                            pointRadius: 4
+                        }, {
+                            label: 'Private Self',
+                            data: privateData,
+                            backgroundColor: 'rgba(39,174,96,0.15)',
+                            borderColor: '#27ae60',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#27ae60',
+                            pointRadius: 4
+                        }, {
+                            label: 'Perceived Self',
+                            data: perceivedData,
+                            backgroundColor: 'rgba(231,76,60,0.15)',
+                            borderColor: '#e74c3c',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#e74c3c',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: { stepSize: 25, font: { size: 8 } },
+                                pointLabels: { font: { size: 10, weight: 'bold' } },
+                                grid: { color: 'rgba(0,0,0,0.06)' }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 8, font: { size: 8 } }
+                            }
+                        }
+                    }
+                });
+                state.charts.push(chart);
+            } catch (e) {
+                console.warn('Disc radar error:', e);
+            }
+        }
+
+        // ============================================================
+        // LOAD DATA
+        // ============================================================
+
+        async function loadDashboard() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            if (!token) {
+                app.innerHTML = `<div class="error-msg"><h2>❌ Error</h2><p>Token tidak ditemukan di URL</p></div>`;
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `https://lidan-co-id.pages.dev/api/contacts_filter_dinamis6?table=nilai1_json&x_01_eq=${token}`, {
+                        headers: { 'X-Custom-Auth': 'admin' }
+                    }
+                );
+                const res = await response.json();
+
+                if (!res.success || res.count === 0) {
+                    app.innerHTML = `<div class="error-msg"><h2>❌ Data Tidak Ditemukan</h2><p>Token tidak valid atau sudah kadaluarsa</p></div>`;
+                    return;
+                }
+
+                const data = res.data[0];
+                const dataDiri = JSON.parse(data.x_02 || "{}");
+                const x07 = JSON.parse(data.x_07 || "{}");
+                const x05 = JSON.parse(data.x_05 || "{}");
+                const x06 = JSON.parse(data.x_06 || "{}");
+
+                // Parse Psikogram
+                const psikoData = parsePsikogramData(x05, x06);
+                const swData = hitungKelebihanKelemahan(psikoData.semuaNilai);
+                const rekomendasi = hitungRekomendasi(swData.kelemahan);
+                const minatData = hitungMinat(psikoData.rmibData);
+
+                // Kumpulkan semua tes
+                const testResults = [];
+                let discData = null;
+
+                for (const config of TEST_CONFIG) {
+                    const raw = x07[config.key] || '';
+
+                    if (config.isPsiko) {
+                        if (config.id === 'iq') {
+                            testResults.push({
+                                ...config,
+                                jawaban: [],
+                                result: {
+                                    type: 'psiko_iq',
+                                    title: 'IQ',
+                                    detail: `${psikoData.iq || 0}`,
+                                    value: psikoData.iq || 0,
+                                    maxScore: 160,
+                                    score100: Math.round(((psikoData.iq || 0) / 160) * 100),
+                                    psikoData: psikoData
+                                }
+                            });
+                        } else if (config.id === 'aspek-kognitif') {
+                            const avg = Object.values(psikoData.kognitif).filter(v => v > 0).reduce((a, b) => a + b, 0) /
+                                Object.values(psikoData.kognitif).filter(v => v > 0).length || 0;
+                            if (avg > 0) {
+                                testResults.push({
+                                    ...config,
+                                    jawaban: [],
+                                    result: {
+                                        type: 'psiko_aspek',
+                                        title: 'Kognitif',
+                                        detail: `${Math.round(avg * 10)}%`,
+                                        value: Math.round(avg * 10),
+                                        maxScore: 100,
+                                        score100: Math.round(avg * 10),
+                                        psikoData: psikoData,
+                                        aspekType: 'kognitif'
+                                    }
+                                });
+                            }
+                        } else if (config.id === 'aspek-kepribadian') {
+                            const avg = Object.values(psikoData.kepribadian).filter(v => v > 0).reduce((a, b) => a + b, 0) /
+                                Object.values(psikoData.kepribadian).filter(v => v > 0).length || 0;
+                            if (avg > 0) {
+                                testResults.push({
+                                    ...config,
+                                    jawaban: [],
+                                    result: {
+                                        type: 'psiko_aspek',
+                                        title: 'Kepribadian',
+                                        detail: `${Math.round(avg * 10)}%`,
+                                        value: Math.round(avg * 10),
+                                        maxScore: 100,
+                                        score100: Math.round(avg * 10),
+                                        psikoData: psikoData,
+                                        aspekType: 'kepribadian'
+                                    }
+                                });
+                            }
+                        } else if (config.id === 'kelebihan-kelemahan') {
+                            if (swData.kelebihan.length > 0 || swData.kelemahan.length > 0) {
+                                testResults.push({
+                                    ...config,
+                                    jawaban: [],
+                                    result: {
+                                        type: 'psiko_sw',
+                                        title: 'Kelebihan & Kelemahan',
+                                        detail: `${swData.kelebihan.length} kelebihan, ${swData.kelemahan.length} kelemahan`,
+                                        value: 70,
+                                        maxScore: 100,
+                                        score100: 70,
+                                        psikoData: psikoData,
+                                        swData: swData,
+                                        rekomendasi: rekomendasi
+                                    }
+                                });
+                            }
+                        } else if (config.id === 'arah-minat') {
+                            if (minatData.length > 0) {
+                                testResults.push({
+                                    ...config,
+                                    jawaban: [],
+                                    result: {
+                                        type: 'psiko_minat',
+                                        title: 'Arah Minat',
+                                        detail: `${minatData.length} bidang minat`,
+                                        value: minatData.length > 0 ? minatData[0].nilai * 10 : 0,
+                                        maxScore: 100,
+                                        score100: minatData.length > 0 ? minatData[0].nilai * 10 : 0,
+                                        psikoData: psikoData,
+                                        minatData: minatData
+                                    }
+                                });
+                            }
+                        }
+                        continue;
+                    }
+
+                    // Tes biasa - hanya jika ada data
+                    if (raw && raw.trim() !== '') {
+                        const jawaban = raw.split(';').filter(v => v !== '');
+                        if (config.id === 'disc') {
+                            try {
+                                const discResult = hitungDISC(raw);
+                                discData = discResult;
+                                const keys = ['D', 'I', 'S', 'C'];
+                                const avgScore = keys.reduce((sum, k) => sum + toDiscPercent(discResult.public[k]), 0) / keys
+                                    .length;
+                                testResults.push({
+                                    ...config,
+                                    jawaban,
+                                    result: {
+                                        type: 'disc',
+                                        title: 'DISC Profile',
+                                        detail: `Public: ${toDiscPercent(discResult.public.D)}%`,
+                                        value: Math.round(avgScore),
+                                        maxScore: 100,
+                                        score100: Math.round(avgScore),
+                                        discData: discResult
+                                    }
+                                });
+                            } catch (e) { console.warn('DISC error:', e); }
+                        } else {
+                            const result = processTestData(config.id, jawaban, config.maxScore);
+                            testResults.push({
+                                ...config,
+                                jawaban,
+                                result
+                            });
+                        }
+                    }
+                }
+
+                // Cek tes tambahan (unknown)
+                const allKeys = Object.keys(x07);
+                const extraKeysList = allKeys.filter(k =>
+                    k.startsWith('who_') &&
+                    !TEST_CONFIG.find(t => t.key === k) &&
+                    x07[k] && x07[k].trim() !== ''
+                );
+
+                extraKeysList.forEach(key => {
+                    const raw = x07[key] || '';
+                    const jawaban = raw.split(';').filter(v => v !== '');
+                    if (jawaban.length > 0) {
+                        testResults.push({
+                            id: key,
+                            label: key.replace('who_', 'Tes '),
+                            icon: '📊',
+                            key: key,
+                            color: '#95a5a6',
+                            maxScore: jawaban.length || 10,
+                            group: 'unknown',
+                            jawaban: jawaban,
+                            result: {
+                                type: 'unknown',
+                                title: `${jawaban.length} jawaban`,
+                                detail: `Data tersedia`,
+                                value: jawaban.length,
+                                maxScore: jawaban.length || 10,
+                                score100: toScale100(jawaban.length, jawaban.length || 10)
+                            }
+                        });
+                    }
+                });
+
+                if (testResults.length === 0) {
+                    app.innerHTML = `<div class="error-msg"><h2>⚠️ Belum Ada Tes Dikerjakan</h2><p>Peserta belum mengerjakan tes apapun.</p></div>`;
+                    return;
+                }
+
+                renderDashboard(dataDiri, testResults, discData, psikoData, swData, rekomendasi, minatData);
+
+            } catch (e) {
+                app.innerHTML = `<div class="error-msg"><h2>❌ Kesalahan Koneksi</h2><p>Tidak dapat terhubung ke server</p></div>`;
+                console.error(e);
+            }
+        }
+
+        // ============================================================
+        // DOWNLOAD DASHBOARD
+        // ============================================================
+
+        async function downloadDashboard() {
+            const btn = document.querySelector('.btn-download-all');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '⏳ Memproses...';
+            }
+
+            try {
+                const dashboard = document.querySelector('.dashboard');
+                const canvas = await html2canvas(dashboard, {
+                    scale: 2,
+                    backgroundColor: '#f0f2f5',
+                    logging: false,
+                    useCORS: true,
+                    windowWidth: dashboard.scrollWidth,
+                    windowHeight: dashboard.scrollHeight
+                });
+
+                const link = document.createElement('a');
+                link.download = `Dashboard-Psikologi-${Date.now()}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.92);
+                link.click();
+
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '✅ Berhasil!';
+                    setTimeout(() => { btn.textContent = '📥 Download Semua'; }, 2000);
+                }
+            } catch (error) {
+                console.error('Download error:', error);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '❌ Gagal';
+                    setTimeout(() => { btn.textContent = '📥 Download Semua'; }, 2000);
+                }
+            }
+        }
+
+        // ============================================================
+        // START
+        // ============================================================
+
+        loadDashboard();
+    </script>
+
+</body>
+</html>

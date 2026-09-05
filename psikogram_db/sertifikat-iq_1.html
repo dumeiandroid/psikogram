@@ -464,7 +464,7 @@ body {
             <!-- LAYER 6: QR paling atas -->
             <div class="cert-qr">
                 <div class="qr-box"><div id="cert-qr-code"></div></div>
-                <div class="qr-label">Verifikasi<br>Lidan Psikologi</div>
+                <div class="qr-label">Verifikasi</div>
             </div>
 
             <!-- LAYER 5: TTD -->
@@ -480,10 +480,29 @@ body {
                 <div class="cert-ttd-sipp" id="nomor-sipp">No. SIPP 20070136 – 2021 – 02 – 0799</div>
             </div>
 
-            <!-- LAYER 5: Segel (QR HIMPSI) -->
-            <div class="cert-seal" style="width:auto;">
-                <div class="qr-box" style="display:inline-block;"><img src="https://cipta.my.id/gambar/himpsi_qrcode_karina.jpeg" alt="QR HIMPSI" width="96" height="96" style="display:block;"></div>
-                <div style="font-family:'Cinzel',serif;font-size:7px;color:#B8922A;text-align:center;margin-top:4px;letter-spacing:.6px;max-width:106px;line-height:1.4;">Psikolog terdaftar dan terawasi oleh HIMPSI</div>
+            <!-- LAYER 5: Segel -->
+            <div class="cert-seal">
+                <svg width="78" height="78" viewBox="0 0 78 78" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="sg" cx="40%" cy="35%" r="60%">
+                            <stop offset="0%" stop-color="#e8c860"/>
+                            <stop offset="50%" stop-color="#C9A84C"/>
+                            <stop offset="100%" stop-color="#8B6914"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="39" cy="39" r="35" fill="none" stroke="url(#sg)" stroke-width="1.5" stroke-dasharray="3 2"/>
+                    <circle cx="39" cy="39" r="30" fill="rgba(201,168,76,.07)" stroke="url(#sg)" stroke-width="1"/>
+                    <circle cx="39" cy="39" r="25" fill="none" stroke="url(#sg)" stroke-width=".5"/>
+                    <path d="M39 14 L41.5 32 L57 25 L46 38 L57 51 L41.5 44 L39 62 L36.5 44 L21 51 L32 38 L21 25 L36.5 32 Z" fill="url(#sg)" opacity=".22"/>
+                    <path id="cp" d="M39 39 m-21 0 a21 21 0 1 1 42 0 a21 21 0 1 1 -42 0" fill="none"/>
+                    <text font-family="Cinzel, serif" font-size="5" fill="#8B6914" font-weight="600" letter-spacing="1.5">
+                        <textPath href="#cp" startOffset="5%">LIDAN PSIKOLOGI · OFFICIAL ·</textPath>
+                    </text>
+                    <circle cx="39" cy="39" r="7" fill="url(#sg)" opacity=".28"/>
+                    <circle cx="39" cy="39" r="3.5" fill="url(#sg)"/>
+                    <circle cx="39" cy="39" r="1.8" fill="#FDF6E3"/>
+                </svg>
+                <div style="font-family:'Cinzel',serif;font-size:7px;color:#B8922A;text-align:center;margin-top:2px;letter-spacing:1px;">OFFICIAL</div>
             </div>
 
         </div>
@@ -579,62 +598,6 @@ function applyConfig() {
     }
 }
 
-/* ── Sisipkan logo + teks LIDAN di tengah QR tanpa merusak hasil scan ── */
-function addLogoToQR(containerId, logoUrl){
-  const container = document.getElementById(containerId);
-  if(!container) return;
-  const canvas = container.querySelector('canvas');
-  const visibleImg = container.querySelector('img');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-
-  // qrcode.js merender ke <canvas> tersembunyi lalu menyalinnya sekali ke <img>
-  // yang tampil. Setiap kali canvas kita ubah, <img> itu harus di-refresh manual.
-  function refreshVisibleImg(){
-    if(visibleImg){
-      visibleImg.src = canvas.toDataURL('image/png');
-    }
-  }
-
-  const boxSize = w * 0.34;
-  const boxX = (w - boxSize) / 2;
-  const boxY = (h - boxSize) / 2;
-  const r = 5;
-  ctx.fillStyle = '#ffffff';
-  ctx.strokeStyle = '#C9A84C';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(boxX + r, boxY);
-  ctx.arcTo(boxX + boxSize, boxY, boxX + boxSize, boxY + boxSize, r);
-  ctx.arcTo(boxX + boxSize, boxY + boxSize, boxX, boxY + boxSize, r);
-  ctx.arcTo(boxX, boxY + boxSize, boxX, boxY, r);
-  ctx.arcTo(boxX, boxY, boxX + boxSize, boxY, r);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-  refreshVisibleImg();
-
-  const logoSize = boxSize * 0.82;
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = function(){
-    const imgX = (w - logoSize) / 2;
-    const imgY = (h - logoSize) / 2;
-    ctx.drawImage(img, imgX, imgY, logoSize, logoSize);
-    refreshVisibleImg();
-  };
-  img.onerror = function(){
-    ctx.fillStyle = '#3B2A1A';
-    ctx.font = '700 ' + Math.max(6, Math.round(w * 0.08)) + 'px Arial, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('LIDAN', w / 2, h / 2);
-    refreshVisibleImg();
-  };
-  img.src = logoUrl;
-}
-
 async function main() {
     const p = new URLSearchParams(window.location.search);
     const id = p.get('id_x'), tok = p.get('x_01');
@@ -664,10 +627,9 @@ async function main() {
         const qrUrl = `https://laporan.lidan.co.id/sertifikat/?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}&tabel=${encodeURIComponent(CONFIG.TABLE_NAME)}`;
         new QRCode(document.getElementById('cert-qr-code'), {
             text: qrUrl, width: 96, height: 96,
-            colorDark: '#000000', colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
+            colorDark: '#3B2A1A', colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
         });
-        addLogoToQR('cert-qr-code', 'https://lidan.co.id/gambar/lidan_logo.jpg');
 
         document.getElementById('ls').classList.add('hidden');
         applyConfig();

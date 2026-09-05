@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentasi Transfer Data Psikogram — Naratif + Contoh</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+            color: #1a1a2e;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #5F4EDA;
+            border-bottom: 3px solid #5F4EDA;
+            padding-bottom: 12px;
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+        .subtitle {
+            color: #6c6c8a;
+            margin-bottom: 25px;
+            font-size: 15px;
+        }
+
+        .info-box {
+            background: #f8f7ff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #e8e5f5;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+        }
+        .info-box .item { text-align: center; }
+        .info-box .item .num { font-size: 28px; font-weight: bold; color: #5F4EDA; }
+        .info-box .item .lbl { font-size: 12px; color: #888; text-transform: uppercase; }
+
+        /* Narasi Kolom dengan Contoh */
+        .kolom-item {
+            background: #faf9ff;
+            border-left: 5px solid #5F4EDA;
+            border-radius: 0 10px 10px 0;
+            padding: 18px 22px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .kolom-item h3 {
+            color: #2d2b6b;
+            font-size: 17px;
+            margin-bottom: 6px;
+        }
+        .kolom-item h3 .badge-kolom {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #5F4EDA;
+            color: white;
+            margin-left: 6px;
+        }
+        .kolom-item .sumber {
+            background: #e8e5f5;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: monospace;
+            display: inline-block;
+            margin: 4px 4px 4px 0;
+        }
+        .kolom-item .engine {
+            background: #fff3cd;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: monospace;
+            display: inline-block;
+            margin: 4px 4px 4px 0;
+        }
+        .kolom-item .tujuan {
+            background: #d4edda;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: monospace;
+            display: inline-block;
+            margin: 4px 4px 4px 0;
+        }
+        .kolom-item p {
+            font-size: 14px;
+            line-height: 1.7;
+            margin-top: 8px;
+            text-align: justify;
+        }
+
+        .contoh-box {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+        .contoh-box .label-contoh {
+            color: #a8ff78;
+            font-size: 12px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .contoh-box .nilai-contoh {
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .contoh-box .nilai-contoh .key { color: #ffd700; }
+        .contoh-box .nilai-contoh .string { color: #7ec8e3; }
+        .contoh-box .nilai-contoh .number { color: #f5a623; }
+        .contoh-box .nilai-contoh .null { color: #888; }
+        .contoh-box .nilai-contoh .boolean { color: #ff6b6b; }
+
+        .contoh-box-empty {
+            background: #2a2a3e;
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-top: 10px;
+            color: #888;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e8e5f5;
+            text-align: center;
+            color: #6c6c8a;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .info-box { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="main-content">
+
+    <h1>📚 Dokumentasi Transfer Data Psikogram</h1>
+    <p class="subtitle">
+        Penjelasan naratif lengkap: dari sumber data → engine → tujuan, disertai contoh nilai setiap kolom.
+    </p>
+
+    <!-- ============================================================ -->
+    <!-- INFO RINGKASAN -->
+    <!-- ============================================================ -->
+    <div class="info-box" id="info-box">
+        <div class="item">
+            <div class="num" id="total-data">-</div>
+            <div class="lbl">Total Data Ditransfer</div>
+        </div>
+        <div class="item">
+            <div class="num" id="total-kolom">18</div>
+            <div class="lbl">Kolom Tujuan</div>
+        </div>
+        <div class="item">
+            <div class="num" id="total-engine">5</div>
+            <div class="lbl">Engine Digunakan</div>
+        </div>
+        <div class="item">
+            <div class="num" id="peserta-id">-</div>
+            <div class="lbl">Contoh Peserta ID</div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- NARASI PER KOLOM + CONTOH -->
+    <!-- ============================================================ -->
+    <div id="narasi-container"></div>
+
+    <!-- ============================================================ -->
+    <!-- FOOTER -->
+    <!-- ============================================================ -->
+    <div class="footer">
+        <p>Dokumentasi ini menjelaskan alur data dari tabel sumber <code>nilai1_json</code> ke tabel tujuan <code>rekap_nilai1</code>.</p>
+        <p>© PT. LIDAN INDAH ABADI — LIDAN PSIKOLOGI</p>
+    </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- LIBRARY & SCRIPT -->
+<!-- ============================================================ -->
+<script src="https://psikogram.lidan.co.id/engine1/psikogram-engine-json.js?v=1"></script>
+<script>
+// =========================================================
+// KONFIGURASI API
+// =========================================================
+const CONFIG = {
+    API_URL    : 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis6',
+    TABLE_NAME : 'nilai1_json',
+    API_SECRET : 'admin'
+};
+
+function getParamsFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        id_x : params.get('id_x'),
+        x_01 : params.get('x_01')
+    };
+}
+
+async function fetchData(id, x_01) {
+    const url = `${CONFIG.API_URL}?table=${CONFIG.TABLE_NAME}&id_x=${id}`;
+    const res = await fetch(url, {
+        headers: {
+            'X-Custom-Auth': CONFIG.API_SECRET,
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
+
+    const data = json.data;
+    const firstData = Array.isArray(data) ? data[0] : data;
+    const x01Data = firstData?.x_01;
+    if (String(x01Data) !== String(x_01)) {
+        throw new Error('Akses ditolak: parameter x_01 tidak valid.');
+    }
+    return firstData;
+}
+
+// =========================================================
+// KONVERSI WS KE SKALA 1-10
+// =========================================================
+function convertWStoScale(wsValue) {
+    if (wsValue === null || wsValue === undefined) return null;
+    const criteria = [
+        [2, 1], [4, 2], [6, 3], [8, 4], [10, 5],
+        [12, 6], [14, 7], [16, 8], [18, 9], [Infinity, 10]
+    ];
+    for (const [limit, score] of criteria) {
+        if (wsValue <= limit) return score;
+    }
+    return 10;
+}
+
+// =========================================================
+// SKOR EPPS LOKAL
+// =========================================================
+function skorEPPS_Lokal(soalEpps) {
+    const s = soalEpps;
+    const cntA = arr => arr.filter(v => v === 'A').length;
+    const cntB = arr => arr.filter(v => v === 'B').length;
+
+    const ach_r = [s[5],s[10],s[15],s[20],s[25],s[30],s[35],s[40],s[45],s[50],s[55],s[60],s[65],s[70]];
+    const def_r = [s[1],s[11],s[16],s[21],s[26],s[31],s[36],s[41],s[46],s[51],s[56],s[61],s[66],s[71]];
+    const ord_r = [s[2],s[7],s[17],s[22],s[27],s[32],s[37],s[42],s[47],s[52],s[57],s[62],s[67],s[72]];
+    const exh_r = [s[3],s[8],s[13],s[23],s[28],s[33],s[38],s[43],s[48],s[53],s[58],s[63],s[68],s[73]];
+    const aut_r = [s[4],s[9],s[14],s[19],s[29],s[34],s[39],s[44],s[49],s[54],s[59],s[64],s[69],s[74]];
+    const aff_r = [s[75],s[80],s[85],s[90],s[95],s[105],s[110],s[115],s[120],s[125],s[130],s[135],s[140],s[145]];
+    const int_r = [s[76],s[81],s[86],s[91],s[96],s[101],s[111],s[116],s[121],s[126],s[131],s[136],s[141],s[146]];
+    const suc_r = [s[77],s[82],s[87],s[92],s[97],s[102],s[107],s[117],s[122],s[127],s[132],s[137],s[142],s[147]];
+    const dom_r = [s[78],s[83],s[88],s[93],s[98],s[103],s[108],s[113],s[123],s[128],s[133],s[138],s[143],s[148]];
+    const aba_r = [s[79],s[84],s[89],s[94],s[99],s[104],s[109],s[114],s[119],s[129],s[134],s[139],s[144],s[149]];
+    const nur_r = [s[150],s[155],s[160],s[165],s[170],s[175],s[180],s[185],s[190],s[195],s[205],s[210],s[215],s[220]];
+    const chg_r = [s[151],s[156],s[161],s[166],s[171],s[176],s[181],s[186],s[191],s[196],s[201],s[211],s[216],s[221]];
+    const end_r = [s[152],s[157],s[162],s[167],s[172],s[177],s[182],s[187],s[192],s[197],s[202],s[207],s[217],s[222]];
+    const het_r = [s[153],s[158],s[163],s[168],s[173],s[178],s[183],s[188],s[193],s[198],s[203],s[208],s[213],s[223]];
+    const agg_r = [s[154],s[159],s[164],s[169],s[174],s[179],s[184],s[189],s[194],s[199],s[204],s[209],s[214],s[219]];
+
+    const ach_c = [s[1],s[2],s[3],s[4],s[75],s[76],s[77],s[78],s[79],s[150],s[151],s[152],s[153],s[154]];
+    const def_c = [s[5],s[7],s[8],s[9],s[80],s[81],s[82],s[83],s[84],s[155],s[156],s[157],s[158],s[159]];
+    const ord_c = [s[10],s[11],s[13],s[14],s[85],s[86],s[87],s[88],s[89],s[160],s[161],s[162],s[163],s[164]];
+    const exh_c = [s[15],s[16],s[17],s[19],s[90],s[91],s[92],s[93],s[94],s[165],s[166],s[167],s[168],s[169]];
+    const aut_c = [s[20],s[21],s[22],s[23],s[95],s[96],s[97],s[98],s[99],s[170],s[171],s[172],s[173],s[174]];
+    const aff_c = [s[25],s[26],s[27],s[28],s[29],s[101],s[102],s[103],s[104],s[175],s[176],s[177],s[178],s[179]];
+    const int_c = [s[30],s[31],s[32],s[33],s[34],s[105],s[107],s[108],s[109],s[180],s[181],s[182],s[183],s[184]];
+    const suc_c = [s[35],s[36],s[37],s[38],s[39],s[110],s[111],s[113],s[114],s[185],s[186],s[187],s[188],s[189]];
+    const dom_c = [s[40],s[41],s[42],s[43],s[44],s[115],s[116],s[117],s[119],s[190],s[191],s[192],s[193],s[194]];
+    const aba_c = [s[45],s[46],s[47],s[48],s[49],s[120],s[121],s[122],s[123],s[195],s[196],s[197],s[198],s[199]];
+    const nur_c = [s[50],s[51],s[52],s[53],s[54],s[125],s[126],s[127],s[128],s[129],s[201],s[202],s[203],s[204]];
+    const chg_c = [s[55],s[56],s[57],s[58],s[59],s[130],s[131],s[132],s[133],s[134],s[205],s[207],s[208],s[209]];
+    const end_c = [s[60],s[61],s[62],s[63],s[64],s[135],s[136],s[137],s[138],s[139],s[210],s[211],s[213],s[214]];
+    const het_c = [s[65],s[66],s[67],s[68],s[69],s[140],s[141],s[142],s[143],s[144],s[215],s[216],s[217],s[219]];
+    const agg_c = [s[70],s[71],s[72],s[73],s[74],s[145],s[146],s[147],s[148],s[149],s[220],s[221],s[222],s[223]];
+
+    const ach_s = cntA(ach_r) + cntB(ach_c);
+    const def_s = cntA(def_r) + cntB(def_c);
+    const ord_s = cntA(ord_r) + cntB(ord_c);
+    const exh_s = cntA(exh_r) + cntB(exh_c);
+    const out_s = cntA(aut_r) + cntB(aut_c);
+    const aff_s = cntA(aff_r) + cntB(aff_c);
+    const int_s = cntA(int_r) + cntB(int_c);
+    const suc_s = cntA(suc_r) + cntB(suc_c);
+    const dom_s = cntA(dom_r) + cntB(dom_c);
+    const aba_s = cntA(aba_r) + cntB(aba_c);
+    const nur_s = cntA(nur_r) + cntB(nur_c);
+    const chg_s = cntA(chg_r) + cntB(chg_c);
+    const end_s = cntA(end_r) + cntB(end_c);
+    const het_s = cntA(het_r) + cntB(het_c);
+    const agg_s = cntA(agg_r) + cntB(agg_c);
+
+    const wsMap = {
+        ACH_s:{28:20,27:20,26:19,25:18,24:17,23:16,22:16,21:15,20:14,19:13,18:12,17:11,16:10,15:9,14:8,13:7,12:6,11:5,10:5,9:4,8:3,7:2,6:1,5:0,4:0,3:0,2:0,1:0,0:0},
+        DEF_s:{22:20,21:19,20:18,19:18,18:18,17:17,16:16,15:15,14:14,13:13,12:11,11:11,10:10,9:9,8:8,7:7,6:6,5:5,4:3,3:3,2:2,1:1,0:0},
+        ORD_s:{28:20,27:19,26:19,25:18,24:17,23:17,22:16,21:15,20:15,19:14,18:13,17:13,16:12,15:11,14:10,13:9,12:9,11:8,10:7,9:7,8:6,7:5,6:5,5:4,4:3,3:3,2:2,1:1,0:1},
+        EXH_s:{24:20,23:19,22:18,21:18,20:17,19:16,18:15,17:15,16:14,15:13,14:12,13:11,12:10,11:9,10:8,9:7,8:7,7:6,6:5,5:4,4:3,3:3,2:2,1:1,0:0},
+        OUT_s:{21:20,20:19,19:18,18:17,17:16,16:15,15:14,14:13,13:12,12:11,11:10,10:9,9:8,8:7,7:6,6:5,5:4,4:3,3:2,2:2,1:1,0:0},
+        AFF_s:{26:20,25:19,24:19,23:18,22:17,21:16,20:15,19:14,18:14,17:13,16:12,15:11,14:10,13:9,12:8,11:8,10:7,9:6,8:5,7:4,6:3,5:3,4:2,3:1,2:1,1:0},
+        INT_s:{28:20,27:20,26:19,25:18,24:17,23:17,22:16,21:15,20:14,19:14,18:13,17:12,16:11,15:10,14:9,13:8,12:7,11:7,10:6,9:5,8:4,7:4,6:3,5:2,4:1,3:1,2:0,1:0},
+        SUC_s:{27:20,26:19,25:19,24:18,23:17,22:17,21:16,20:15,19:15,18:14,17:13,16:13,15:12,14:11,13:10,12:9,11:9,10:8,9:7,8:7,7:6,6:5,5:4,4:4,3:3,2:2,1:1,0:1},
+        DOM_s:{25:20,24:20,23:19,22:18,21:17,20:17,19:16,18:15,17:14,16:14,15:13,14:12,13:11,12:10,11:9,10:8,9:8,8:7,7:6,6:5,5:5,4:4,3:3,2:2,1:1,0:0},
+        ABA_s:{29:20,28:19,27:18,26:18,25:17,24:16,23:15,22:15,21:14,20:13,19:13,18:12,17:11,16:10,15:9,14:8,13:8,12:7,11:6,10:5,9:5,8:4,7:3,6:2,5:2,4:1,3:0,2:0,1:0},
+        NUR_s:{30:20,29:19,28:18,27:18,26:17,25:16,24:16,23:15,22:14,21:14,20:13,19:12,18:12,17:11,16:10,15:9,14:9,13:8,12:7,11:7,10:6,9:5,8:5,7:4,6:3,5:3,4:2,3:1,2:1,1:0},
+        CHG_s:{27:20,26:19,25:18,24:18,23:17,22:16,21:16,20:15,19:14,18:13,17:13,16:12,15:11,14:10,13:9,12:9,11:8,10:7,9:6,8:6,7:5,6:4,5:3,4:3,3:2,2:1,1:1,0:0},
+        END_s:{30:20,29:19,28:18,27:17,26:17,25:16,24:16,23:15,22:14,21:14,20:13,19:13,18:12,17:12,16:11,15:10,14:9,13:9,12:8,11:7,10:7,9:6,8:6,7:5,6:4,5:4,4:3,3:3,2:2,1:1,0:1},
+        HET_s:{26:20,25:19,24:19,23:18,22:18,21:17,20:17,19:16,18:16,17:15,16:15,15:14,14:14,13:13,12:12,11:12,10:11,9:11,8:10,7:9,6:9,5:8,4:8,3:7,2:7,1:6,0:5},
+        AGG_s:{27:20,26:19,25:18,24:18,23:17,22:16,21:16,20:15,19:14,18:14,17:13,16:12,15:12,14:11,13:10,12:9,11:9,10:8,9:7,8:7,7:6,6:5,5:5,4:4,3:3,2:3,1:2,0:1}
+    };
+
+    function getWS(ss, type) {
+        const m = wsMap[type];
+        if (!m) return 0;
+        const keys = Object.keys(m).map(Number).sort((a,b) => b - a);
+        for (const k of keys) {
+            if (ss >= k) return m[k];
+        }
+        return 0;
+    }
+
+    return {
+        ws_ach: getWS(ach_s, 'ACH_s'),
+        ws_def: getWS(def_s, 'DEF_s'),
+        ws_ord: getWS(ord_s, 'ORD_s'),
+        ws_exh: getWS(exh_s, 'EXH_s'),
+        ws_out: getWS(out_s, 'OUT_s'),
+        ws_aff: getWS(aff_s, 'AFF_s'),
+        ws_int: getWS(int_s, 'INT_s'),
+        ws_suc: getWS(suc_s, 'SUC_s'),
+        ws_dom: getWS(dom_s, 'DOM_s'),
+        ws_aba: getWS(aba_s, 'ABA_s'),
+        ws_nur: getWS(nur_s, 'NUR_s'),
+        ws_chg: getWS(chg_s, 'CHG_s'),
+        ws_end: getWS(end_s, 'END_s'),
+        ws_het: getWS(het_s, 'HET_s'),
+        ws_agg: getWS(agg_s, 'AGG_s'),
+        konsistensi: 0
+    };
+}
+
+// =========================================================
+// SEEDED RANDOM
+// =========================================================
+function makeSeededRand(seed) {
+    let s = seed >>> 0;
+    return function() {
+        s += 0x6D2B79F5;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+function seedFromId(id_x) {
+    let h = 0;
+    const str = String(id_x || '0');
+    for (let i = 0; i < str.length; i++) {
+        h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+    }
+    return h >>> 0;
+}
+
+// =========================================================
+// HITUNG VAK & TEMPERAMEN
+// =========================================================
+function hitungVakTemperamen(x07, token) {
+    const out = { vak: null, temperamen: null };
+
+    const vakKey = x07['tes-gaya-belajar-vak'] !== undefined ? 'tes-gaya-belajar-vak'
+                 : (x07['who_1'] !== undefined ? 'who_1' : null);
+    const vakStr = vakKey ? x07[vakKey] : null;
+
+    if (vakStr) {
+        const vakArr = vakStr.split(';').filter(v => v.trim() !== '');
+        const vakSkor = { A: 0, B: 0, C: 0 };
+        vakArr.forEach(v => { if (vakSkor[v] !== undefined) vakSkor[v]++; });
+        const total = vakArr.length || 15;
+        const vakPct = {
+            A: Math.round((vakSkor.A / total) * 100),
+            B: Math.round((vakSkor.B / total) * 100),
+            C: Math.round((vakSkor.C / total) * 100)
+        };
+        const vakDom = Object.keys(vakSkor).reduce((a, b) => vakSkor[a] > vakSkor[b] ? a : b);
+        out.vak = { dominan: vakDom, skor: vakSkor, persentase: vakPct, total };
+    }
+
+    const tempKey = x07['input-tes-temperamen'] !== undefined ? 'input-tes-temperamen'
+                  : (x07['who_4'] !== undefined ? 'who_4' : null);
+    const tempStr = tempKey ? x07[tempKey] : null;
+
+    if (tempStr) {
+        const tempArr = tempStr.split(';').filter(v => v !== '');
+        const tempSkor = { A: 0, B: 0, C: 0, D: 0 };
+        tempArr.forEach(v => { if (tempSkor[v] !== undefined) tempSkor[v]++; });
+        const tempTotal = 26;
+        const tempDom = Object.keys(tempSkor).reduce((a, b) => tempSkor[a] > tempSkor[b] ? a : b);
+        const tempPct = {};
+        Object.keys(tempSkor).forEach(k => { tempPct[k] = Math.round((tempSkor[k] / tempTotal) * 100); });
+        out.temperamen = { dominan: tempDom, skor: tempSkor, persentase: tempPct, total: tempTotal };
+    }
+
+    if (!out.vak && !out.temperamen) return null;
+    return out;
+}
+
+// =========================================================
+// HITUNG KARAKTER SEDERHANA
+// =========================================================
+function hitungKarakterSederhana(x07) {
+    const x12 = {};
+    const x13 = {};
+
+    const tempKeys = ['input-tes-temperamen', 'who_4'];
+    let tempStr = '';
+    for (const k of tempKeys) { if (x07[k] !== undefined && x07[k] !== '') { tempStr = x07[k]; break; } }
+    if (tempStr) {
+        const arr = tempStr.split(';').filter(v => v !== '');
+        const skor = { A: 0, B: 0, C: 0, D: 0 };
+        arr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+        const total = 26;
+        const persen = {};
+        Object.keys(skor).forEach(k => { persen[k] = Math.round((skor[k]/total)*100); });
+        const dominan = Object.keys(skor).reduce((a,b) => skor[a] > skor[b] ? a : b);
+        x12['tes04'] = { dominan, skor, persen, total };
+        x13['tes04'] = { nama: 'Temperamen ' + dominan };
+    }
+
+    const extKeys = ['input-tes-extrovert-vs-introvert', 'who_5'];
+    let extStr = '';
+    for (const k of extKeys) { if (x07[k] !== undefined && x07[k] !== '') { extStr = x07[k]; break; } }
+    if (extStr) {
+        const arr = extStr.split(';').filter(v => v !== '');
+        const skor = { A: 0, B: 0 };
+        arr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+        const total = 17;
+        const persen = { A: Math.round((skor.A/total)*100), B: Math.round((skor.B/total)*100) };
+        const selisih = Math.abs(skor.A - skor.B);
+        const dominan = selisih <= 3 ? 'AMBIVERT' : (skor.A > skor.B ? 'EXTROVERT' : 'INTROVERT');
+        x12['tes05'] = { dominan, skor, persen, total };
+        x13['tes05'] = { nama: dominan };
+    }
+
+    return { x12: Object.keys(x12).length > 0 ? JSON.stringify(x12) : null,
+             x13: Object.keys(x13).length > 0 ? JSON.stringify(x13) : null };
+}
+
+// =========================================================
+// HITUNG POTENSI SEDERHANA
+// =========================================================
+function hitungPotensiSederhana(x07) {
+    const x12 = {};
+    const x13 = {};
+
+    const vakKeys = ['tes-gaya-belajar-vak', 'who_1'];
+    let vakStr = '';
+    for (const k of vakKeys) { if (x07[k] !== undefined && x07[k] !== '') { vakStr = x07[k]; break; } }
+    if (vakStr) {
+        const arr = vakStr.split(';').filter(v => v !== '');
+        const skor = { A: 0, B: 0, C: 0 };
+        arr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+        const total = arr.length || 1;
+        const persen = {};
+        Object.keys(skor).forEach(k => persen[k] = Math.round(skor[k]/total*100));
+        const dominan = Object.keys(skor).reduce((a,b) => skor[a] > skor[b] ? a : b);
+        x12['tes01'] = { dominan, skor, persen, total };
+        x13['tes01'] = { nama: 'VAK ' + dominan };
+    }
+
+    return { x12: Object.keys(x12).length > 0 ? x12 : null,
+             x13: Object.keys(x13).length > 0 ? x13 : null };
+}
+
+// =========================================================
+// HITUNG KARIR SEDERHANA
+// =========================================================
+function hitungKarirSederhana(x07) {
+    const x12 = {};
+    const x13 = {};
+
+    const riasecStr = x07['who_20'] || '';
+    if (riasecStr) {
+        const arr = riasecStr.split(';').filter(v => v !== '');
+        const order = ['R', 'I', 'A', 'S', 'E', 'C'];
+        const skor = {};
+        order.forEach((id, i) => {
+            const blok = arr.slice(i * 18, (i + 1) * 18);
+            skor[id] = blok.filter(v => v === 'B').length;
+        });
+        const dominan = Object.keys(skor).reduce((a,b) => skor[a] > skor[b] ? a : b);
+        x12['tes20'] = { dominan, skor };
+        x13['tes20'] = { nama: 'RIASEC ' + dominan };
+    }
+
+    const kepemimpinanStr = x07['who_21'] || '';
+    if (kepemimpinanStr) {
+        const arr = kepemimpinanStr.split(';').filter(v => v !== '');
+        const nilaiMap = { A: 0, B: 1, C: 2, D: 3 };
+        let total = 0;
+        arr.forEach(v => total += nilaiMap[v.trim()] !== undefined ? nilaiMap[v.trim()] : 0);
+        x12['tes21'] = { skor: total, maxSkor: 42 };
+        x13['tes21'] = { title: total <= 9 ? 'Pemimpin Kuat' : total <= 20 ? 'Pemimpin Baik' : 'Perlu Belajar' };
+    }
+
+    return { x12: Object.keys(x12).length > 0 ? x12 : null,
+             x13: Object.keys(x13).length > 0 ? x13 : null };
+}
+
+// =========================================================
+// HITUNG ASMARA SEDERHANA
+// =========================================================
+function hitungAsmaraSederhana(x07) {
+    const x12 = {};
+    const x13 = {};
+
+    const polaAsuhStr = x07['who_9'] || '';
+    if (polaAsuhStr) {
+        const arr = polaAsuhStr.split(';').filter(v => v !== '');
+        const skor = { A: 0, B: 0 };
+        arr.forEach(v => { if (skor[v] !== undefined) skor[v]++; });
+        const dominan = skor.A > skor.B ? 'A' : 'B';
+        x12['tes09'] = { dominan, skor };
+        x13['tes09'] = { nama: 'Pola Asuh ' + dominan };
+    }
+
+    return { x12: Object.keys(x12).length > 0 ? x12 : null,
+             x13: Object.keys(x13).length > 0 ? x13 : null };
+}
+
+// =========================================================
+// MAP DATA
+// =========================================================
+function mapData(rawRow) {
+    if (!window.PsikogramEngine) throw new Error('PsikogramEngine belum dimuat.');
+
+    const randPsikogram = makeSeededRand(seedFromId(String(rawRow.id_x)));
+    const hasil = window.PsikogramEngine.hitungPsikogram(rawRow, rawRow.id_x, randPsikogram);
+    const { kekuatanKelemahan, minatData, aspekPsikologis } = window.PsikogramEngine;
+    const {
+        identitas, IQ, resultScores, konsistensi,
+        sorted_desc, sorted_asc,
+        kelebihan, kelemahan, rekomendasi, minat3
+    } = hasil;
+
+    const eppsLengkap = skorEPPS_Lokal(
+        (() => {
+            try {
+                const x06 = JSON.parse(rawRow.x_06 || '{}');
+                const cleaned = (x06.epps || '').replace(/;+$/, '');
+                return cleaned.split(';').map(v => v.trim());
+            } catch { return []; }
+        })()
+    );
+
+    const kel1 = rawRow.x_01 || '';
+
+    const rawBio = Array.isArray(rawRow) ? rawRow[0] : rawRow;
+    let bioParsed = {};
+    try { bioParsed = JSON.parse(rawBio.x_02 || '{}'); } catch(e) {}
+
+    const kel15 = rawBio.x_05 !== undefined ? rawBio.x_05 : null;
+    const kel16 = rawBio.x_06 !== undefined ? rawBio.x_06 : null;
+    const kel17 = rawBio.x_07 !== undefined ? rawBio.x_07 : null;
+
+    let x07 = {};
+    try { x07 = JSON.parse(rawRow.x_07 || '{}'); } catch(e) {}
+    const vakTempResult = hitungVakTemperamen(x07, kel1);
+    const kel18 = vakTempResult ? JSON.stringify(vakTempResult) : null;
+
+    const kel2 = JSON.stringify({
+        nama        : identitas.nama || bioParsed.nama || '',
+        jk          : identitas.jk || bioParsed.jenis_kelamin || bioParsed.gender || '',
+        usia        : identitas.usia || bioParsed.usia || '',
+        tanggal     : identitas.tanggal || bioParsed.tgl_tes || '',
+        tanggal_ttd : identitas.tanggalTTD || bioParsed.tgl_tes || '',
+        pendidikan  : bioParsed.pendidikan || '',
+        status      : bioParsed.status || '',
+        id_sumber   : rawRow.id_x
+    });
+
+    const kel3_obj = { skor_iq: IQ };
+    ['Kemampuan Umum','Daya Tangkap Visual','Kemampuan Berpikir Logis',
+     'Kemampuan Berpikir Abstrak','Penalaran Verbal','Penalaran Numerik'].forEach((nama, i) => {
+        const key = nama.toLowerCase().replace(/ /g,'_');
+        kel3_obj[key] = resultScores[i];
+    });
+    const kel3 = JSON.stringify(kel3_obj);
+
+    const kel4_obj = {
+        hasrat_berprestasi: resultScores[6],
+        daya_tahan_stress:  resultScores[7],
+        kepercayaan_diri:   resultScores[8],
+        relasi_sosial:      resultScores[9],
+        kerjasama:          resultScores[10],
+        inisiatif:          resultScores[12],
+        dominasi:           eppsLengkap ? convertWStoScale(eppsLengkap.ws_dom) : null,
+        introspeksi:        eppsLengkap ? convertWStoScale(eppsLengkap.ws_int) : null,
+        meminta_bantuan:    eppsLengkap ? convertWStoScale(eppsLengkap.ws_suc) : null,
+        mengalah:           eppsLengkap ? convertWStoScale(eppsLengkap.ws_aba) : null,
+        merawat:            eppsLengkap ? convertWStoScale(eppsLengkap.ws_nur) : null,
+        perubahan:          eppsLengkap ? convertWStoScale(eppsLengkap.ws_chg) : null,
+        ketahanan:          eppsLengkap ? convertWStoScale(eppsLengkap.ws_end) : null,
+        heteroseksual:      eppsLengkap ? convertWStoScale(eppsLengkap.ws_het) : null,
+        agresi:             eppsLengkap ? convertWStoScale(eppsLengkap.ws_agg) : null,
+    };
+    const kel4 = JSON.stringify(kel4_obj);
+
+    const kel5_obj = {};
+    ['Sistematika Kerja','Inisiatif','Kemandirian'].forEach((nama, i) => {
+        const key = nama.toLowerCase().replace(/ /g,'_');
+        kel5_obj[key] = resultScores[11 + i];
+    });
+    const kel5 = JSON.stringify(kel5_obj);
+
+    const kel6 = String(IQ);
+
+    const kekuatanArr = [0,1,2].map(i => {
+        const teks = kelebihan[i] !== null ? kelebihan[i] : kekuatanKelemahan[sorted_desc[i].index].teks2;
+        return teks;
+    });
+    const kel7 = JSON.stringify(kekuatanArr);
+
+    const kelemahanArr = [0,1,2].map(i => {
+        const teks = kelemahan[i] !== null ? kelemahan[i] : kekuatanKelemahan[sorted_asc[i].index].teks3;
+        return teks;
+    });
+    const kel8 = JSON.stringify(kelemahanArr);
+
+    const rekomendasiArr = [0,1,2].map(i => {
+        const teks = rekomendasi[i] !== null ? rekomendasi[i] : kekuatanKelemahan[sorted_asc[i].index].teks5;
+        return teks;
+    });
+    const kel9 = JSON.stringify(rekomendasiArr);
+
+    const minatArr = minat3.map(({ singkatan, namaOverride, ketOverride }) => {
+        const item = minatData.find(m => m.singkatan === singkatan);
+        if (!item) return { singkatan, nama: singkatan, keterangan: '' };
+        return {
+            singkatan,
+            nama       : namaOverride ? namaOverride.toUpperCase() : item.arah_minat,
+            keterangan : ketOverride  ? ketOverride : item.keterangan_minat
+        };
+    });
+    const kel10 = JSON.stringify(minatArr);
+
+    const now = new Date();
+    const kel11 = now.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+    const karakterResult = hitungKarakterSederhana(x07);
+    const potensiResult = hitungPotensiSederhana(x07);
+    const karirResult = hitungKarirSederhana(x07);
+    const asmaraResult = hitungAsmaraSederhana(x07);
+
+    const x12_obj = {};
+    const x13_obj = {};
+
+    if (karakterResult.x12) x12_obj.karakter = JSON.parse(karakterResult.x12);
+    if (karakterResult.x13) x13_obj.karakter = JSON.parse(karakterResult.x13);
+    if (potensiResult.x12) x12_obj.potensi = potensiResult.x12;
+    if (potensiResult.x13) x13_obj.potensi = potensiResult.x13;
+    if (karirResult.x12) x12_obj.karir = karirResult.x12;
+    if (karirResult.x13) x13_obj.karir = karirResult.x13;
+    if (asmaraResult.x12) x12_obj.asmara = asmaraResult.x12;
+    if (asmaraResult.x13) x13_obj.asmara = asmaraResult.x13;
+
+    return {
+        x_01 : kel1,
+        x_02 : kel2,
+        x_03 : kel3,
+        x_04 : kel4,
+        x_05 : kel5,
+        x_06 : kel6,
+        x_07 : kel7,
+        x_08 : kel8,
+        x_09 : kel9,
+        x_10 : kel10,
+        x_11 : kel11,
+        x_12 : Object.keys(x12_obj).length > 0 ? JSON.stringify(x12_obj) : null,
+        x_13 : Object.keys(x13_obj).length > 0 ? JSON.stringify(x13_obj) : null,
+        x_15 : kel15,
+        x_16 : kel16,
+        x_17 : kel17,
+        x_18 : kel18,
+    };
+}
+
+// =========================================================
+// FORMAT JSON UNTUK TAMPILAN
+// =========================================================
+function formatJSON(val) {
+    if (val === null || val === undefined) {
+        return '<span class="null">null</span>';
+    }
+    if (typeof val === 'string') {
+        try {
+            const parsed = JSON.parse(val);
+            const pretty = JSON.stringify(parsed, null, 2)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"([^"]+)":/g, '<span class="key">"$1"</span>:')
+                .replace(/: "([^"]+)"/g, ': <span class="string">"$1"</span>')
+                .replace(/: (\d+)/g, ': <span class="number">$1</span>')
+                .replace(/: (true|false)/g, ': <span class="boolean">$1</span>')
+                .replace(/: (null)/g, ': <span class="null">$1</span>');
+            return pretty;
+        } catch {
+            return `<span class="string">"${val}"</span>`;
+        }
+    }
+    return String(val);
+}
+
+// =========================================================
+// RENDER DOKUMENTASI NARATIF + CONTOH
+// =========================================================
+function renderSemua(mappedData, rawRow, totalData) {
+    const container = document.getElementById('narasi-container');
+
+    const kolomInfo = [
+        {
+            kolom: 'x_01',
+            label: 'Kode Peserta',
+            sumber: 'x_01 dari tabel sumber (nilai1_json)',
+            engine: 'Langsung (tanpa engine)',
+            tujuan: 'x_01 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data x_01 dari tabel sumber diambil langsung tanpa diproses oleh engine apapun. Nilai ini berfungsi sebagai kode unik peserta yang digunakan untuk validasi akses dan identifikasi data.'
+        },
+        {
+            kolom: 'x_02',
+            label: 'Biodata Peserta',
+            sumber: 'x_02 dari tabel sumber (nilai1_json) — JSON biodata',
+            engine: 'PsikogramEngine.parseX02()',
+            tujuan: 'x_02 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data x_02 dari tabel sumber berupa JSON yang berisi informasi biodata peserta (nama, jenis kelamin, usia, tanggal tes, status, pendidikan). Fungsi parseX02() dari PsikogramEngine mengambil field-field tertentu (nama, usia, jk) dari JSON tersebut. Hasilnya kemudian disimpan ke kolom x_02 di tabel tujuan dalam format JSON yang telah diperkaya dengan informasi tambahan seperti tanggal_ttd dan id_sumber.'
+        },
+        {
+            kolom: 'x_03',
+            label: 'Kemampuan (6 Aspek)',
+            sumber: 'x_05 dari tabel sumber (nilai1_json) — CFIT & TKD',
+            engine: 'PsikogramEngine: getIQ_cfit() + getScore()',
+            tujuan: 'x_03 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data x_05 dari tabel sumber berupa JSON yang berisi skor CFIT (cfit1, cfit2, cfit3, cfit4) dan TKD (tkd3, tkd6). Fungsi getIQ_cfit() mengkonversi skor CFIT total menjadi IQ berdasarkan usia peserta. Fungsi getScore() kemudian mengkonversi IQ dan skor TKD ke skala 1-10. Hasilnya berupa 6 aspek kemampuan: Kemampuan Umum (dari IQ), Daya Tangkap Visual (dari CFIT2), Berpikir Logis (dari CFIT1+CFIT4), Berpikir Abstrak (dari CFIT3), Penalaran Verbal (dari TKD3), dan Penalaran Numerik (dari TKD6). Semua nilai dalam skala 1-10 disimpan ke kolom x_03 dalam format JSON.'
+        },
+        {
+            kolom: 'x_04',
+            label: 'Kepribadian (14 Aspek)',
+            sumber: 'x_06 dari tabel sumber (nilai1_json) — EPPS (225 soal)',
+            engine: 'PsikogramEngine.skorEPPS() + convertWStoScale()',
+            tujuan: 'x_04 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data x_06 dari tabel sumber berisi jawaban EPPS (225 soal pilihan A/B). Fungsi skorEPPS() dari PsikogramEngine menghitung 15 skala EPPS (ACH, DEF, ORD, EXH, OUT, AFF, INT, SUC, DOM, ABA, NUR, CHG, END, HET, AGG) dalam bentuk Weighted Score (WS) 1-20. Fungsi convertWStoScale() kemudian mengkonversi WS ke skala 1-10. Hasilnya 14 aspek kepribadian: 5 aspek lama (Hasrat Berprestasi, Daya Tahan Stress, Kepercayaan Diri, Relasi Sosial, Kerjasama) + 1 aspek tersembunyi (Inisiatif) + 9 aspek baru (Dominasi, Introspeksi, Meminta Bantuan, Mengalah, Merawat, Perubahan, Ketahanan, Heteroseksual, Agresi). Semua dalam skala 1-10 disimpan ke kolom x_04 dalam format JSON.'
+        },
+        {
+            kolom: 'x_05',
+            label: 'Sikap Kerja (3 Aspek)',
+            sumber: 'x_06 dari tabel sumber (nilai1_json) — EPPS',
+            engine: 'PsikogramEngine — hasil EPPS (ORD, AUT, DOM+ACH)',
+            tujuan: 'x_05 di tabel tujuan (rekap_nilai1)',
+            proses: 'Dari hasil skor EPPS yang sama, diambil 3 aspek sikap kerja: Sistematika Kerja (dari skala ORD), Inisiatif (dari rata-rata DOM, ACH, AUT), dan Kemandirian (dari skala AUT). Ketiganya dalam skala 1-10 disimpan ke kolom x_05 dalam format JSON.'
+        },
+        {
+            kolom: 'x_06',
+            label: 'IQ',
+            sumber: 'x_05 dari tabel sumber (nilai1_json) — CFIT',
+            engine: 'PsikogramEngine.getIQ_cfit()',
+            tujuan: 'x_06 di tabel tujuan (rekap_nilai1)',
+            proses: 'Nilai IQ hasil perhitungan dari CFIT (menggunakan getIQ_cfit()) disimpan langsung sebagai string ke kolom x_06 di tabel tujuan.'
+        },
+        {
+            kolom: 'x_07',
+            label: 'Kelebihan (3 Kalimat)',
+            sumber: 'Hasil PsikogramEngine + Data Statis kekuatanKelemahan',
+            engine: 'PsikogramEngine.hitungPsikogram() + Seeded Random',
+            tujuan: 'x_07 di tabel tujuan (rekap_nilai1)',
+            proses: 'Dari 14 aspek psikologis yang telah dihitung, diambil 3 aspek dengan skor tertinggi (dengan distribusi lintas grup KEMAMPUAN, KEPRIBADIAN, SIKAP KERJA). Untuk setiap aspek, dipilih satu kalimat kelebihan dari 5 versi yang tersedia di data statis kekuatanKelemahan. Pemilihan kalimat menggunakan seeded random berdasarkan id_x agar konsisten per peserta. Hasilnya 3 kalimat kelebihan disimpan ke kolom x_07 dalam format JSON.'
+        },
+        {
+            kolom: 'x_08',
+            label: 'Kelemahan (3 Kalimat)',
+            sumber: 'Hasil PsikogramEngine + Data Statis kekuatanKelemahan',
+            engine: 'PsikogramEngine.hitungPsikogram() + Seeded Random',
+            tujuan: 'x_08 di tabel tujuan (rekap_nilai1)',
+            proses: 'Dari 14 aspek psikologis yang telah dihitung, diambil 3 aspek dengan skor terendah (dengan distribusi lintas grup). Untuk setiap aspek, dipilih satu kalimat kelemahan dari 5 versi yang tersedia di data statis kekuatanKelemahan. Pemilihan kalimat menggunakan seeded random berdasarkan id_x agar konsisten per peserta. Hasilnya 3 kalimat kelemahan disimpan ke kolom x_08 dalam format JSON.'
+        },
+        {
+            kolom: 'x_09',
+            label: 'Rekomendasi (3 Kalimat)',
+            sumber: 'Hasil PsikogramEngine + Data Statis kekuatanKelemahan',
+            engine: 'PsikogramEngine.hitungPsikogram() + Seeded Random',
+            tujuan: 'x_09 di tabel tujuan (rekap_nilai1)',
+            proses: 'Berdasarkan 3 aspek dengan skor terendah yang sama, untuk setiap aspek dipilih satu kalimat rekomendasi dari 5 versi yang tersedia di data statis kekuatanKelemahan. Pemilihan kalimat menggunakan seeded random berdasarkan id_x agar konsisten per peserta. Hasilnya 3 kalimat rekomendasi disimpan ke kolom x_09 dalam format JSON.'
+        },
+        {
+            kolom: 'x_10',
+            label: 'Arah Minat (3 Bidang)',
+            sumber: 'x_06 dari tabel sumber (nilai1_json) — RMIB (96 soal)',
+            engine: 'PsikogramEngine.skorRMIB() + minatData',
+            tujuan: 'x_10 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data RMIB dari x_06 (8 bagian, masing-masing 12 soal) diproses oleh skorRMIB() menghasilkan 12 bidang minat (OUT, MECH, COMP, ACIE, PERS, AESTH, LITE, MUS, SOS.WERV, CLER, PRAC, MED). Data statis minatData kemudian digunakan untuk memberikan nama dan keterangan lengkap setiap bidang. 3 bidang dengan skor terendah (artinya minat tertinggi) dipilih sebagai arah minat utama. Hasilnya disimpan ke kolom x_10 dalam format JSON.'
+        },
+        {
+            kolom: 'x_11',
+            label: 'Tanggal Transfer',
+            sumber: 'Sistem (Date.now())',
+            engine: 'new Date().toLocaleDateString()',
+            tujuan: 'x_11 di tabel tujuan (rekap_nilai1)',
+            proses: 'Tanggal dan waktu saat data ditransfer dihasilkan oleh fungsi Date() JavaScript dan diformat dengan toLocaleDateString() menjadi format "dd Month yyyy HH:mm". Nilai ini disimpan ke kolom x_11 di tabel tujuan.'
+        },
+        {
+            kolom: 'x_12',
+            label: 'Karakter — Data Angka',
+            sumber: 'x_07 dari tabel sumber (nilai1_json) — Tes Karakter',
+            engine: 'KarakterEngine, PotensiEngine, KarirEngine, AsmaraEngine',
+            tujuan: 'x_12 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data x_07 dari tabel sumber berisi jawaban dari berbagai tes karakter (Temperamen, Ekstrovert/Introvert, Sensing/Intuitif, Thinking/Feeling, Judging/Perceiving, VAK, Otak Kiri/Kanan, Kecerdasan Majemuk, RIASEC, Kepemimpinan, Gaya Kepemimpinan, Motivasi, Manajemen Waktu, Stres, Keberanian, dan tes Asmara). Masing-masing diproses oleh engine yang sesuai: KarakterEngine (tes 04-08), PotensiEngine (tes 01-03), KarirEngine (tes 20-27), AsmaraEngine (tes 09,12-18). Hasilnya berupa angka/statistik (skor, persentase, dominan, dll) yang disimpan ke kolom x_12 dalam format JSON.'
+        },
+        {
+            kolom: 'x_13',
+            label: 'Karakter — Data Kalimat',
+            sumber: 'x_07 dari tabel sumber (nilai1_json) — Tes Karakter',
+            engine: 'KarakterEngine, PotensiEngine, KarirEngine, AsmaraEngine (data statis)',
+            tujuan: 'x_13 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data yang sama dari x_07 diproses oleh engine yang sama, namun hasilnya berupa kalimat/narasi (deskripsi, karakteristik, saran, kekuatan, kelemahan, dll) yang diambil dari data statis masing-masing engine (TEMPERAMENTS, PERSONALITY_TYPES, LEARNING_STYLES, BRAIN_TYPES, INTELLIGENCES, RIASEC_CATEGORIES, KEPEMIMPINAN_LEVELS, GAYA_KEPEMIMPINAN_STYLES, MOTIVASI_LEVELS, MANWAK_LEVELS, STRES_LEVELS, KEBERANIAN_CONFIG, dan data Asmara). Hasilnya disimpan ke kolom x_13 dalam format JSON.'
+        },
+        {
+            kolom: 'x_15',
+            label: 'Copy Sumber x_05',
+            sumber: 'x_05 dari tabel sumber (nilai1_json)',
+            engine: 'Langsung (copy)',
+            tujuan: 'x_15 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data x_05 dari tabel sumber (CFIT, TKD) di-copy langsung tanpa perubahan dan disimpan ke kolom x_15 di tabel tujuan sebagai arsip data mentah.'
+        },
+        {
+            kolom: 'x_16',
+            label: 'Copy Sumber x_06',
+            sumber: 'x_06 dari tabel sumber (nilai1_json)',
+            engine: 'Langsung (copy)',
+            tujuan: 'x_16 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data x_06 dari tabel sumber (EPPS, RMIB) di-copy langsung tanpa perubahan dan disimpan ke kolom x_16 di tabel tujuan sebagai arsip data mentah.'
+        },
+        {
+            kolom: 'x_17',
+            label: 'Copy Sumber x_07',
+            sumber: 'x_07 dari tabel sumber (nilai1_json)',
+            engine: 'Langsung (copy)',
+            tujuan: 'x_17 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data x_07 dari tabel sumber (Tes Karakter) di-copy langsung tanpa perubahan dan disimpan ke kolom x_17 di tabel tujuan sebagai arsip data mentah.'
+        },
+        {
+            kolom: 'x_18',
+            label: 'VAK & Temperamen',
+            sumber: 'x_07 dari tabel sumber (nilai1_json) — VAK & Temperamen',
+            engine: 'Fungsi hitungVakTemperamen()',
+            tujuan: 'x_18 di tabel tujuan (rekap_nilai1)',
+            proses: 'Data VAK (tes-gaya-belajar-vak atau who_1) dan Temperamen (input-tes-temperamen atau who_4) dari x_07 diproses oleh fungsi hitungVakTemperamen(). Hasilnya berupa objek yang berisi skor, persentase, dan dominan untuk VAK (A/B/C) dan Temperamen (A/B/C/D). Hasil ini disimpan ke kolom x_18 dalam format JSON.'
+        }
+    ];
+
+    let html = '';
+    kolomInfo.forEach((item, idx) => {
+        const nilai = mappedData[item.kolom];
+        const nilaiDisplay = formatJSON(nilai);
+
+        html += `
+            <div class="kolom-item">
+                <h3>
+                    ${idx+1}. ${item.kolom} — ${item.label}
+                    <span class="badge-kolom">Kolom Tujuan</span>
+                </h3>
+                <div>
+                    <span class="sumber">📥 Sumber: ${item.sumber}</span>
+                    <span class="engine">⚙️ Engine: ${item.engine}</span>
+                    <span class="tujuan">📤 Tujuan: ${item.tujuan}</span>
+                </div>
+                <p>${item.proses}</p>
+                <div class="contoh-box">
+                    <span class="label-contoh">📋 Contoh Nilai untuk id_x = ${rawRow.id_x}:</span>
+                    <div class="nilai-contoh">${nilaiDisplay}</div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// =========================================================
+// MAIN
+// =========================================================
+async function main() {
+    const { id_x, x_01 } = getParamsFromUrl();
+
+    if (!id_x || !x_01) {
+        document.getElementById('main-content').innerHTML = `
+            <div style="padding:40px;text-align:center;color:#dc3545;">
+                ⚠️ Parameter URL tidak lengkap.<br><br>
+                Contoh: <code>dokumentasi-transfer-naratif-langsung.html?id_x=41&x_01=123456</code>
+            </div>`;
+        return;
+    }
+
+    try {
+        if (window.PsikogramEngine === undefined) {
+            throw new Error('PsikogramEngine belum dimuat. Tunggu beberapa saat.');
+        }
+
+        const rawData = await fetchData(id_x, x_01);
+        const mappedData = mapData(rawData);
+
+        // Update Info Box
+        document.getElementById('total-data').textContent = '1';
+        document.getElementById('peserta-id').textContent = rawData.id_x;
+
+        // Render semua narasi + contoh
+        renderSemua(mappedData, rawData, 1);
+
+    } catch (err) {
+        document.getElementById('main-content').innerHTML = `
+            <div style="padding:40px;text-align:center;color:#dc3545;">
+                ⚠️ Gagal memuat data.<br><br>
+                <code style="font-size:14px;">${err.message}</code>
+                <br><br>
+                <button onclick="location.reload()" style="padding:10px 24px;background:#5F4EDA;color:white;border:none;border-radius:6px;cursor:pointer;">🔄 Refresh</button>
+            </div>`;
+        console.error(err);
+    }
+}
+
+main();
+</script>
+
+</body>
+</html>

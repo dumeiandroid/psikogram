@@ -979,19 +979,16 @@
         <p class="pdf-verif-text">Menyatakan bahwa <strong>Proses, Norma, dan Hasil Tes</strong> ini telah diverifikasi</p>
 
         <div class="signature" style="position:relative; margin-top:80px;">
+            <!-- QR Code absolute di tengah, tidak ganggu layout — hanya tampil di Versi 2 -->
+            <div id="qr-wrap" style="display:none; position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
+                <a id="qr-link" href="#" target="_blank" title="Buka laporan online">
+                    <div id="qr-code" style="display:inline-block;"></div>
+                </a>
+                <p style="font-size:10px; color:#888; margin:4px 0 0 0;">Scan untuk lihat laporan</p>
+            </div>
             <p style="text-align:center;"><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
             <p style="margin-top:-12px; text-align:center;">Psikolog,</p>
-            <!-- Wrapper relative hanya utk baris gambar ttd, supaya QR bisa absolute di sampingnya tanpa geser posisi gambar -->
-            <div style="position:relative; text-align:center;">
-                <img id="header-ttd-img" src="gambar/ttd-ssc1.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/>
-                <!-- QR Code absolute di samping kanan gambar ttd, sejajar vertikal — hanya tampil di Versi 2 -->
-                <div id="qr-wrap" style="display:none; position:absolute; left:calc(60% + 110px); top:50%; transform:translateY(-50%); text-align:center; z-index:10;">
-                    <a id="qr-link" href="#" target="_blank" title="Buka laporan online">
-                        <div id="qr-code" style="display:inline-block;"></div>
-                    </a>
-                    <p style="font-size:10px; color:#888; margin:4px 0 0 0;">Scan untuk lihat laporan</p>
-                </div>
-            </div>
+            <div style="text-align:center;"><img id="header-ttd-img" src="gambar/ttd-ssc1.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
             <p style="margin-top:-5px; text-align:center;"><strong>Dr. Karina M. Brahmana, M.Psi, Psikolog</strong></p>
             <p style="margin-top:-12px; text-align:center;">No SIPP: 20070136-2021-02-0799</p><br>
             <div class="enter"></div>
