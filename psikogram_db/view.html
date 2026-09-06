@@ -228,6 +228,12 @@
         .ttd-footer-col-himpsi img { display: block; margin: 0 auto; }
         .ttd-footer-col-himpsi p { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.4; }
 
+        /* --- Versi 1: QR HIMPSI di kiri, teks+TTD rata kanan di kanan (tanpa QR Lidan/stempel di tengah) --- */
+        .ttd-footer.versi1 .ttd-footer-col-himpsi { order: 1; }
+        .ttd-footer.versi1 .ttd-footer-col-center { order: 2; text-align: right; }
+        .ttd-footer.versi1 .ttd-footer-col-center p { text-align: right; }
+        .ttd-footer.versi1 .ttd-stempel-wrap { margin-left: auto; margin-right: 0; }
+
         /* --- Tombol Download --- */
         #downloadBtn {
             display: block; margin: 20px auto;
@@ -1027,7 +1033,7 @@
 
         <!-- Tanda Tangan -->
         <div class="signature">
-            <div class="ttd-footer">
+            <div class="ttd-footer" id="ttd-footer">
 
                 <!-- KIRI: QR Lidan (verifikasi laporan online) — hanya tampil di Versi 2 -->
                 <div id="qr-wrap" class="ttd-footer-col-qrlidan" style="display:none;">
@@ -1772,6 +1778,7 @@ function terapkanVersiKop(versi) {
     const ttdEl      = document.getElementById('header-ttd-img');
     const stempelEl  = document.getElementById('header-stempel-img');
     const qrWrap     = document.getElementById('qr-wrap');
+    const ttdFooter  = document.getElementById('ttd-footer');
     if (logoEl) logoEl.src = cfg.logoImg;
     if (infoEl) {
         infoEl.innerHTML = cfg.headerHtml;
@@ -1781,6 +1788,10 @@ function terapkanVersiKop(versi) {
     if (stempelEl) { stempelEl.style.display = ''; stempelEl.src = cfg.stempelImg; }
     document.documentElement.style.setProperty('--watermark-logo', `url('${cfg.watermarkImg}')`);
     if (qrWrap) qrWrap.style.display = cfg.showQr ? 'block' : 'none';
+    if (ttdFooter) {
+        ttdFooter.classList.toggle('versi1', versi === 'v1');
+        ttdFooter.classList.toggle('versi2', versi === 'v2');
+    }
 
     const r1 = document.getElementById('versiKop1');
     const r2 = document.getElementById('versiKop2');
@@ -2899,8 +2910,11 @@ function setupDownload() {
         hal2Content.push({ text:'', margin:[0,10,0,0] });
 
         const cfgSign = VERSI_KOP_CONFIG[_versiKop] || VERSI_KOP_CONFIG.v1;
+        // Versi 2 (showQr:true): QR Lidan kiri — TTD/Stempel tengah (rata tengah) — QR HIMPSI kanan.
+        // Versi 1 (showQr:false): QR HIMPSI kiri — teks + TTD rata kanan di kanan (tanpa QR Lidan).
+        const align = cfgSign.showQr ? 'center' : 'right';
 
-        // KIRI: QR Lidan (verifikasi laporan online) — hanya Versi 2. Logo di tengah QR
+        // KIRI (khusus Versi 2): QR Lidan (verifikasi laporan online). Logo di tengah QR
         // sudah otomatis ikut, karena qrB64 diambil dari canvas #qr-code yang sudah
         // ditimpa addLogoToQR() saat render di layar.
         const qrLidanCol = (cfgSign.showQr && qrB64) ? {
@@ -2911,17 +2925,18 @@ function setupDownload() {
             ]
         } : { width:'auto', text:'' };
 
-        // TENGAH: Tanggal, TTD + Stempel (ditumpuk pakai margin negatif — pdfmake tidak
-        // mendukung posisi absolute/overlap layaknya CSS), Nama, SIPP
+        // TTD + Stempel (ditumpuk pakai margin negatif — pdfmake tidak mendukung posisi
+        // absolute/overlap layaknya CSS). Perataan mengikuti `align` (tengah di Versi 2,
+        // kanan di Versi 1).
         const ttdStempelStack = [];
-        if (stempelB64) ttdStempelStack.push({ image:stempelB64, width:80, alignment:'center' });
+        if (stempelB64) ttdStempelStack.push({ image:stempelB64, width:80, alignment:align });
         if (ttdB64) {
-            ttdStempelStack.push({ image:ttdB64, width:90, alignment:'center', margin:[0, stempelB64 ? -55 : 2, 0, 2] });
+            ttdStempelStack.push({ image:ttdB64, width:90, alignment:align, margin:[0, stempelB64 ? -55 : 2, 0, 2] });
         } else if (!stempelB64) {
             ttdStempelStack.push({ text:'', margin:[0,50,0,0] });
         }
 
-        // KANAN: QR HIMPSI
+        // QR HIMPSI — selalu tampil (kanan di Versi 2, kiri di Versi 1)
         const himpsiCol = himpsiB64 ? {
             width:'auto',
             stack: [
@@ -2930,21 +2945,21 @@ function setupDownload() {
             ]
         } : { width:'auto', text:'' };
 
-        hal2Content.push({
-            columns: [
-                qrLidanCol,
-                {
-                    width:'*',
-                    stack: [
-                        { text:`Medan, ${tglTTD}`, bold:true, fontSize:FS2, alignment:'center' },
-                        { text:'Psikolog,', fontSize:FS2, margin:[0,2,0,2], alignment:'center' },
-                        ...ttdStempelStack,
-                        { text:'Dr. Karina M. Brahmana, M.Psi, Psikolog', bold:true, fontSize:FS2, margin:[0,2,0,0], alignment:'center' },
-                        { text:'No SIPP: 20070136-2021-02-0799', fontSize:FS2, alignment:'center' }
-                    ]
-                },
-                himpsiCol
+        const ttdTextCol = {
+            width:'*',
+            stack: [
+                { text:`Medan, ${tglTTD}`, bold:true, fontSize:FS2, alignment:align },
+                { text:'Psikolog,', fontSize:FS2, margin:[0,2,0,2], alignment:align },
+                ...ttdStempelStack,
+                { text:'Dr. Karina M. Brahmana, M.Psi, Psikolog', bold:true, fontSize:FS2, margin:[0,2,0,0], alignment:align },
+                { text:'No SIPP: 20070136-2021-02-0799', fontSize:FS2, alignment:align }
             ]
+        };
+
+        hal2Content.push({
+            columns: cfgSign.showQr
+                ? [ qrLidanCol, ttdTextCol, himpsiCol ]   // Versi 2: kiri-tengah-kanan
+                : [ himpsiCol, ttdTextCol ]                // Versi 1: HIMPSI kiri, teks+TTD rata kanan
         });
 
         const hal3Content = [];
