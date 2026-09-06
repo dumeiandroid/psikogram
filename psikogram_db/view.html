@@ -152,7 +152,7 @@
         .container_a::before {
             content: ""; position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
-            background-image: var(--watermark-logo, url('gambar/logo-ssc.png'));
+            background-image: var(--watermark-logo, url('https://psikogram.lidan.co.id/gambar/logo-ssc.png'));
             background-size: 70%; background-position: center;
             background-repeat: no-repeat; opacity: 0.1; z-index: 0;
         }
@@ -939,7 +939,7 @@
         <!-- Header Institusi -->
         <div class="custom-header no-download">
             <div class="logo-container_a">
-                <img id="header-logo-img" src="gambar/logo-ssc1.png" alt="Logo" class="logo"/>
+                <img id="header-logo-img" src="https://psikogram.lidan.co.id/gambar/logo-ssc1.png" alt="Logo" class="logo"/>
             </div>
             <div class="info-container_a" id="header-info-container">
                 <div class="header-title">BIRO KONSULTASI PSIKOLOGI DAN BIMBINGAN BELAJAR</div>
@@ -1042,8 +1042,8 @@
                     <p><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
                     <p>Psikolog,</p>
                     <div class="ttd-stempel-wrap">
-                        <img id="header-stempel-img" src="gambar/stempel-ssc1.png" alt="Stempel" class="stempel-img" onerror="this.style.display='none'">
-                        <img id="header-ttd-img" src="gambar/ttd-ssc1.png" alt="Tanda Tangan" class="ttd-img" onerror="this.style.visibility='hidden'">
+                        <img id="header-stempel-img" src="https://psikogram.lidan.co.id/gambar/stempel-ssc1.png" alt="Stempel" class="stempel-img" onerror="this.style.display='none'">
+                        <img id="header-ttd-img" src="https://psikogram.lidan.co.id/gambar/ttd-ssc1.png" alt="Tanda Tangan" class="ttd-img" onerror="this.style.visibility='hidden'">
                     </div>
                     <p><strong>Dr. Karina M. Brahmana, M.Psi, Psikolog</strong></p>
                     <p>No SIPP: 20070136-2021-02-0799</p>
@@ -1051,7 +1051,7 @@
 
                 <!-- KANAN: QR HIMPSI -->
                 <div class="ttd-footer-col-himpsi">
-                    <img src="gambar/himpsi_qrcode_karina.jpeg" alt="QR HIMPSI" width="90" height="90" style="border:1.5px solid #ccc; background:#fff; padding:4px; box-shadow:0 2px 8px rgba(0,0,0,.12);">
+                    <img src="https://psikogram.lidan.co.id/gambar/himpsi_qrcode_karina.jpeg" alt="QR HIMPSI" width="90" height="90" style="border:1.5px solid #ccc; background:#fff; padding:4px; box-shadow:0 2px 8px rgba(0,0,0,.12);">
                     <p>Psikolog terdaftar dan terawasi oleh HIMPSI</p>
                 </div>
 
@@ -1733,11 +1733,11 @@ const ASPEK_KEY_SIKAP       = ['sistematika_kerja','inisiatif','kemandirian'];
 let _versiKop = localStorage.getItem('psikogram_versi_kop') === 'v2' ? 'v2' : 'v1';
 const VERSI_KOP_CONFIG = {
     v1: {
-        logoImg: 'gambar/logo-ssc1.png',
-        watermarkImg: 'gambar/logo-ssc.png',
-        hdrImg: 'gambar/kop-ssc.png',
-        ttdImg: 'gambar/ttd-ssc1.png',
-        stempelImg: 'gambar/stempel-ssc1.png',
+        logoImg: 'https://psikogram.lidan.co.id/gambar/logo-ssc1.png',
+        watermarkImg: 'https://psikogram.lidan.co.id/gambar/logo-ssc.png',
+        hdrImg: 'https://psikogram.lidan.co.id/gambar/kop-ssc.png',
+        ttdImg: 'https://psikogram.lidan.co.id/gambar/ttd-ssc1.png',
+        stempelImg: 'https://psikogram.lidan.co.id/gambar/stempel-ssc1.png',
         showQr: false,
         headerHtml: `
             <div class="header-title">BIRO KONSULTASI PSIKOLOGI DAN BIMBINGAN BELAJAR</div>
@@ -1746,11 +1746,11 @@ const VERSI_KOP_CONFIG = {
             <div class="phone">Hp. 0822 9418 5814 (Dedy), 0877 4845 1289 (Dwi) Email: educationproxecla@gmail.com</div>`
     },
     v2: {
-        logoImg: 'gambar/logo1.png',
-        watermarkImg: 'gambar/logo1.png',
-        hdrImg: 'gambar/01d.jpg',
-        ttdImg: 'gambar/ttd.png',
-        stempelImg: 'gambar/stempel.png',
+        logoImg: 'https://psikogram.lidan.co.id/gambar/logo1.png',
+        watermarkImg: 'https://psikogram.lidan.co.id/gambar/logo1.png',
+        hdrImg: 'https://psikogram.lidan.co.id/gambar/01d.jpg',
+        ttdImg: 'https://psikogram.lidan.co.id/gambar/ttd.png',
+        stempelImg: 'https://psikogram.lidan.co.id/gambar/stempel.png',
         showQr: true,
         headerHtml: `
             <div class="header-title">PT. LIDAN INDAH ABADI</div>
@@ -1795,6 +1795,13 @@ function terapkanVersiKop(versi) {
     }
 }
 
+// Logo yang disisipkan di tengah QR Lidan — selalu dari domain utama lidan.co.id
+const QR_LOGO_URL = 'https://lidan.co.id/gambar/lidan_logo.jpg';
+// Promise yang selesai saat logo QR sudah selesai digambar ke canvas — di-await
+// sebelum mengambil qrB64 untuk PDF, supaya tidak ada race condition (layar sudah
+// tampil logo tapi hasil download diambil sebelum logo selesai digambar).
+let _qrLogoReadyPromise = Promise.resolve();
+
 function renderQrCode(rawData) {
     const qrLinkEl = document.getElementById('qr-link');
     const qrCodeEl = document.getElementById('qr-code');
@@ -1807,63 +1814,70 @@ function renderQrCode(rawData) {
         colorDark: '#000000', colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
     });
-    const cfgLogo = VERSI_KOP_CONFIG[_versiKop] || VERSI_KOP_CONFIG.v1;
-    addLogoToQR('qr-code', cfgLogo.logoImg);
+    _qrLogoReadyPromise = addLogoToQR('qr-code', QR_LOGO_URL);
 }
 
-/* ── Sisipkan logo di tengah QR Lidan tanpa merusak hasil scan ── */
+/* ── Sisipkan logo di tengah QR Lidan tanpa merusak hasil scan ──
+   Mengembalikan Promise yang selesai setelah logo benar-benar digambar
+   (atau gagal dimuat), supaya proses lain bisa menunggu sebelum
+   mengambil isi canvas (mis. untuk PDF). ── */
 function addLogoToQR(containerId, logoUrl) {
     const container = document.getElementById(containerId);
-    if (!container) return;
-    // qrcode.js merender async ke <canvas>; tunggu 1 tick agar canvas sudah ada
-    setTimeout(() => {
-        const canvas = container.querySelector('canvas');
-        const visibleImg = container.querySelector('img');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width, h = canvas.height;
+    if (!container) return Promise.resolve();
+    return new Promise((resolve) => {
+        // qrcode.js merender canvas secara sinkron saat new QRCode() dipanggil,
+        // tapi kita tunggu 1 microtask supaya aman kalau ada perubahan urutan render.
+        Promise.resolve().then(() => {
+            const canvas = container.querySelector('canvas');
+            const visibleImg = container.querySelector('img');
+            if (!canvas) return resolve();
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
 
-        function refreshVisibleImg() {
-            if (visibleImg) visibleImg.src = canvas.toDataURL('image/png');
-        }
+            function refreshVisibleImg() {
+                if (visibleImg) visibleImg.src = canvas.toDataURL('image/png');
+            }
 
-        const boxSize = w * 0.30;
-        const boxX = (w - boxSize) / 2;
-        const boxY = (h - boxSize) / 2;
-        const r = 4;
-        ctx.fillStyle = '#ffffff';
-        ctx.strokeStyle = '#5F4EDA';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(boxX + r, boxY);
-        ctx.arcTo(boxX + boxSize, boxY, boxX + boxSize, boxY + boxSize, r);
-        ctx.arcTo(boxX + boxSize, boxY + boxSize, boxX, boxY + boxSize, r);
-        ctx.arcTo(boxX, boxY + boxSize, boxX, boxY, r);
-        ctx.arcTo(boxX, boxY, boxX + boxSize, boxY, r);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        refreshVisibleImg();
-
-        const logoSize = boxSize * 0.82;
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = function () {
-            const imgX = (w - logoSize) / 2;
-            const imgY = (h - logoSize) / 2;
-            ctx.drawImage(img, imgX, imgY, logoSize, logoSize);
+            const boxSize = w * 0.30;
+            const boxX = (w - boxSize) / 2;
+            const boxY = (h - boxSize) / 2;
+            const r = 4;
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#5F4EDA';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(boxX + r, boxY);
+            ctx.arcTo(boxX + boxSize, boxY, boxX + boxSize, boxY + boxSize, r);
+            ctx.arcTo(boxX + boxSize, boxY + boxSize, boxX, boxY + boxSize, r);
+            ctx.arcTo(boxX, boxY + boxSize, boxX, boxY, r);
+            ctx.arcTo(boxX, boxY, boxX + boxSize, boxY, r);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
             refreshVisibleImg();
-        };
-        img.onerror = function () {
-            ctx.fillStyle = '#5F4EDA';
-            ctx.font = '700 ' + Math.max(6, Math.round(w * 0.08)) + 'px Arial, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('LIDAN', w / 2, h / 2);
-            refreshVisibleImg();
-        };
-        img.src = logoUrl;
-    }, 0);
+
+            const logoSize = boxSize * 0.82;
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function () {
+                const imgX = (w - logoSize) / 2;
+                const imgY = (h - logoSize) / 2;
+                ctx.drawImage(img, imgX, imgY, logoSize, logoSize);
+                refreshVisibleImg();
+                resolve();
+            };
+            img.onerror = function () {
+                ctx.fillStyle = '#5F4EDA';
+                ctx.font = '700 ' + Math.max(6, Math.round(w * 0.08)) + 'px Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('LIDAN', w / 2, h / 2);
+                refreshVisibleImg();
+                resolve();
+            };
+            img.src = logoUrl;
+        });
+    });
 }
 
 // =========================================================
@@ -2735,7 +2749,7 @@ function setupDownload() {
             toBase64(cfg.hdrImg),
             toBase64(cfg.ttdImg),
             toBase64(cfg.stempelImg),
-            toBase64('gambar/himpsi_qrcode_karina.jpeg')
+            toBase64('https://psikogram.lidan.co.id/gambar/himpsi_qrcode_karina.jpeg')
         ]);
         _imgCache = { logoB64, hdrB64, ttdB64, stempelB64, himpsiB64 };
         return _imgCache;
@@ -2799,6 +2813,10 @@ function setupDownload() {
             if (qrImg) return qrImg.src;
             return null;
         }
+        // Tunggu proses penyisipan logo ke QR selesai (fetch gambar lidan_logo.jpg
+        // bersifat async) supaya PDF tidak "keduluan" mengambil canvas QR yang
+        // masih polos tanpa logo.
+        await _qrLogoReadyPromise;
         const qrB64 = getQrBase64();
 
         const EMP = {text:'', border:[false,false,false,false]};
