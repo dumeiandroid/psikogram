@@ -202,31 +202,9 @@
         .container_a p, .container_a li { text-align: justify; font-size: inherit; line-height: 1.6; }
         .container_a .custom-list li { margin-bottom: 2px; }
         .strength-weakness strong, .strength-weakness h4 { text-align: left; display: block; }
-        .signature { margin-top: 20px; }
+        .signature { margin-top: 20px; text-align: right; }
         .signature p { font-size: inherit; line-height: 1.4; }
         .enter { margin: 20px 0; }
-
-        /* --- Footer TTD: QR Lidan (kiri) - TTD/Stempel (tengah) - QR HIMPSI (kanan) --- */
-        .ttd-footer {
-            display: flex; align-items: flex-end; justify-content: space-between;
-            gap: 14px; flex-wrap: nowrap;
-        }
-        .ttd-footer-col-qrlidan { flex-shrink: 0; width: 130px; text-align: center; }
-        .ttd-footer-col-qrlidan p { font-size: 9px; color: #888; margin: 4px 0 0 0; line-height: 1.3; }
-        .ttd-footer-col-center { flex: 1; text-align: center; min-width: 0; }
-        .ttd-footer-col-center p { margin: 2px 0; text-align: center; }
-        .ttd-stempel-wrap { position: relative; width: 150px; height: 95px; margin: 4px auto; }
-        .ttd-stempel-wrap .stempel-img {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 88px; height: 88px; object-fit: contain; opacity: .85; z-index: 1;
-        }
-        .ttd-stempel-wrap .ttd-img {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            max-width: 150px; height: 60px; object-fit: contain; z-index: 2;
-        }
-        .ttd-footer-col-himpsi { flex-shrink: 0; width: 110px; text-align: center; }
-        .ttd-footer-col-himpsi img { display: block; margin: 0 auto; }
-        .ttd-footer-col-himpsi p { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.4; }
 
         /* --- Tombol Download --- */
         #downloadBtn {
@@ -1026,36 +1004,19 @@
         </div>
 
         <!-- Tanda Tangan -->
-        <div class="signature">
-            <div class="ttd-footer">
-
-                <!-- KIRI: QR Lidan (verifikasi laporan online) — hanya tampil di Versi 2 -->
-                <div id="qr-wrap" class="ttd-footer-col-qrlidan" style="display:none;">
-                    <a id="qr-link" href="#" target="_blank" title="Buka laporan online">
-                        <div id="qr-code" style="display:inline-block;"></div>
-                    </a>
-                    <p>Scan untuk lihat laporan</p>
-                </div>
-
-                <!-- TENGAH: Tanggal, TTD + Stempel, Nama, SIPP -->
-                <div class="ttd-footer-col-center">
-                    <p><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
-                    <p>Psikolog,</p>
-                    <div class="ttd-stempel-wrap">
-                        <img id="header-stempel-img" src="gambar/stempel-ssc1.png" alt="Stempel" class="stempel-img" onerror="this.style.display='none'">
-                        <img id="header-ttd-img" src="gambar/ttd-ssc1.png" alt="Tanda Tangan" class="ttd-img" onerror="this.style.visibility='hidden'">
-                    </div>
-                    <p><strong>Dr. Karina M. Brahmana, M.Psi, Psikolog</strong></p>
-                    <p>No SIPP: 20070136-2021-02-0799</p>
-                </div>
-
-                <!-- KANAN: QR HIMPSI -->
-                <div class="ttd-footer-col-himpsi">
-                    <img src="gambar/himpsi_qrcode_karina.jpeg" alt="QR HIMPSI" width="90" height="90" style="border:1.5px solid #ccc; background:#fff; padding:4px; box-shadow:0 2px 8px rgba(0,0,0,.12);">
-                    <p>Psikolog terdaftar dan terawasi oleh HIMPSI</p>
-                </div>
-
+        <div class="signature" style="position:relative;">
+            <!-- QR Code absolute di tengah, tidak ganggu layout — hanya tampil di Versi 2 -->
+            <div id="qr-wrap" style="display:none; position:absolute; left:50%; transform:translateX(-50%); top:0; text-align:center; z-index:10;">
+                <a id="qr-link" href="#" target="_blank" title="Buka laporan online">
+                    <div id="qr-code" style="display:inline-block;"></div>
+                </a>
+                <p style="font-size:10px; color:#888; margin:4px 0 0 0;">Scan untuk lihat laporan</p>
             </div>
+            <p style="text-align:right;"><strong>Medan, <span id="span-tanggal-ttd"></span></strong></p>
+            <p style="margin-top:-12px; text-align:right;">Psikolog,</p>
+            <div style="text-align:right;"><img id="header-ttd-img" src="gambar/ttd-ssc1.png" alt="Tanda Tangan" style="max-width:20%; height:auto;"/></div>
+            <p style="margin-top:-5px; text-align:right;"><strong>Dr. Karina M. Brahmana, M.Psi, Psikolog</strong></p>
+            <p style="margin-top:-12px; text-align:right;">No SIPP: 20070136-2021-02-0799</p><br>
             <div class="enter"></div>
         </div>
     </div>
@@ -1737,7 +1698,6 @@ const VERSI_KOP_CONFIG = {
         watermarkImg: 'gambar/logo-ssc.png',
         hdrImg: 'gambar/kop-ssc.png',
         ttdImg: 'gambar/ttd-ssc1.png',
-        stempelImg: 'gambar/stempel-ssc1.png',
         showQr: false,
         headerHtml: `
             <div class="header-title">BIRO KONSULTASI PSIKOLOGI DAN BIMBINGAN BELAJAR</div>
@@ -1750,7 +1710,6 @@ const VERSI_KOP_CONFIG = {
         watermarkImg: 'gambar/logo1.png',
         hdrImg: 'gambar/01d.jpg',
         ttdImg: 'gambar/ttd.png',
-        stempelImg: 'gambar/stempel.png',
         showQr: true,
         headerHtml: `
             <div class="header-title">PT. LIDAN INDAH ABADI</div>
@@ -1767,18 +1726,16 @@ function terapkanVersiKop(versi) {
     _versiKop = versi;
     try { localStorage.setItem('psikogram_versi_kop', versi); } catch (e) {}
 
-    const logoEl     = document.getElementById('header-logo-img');
-    const infoEl     = document.getElementById('header-info-container');
-    const ttdEl      = document.getElementById('header-ttd-img');
-    const stempelEl  = document.getElementById('header-stempel-img');
-    const qrWrap     = document.getElementById('qr-wrap');
+    const logoEl = document.getElementById('header-logo-img');
+    const infoEl = document.getElementById('header-info-container');
+    const ttdEl  = document.getElementById('header-ttd-img');
+    const qrWrap = document.getElementById('qr-wrap');
     if (logoEl) logoEl.src = cfg.logoImg;
     if (infoEl) {
         infoEl.innerHTML = cfg.headerHtml;
         infoEl.classList.toggle('versi2-center', versi === 'v2');
     }
-    if (ttdEl) { ttdEl.style.visibility = ''; ttdEl.src = cfg.ttdImg; }
-    if (stempelEl) { stempelEl.style.display = ''; stempelEl.src = cfg.stempelImg; }
+    if (ttdEl)  ttdEl.src = cfg.ttdImg;
     document.documentElement.style.setProperty('--watermark-logo', `url('${cfg.watermarkImg}')`);
     if (qrWrap) qrWrap.style.display = cfg.showQr ? 'block' : 'none';
 
@@ -1807,63 +1764,6 @@ function renderQrCode(rawData) {
         colorDark: '#000000', colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
     });
-    const cfgLogo = VERSI_KOP_CONFIG[_versiKop] || VERSI_KOP_CONFIG.v1;
-    addLogoToQR('qr-code', cfgLogo.logoImg);
-}
-
-/* ── Sisipkan logo di tengah QR Lidan tanpa merusak hasil scan ── */
-function addLogoToQR(containerId, logoUrl) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    // qrcode.js merender async ke <canvas>; tunggu 1 tick agar canvas sudah ada
-    setTimeout(() => {
-        const canvas = container.querySelector('canvas');
-        const visibleImg = container.querySelector('img');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width, h = canvas.height;
-
-        function refreshVisibleImg() {
-            if (visibleImg) visibleImg.src = canvas.toDataURL('image/png');
-        }
-
-        const boxSize = w * 0.30;
-        const boxX = (w - boxSize) / 2;
-        const boxY = (h - boxSize) / 2;
-        const r = 4;
-        ctx.fillStyle = '#ffffff';
-        ctx.strokeStyle = '#5F4EDA';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(boxX + r, boxY);
-        ctx.arcTo(boxX + boxSize, boxY, boxX + boxSize, boxY + boxSize, r);
-        ctx.arcTo(boxX + boxSize, boxY + boxSize, boxX, boxY + boxSize, r);
-        ctx.arcTo(boxX, boxY + boxSize, boxX, boxY, r);
-        ctx.arcTo(boxX, boxY, boxX + boxSize, boxY, r);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        refreshVisibleImg();
-
-        const logoSize = boxSize * 0.82;
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = function () {
-            const imgX = (w - logoSize) / 2;
-            const imgY = (h - logoSize) / 2;
-            ctx.drawImage(img, imgX, imgY, logoSize, logoSize);
-            refreshVisibleImg();
-        };
-        img.onerror = function () {
-            ctx.fillStyle = '#5F4EDA';
-            ctx.font = '700 ' + Math.max(6, Math.round(w * 0.08)) + 'px Arial, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('LIDAN', w / 2, h / 2);
-            refreshVisibleImg();
-        };
-        img.src = logoUrl;
-    }, 0);
 }
 
 // =========================================================
@@ -2730,14 +2630,12 @@ function setupDownload() {
     async function getImages() {
         if (_imgCache) return _imgCache;
         const cfg = VERSI_KOP_CONFIG[_versiKop] || VERSI_KOP_CONFIG.v1;
-        const [logoB64, hdrB64, ttdB64, stempelB64, himpsiB64] = await Promise.all([
+        const [logoB64, hdrB64, ttdB64] = await Promise.all([
             toBase64(cfg.logoImg),
             toBase64(cfg.hdrImg),
-            toBase64(cfg.ttdImg),
-            toBase64(cfg.stempelImg),
-            toBase64('gambar/himpsi_qrcode_karina.jpeg')
+            toBase64(cfg.ttdImg)
         ]);
-        _imgCache = { logoB64, hdrB64, ttdB64, stempelB64, himpsiB64 };
+        _imgCache = { logoB64, hdrB64, ttdB64 };
         return _imgCache;
     }
 
@@ -2757,7 +2655,7 @@ function setupDownload() {
         FS4 = FS4 || 100;
         const autoShrinkNotes = [];
 
-        const { logoB64, hdrB64, ttdB64, stempelB64, himpsiB64 } = await getImages();
+        const { logoB64, hdrB64, ttdB64 } = await getImages();
 
         const nama    = document.getElementById('td-nama')?.textContent?.trim() || '';
         const jk      = document.getElementById('td-jk')?.textContent?.trim() || '';
@@ -2879,53 +2777,28 @@ function setupDownload() {
         });
 
         hal2Content.push({ text:'', margin:[0,10,0,0] });
-
-        const cfgSign = VERSI_KOP_CONFIG[_versiKop] || VERSI_KOP_CONFIG.v1;
-
-        // KIRI: QR Lidan (verifikasi laporan online) — hanya Versi 2. Logo di tengah QR
-        // sudah otomatis ikut, karena qrB64 diambil dari canvas #qr-code yang sudah
-        // ditimpa addLogoToQR() saat render di layar.
-        const qrLidanCol = (cfgSign.showQr && qrB64) ? {
-            width:'auto',
-            stack: [
-                { image:qrB64, width:80, alignment:'center' },
-                { text:'Scan untuk lihat laporan', fontSize:7, alignment:'center', color:'#888', margin:[0,2,0,0] }
-            ]
-        } : { width:'auto', text:'' };
-
-        // TENGAH: Tanggal, TTD + Stempel (ditumpuk pakai margin negatif — pdfmake tidak
-        // mendukung posisi absolute/overlap layaknya CSS), Nama, SIPP
-        const ttdStempelStack = [];
-        if (stempelB64) ttdStempelStack.push({ image:stempelB64, width:80, alignment:'center' });
-        if (ttdB64) {
-            ttdStempelStack.push({ image:ttdB64, width:90, alignment:'center', margin:[0, stempelB64 ? -55 : 2, 0, 2] });
-        } else if (!stempelB64) {
-            ttdStempelStack.push({ text:'', margin:[0,50,0,0] });
-        }
-
-        // KANAN: QR HIMPSI
-        const himpsiCol = himpsiB64 ? {
-            width:'auto',
-            stack: [
-                { image:himpsiB64, width:78, alignment:'center' },
-                { text:'Psikolog terdaftar dan terawasi oleh HIMPSI', fontSize:6, alignment:'center', color:'#888', margin:[0,3,0,0] }
-            ]
-        } : { width:'auto', text:'' };
-
         hal2Content.push({
             columns: [
-                qrLidanCol,
+                { width:'*', text:'' },
                 {
-                    width:'*',
-                    stack: [
-                        { text:`Medan, ${tglTTD}`, bold:true, fontSize:FS2, alignment:'center' },
-                        { text:'Psikolog,', fontSize:FS2, margin:[0,2,0,2], alignment:'center' },
-                        ...ttdStempelStack,
-                        { text:'Dr. Karina M. Brahmana, M.Psi, Psikolog', bold:true, fontSize:FS2, margin:[0,2,0,0], alignment:'center' },
-                        { text:'No SIPP: 20070136-2021-02-0799', fontSize:FS2, alignment:'center' }
-                    ]
+                    width:'auto',
+                    stack: qrB64 ? [
+                        { image:qrB64, width:90, alignment:'center' },
+                        { text:'Scan untuk lihat laporan', fontSize:8, alignment:'center', color:'#888', margin:[0,2,0,0] }
+                    ] : [{ text:'' }]
                 },
-                himpsiCol
+                { width:'*', text:'' },
+                {
+                    width:'auto',
+                    alignment:'right',
+                    stack: [
+                        { text:`Medan, ${tglTTD}`, bold:true, fontSize:FS2 },
+                        { text:'Psikolog,', fontSize:FS2, margin:[0,2,0,2] },
+                        ttdB64 ? { image:ttdB64, width:90, margin:[0,2,0,2] } : { text:'', margin:[0,50,0,0] },
+                        { text:'Dr. Karina M. Brahmana, M.Psi, Psikolog', bold:true, fontSize:FS2, margin:[0,2,0,0] },
+                        { text:'No SIPP: 20070136-2021-02-0799', fontSize:FS2 }
+                    ]
+                }
             ]
         });
 
