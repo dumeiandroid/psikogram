@@ -1516,6 +1516,26 @@ const CONFIG = {
     API_SECRET : 'admin'
 };
 
+// Key localStorage yang sama dipakai finishing.html & index_rekap.html untuk menyimpan tabel aktif terakhir
+const LS_TABEL_TERAKHIR = 'rekap_tabelAktifTerakhir';
+
+// Tentukan tabel awal saat halaman dibuka: prioritas ?tabel= di URL, lalu fallback ke localStorage
+// (localStorage ini yang juga dipakai/diupdate oleh finishing.html & index_rekap.html)
+function getTabelAwalDariUrlAtauStorage() {
+    const p = new URLSearchParams(window.location.search);
+    const dariUrl = p.get('tabel');
+    if (dariUrl && dariUrl.trim()) {
+        try { localStorage.setItem(LS_TABEL_TERAKHIR, dariUrl.trim()); } catch (e) { /* localStorage diblokir — abaikan */ }
+        return dariUrl.trim();
+    }
+    try {
+        const dariStorage = localStorage.getItem(LS_TABEL_TERAKHIR);
+        return (dariStorage && dariStorage.trim()) || null;
+    } catch (e) {
+        return null;
+    }
+}
+
 let _globalData   = null;
 let _globalIdX    = null;
 let _daftarRows   = [];
@@ -3234,6 +3254,7 @@ async function pilihTabel(namaTabel) {
         if (!rows.length) throw new Error(`Tabel "${namaTabel}" kosong.`);
 
         CONFIG.TABLE_NAME = namaTabel;
+        try { localStorage.setItem(LS_TABEL_TERAKHIR, namaTabel); } catch (e) { /* localStorage diblokir — abaikan */ }
         _daftarRows = rows.slice().sort((a, b) => (parseInt(a.id_x) || 0) - (parseInt(b.id_x) || 0));
         _posisisiSekarang = -1;
 
@@ -4750,12 +4771,20 @@ async function simpanEdit() {
 // =========================================================
 function init() {
     document.getElementById('loading-screen').classList.add('hidden');
-    document.getElementById('pilih-tabel-screen').classList.remove('hidden');
     terapkanVersiKop(_versiKop);
-    
+
     // Override variabel typo
     if (typeof _posisisiSekarang === 'undefined') {
         _posisisiSekarang = -1;
+    }
+
+    // Coba muat otomatis tabel yang sedang aktif di finishing.html/index_rekap.html
+    // (dari ?tabel= di URL, atau dari localStorage kalau dibuka tanpa parameter)
+    const tabelAwal = getTabelAwalDariUrlAtauStorage();
+    if (tabelAwal) {
+        pilihTabel(tabelAwal);
+    } else {
+        document.getElementById('pilih-tabel-screen').classList.remove('hidden');
     }
 }
 

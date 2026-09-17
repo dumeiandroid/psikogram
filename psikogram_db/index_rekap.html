@@ -784,7 +784,7 @@
                 style="flex:1; min-width:200px; background:var(--bg); border:1px solid var(--border);
                        color:var(--text); border-radius:7px; padding:8px 12px; font-family:'DM Mono',monospace;
                        font-size:13px; outline:none;"
-                oninput="renderTabelList(this.value)"
+                oninput="_tampilkanSemuaTabel = false; renderTabelList(this.value)"
                 onkeydown="if(event.key==='Enter') gantiTabel()">
             <button class="btn btn-secondary" onclick="gantiTabel()" style="background:var(--accent); color:#0d0f14; border:none;">Terapkan</button>
             <button class="btn btn-secondary" onclick="toggleTabelInput()">Batal</button>
@@ -1808,6 +1808,8 @@
     }
 
     let _semuaTabel = [];
+    let _tampilkanSemuaTabel = false;
+    const BATAS_TAMPIL_TABEL = 10;
 
     async function loadTabelList() {
         try {
@@ -1815,7 +1817,11 @@
                 headers: { 'X-Custom-Auth': SECRET }
             });
             const result = await res.json();
-            _semuaTabel = result.tables || [];
+            // Urutkan dari yang terbaru ke terlama.
+            // Asumsi: API mengembalikan tabel sesuai urutan pembuatan (lama -> baru di D1/SQLite),
+            // jadi dibalik (reverse) supaya tabel yang paling baru muncul paling atas.
+            _semuaTabel = (result.tables || []).slice().reverse();
+            _tampilkanSemuaTabel = false;
             renderTabelList(document.getElementById('inputTabelBaru').value);
         } catch(e) { /* silent */ }
     }
@@ -1824,7 +1830,11 @@
         const container = document.getElementById('tabelList');
         container.innerHTML = '';
         const q = (katakunci || '').trim().toLowerCase();
-        const daftar = q ? _semuaTabel.filter(t => t.toLowerCase().includes(q)) : _semuaTabel;
+        // Pencarian selalu dilakukan terhadap SELURUH daftar tabel, bukan cuma yang sedang tampil
+        const hasil = q ? _semuaTabel.filter(t => t.toLowerCase().includes(q)) : _semuaTabel;
+
+        const daftar = _tampilkanSemuaTabel ? hasil : hasil.slice(0, BATAS_TAMPIL_TABEL);
+
         daftar.forEach(t => {
             const btn = document.createElement('button');
             btn.textContent = t;
@@ -1841,6 +1851,31 @@
             };
             container.appendChild(btn);
         });
+
+        // Tombol "Lihat Semua" muncul kalau masih ada tabel tersembunyi (baik saat browsing biasa maupun saat mencari)
+        if (!_tampilkanSemuaTabel && hasil.length > BATAS_TAMPIL_TABEL) {
+            const btnSemua = document.createElement('button');
+            btnSemua.textContent = `Lihat Semua (${hasil.length})`;
+            btnSemua.style.cssText = `background:transparent; color:var(--accent);
+                border:1px dashed var(--accent); border-radius:6px;
+                padding:5px 12px; font-size:12px; font-family:'DM Mono',monospace;
+                cursor:pointer;`;
+            btnSemua.onclick = () => {
+                _tampilkanSemuaTabel = true;
+                renderTabelList(document.getElementById('inputTabelBaru').value);
+            };
+            container.appendChild(btnSemua);
+        }
+
+        // Info kecil kalau sedang mencari (biar jelas hasil pencarian dari seluruh tabel, bukan cuma 10)
+        if (q) {
+            const info = document.createElement('div');
+            info.style.cssText = `width:100%; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:2px;`;
+            info.textContent = hasil.length
+                ? `Ditemukan ${hasil.length} tabel cocok dengan "${katakunci}"`
+                : `Tidak ada tabel yang cocok dengan "${katakunci}"`;
+            container.appendChild(info);
+        }
     }
 
     function safeJSON(str, def) {
