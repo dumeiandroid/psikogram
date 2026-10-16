@@ -8,6 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;900&family=Great+Vibes&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
+/* Ukuran QR verifikasi (px). QR HIMPSI otomatis dibuat sama besar (+13px = padding & border kotak) */
+:root{--cert-qr-size:96px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:#111;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;font-family:'EB Garamond',serif}
 #ls{position:fixed;inset:0;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:14px}
@@ -238,8 +240,8 @@ body{background:#111;min-height:100vh;display:flex;flex-direction:column;align-i
 
       <!-- LAYER 5: Segel -->
       <div class="sel" style="width:auto;">
-        <img src="https://psikogram.lidan.co.id/gambar/himpsi_qrcode_karina.jpeg" alt="QR HIMPSI" width="96" height="96" style="display:block; padding:5px; border:1.5px solid #D4AF37; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.1);">
-        <div style="font-family:'Cinzel',serif;font-size:7px;color:#888;text-align:center;margin-top:4px;letter-spacing:.6px;max-width:106px;line-height:1.4;">Psikolog terdaftar dan terawasi oleh HIMPSI</div>
+        <img src="https://psikogram.lidan.co.id/gambar/himpsi_qrcode_karina.jpeg" alt="QR HIMPSI" style="display:block; width:calc(var(--cert-qr-size, 96px) + 13px); height:calc(var(--cert-qr-size, 96px) + 13px); object-fit:contain; padding:5px; border:1.5px solid #D4AF37; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.1);">
+        <div style="font-family:'Cinzel',serif;font-size:7px;color:#888;text-align:center;margin-top:4px;letter-spacing:.6px;max-width:calc(var(--cert-qr-size, 96px) + 13px);line-height:1.4;">Psikolog terdaftar dan terawasi oleh HIMPSI</div>
       </div>
     </div>
   </div>
@@ -417,6 +419,15 @@ const CFG={
   TABLE_NAME:(new URLSearchParams(window.location.search).get('tabel'))||'rekap_nilai1',
   API_SECRET:'admin'
 };
+function toTitleCase(str) {
+    return String(str || '')
+        .trim()
+        .replace(/\s+/g, ' ')
+        .toLowerCase()
+        .replace(/(^|[\s.'-])([a-z])/g, (m, sep, huruf) => sep + huruf.toUpperCase());
+}
+
+function certQrSize(){const v=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cert-qr-size'),10);return v>0?v:96}
 function kat(n){if(n<=69)return'Mental Defective';if(n<=79)return'Borderline';if(n<=89)return'Rata-rata Bawah';if(n<=109)return'Rata-rata';if(n<=119)return'Di Atas Rata-rata';if(n<=129)return'Superior';if(n<=139)return'Sangat Superior';return'Genius'}
 function fmt(s){if(!s)return'';const d=new Date(s);if(isNaN(d))return s;return d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}
 
@@ -490,11 +501,11 @@ async function main(){
     if(String(row.x_01)!==String(tok))throw new Error('Akses ditolak.');
     const bio=(()=>{try{return JSON.parse(row.x_02||'{}')}catch{return{}}})();
     const iq=parseInt(row.x_06)||0;
-    document.getElementById('cert-nama').textContent=bio.nama||'—';
+    document.getElementById('cert-nama').textContent=toTitleCase(bio.nama)||'—';
     document.getElementById('cert-tgl').textContent='Medan, '+(fmt(row.x_11||bio.tanggal||'')||'—');
     document.getElementById('cert-sv').textContent=`${iq} (${kat(iq)})`;
     const qrUrl=`https://laporan.lidan.co.id/sertifikat/sertifikat-iq?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}&tabel=${encodeURIComponent(CFG.TABLE_NAME)}`;
-    new QRCode(document.getElementById('qr'),{text:qrUrl,width:96,height:96,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+    new QRCode(document.getElementById('qr'),{text:qrUrl,width:certQrSize(),height:certQrSize(),colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
     addLogoToQR('qr','https://lidan.co.id/gambar/lidan_logo.jpg');
     document.getElementById('ls').classList.add('hidden');
     applyConfig();

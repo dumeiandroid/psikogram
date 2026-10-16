@@ -8,6 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;900&family=Great+Vibes&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* Ukuran QR verifikasi (px). QR HIMPSI otomatis dibuat sama besar (+13px = padding & border kotak) */
+:root{--cert-qr-size:96px}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -482,8 +484,8 @@ body {
 
             <!-- LAYER 5: Segel -->
             <div class="cert-seal" style="width:auto;">
-                <img src="https://psikogram.lidan.co.id/gambar/himpsi_qrcode_karina.jpeg" alt="QR HIMPSI" width="96" height="96" style="display:block; border:1.5px solid rgba(201,168,76,.55); background:#fff; padding:5px; box-shadow:0 2px 8px rgba(0,0,0,.12);">
-                <div style="font-family:'Cinzel',serif;font-size:7px;color:#B8922A;text-align:center;margin-top:4px;letter-spacing:.6px;max-width:106px;line-height:1.4;">Psikolog terdaftar dan terawasi oleh HIMPSI</div>
+                <img src="https://psikogram.lidan.co.id/gambar/himpsi_qrcode_karina.jpeg" alt="QR HIMPSI" style="display:block; width:calc(var(--cert-qr-size, 96px) + 13px); height:calc(var(--cert-qr-size, 96px) + 13px); object-fit:contain; border:1.5px solid rgba(201,168,76,.55); background:#fff; padding:5px; box-shadow:0 2px 8px rgba(0,0,0,.12);">
+                <div style="font-family:'Cinzel',serif;font-size:7px;color:#B8922A;text-align:center;margin-top:4px;letter-spacing:.6px;max-width:calc(var(--cert-qr-size, 96px) + 13px);line-height:1.4;">Psikolog terdaftar dan terawasi oleh HIMPSI</div>
             </div>
 
         </div>
@@ -508,6 +510,15 @@ function getKat(n) {
     return 'Genius';
 }
 
+function toTitleCase(str) {
+    return String(str || '')
+        .trim()
+        .replace(/\s+/g, ' ')
+        .toLowerCase()
+        .replace(/(^|[\s.'-])([a-z])/g, (m, sep, huruf) => sep + huruf.toUpperCase());
+}
+
+function certQrSize(){const v=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cert-qr-size'),10);return v>0?v:96}
 function fmt(str) {
     if (!str) return '';
     const d = new Date(str);
@@ -657,13 +668,13 @@ async function main() {
         const bio = (() => { try { return JSON.parse(row.x_02||'{}'); } catch { return {}; } })();
         const iq  = parseInt(row.x_06) || 0;
 
-        document.getElementById('cert-nama').textContent      = bio.nama || '—';
+        document.getElementById('cert-nama').textContent      = toTitleCase(bio.nama) || '—';
         document.getElementById('cert-tanggal').textContent   = 'Medan, ' + (fmt(row.x_11 || bio.tanggal || '') || '—');
         document.getElementById('cert-score-val').textContent = `${iq} (${getKat(iq)})`;
 
         const qrUrl = `https://laporan.lidan.co.id/sertifikat/?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}&tabel=${encodeURIComponent(CONFIG.TABLE_NAME)}`;
         new QRCode(document.getElementById('cert-qr-code'), {
-            text: qrUrl, width: 96, height: 96,
+            text: qrUrl, width: certQrSize(), height: certQrSize(),
             colorDark: '#000000', colorLight: '#ffffff',
             correctLevel: QRCode.CorrectLevel.H
         });

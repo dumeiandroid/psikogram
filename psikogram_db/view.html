@@ -211,21 +211,38 @@
             display: flex; align-items: flex-end; justify-content: space-between;
             gap: 14px; flex-wrap: nowrap;
         }
-        .ttd-footer-col-qrlidan { flex-shrink: 0; width: 130px; text-align: center; }
+        /* ===== UKURAN FOOTER TTD (ubah angka di sini) =====
+           --qr-size      : ukuran QR Lidan & QR HIMPSI (dibuat sama besar)
+           --ttd-height   : tinggi gambar tanda tangan (lebar otomatis)
+           --stempel-size : ukuran stempel
+           --ttd-area-h   : tinggi area TTD/stempel di layout (jarak teks atas-bawah). Jangan diubah
+                            kalau ingin jarak tetap; TTD/stempel boleh melebihi area ini (menimpa teks). */
+        :root {
+            --qr-size: 130px;
+            --ttd-height: 100px;
+            --stempel-size: 110px;
+            --ttd-area-h: 95px;
+            --ttd-area-w: 150px;
+        }
+        .ttd-footer-col-qrlidan { flex-shrink: 0; width: var(--qr-size); text-align: center; }
         .ttd-footer-col-qrlidan p { font-size: 9px; color: #888; margin: 4px 0 0 0; line-height: 1.3; }
         .ttd-footer-col-center { flex: 1; text-align: center; min-width: 0; }
         .ttd-footer-col-center p { margin: 2px 0; text-align: center; }
-        .ttd-stempel-wrap { position: relative; width: 150px; height: 95px; margin: 4px auto; }
+        .ttd-stempel-wrap { position: relative; width: var(--ttd-area-w); height: var(--ttd-area-h); margin: 4px auto; }
         .ttd-stempel-wrap .stempel-img {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 88px; height: 88px; object-fit: contain; opacity: .85; z-index: 1;
+            width: var(--stempel-size); height: var(--stempel-size); max-width: none; object-fit: contain; opacity: .85; z-index: 1;
         }
         .ttd-stempel-wrap .ttd-img {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            max-width: 150px; height: 60px; object-fit: contain; z-index: 2;
+            width: auto; max-width: none; height: var(--ttd-height); object-fit: contain; z-index: 2;
         }
-        .ttd-footer-col-himpsi { flex-shrink: 0; width: 110px; text-align: center; }
+        .ttd-footer-col-himpsi { flex-shrink: 0; width: var(--qr-size); text-align: center; }
         .ttd-footer-col-himpsi img { display: block; margin: 0 auto; }
+        .ttd-footer-col-himpsi img.himpsi-qr {
+            width: var(--qr-size); height: var(--qr-size); box-sizing: border-box; object-fit: contain;
+            border: 1.5px solid #ccc; background: #fff; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+        }
         .ttd-footer-col-himpsi p { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.4; }
 
         /* --- Versi 1: QR HIMPSI di kiri, teks+TTD rata kanan di kanan (tanpa QR Lidan/stempel di tengah) --- */
@@ -1057,7 +1074,7 @@
 
                 <!-- KANAN: QR HIMPSI -->
                 <div class="ttd-footer-col-himpsi">
-                    <img src="https://psikogram.lidan.co.id/gambar/himpsi_qrcode_karina.jpeg" alt="QR HIMPSI" width="90" height="90" style="border:1.5px solid #ccc; background:#fff; padding:4px; box-shadow:0 2px 8px rgba(0,0,0,.12);">
+                    <img src="https://psikogram.lidan.co.id/gambar/himpsi_qrcode_karina.jpeg" alt="QR HIMPSI" class="himpsi-qr">
                     <p>Psikolog terdaftar dan terawasi oleh HIMPSI</p>
                 </div>
 
@@ -1826,6 +1843,23 @@ function terapkanVersiKop(versi) {
     }
 }
 
+// Ukuran QR Lidan mengikuti variabel CSS --qr-size (di :root), sama dengan QR HIMPSI
+function getQrSizePx() {
+    const v = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--qr-size'), 10);
+    return v > 0 ? v : 130;
+}
+
+// =========================================================
+// UKURAN TTD / STEMPEL / QR UNTUK PDF (satuan pt) — ubah angka di sini
+//  qr      : lebar QR Lidan & QR HIMPSI (sama besar)
+//  ttd     : lebar gambar tanda tangan
+//  stempel : lebar gambar stempel
+// Jarak teks atas-bawah dijaga tetap otomatis; TTD/stempel boleh menimpa teks.
+// =========================================================
+const UKURAN_PDF = { qr: 80, ttd: 110, stempel: 95 };
+// Nilai acuan lama (JANGAN diubah) — dipakai agar jarak teks tidak bergeser
+const UKURAN_PDF_ACUAN = { ttd: 90, stempel: 80, overlap: 55 };
+
 // Logo yang disisipkan di tengah QR Lidan — selalu dari domain utama lidan.co.id
 const QR_LOGO_URL = 'https://lidan.co.id/gambar/lidan_logo.jpg';
 // Promise yang selesai saat logo QR sudah selesai digambar ke canvas — di-await
@@ -1841,7 +1875,7 @@ function renderQrCode(rawData) {
     const qrUrl = `https://laporan.lidan.co.id/?id_x=${rawData.id_x}&x_01=${rawData.x_01 || ''}&tabel=${CONFIG.TABLE_NAME || ''}`;
     qrLinkEl.href = qrUrl;
     new QRCode(qrCodeEl, {
-        text: qrUrl, width: 130, height: 130,
+        text: qrUrl, width: getQrSizePx(), height: getQrSizePx(),
         colorDark: '#000000', colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
     });
@@ -2940,7 +2974,7 @@ function setupDownload() {
         const qrLidanCol = (cfgSign.showQr && qrB64) ? {
             width:'auto',
             stack: [
-                { image:qrB64, width:80, alignment:'center' },
+                { image:qrB64, width:UKURAN_PDF.qr, alignment:'center' },
                 { text:'Scan untuk lihat laporan', fontSize:7, alignment:'center', color:'#888', margin:[0,2,0,0] }
             ]
         } : { width:'auto', text:'' };
@@ -2949,18 +2983,33 @@ function setupDownload() {
         // absolute/overlap layaknya CSS). Perataan mengikuti `align` (tengah di Versi 2,
         // kanan di Versi 1).
         const ttdStempelStack = [];
-        if (stempelB64) ttdStempelStack.push({ image:stempelB64, width:80, alignment:align });
-        if (ttdB64) {
-            ttdStempelStack.push({ image:ttdB64, width:90, alignment:align, margin:[0, stempelB64 ? -55 : 2, 0, 2] });
-        } else if (!stempelB64) {
-            ttdStempelStack.push({ text:'', margin:[0,50,0,0] });
+        if (stempelB64 && ttdB64) {
+            // Stempel di alur layout; TTD ditumpuk di tengah stempel dengan margin negatif.
+            // Margin bawah dihitung otomatis supaya total tinggi blok = tinggi acuan lama,
+            // jadi jarak teks atas & bawah tidak berubah walau ukuran diperbesar.
+            const rs = (await getImgRatio(stempelB64)) || 1;
+            const rt = (await getImgRatio(ttdB64)) || 0.5;
+            const S = UKURAN_PDF.stempel * rs;   // tinggi stempel
+            const T = UKURAN_PDF.ttd * rt;       // tinggi ttd
+            const tinggiAcuan = UKURAN_PDF_ACUAN.stempel * rs - UKURAN_PDF_ACUAN.overlap + UKURAN_PDF_ACUAN.ttd * rt + 2;
+            const marginAtas  = -(S + T) / 2;
+            const marginBawah = tinggiAcuan - (S + marginAtas + T);
+            ttdStempelStack.push({ image:stempelB64, width:UKURAN_PDF.stempel, alignment:align });
+            ttdStempelStack.push({ image:ttdB64, width:UKURAN_PDF.ttd, alignment:align, margin:[0, marginAtas, 0, marginBawah] });
+        } else {
+            if (stempelB64) ttdStempelStack.push({ image:stempelB64, width:UKURAN_PDF.stempel, alignment:align });
+            if (ttdB64) {
+                ttdStempelStack.push({ image:ttdB64, width:UKURAN_PDF.ttd, alignment:align, margin:[0, stempelB64 ? -55 : 2, 0, 2] });
+            } else if (!stempelB64) {
+                ttdStempelStack.push({ text:'', margin:[0,50,0,0] });
+            }
         }
 
         // QR HIMPSI — selalu tampil (kanan di Versi 2, kiri di Versi 1)
         const himpsiCol = himpsiB64 ? {
             width:'auto',
             stack: [
-                { image:himpsiB64, width:78, alignment:'center' },
+                { image:himpsiB64, width:UKURAN_PDF.qr, alignment:'center' },
                 { text:'Psikolog terdaftar dan terawasi oleh HIMPSI', fontSize:6, alignment:'center', color:'#888', margin:[0,3,0,0] }
             ]
         } : { width:'auto', text:'' };
