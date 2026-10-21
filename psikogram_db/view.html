@@ -819,8 +819,12 @@
         <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0 0 0 6px;">
             <input type="radio" name="zipMode" id="zipModeAll" value="all" onchange="toggleZipMode()"> All
         </label>
+        <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0 0 0 6px;">
+            <input type="radio" name="zipMode" id="zipModeSatu" value="satu" onchange="toggleZipMode()"> Satu id_x
+        </label>
         <input type="number" id="inputRangeMulai" placeholder="dari id_x" style="width:85px; margin-left:6px;">
         <input type="number" id="inputRangeSampai" placeholder="sampai id_x" style="width:90px;">
+        <input type="number" id="inputZipSatu" placeholder="id_x" style="width:85px; margin-left:6px; display:none;">
         <span style="border-left:1px solid rgba(255,255,255,0.35); margin-left:6px; padding-left:6px; display:inline-flex; align-items:center; gap:3px;">
             <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0;">
                 <input type="radio" name="zipMethod" id="zipMethodPer100" value="per100" checked> Per 100
@@ -829,7 +833,7 @@
                 <input type="radio" name="zipMethod" id="zipMethodToken" value="token"> Per Token
             </label>
         </span>
-        <button onclick="downloadRangeZip()">📦 Download ZIP</button>
+        <button id="btnDownloadZip" onclick="downloadRangeZip()">📦 Download ZIP</button>
         <span style="border-left:1px solid rgba(255,255,255,0.35); margin-left:6px; padding-left:6px; display:inline-flex; align-items:center; gap:3px;">
             <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0;">
                 <input type="radio" name="modelSert" id="modelSert1" value="1" checked onchange="simpanModelSertifikat()"> Model 1
@@ -838,7 +842,7 @@
                 <input type="radio" name="modelSert" id="modelSert2" value="2" onchange="simpanModelSertifikat()"> Model 2
             </label>
         </span>
-        <button onclick="downloadRangeZip('sertifikat')" title="Download ZIP berisi sertifikat IQ (JPG) sesuai Model 1/2 yang dipilih, memakai pengaturan Range/All & Per 100/Per Token">🏅 ZIP Sertifikat</button>
+        <button id="btnDownloadSert" onclick="downloadRangeZip('sertifikat')" title="Download ZIP berisi sertifikat IQ (JPG) sesuai Model 1/2 yang dipilih, memakai pengaturan Range/All & Per 100/Per Token">🏅 ZIP Sertifikat</button>
     </span>
     <span class="idx-jump" style="background:rgba(255,255,255,0.12); padding:5px 8px; border-radius:6px;">
         <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0;">
@@ -847,8 +851,12 @@
         <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0 0 0 6px;">
             <input type="radio" name="excelMode" id="excelModeAll" value="all" onchange="toggleExcelMode()"> All
         </label>
+        <label style="color:white; font-size:12px; display:flex; align-items:center; gap:3px; cursor:pointer; margin:0 0 0 6px;">
+            <input type="radio" name="excelMode" id="excelModeSatu" value="satu" onchange="toggleExcelMode()"> Satu id_x
+        </label>
         <input type="number" id="inputExcelMulai" placeholder="dari id_x" style="width:85px; margin-left:6px;">
         <input type="number" id="inputExcelSampai" placeholder="sampai id_x" style="width:90px;">
+        <input type="number" id="inputExcelSatu" placeholder="id_x" style="width:85px; margin-left:6px; display:none;">
         <button onclick="bukaModalExcelRange()">📊 Export Excel</button>
         <button onclick="bukaModalKelengkapan()">🔍 Kelengkapan</button>
     </span>
@@ -4249,19 +4257,37 @@ function tampilToast(msg, type = '') {
 // TOGGLE ZIP/EXCEL MODE
 // =========================================================
 function toggleZipMode() {
-    const isAll = document.getElementById('zipModeAll').checked;
-    document.getElementById('inputRangeMulai').disabled  = isAll;
-    document.getElementById('inputRangeSampai').disabled = isAll;
-    document.getElementById('inputRangeMulai').style.opacity  = isAll ? 0.5 : 1;
-    document.getElementById('inputRangeSampai').style.opacity = isAll ? 0.5 : 1;
+    const isAll  = document.getElementById('zipModeAll').checked;
+    const isSatu = document.getElementById('zipModeSatu').checked;
+    const isRange = !isAll && !isSatu;
+    const mulai = document.getElementById('inputRangeMulai');
+    const sampai = document.getElementById('inputRangeSampai');
+    mulai.style.display  = isSatu ? 'none' : '';
+    sampai.style.display = isSatu ? 'none' : '';
+    document.getElementById('inputZipSatu').style.display = isSatu ? '' : 'none';
+    mulai.disabled  = !isRange;
+    sampai.disabled = !isRange;
+    mulai.style.opacity  = isRange ? 1 : 0.5;
+    sampai.style.opacity = isRange ? 1 : 0.5;
+    document.getElementById('btnDownloadZip').textContent  = isSatu ? '📥 Download PDF' : '📦 Download ZIP';
+    document.getElementById('btnDownloadSert').textContent = isSatu ? '🏅 Download Sertifikat' : '🏅 ZIP Sertifikat';
+    const metodeWrap = document.getElementById('zipMethodPer100').closest('span');
+    if (metodeWrap) metodeWrap.style.display = isSatu ? 'none' : 'inline-flex';
 }
 
 function toggleExcelMode() {
-    const isAll = document.getElementById('excelModeAll').checked;
-    document.getElementById('inputExcelMulai').disabled  = isAll;
-    document.getElementById('inputExcelSampai').disabled = isAll;
-    document.getElementById('inputExcelMulai').style.opacity  = isAll ? 0.5 : 1;
-    document.getElementById('inputExcelSampai').style.opacity = isAll ? 0.5 : 1;
+    const isAll  = document.getElementById('excelModeAll').checked;
+    const isSatu = document.getElementById('excelModeSatu').checked;
+    const isRange = !isAll && !isSatu;
+    const mulai = document.getElementById('inputExcelMulai');
+    const sampai = document.getElementById('inputExcelSampai');
+    mulai.style.display  = isSatu ? 'none' : '';
+    sampai.style.display = isSatu ? 'none' : '';
+    document.getElementById('inputExcelSatu').style.display = isSatu ? '' : 'none';
+    mulai.disabled  = !isRange;
+    sampai.disabled = !isRange;
+    mulai.style.opacity  = isRange ? 1 : 0.5;
+    sampai.style.opacity = isRange ? 1 : 0.5;
 }
 
 // =========================================================
@@ -4309,11 +4335,24 @@ function sanitizeNamaFile(str) {
 // AMBIL TARGET RANGE EXCEL
 // =========================================================
 function ambilTargetRangeExcel() {
-    const modeAll = document.getElementById('excelModeAll').checked;
+    const modeAll  = document.getElementById('excelModeAll').checked;
+    const modeSatu = document.getElementById('excelModeSatu').checked;
     let target;
     let labelTeks;
 
-    if (modeAll) {
+    if (modeSatu) {
+        const idSatu = parseInt(document.getElementById('inputExcelSatu').value, 10);
+        if (isNaN(idSatu)) {
+            tampilToast('⚠️ Isi id_x dengan angka.', 'error');
+            return null;
+        }
+        target = _daftarRows.filter(r => parseInt(r.id_x, 10) === idSatu);
+        if (!target.length) {
+            tampilToast(`⚠️ id_x ${idSatu} tidak ditemukan di tabel "${CONFIG.TABLE_NAME}".`, 'error');
+            return null;
+        }
+        labelTeks = `${idSatu} (1 data)`;
+    } else if (modeAll) {
         target = _daftarRows.slice();
         if (!target.length) {
             tampilToast(`⚠️ Tidak ada data di tabel "${CONFIG.TABLE_NAME}".`, 'error');
@@ -4543,7 +4582,9 @@ function downloadExcelRange() {
     XLSX.utils.book_append_sheet(wb, ws, 'Data');
 
     const modeAll = document.getElementById('excelModeAll').checked;
-    if (modeAll) {
+    if (document.getElementById('excelModeSatu').checked) {
+        XLSX.writeFile(wb, `data_${CONFIG.TABLE_NAME}_id${document.getElementById('inputExcelSatu').value}.xlsx`);
+    } else if (modeAll) {
         XLSX.writeFile(wb, `data_${CONFIG.TABLE_NAME}_ALL.xlsx`);
     } else {
         const mulaiInp  = document.getElementById('inputExcelMulai').value;
@@ -4665,7 +4706,9 @@ function downloadKelengkapanTxt() {
     a.href = url;
 
     const modeAll = document.getElementById('excelModeAll').checked;
-    if (modeAll) {
+    if (document.getElementById('excelModeSatu').checked) {
+        a.download = `kelengkapan_${CONFIG.TABLE_NAME}_id${document.getElementById('inputExcelSatu').value}.txt`;
+    } else if (modeAll) {
         a.download = `kelengkapan_${CONFIG.TABLE_NAME}_ALL.txt`;
     } else {
         const mulaiInp  = document.getElementById('inputExcelMulai').value;
@@ -4754,12 +4797,64 @@ async function downloadRangeZip(jenis = 'psikogram') {
         return;
     }
 
-    const modeAll = document.getElementById('zipModeAll').checked;
+    const modeAll  = document.getElementById('zipModeAll').checked;
+    const modeSatu = document.getElementById('zipModeSatu').checked;
     let target;
     let mulai, sampai;
     let labelRange;
 
-    if (modeAll) {
+    if (modeSatu) {
+        // Satu id_x: unduh langsung 1 file (PDF / JPG sertifikat) bernama sesuai peserta — tanpa ZIP, prompt, maupun txt.
+        const idSatu = parseInt(document.getElementById('inputZipSatu').value, 10);
+        if (isNaN(idSatu)) {
+            tampilToast('⚠️ Isi id_x dengan angka.', 'error');
+            return;
+        }
+        const rowSatu = _daftarRows.find(r => parseInt(r.id_x, 10) === idSatu);
+        if (!rowSatu) {
+            tampilToast(`⚠️ id_x ${idSatu} tidak ditemukan di tabel "${CONFIG.TABLE_NAME}".`, 'error');
+            return;
+        }
+        const cekSatu = cekKelengkapanPeserta(rowSatu);
+        if (cekSatu.status !== 'lengkap') {
+            tampilToast(`⚠️ id_x ${idSatu}: ${cekSatu.status === 'tidak_ikut' ? 'tidak mengikuti tes' : 'tidak menyelesaikan seluruh tes'}.`, 'error');
+            return;
+        }
+        const isSertSatu   = jenis === 'sertifikat';
+        const btnSatu      = document.getElementById(isSertSatu ? 'btnDownloadSert' : 'btnDownloadZip');
+        const labelAsal    = btnSatu.textContent;
+        const dataSemula   = _daftarRows[_posisisiSekarang] || null;
+        const posisiSemula = _posisisiSekarang;
+        btnSatu.disabled = true;
+        btnSatu.textContent = '⏳ Membuat file...';
+        try {
+            const result = await renderPesertaUntukZip(rowSatu, jenis, modelSert);
+            const nama = isSertSatu
+                ? (cekSatu.nama || 'sertifikat')
+                : (document.getElementById('td-nama')?.textContent?.trim() || `psikogram_${idSatu}`);
+            const namaFile = `${sanitizeNamaFile(nama)}.${isSertSatu ? 'jpg' : 'pdf'}`;
+            const url = URL.createObjectURL(result.blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = namaFile;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 5000);
+            tampilToast(`✅ "${namaFile}" berhasil didownload.`, '');
+        } catch (e) {
+            console.error('Gagal membuat file id_x ' + idSatu + ':', e);
+            tampilToast('❌ Gagal membuat file: ' + e.message, 'error');
+        }
+        btnSatu.disabled = false;
+        btnSatu.textContent = labelAsal;
+        if (!isSertSatu && dataSemula) {
+            await renderDataPeserta(dataSemula);
+            _posisisiSekarang = posisiSemula;
+            updateTombolPosisi();
+        }
+        return;
+    } else if (modeAll) {
         target = _daftarRows.slice();
         if (!target.length) {
             tampilToast(`⚠️ Tidak ada data di tabel "${CONFIG.TABLE_NAME}".`, 'error');
