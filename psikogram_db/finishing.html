@@ -315,7 +315,10 @@
             kind: 'iqfloor',
             label: 'Filter 1 — Nilai Minimum IQ',
             defaultThreshold: 65,
-            defaultFloor: 65
+            defaultFloor: 65,
+            // Aturan bertingkat (bisa ditambah lewat tombol "+" di panel).
+            // Contoh: <65 jadi 65, <70 jadi 70, <78 jadi 78.
+            defaultRules: [{ threshold: 65, floor: 65 }]
         },
         {
             id: 'f2',
@@ -395,7 +398,7 @@
         if (f.kind === 'minat') {
             filterState[f.id] = { threshold: f.defaultThreshold, selectedMinat: [], template: f.defaultTemplate };
         } else if (f.kind === 'iqfloor') {
-            filterState[f.id] = { threshold: f.defaultThreshold, floor: f.defaultFloor };
+            filterState[f.id] = { rules: (f.defaultRules || [{ threshold: f.defaultThreshold, floor: f.defaultFloor }]).map(r => ({ ...r })) };
         } else if (f.kind === 'skormin') {
             filterState[f.id] = { dari: f.defaultDari, ke: f.defaultKe };
         } else if (f.kind === 'iqcalib') {
@@ -610,29 +613,56 @@
     }
 
     function renderPanelIqFloor(f) {
-        const st = filterState[f.id];
         return `
             <div class="filter-card" id="panel-filter-${f.id}" style="display:none;">
                 ${panelHeaderHtml(f)}
-                <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:10px;">
-                    Nilai IQ di bawah
-                    <input type="number" id="f${f.id}Threshold" value="${st.threshold}" min="1" max="200"
-                        style="width:70px;" onchange="ubahIqFloorField('${f.id}','threshold')" oninput="ubahIqFloorField('${f.id}','threshold')">
-                </label>
-                <label style="display:flex; align-items:center; gap:7px; font-size:13px; margin-bottom:14px;">
-                    akan diubah menjadi
-                    <input type="number" id="f${f.id}Floor" value="${st.floor}" min="1" max="200"
-                        style="width:70px;" onchange="ubahIqFloorField('${f.id}','floor')" oninput="ubahIqFloorField('${f.id}','floor')">
-                </label>
+                <div id="f${f.id}Rules"></div>
+                <button type="button" class="btn btn-secondary" style="margin:2px 0 14px; padding:6px 14px; font-size:12.5px;"
+                    onclick="tambahIqFloorRule('${f.id}')">＋ Tambah aturan</button>
+                <div id="f${f.id}RulesWarn" style="font-size:11.5px; color:#e07a5f; margin-bottom:10px; display:none;"></div>
                 <div style="font-size:11.5px; color:var(--muted); line-height:1.6;">
-                    Peserta cocok jika <strong style="color:var(--text)">Nilai IQ (x_06) di bawah ambang</strong> di atas.
-                    Submit akan langsung meng-set IQ peserta yang cocok menjadi nilai floor di atas (bukan ditambah).
-                    Sudah otomatis tidak akan diproses ulang — begitu IQ sudah jadi ${escHtml(String(st.floor))} (atau lebih), peserta itu tidak lagi cocok dengan kriteria ini.
+                    Peserta cocok jika <strong style="color:var(--text)">Nilai IQ (x_06) di bawah ambang</strong> salah satu aturan.
+                    Aturan bersifat <strong style="color:var(--text)">bertingkat</strong>: tiap peserta hanya dikenai <strong style="color:var(--text)">satu</strong> aturan,
+                    yaitu ambang terkecil yang masih di atas IQ asli peserta (mis. &lt;65→65, &lt;70→70, &lt;78→78: IQ 60 jadi 65, IQ 67 jadi 70, IQ 72 jadi 78).
+                    Submit langsung meng-set IQ ke nilai tujuan (bukan ditambah). Sudah otomatis tidak diproses ulang —
+                    begitu IQ sudah mencapai nilai tujuan aturannya, peserta itu tidak lagi cocok.
                 </div>
                 <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
                     ${panelFooterHtml(f)}
                 </div>
             </div>`;
+    }
+
+    // Render daftar baris aturan Filter IQ (tanpa merender ulang seluruh panel)
+    function renderIqFloorRules(id) {
+        const wrap = document.getElementById(`f${id}Rules`);
+        if (!wrap) return;
+        const rules = filterState[id].rules;
+        wrap.innerHTML = rules.map((r, i) => `
+            <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap; font-size:13px; margin-bottom:10px;">
+                <span style="color:var(--muted); font-family:'DM Mono',monospace; font-size:11px; min-width:18px;">${i + 1}.</span>
+                Nilai IQ di bawah
+                <input type="number" id="f${id}Threshold${i}" value="${r.threshold}" min="1" max="200" style="width:70px;"
+                    onchange="ubahIqFloorRule('${id}',${i},'threshold')" oninput="ubahIqFloorRule('${id}',${i},'threshold')">
+                akan diubah menjadi
+                <input type="number" id="f${id}Floor${i}" value="${r.floor}" min="1" max="200" style="width:70px;"
+                    onchange="ubahIqFloorRule('${id}',${i},'floor')" oninput="ubahIqFloorRule('${id}',${i},'floor')">
+                <button type="button" class="btn btn-secondary" title="Hapus aturan ini"
+                    style="padding:4px 10px; font-size:12px; ${rules.length <= 1 ? 'opacity:.35; cursor:not-allowed;' : ''}"
+                    ${rules.length <= 1 ? 'disabled' : ''} onclick="hapusIqFloorRule('${id}',${i})">✕</button>
+            </div>`).join('');
+        cekPeringatanIqFloor(id);
+    }
+
+    function cekPeringatanIqFloor(id) {
+        const el = document.getElementById(`f${id}RulesWarn`);
+        if (!el) return;
+        const rules = filterState[id].rules;
+        const th = rules.map(r => r.threshold);
+        const pesan = [];
+        if (new Set(th).size !== th.length) pesan.push('Ada ambang yang sama — hanya aturan pertama dengan ambang itu yang dipakai.');
+        el.innerHTML = pesan.filter(Boolean).map(escHtml).join('<br>');
+        el.style.display = el.innerHTML ? 'block' : 'none';
     }
 
     function renderPanelSkormin(f) {
@@ -785,10 +815,31 @@
         filterState[id].template = document.getElementById(`f${id}Template`).value;
     }
 
-    function ubahIqFloorField(id, field) {
-        const el = document.getElementById(field === 'threshold' ? `f${id}Threshold` : `f${id}Floor`);
+    function ubahIqFloorRule(id, idx, field) {
+        const el  = document.getElementById(field === 'threshold' ? `f${id}Threshold${idx}` : `f${id}Floor${idx}`);
         const val = parseInt(el.value);
-        filterState[id][field] = isNaN(val) ? filterState[id][field] : val;
+        const r   = filterState[id].rules[idx];
+        if (!r) return;
+        r[field] = isNaN(val) ? r[field] : val;
+        cekPeringatanIqFloor(id);
+        updatePreview(id);
+    }
+
+    function tambahIqFloorRule(id) {
+        const rules = filterState[id].rules;
+        const maxTh = rules.reduce((m, r) => Math.max(m, r.threshold), 0);
+        const maxFl = rules.reduce((m, r) => Math.max(m, r.floor), 0);
+        const th = Math.min(200, maxTh + 5);
+        rules.push({ threshold: th, floor: Math.min(200, Math.max(th, maxFl)) });
+        renderIqFloorRules(id);
+        updatePreview(id);
+    }
+
+    function hapusIqFloorRule(id, idx) {
+        const rules = filterState[id].rules;
+        if (rules.length <= 1) return;
+        rules.splice(idx, 1);
+        renderIqFloorRules(id);
         updatePreview(id);
     }
 
@@ -855,14 +906,31 @@
         };
     }
 
+    // Cari aturan yang berlaku untuk satu IQ: ambang TERKECIL yang masih di atas IQ tsb.
+    function cariAturanIqFloor(rules, iq) {
+        const valid = rules
+            .filter(r => !isNaN(r.threshold) && !isNaN(r.floor))
+            .slice()
+            .sort((a, b) => a.threshold - b.threshold);
+        return valid.find(r => iq < r.threshold) || null;
+    }
+
     function buatAksiIqFloor(f, row) {
         const st = filterState[f.id];
         const iq = parseInt(row.x_06);
-        if (isNaN(iq) || iq >= st.threshold) return null;
+        if (isNaN(iq)) return null;
+        // Tingkat ditentukan dari IQ ASLI (snapshot x_20 kalau ada), supaya peserta yang
+        // sudah dinaikkan ke 65 tidak ikut "naik tangga" lagi ke 70 / 78 di proses berikutnya.
+        const snap   = safeJSON(row.x_20, null);
+        const iqAsli = snap ? parseInt(snap.x_06) : NaN;
+        const iqAcuan = isNaN(iqAsli) ? iq : Math.min(iqAsli, iq);
+        const rule = cariAturanIqFloor(st.rules, iqAcuan);
+        if (!rule) return null;
+        if (iq >= rule.floor) return null; // sudah mencapai nilai tujuan — jangan proses ulang
         return {
             id_x: row.id_x, nama: namaFromRow(row), row,
-            tampilLama: `IQ: ${iq}`, tampilBaru: `IQ: ${st.floor}`,
-            payload: { x_06: String(st.floor) },
+            tampilLama: `IQ: ${iq}`, tampilBaru: `IQ: ${rule.floor}`,
+            payload: { x_06: String(rule.floor) },
             sudahAda: false
         };
     }
@@ -1000,6 +1068,7 @@
         document.getElementById('emptyStateBox').style.display = 'none';
         document.getElementById(`panel-filter-${id}`).style.display = 'block';
         if (f.kind === 'minat') renderMinatChecklist(id);
+        if (f.kind === 'iqfloor') renderIqFloorRules(id);
         if (!_lastRows) {
             document.getElementById(`f${id}Preview`).textContent = 'Memuat data peserta...';
             await muatDataJikaPerlu();
