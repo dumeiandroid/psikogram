@@ -724,8 +724,11 @@
                 </div>
 
                 <div style="margin-top:18px;">
-                    <div class="box-title">ℹ️ SUDAH PERNAH DINAIKKAN SEBELUMNYA (info saja, tidak bisa diproses ulang) — <span id="f${f.id}RiwayatCount">0</span> peserta</div>
+                    <div class="box-title">ℹ️ SUDAH PERNAH DINAIKKAN SEBELUMNYA (tidak bisa diproses ulang — IQ hasil bisa diedit &amp; disimpan langsung ke tabel) — <span id="f${f.id}RiwayatCount">0</span> peserta</div>
                     <div id="f${f.id}Riwayat" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto;"></div>
+                    <button type="button" class="btn btn-secondary" id="f${f.id}BtnSimpanSemuaRiwayat" disabled
+                        style="margin-top:10px; background:var(--accent); color:#0d0f14; border:none;"
+                        onclick="simpanSemuaRiwayatIq('${f.id}')">💾 Simpan Semua Perubahan</button>
                 </div>
 
                 <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
@@ -1046,14 +1049,136 @@
                 const snap = safeJSON(row.x_20, {});
                 const iqAsli    = parseInt(snap.x_06);
                 const iqSekarang = parseInt(row.x_06);
-                return `<div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+                return `<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
                               background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:7px 12px; font-size:12.5px;">
                     <span><strong style="color:var(--text)">${escHtml(namaFromRow(row))}</strong></span>
-                    <span style="color:var(--muted); font-family:'DM Mono',monospace;">IQ ${iqAsli} → ${iqSekarang} · ID ${row.id_x}</span>
+                    <span style="color:var(--muted); font-family:'DM Mono',monospace; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        IQ ${iqAsli} →
+                        <input type="number" class="riw-input" id="f${id}RiwIq${row.id_x}" value="${iqSekarang}" data-orig="${iqSekarang}"
+                            min="1" max="200" style="width:68px; padding:4px 8px;"
+                            oninput="riwayatIqInput('${id}',${row.id_x})"
+                            onkeydown="if(event.key==='Enter') simpanRiwayatIq('${id}',${row.id_x})">
+                        <button type="button" class="btn btn-secondary" id="f${id}RiwBtn${row.id_x}" disabled
+                            style="padding:4px 10px; font-size:12px;"
+                            onclick="simpanRiwayatIq('${id}',${row.id_x})">💾 Simpan</button>
+                        · ID ${row.id_x}
+                    </span>
                 </div>`;
             }).join('')
             : `<div style="font-size:12px; color:var(--muted); padding:6px 2px;">Belum ada yang pernah diproses lewat filter ini.</div>`;
         count.textContent = daftar.length;
+        updateTombolSimpanSemuaRiwayat(id);
+    }
+
+    // ── Edit IQ hasil di daftar riwayat Filter 4 ──
+    function riwayatIqInput(id, id_x) {
+        const inp = document.getElementById(`f${id}RiwIq${id_x}`);
+        const btn = document.getElementById(`f${id}RiwBtn${id_x}`);
+        if (!inp || !btn) return;
+        const berubah = inp.value.trim() !== inp.dataset.orig;
+        btn.disabled = !berubah;
+        inp.style.borderColor = berubah ? 'var(--accent)' : '';
+        updateTombolSimpanSemuaRiwayat(id);
+    }
+
+    function updateTombolSimpanSemuaRiwayat(id) {
+        const btnAll = document.getElementById(`f${id}BtnSimpanSemuaRiwayat`);
+        if (!btnAll) return;
+        const adaUbah = [...document.querySelectorAll(`#f${id}Riwayat .riw-input`)]
+            .some(i => i.value.trim() !== i.dataset.orig);
+        btnAll.disabled = !adaUbah;
+    }
+
+    function _iqAsliRow(row) {
+        const snap = safeJSON(row.x_20, {});
+        return parseInt(snap.x_06);
+    }
+
+    // Simpan IQ baru satu baris ke server (PUT) + perbarui cache lokal. Return true/false.
+    async function _simpanIqRow(row, iqBaru) {
+        try {
+            const payload = { x_06: String(iqBaru) };
+            const snapshotAsli = siapkanSnapshotAsli(row);
+            if (snapshotAsli) payload.x_20 = snapshotAsli;
+            const res = await fetch(`${API_URL}?table=${TABLE_NAME}&id_x=${row.id_x}`, {
+                method : 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-Custom-Auth': SECRET },
+                body   : JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const result = await res.json();
+            if (!result.success) throw new Error(result.message || 'Gagal menyimpan');
+            row.x_06 = String(iqBaru);
+            if (payload.x_20) row.x_20 = payload.x_20;
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function _validIq(v) { return !isNaN(v) && v >= 1 && v <= 200; }
+
+    async function simpanRiwayatIq(id, id_x) {
+        const inp = document.getElementById(`f${id}RiwIq${id_x}`);
+        const btn = document.getElementById(`f${id}RiwBtn${id_x}`);
+        const row = (_lastRows || []).find(r => String(r.id_x) === String(id_x));
+        if (!inp || !btn || !row) return;
+        const iqBaru = parseInt(inp.value);
+        if (!_validIq(iqBaru)) { tampilToast('❌ IQ harus angka 1–200.', 'error'); return; }
+        if (String(iqBaru) === inp.dataset.orig) return;
+
+        const iqAsli = _iqAsliRow(row);
+        if (!isNaN(iqAsli) && iqBaru <= iqAsli) {
+            if (!confirm(`IQ baru (${iqBaru}) tidak lebih tinggi dari IQ asli (${iqAsli}).\nPeserta ini akan keluar dari daftar riwayat dan bisa muncul lagi sebagai pilihan filter. Lanjutkan?`)) return;
+        }
+
+        btn.disabled = true; inp.disabled = true;
+        btn.textContent = '⏳...';
+        const ok = await _simpanIqRow(row, iqBaru);
+        inp.disabled = false;
+        btn.textContent = '💾 Simpan';
+        if (!ok) { btn.disabled = false; tampilToast('❌ Gagal menyimpan IQ ke tabel.', 'error'); return; }
+
+        tampilToast(`✅ IQ ${namaFromRow(row)} disimpan: ${iqBaru}`, 'success');
+        // Rapikan tampilan: kalau masih tergolong "sudah dinaikkan" cukup perbarui barisnya,
+        // kalau tidak (IQ <= asli) render ulang agar keluar dari daftar & hitung ulang preview.
+        if (iqCalibSudahDiproses(row)) {
+            inp.dataset.orig = String(iqBaru);
+            inp.style.borderColor = '';
+            btn.disabled = true;
+            updateTombolSimpanSemuaRiwayat(id);
+        } else {
+            refreshActivePreview();
+        }
+    }
+
+    async function simpanSemuaRiwayatIq(id) {
+        const inputs = [...document.querySelectorAll(`#f${id}Riwayat .riw-input`)]
+            .filter(i => i.value.trim() !== i.dataset.orig);
+        if (inputs.length === 0) return;
+        const prefix = `f${id}RiwIq`;
+        const items = [];
+        for (const inp of inputs) {
+            const id_x = inp.id.slice(prefix.length);
+            const row = (_lastRows || []).find(r => String(r.id_x) === id_x);
+            const iqBaru = parseInt(inp.value);
+            if (!row) continue;
+            if (!_validIq(iqBaru)) { tampilToast(`❌ IQ ID ${id_x} harus angka 1–200.`, 'error'); return; }
+            items.push({ row, iqBaru });
+        }
+        const keluar = items.filter(it => { const a = _iqAsliRow(it.row); return !isNaN(a) && it.iqBaru <= a; }).length;
+        if (keluar > 0 && !confirm(`${keluar} peserta punya IQ baru yang tidak lebih tinggi dari IQ asli, sehingga akan keluar dari daftar riwayat dan bisa muncul lagi sebagai pilihan filter. Lanjutkan menyimpan semua?`)) return;
+
+        const btnAll = document.getElementById(`f${id}BtnSimpanSemuaRiwayat`);
+        btnAll.disabled = true;
+        let sukses = 0, gagal = 0;
+        for (let i = 0; i < items.length; i++) {
+            btnAll.textContent = `⏳ Menyimpan ${i + 1}/${items.length}...`;
+            (await _simpanIqRow(items[i].row, items[i].iqBaru)) ? sukses++ : gagal++;
+        }
+        btnAll.textContent = '💾 Simpan Semua Perubahan';
+        tampilToast(`Selesai: ${sukses} IQ disimpan, ${gagal} gagal.`, gagal > 0 ? 'error' : 'success');
+        refreshActivePreview();
     }
 
     function updatePreviewIqCalib(id) {
