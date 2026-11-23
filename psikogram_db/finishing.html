@@ -723,7 +723,14 @@
                     dan hanya ditampilkan sebagai riwayat info di bawah ini.
                 </div>
 
-                <div style="margin-top:18px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-top:16px; cursor:pointer;">
+                    <input type="checkbox" id="f${f.id}SamakanKenaikan" onchange="toggleSamakanKenaikan('${f.id}', this.checked)"
+                        style="width:16px; height:16px; cursor:pointer;">
+                    Samakan semua: IQ hasil = IQ asli + <strong style="color:var(--accent)">Kenaikan IQ</strong> di atas
+                    <span style="color:var(--muted); font-size:11.5px;">(mengisi otomatis semua input di bawah; tetap perlu klik Simpan)</span>
+                </label>
+
+                <div style="margin-top:12px;">
                     <div class="box-title">ℹ️ SUDAH PERNAH DINAIKKAN SEBELUMNYA (tidak bisa diproses ulang — IQ hasil bisa diedit &amp; disimpan langsung ke tabel) — <span id="f${f.id}RiwayatCount">0</span> peserta</div>
                     <div id="f${f.id}Riwayat" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto;"></div>
                     <button type="button" class="btn btn-secondary" id="f${f.id}BtnSimpanSemuaRiwayat" disabled
@@ -859,6 +866,10 @@
         const val = parseInt(el.value);
         filterState[id][field] = isNaN(val) ? filterState[id][field] : val;
         updatePreview(id);
+        if (field === 'kenaikan') {
+            const cb = document.getElementById(`f${id}SamakanKenaikan`);
+            if (cb && cb.checked) applySamakanKenaikan(id, true);
+        }
     }
 
     // =========================================================
@@ -1067,7 +1078,32 @@
             }).join('')
             : `<div style="font-size:12px; color:var(--muted); padding:6px 2px;">Belum ada yang pernah diproses lewat filter ini.</div>`;
         count.textContent = daftar.length;
+        const cb = document.getElementById(`f${id}SamakanKenaikan`);
+        if (cb && cb.checked) applySamakanKenaikan(id, true);
         updateTombolSimpanSemuaRiwayat(id);
+    }
+
+    // Checkbox "samakan kenaikan": isi semua input riwayat = IQ asli + Kenaikan IQ.
+    // Kalau dicentang dilepas, semua input dikembalikan ke nilai tersimpan (data-orig).
+    function applySamakanKenaikan(id, aktif) {
+        const kenaikan = filterState[id].kenaikan;
+        const prefix = `f${id}RiwIq`;
+        document.querySelectorAll(`#f${id}Riwayat .riw-input`).forEach(inp => {
+            if (aktif) {
+                const row = (_lastRows || []).find(r => String(r.id_x) === inp.id.slice(prefix.length));
+                const asli = row ? _iqAsliRow(row) : NaN;
+                if (isNaN(asli) || isNaN(kenaikan)) return;
+                inp.value = asli + kenaikan;
+            } else {
+                inp.value = inp.dataset.orig;
+            }
+            riwayatIqInput(id, inp.id.slice(prefix.length));
+        });
+        updateTombolSimpanSemuaRiwayat(id);
+    }
+
+    function toggleSamakanKenaikan(id, checked) {
+        applySamakanKenaikan(id, checked);
     }
 
     // ── Edit IQ hasil di daftar riwayat Filter 4 ──
